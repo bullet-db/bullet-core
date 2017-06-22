@@ -1,0 +1,4 @@
+bullet.query.max.duration: 10000
+bullet.query.aggregation.max.size: 100
+# Some random fake setting
+fake.setting: null

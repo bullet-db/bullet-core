@@ -1,0 +1,182 @@
+# The default duration in milliseconds for a query if one has not been specified.
+bullet.query.default.duration: 30000
+
+# The maximum duration in milliseconds allowed for a query. Anything greater will be clamped to this value.
+bullet.query.max.duration: 120000
+
+# The default number of records that can be aggregated for a query if one has not been specified.
+bullet.query.aggregation.default.size: 1
+
+# The maximum number of records that will be aggregated per query. Anything greater will be clamped to this value.
+bullet.query.aggregation.max.size: 512
+
+# This is the separator that is used when a set of fields has to be considered as a single String.
+# This is relevant when hashing a set of fields (for example, in a GROUP operation) for uniqueness purposes, such
+# as when inserting into a Sketch. Without this, for example, if you were considering two fields together as a
+# group, with values ab and cd, simply concatenating them would produce abcd. This is ambiguous if you with another
+# record that had values a and bcd for those two fields. Using this separator distinguishes them for this purpose.
+# If the default separator occurs in your fields, you should change it something else.
+bullet.query.aggregation.composite.field.separator: "|"
+
+# The maximum number of records that will be collected in the Filter Bolt till it is emitted - i.e. a micro-batch.
+# Leaving this at 1 emits your raw aggregation records as soon as they are received in the Filter Bolt. This makes
+# your raw aggregation query run snappier if the total number of matched records across the Filter Bolts exceeds
+# the number of records your query is looking for but individually each Filter Bolt does not find enough records to
+# satisfy the query. Since the records are emitted immediately, the Join Bolt will terminate your query as soon
+# as the total records are received instead of waiting for the micro-batch size to be reached.
+# If you set this too high (for example, higher than the query size), you will wait the entire duration of the query,
+# and the number of ticks specified in topology.join.bolt.query.tick.timeout.
+bullet.query.aggregation.raw.micro.batch.size: 1
+
+# The maximum number of records that will be collected for Raw aggregations. This number should be <= to the
+# query.aggregation.max.size value. If it is greater, the aggregation size will be used.
+bullet.query.aggregation.raw.max.size: 100
+
+# The maximum number of entries stored by a Sketch created for doing COUNT DISTINCTS. Decreasing this number
+# (rounded to powers of 2) can decrease the accuracy for high cardinality dimensions while decreasing the total
+# memory used by the Sketch. The errors for a Theta Sketch is fixed at a maximum when this number is chosen - in other
+# words, the error will be no worse than this maximum regardless of how many unique entries are inserted into the
+# Sketch. Refer to: https://datasketches.github.io/docs/Theta/ThetaErrorTable.html
+bullet.query.aggregation.count.distinct.sketch.entries: 16384
+
+# Controls how much sampling is done by the Sketch for COUNT DISTINCTS. A value of 1.0 means no sampling is done.
+# A value of 0.5 means, the Sketch will throw out half the data coming into the Sketch.
+# You can leave this at 1 since it really only affects it when we start supporting COUNT DISTINCTS as GROUP operations.
+# https://datasketches.github.io/docs/Theta/ThetaPSampling.html
+bullet.query.aggregation.count.distinct.sketch.sampling: 1.0
+
+# This can either be QuickSelect or Alpha (CaSe SeNsiTive). You can leave this at the default.
+# Alpha Sketches are 30% more accurate if their estimates are queried directly but since we union them, their accuracy
+# reverts back to the QuickSelect accuracy. Alpha Sketches are also faster when updating.
+# https://datasketches.github.io/docs/Theta/ThetaUpdateSpeed.html
+bullet.query.aggregation.count.distinct.sketch.family: "Alpha"
+
+# A Sketch does not start the maximum size specified tbe sketch.entries setting. It grows toward it and can be at most
+# 2 x the size at the maximum. This factor controls by how much the size grows when the threshold is reached. Valid
+# values are 1 (no resize start at maximum), 2 (double), 4 (quadruple) and 8 (octuple). Any other value defaults to 8.
+# https://datasketches.github.io/docs/Theta/ThetaUpdateSpeed.html
+bullet.query.aggregation.count.distinct.sketch.resize.factor: 8
+
+# The maximum number of entries stored by a Sketch created for doing GROUP BY. Sketches are used to do a uniform
+# sample across your unique groups. So, this value should be set to a power of 2 approximately equal to your value for
+# bullet.query.aggregation.max.size. Anything greater will still work but the aggregation max size will limit your result
+# anyway, so it's just a waste of resources to do so. If you have a count or sum as a metric for the group, summing them
+# across the groups and dividing by your Sketch Theta (in the metadata), gives you an approximate estimate of the real
+# sum/count across all your actual groups. The error is defined by the QuickSelect Sketch error. Refer to:
+# https://datasketches.github.io/docs/Theta/ThetaErrorTable.html
+bullet.query.aggregation.group.sketch.entries: 512
+
+# Controls how much sampling is done by the Sketch for GROUP BY. A value of 1.0 means no sampling is done.
+# A value of 0.5 means, the Sketch will throw out half the data coming into the Sketch.
+# You can leave this at 1 since it really only affects it when we start supporting COUNT DISTINCTS as GROUP operations.
+# https://datasketches.github.io/docs/Theta/ThetaPSampling.html
+bullet.query.aggregation.group.sketch.sampling: 1.0
+
+# A Sketch does not start the maximum size specified tbe sketch.entries setting. It grows toward it and can be at most
+# 2 x the size at the maximum. This factor controls by how much the size grows when the threshold is reached. Valid
+# values are 1 (no resize start at maximum), 2 (double), 4 (quadruple) and 8 (octuple). Any other value defaults to 8.
+# https://datasketches.github.io/docs/Theta/ThetaUpdateSpeed.html
+bullet.query.aggregation.group.sketch.resize.factor: 8
+
+# The maximum number of entries stored by a Quantile Sketch created for doing DISTRIBUTIONS. Decreasing this number
+# (rounded to powers of 2) can increase the normalized error while decreasing the total memory used by the Sketch.
+# The normalized error for a Quantile Sketch is fixed at a maximum when this number is chosen - in other
+# words, the error will be no worse than this maximum regardless of how many entries are inserted into the
+# Sketch. Refer to: https://datasketches.github.io/docs/Quantiles/QuantilesAccuracy.html
+bullet.query.aggregation.distribution.sketch.entries: 1024
+
+# The maximum number of points that can be provided or generated for the DISTRIBUTION aggregation. Any more will be
+# clamped to this value. These points are used to pick at the quantiles, or the PMF or the CDF. The number here must
+# smaller than bullet.query.aggregation.max.size. If not, the smaller of the two will be used.
+bullet.query.aggregation.distribution.max.points: 100
+
+# Rounds the max number of decimal places for the points generated for the DISTRIBUTION aggregation to absolute value of this.
+# This helps double rounding errors when generating points for the DISTRIBUTION aggregation.
+bullet.query.aggregation.distribution.generated.points.rounding: 6
+
+# The maximum number of entries used as an internal map size by a FrequentItems Sketch created for doing TOP K. It must
+# be a power of 2. Decreasing this number can increase the maximum count error while decreasing the total memory used
+# by the Sketch. The Sketch will count frequencies correctly up to 0.75 * this number for each of the UNIQUE items.
+# However, if your number of uniques exceeds this value, the distribution of your data determines the accuracy of the
+# count. The only thing the Sketch can guarantee is that error bound is determined by the number of items inserted into
+# the Sketch and NOT the number of unique items. There is a table that can be found at:
+# https://datasketches.github.io/docs/FrequentItems/FrequentItemsErrorTable.html
+# that shows how the error grows with stream length. This error is almost always a high over-estimate. In practice,
+# the error is MUCH smaller (discussion here: https://datasketches.github.io/docs/FrequentItems/FrequentItemsOverview.html)
+bullet.query.aggregation.top.k.sketch.entries: 1024
+
+# The ErrorType to be used for getting frequent items for the TOP K aggregation. The accepted values are "NFP" and
+# "NFN". NFP is No False Positives and NFN is No False Negatives. The frequent item entries returned by the Sketch for
+# NFN will be a superset of the entries for NFP.
+# The Sketch has a error threshold number determined by the data and it can't be sure that the items that have an error
+# range that cross this threshold have a usable count or is just noise. NFN returns these items while NFP does not.
+# More details can be found here: https://datasketches.github.io/docs/FrequentItems/FrequentItemsOverview.html
+bullet.query.aggregation.top.k.sketch.error.type: "NFN"
+
+# Enable logging meta information in the results. Configured metadata will be add to the meta section of the
+# results: {"meta": {}, "records": []}
+bullet.result.metadata.enable: true
+
+# Each entry in this list indicates which metadata to collect (the name) and what key to add it as (the key) to the meta
+# Query Identifier adds the ID that was generated for the query.
+# Query Body adds the received query definition. This is useful for diagnosing syntax exceptions when errors are received.
+# Query Creation Time adds the timestamp in milliseconds when the query was received.
+# Query Termination Time adds the timestamp in milliseconds when the result was emitted.
+
+# Sketch Metadata adds additional nested metadata about sketches if set. These are listed below.
+# Estimated Result adds a boolean denoting whether the result was estimated. (COUNT DISTINCT, GROUP, DISTRIBUTION, TOP K)
+# Standard Deviations adds an object inside the Aggregation Metadata object where the keys are the standard deviations
+#                     and the values are objects containing upper and lower bounds (COUNT DISTINCT, GROUP)
+# Family adds the family of Sketches uses to produce the result, if one was used. (COUNT DISTINCT, GROUP, DISTRIBUTION, TOP K)
+# Size adds the size of final Sketch used to produced the result, if one was used. (COUNT DISTINCT, DISTRIBUTION)
+# Theta adds the theta value of the Sketch for Theta and Tuple Sketches, if one was used. (COUNT DISTINCT, GROUP)
+# Uniques Estimate adds the approximate unique values seen for Tuple Sketches. (GROUP)
+# Minimum Value adds the smallest value seen for Quantile Sketches. (DISTRIBUTION)
+# Maximum Value adds the largest value seen for Quantile Sketches. (DISTRIBUTION)
+# Items Seen adds the number of items inserted into Quantile Sketches, FrequentItemsSketches. (DISTRIBUTION, TOP K)
+# Normalized Rank Error adds the error of the Quantile Sketch as a double between 0 and 1.0. If this was 0.002, for e.g, then
+#                       the error bound on a quantile estimate like median would be : 49.8% >= median <= 50.2%. (DISTRIBUTION)
+# Maximum Count Error adds the error of the FrequentItems Sketch as a long. This will be the distance between the upper
+#                     bound and lower bound of a count for an item. It will be 0 if the count is exact. (TOP K)
+# Active Items adds the number of items being tracked in the the FrequentItems Sketch at the time of the query completion. (TOP K)
+bullet.result.metadata.metrics:
+    - name: "Query Identifier"
+      key: "query_id"
+    - name: "Query Body"
+      key: "query"
+    - name: "Query Creation Time"
+      key: "query_receive_time"
+    - name: "Query Termination Time"
+      key: "query_finish_time"
+    - name: "Sketch Metadata"
+      key: "sketches"
+    - name: "Estimated Result"
+      key: "was_estimated"
+    - name: "Standard Deviations"
+      key: "standard_deviations"
+    - name: "Family"
+      key: "family"
+    - name: "Size"
+      key: "size"
+    - name: "Theta"
+      key: "theta"
+    - name: "Uniques Estimate"
+      key: "uniques_estimate"
+    - name: "Minimum Value"
+      key: "minimum_value"
+    - name: "Maximum Value"
+      key: "maximum_value"
+    - name: "Items Seen"
+      key: "items_seen"
+    - name: "Normalized Rank Error"
+      key: "normalized_rank_error"
+    - name: "Maximum Count Error"
+      key: "maximum_count_error"
+    - name: "Active Items"
+      key: "active_items"
+
+# Enables whether each record should have a new key added to it denoting it was projected.
+bullet.record.inject.timestamp.enable: true
+# This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
+# the record is projected. This is only applicable to RAW queries.
+bullet.record.inject.timestamp.key: "bullet_project_timestamp"
