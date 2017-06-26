@@ -4,14 +4,14 @@
 
     <groupId>com.yahoo.bullet</groupId>
     <artifactId>bullet-core</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bullet-core</name>
 
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/yahoo/bullet-core.git</developerConnection>
-        <tag>bullet-core-0.1.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
