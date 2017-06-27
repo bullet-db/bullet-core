@@ -21,42 +21,33 @@ import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
-public abstract class Config implements Serializable {
+public class Config implements Serializable {
     private Map<String, Object> data;
 
-    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
-    private String defaultConfiguration;
+    /**
+     * Constructor that loads a specific file and loads the settings in that file.
+     *
+     * @param file YAML file to load.
+     * @throws IOException if an error occurred with the file loading.
+     */
+    public Config(String file) throws IOException {
+        data = readYAML(file);
+        log.info("Configuration: {} ", data);
+    }
 
     /**
      * Constructor that loads specific file augmented with defaults and the name of the default configuration file.
-     *
      *
      * @param file YAML file to load.
      * @param defaultConfigurationFile Default YAML file to load.
      * @throws IOException if an error occurred with the file loading.
      */
     public Config(String file, String defaultConfigurationFile) throws IOException {
-        this.defaultConfiguration = defaultConfigurationFile;
-        data = loadConfigResource(file);
-    }
-
-    /**
-     * Constructor that loads specific file augmented with defaults.
-     *
-     * @param file YAML file to load.
-     * @throws IOException if an error occurred with the file loading.
-     */
-    public Config(String file) throws IOException {
-        this(file, DEFAULT_CONFIGURATION_NAME);
-    }
-
-    /**
-     * Default constructor.
-     *
-     * @throws IOException if an error occurred with loading the default config.
-     */
-    public Config() throws IOException {
-        this(null);
+        this(defaultConfigurationFile);
+        // Override
+        Map<String, Object> specificConf = readYAML(file);
+        data.putAll(specificConf);
+        log.info("Final configuration: {} ", data);
     }
 
     /**
@@ -120,19 +111,21 @@ public abstract class Config implements Serializable {
     }
 
     /**
+     * Merges another Config into this one.
+     *
+     * @param other The other {@link Config} to merge into this one.
+     */
+    public void merge(Config other) {
+        if (other != null) {
+            data.putAll(other.data);
+        }
+    }
+
+    /**
      * Clears out the configuration.
      */
     public void clear() {
         data.clear();
-    }
-
-    private Map<String, Object> loadConfigResource(String yamlFile) throws IOException {
-        Map<String, Object> defaultconf = readYAML(defaultConfiguration);
-        Map<String, Object> specificConf = readYAML(yamlFile);
-        // Override
-        defaultconf.putAll(specificConf);
-        log.info("Final configuration: {} ", defaultconf);
-        return defaultconf;
     }
 
     /**

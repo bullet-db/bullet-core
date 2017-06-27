@@ -35,7 +35,7 @@ public class BulletConfigTest {
 
     @Test
     public void testCustomProperties() throws IOException {
-        BulletConfig config = new BulletConfig();
+        BulletConfig config = new BulletConfig(null);
         Assert.assertNull(config.get("foo"));
         config.set("foo", "bar");
         Assert.assertEquals(config.get("foo"), "bar");
@@ -51,7 +51,7 @@ public class BulletConfigTest {
 
     @Test
     public void testGettingMultipleProperties() throws IOException {
-        BulletConfig config = new BulletConfig();
+        BulletConfig config = new BulletConfig(null);
         config.clear();
         config.set("1", 1);
         config.set("pi", 3.14);
@@ -74,7 +74,7 @@ public class BulletConfigTest {
 
     @Test
     public void testGettingMaskedProperties() throws IOException {
-        BulletConfig config = new BulletConfig();
+        BulletConfig config = new BulletConfig(null);
         config.clear();
         config.set("1", 1);
         config.set("pi", 3.14);
@@ -93,5 +93,29 @@ public class BulletConfigTest {
         Assert.assertEquals(mappings.get("pi"), 3.14);
         Assert.assertEquals(mappings.get("foo"), "bar");
         Assert.assertEquals(mappings.get("true"), true);
+    }
+
+    @Test
+    public void testMerging() throws IOException {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+
+        int configSize = config.getAll(Optional.empty()).size();
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000L);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
+
+        Config another = new BulletConfig(null);
+        another.clear();
+        another.set(BulletConfig.SPECIFICATION_MAX_DURATION, 42L);
+        config.set("pi", 3.14);
+
+        config.merge(another);
+
+        // Test null
+        config.merge(null);
+
+        Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 42L);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
+        Assert.assertEquals(config.get("pi"), 3.14);
     }
 }

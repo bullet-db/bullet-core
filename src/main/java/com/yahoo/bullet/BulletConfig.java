@@ -46,6 +46,8 @@ public class BulletConfig extends Config {
 
     public static final String RESULT_METADATA_METRICS_MAPPING = "bullet.result.metadata.metrics.mapping";
 
+    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
+
     /**
      * Constructor that loads specific file augmented with defaults.
      *
@@ -53,15 +55,6 @@ public class BulletConfig extends Config {
      * @throws IOException if an error occurred with the file loading.
      */
     public BulletConfig(String file) throws IOException {
-        super(file);
-    }
-
-    /**
-     * Default constructor.
-     *
-     * @throws IOException if an error occurred with loading the default config.
-     */
-    public BulletConfig() throws IOException {
-        super();
+        super(file, DEFAULT_CONFIGURATION_NAME);
     }
 }
