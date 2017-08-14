@@ -17,4 +17,10 @@ public class PubSubTest {
         Assert.assertEquals(testPubSub.getClass(), MockPubSub.class);
         Assert.assertTrue(testPubSub.getSubscriber().receive().getContent().equals(mockMessage));
     }
+
+    @Test(expectedExceptions = PubSubException.class)
+    public void testIllegalPubSubCreation() throws IOException, PubSubException {
+        PubSubConfig config = new PubSubConfig(null);
+        PubSub testPubSub = PubSub.from(config);
+    }
 }
