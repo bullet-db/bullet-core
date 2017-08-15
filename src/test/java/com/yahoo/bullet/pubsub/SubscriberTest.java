@@ -1,6 +1,6 @@
 package com.yahoo.bullet.pubsub;
 
-import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.UUID;
@@ -9,20 +9,18 @@ public class SubscriberTest {
     @Test
     public void testCommitWithNoSequenceNumber() {
         String randomID = UUID.randomUUID().toString();
-        Subscriber subscriber = Mockito.mock(Subscriber.class, Mockito.CALLS_REAL_METHODS);
-
+        MockSubscriber subscriber = new MockSubscriber();
         subscriber.commit(randomID);
-        Mockito.verify(subscriber).commit(randomID);
-        Mockito.verify(subscriber).commit(randomID, -1);
+        Assert.assertEquals(subscriber.commitSequence, -1);
+        Assert.assertTrue(subscriber.commitID.equals(randomID));
     }
 
     @Test
     public void testFailWithNoSequenceNumber() {
         String randomID = UUID.randomUUID().toString();
-        Subscriber subscriber = Mockito.mock(Subscriber.class, Mockito.CALLS_REAL_METHODS);
-
+        MockSubscriber subscriber = new MockSubscriber();
         subscriber.fail(randomID);
-        Mockito.verify(subscriber).fail(randomID);
-        Mockito.verify(subscriber).fail(randomID, -1);
+        Assert.assertEquals(subscriber.failSequence, -1);
+        Assert.assertTrue(subscriber.failID.equals(randomID));
     }
 }

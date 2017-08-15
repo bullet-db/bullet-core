@@ -1,6 +1,6 @@
 package com.yahoo.bullet.pubsub;
 
-public abstract class Subscriber {
+public interface Subscriber {
     /**
      * Gets a new {@link PubSubMessage} from the assigned partition/partitions (Here a partition is a unit of
      * parallelism in the Pub/Sub queue, See {@link PubSub}).
@@ -8,12 +8,12 @@ public abstract class Subscriber {
      * @return the received {@link PubSubMessage}.
      * @throws PubSubException when a receive fails.
      */
-    public abstract PubSubMessage receive() throws PubSubException;
+    PubSubMessage receive() throws PubSubException;
 
     /**
      * Close the Subscriber and delete all associated Context.
      */
-    public abstract void close();
+    void close();
 
     /**
      * Commits allow clients to implement at least once, at most once or exactly once semantics when processing messages.
@@ -25,14 +25,14 @@ public abstract class Subscriber {
      *  @param id the query ID of the message to be marked as committed.
      *  @param sequenceNumber the sequence number of the message to be committed.
      */
-    public abstract void commit(String id, long sequenceNumber);
+    void commit(String id, int sequenceNumber);
 
     /**
      * Convenience method to commit a message that doesn't contain a sequence number.
      *
      * @param id is the ID of the message to be marked as committed.
      */
-    public void commit(String id) {
+    default void commit(String id) {
         commit(id, -1);
     }
 
@@ -41,14 +41,14 @@ public abstract class Subscriber {
      *
      * @param id the ID of the PubSubMessage to mark as a processing failure.
      */
-    public abstract void fail(String id, long sequenceNumber);
+    void fail(String id, int sequenceNumber);
 
     /**
      * Convenience method to fail a message that doesn't contain a sequence number.
      *
      * @param id is the ID of the message to be marked as a processing failure.
      */
-    public void fail(String id) {
+    default void fail(String id) {
         fail(id, -1);
     }
 
