@@ -15,4 +15,14 @@ public class SubscriberTest {
         Mockito.verify(subscriber).commit(randomID);
         Mockito.verify(subscriber).commit(randomID, -1);
     }
+
+    @Test
+    public void testFailWithNoSequenceNumber() {
+        String randomID = UUID.randomUUID().toString();
+        Subscriber subscriber = Mockito.mock(Subscriber.class, Mockito.CALLS_REAL_METHODS);
+
+        subscriber.fail(randomID);
+        Mockito.verify(subscriber).fail(randomID);
+        Mockito.verify(subscriber).fail(randomID, -1);
+    }
 }

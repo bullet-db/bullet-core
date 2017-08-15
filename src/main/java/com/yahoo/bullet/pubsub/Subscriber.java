@@ -28,7 +28,8 @@ public abstract class Subscriber {
     public abstract void commit(String id, long sequenceNumber);
 
     /**
-     * Convenience method at commit a message that doesn't contain a sequence number.
+     * Convenience method to commit a message that doesn't contain a sequence number.
+     *
      * @param id is the ID of the message to be marked as committed.
      */
     public void commit(String id) {
@@ -41,4 +42,14 @@ public abstract class Subscriber {
      * @param id the ID of the PubSubMessage to mark as a processing failure.
      */
     public abstract void fail(String id, long sequenceNumber);
+
+    /**
+     * Convenience method to fail a message that doesn't contain a sequence number.
+     *
+     * @param id is the ID of the message to be marked as a processing failure.
+     */
+    public void fail(String id) {
+        fail(id, -1);
+    }
+
 }
