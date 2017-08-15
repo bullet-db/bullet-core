@@ -19,7 +19,7 @@ public class PubSubMessage implements Serializable {
     /**
      * Constructor for a message having only content.
      *
-     * @param id is the id associated with the message.
+     * @param id is the ID associated with the message.
      * @param content is the content of the message.
      */
     public PubSubMessage(String id, String content) {
@@ -29,7 +29,7 @@ public class PubSubMessage implements Serializable {
     /**
      * Constructor for a message having content and a sequence number.
      *
-     * @param id is the id associated with the message.
+     * @param id is the ID associated with the message.
      * @param content is the content of the message.
      * @param sequence is the sequence number of the message.
      */
@@ -40,7 +40,7 @@ public class PubSubMessage implements Serializable {
     /**
      * Constructor for a PubSubMessage having content and Metadata.
      *
-     * @param id is the id associated with the message.
+     * @param id is the ID associated with the message.
      * @param content is the content of the message.
      * @param metadata is the {@link Metadata} associated with the message.
      */
@@ -51,7 +51,7 @@ public class PubSubMessage implements Serializable {
     /**
      * Constructor for a message having content, a {@link Metadata.Signal} and a sequence number.
      *
-     * @param id is the id associated with the message.
+     * @param id is the ID associated with the message.
      * @param content is the content of the message.
      * @param sequence is the sequence number of the message.
      * @param signal is the Metadata.Signal of the message.
@@ -63,7 +63,7 @@ public class PubSubMessage implements Serializable {
     /**
      * Constructor for a PubSubMessage having content, Metadata and a sequence number.
      *
-     * @param id is the id associated with the message.
+     * @param id is the ID associated with the message.
      * @param content is the content of the message.
      * @param sequence is the sequence number associated with the message.
      * @param metadata is the {@link Metadata} associated with the message.

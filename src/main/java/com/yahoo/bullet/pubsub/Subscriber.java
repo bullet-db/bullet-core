@@ -22,10 +22,10 @@ public interface Subscriber {
      *  1. Ack all received messages.
      *  2. Commit current read offset to persistent/fault tolerant storage.
      *
-     *  @param id the query ID of the message to be marked as committed.
-     *  @param sequenceNumber the sequence number of the message to be committed.
+     *  @param id the ID of the message to be marked as committed.
+     *  @param sequence the sequence number of the message to be committed.
      */
-    void commit(String id, int sequenceNumber);
+    void commit(String id, int sequence);
 
     /**
      * Convenience method to commit a message that doesn't contain a sequence number.
@@ -41,7 +41,7 @@ public interface Subscriber {
      *
      * @param id the ID of the PubSubMessage to mark as a processing failure.
      */
-    void fail(String id, int sequenceNumber);
+    void fail(String id, int sequence);
 
     /**
      * Convenience method to fail a message that doesn't contain a sequence number.
