@@ -12,8 +12,10 @@ public class PubSubMessage implements Serializable {
     private long sequenceNumber;
 
     /**
-     * Constructor for a message containing content and not supporting sequence numbers.
+     * Constructor for a message having only content.
      *
+     * @param id is the query ID associated with the message.
+     * @param content is the content of the message.
      */
     public PubSubMessage(String id, String content) {
         this.id = id;
@@ -23,7 +25,7 @@ public class PubSubMessage implements Serializable {
     }
 
     /**
-     * Constructor for a message containing content and supporting sequence numbers.
+     * Constructor for a message having content and a sequence number.
      *
      * @param id is the query ID associated with the message.
      * @param content is the content of the message.
@@ -37,7 +39,19 @@ public class PubSubMessage implements Serializable {
     }
 
     /**
-     * Constructor for a message containing content and {@link Metadata.Signal}.
+     * Constructor for a PubSubMessage having content and Metadata.
+     *
+     * @param id is the query ID associated with the message.
+     * @param content is the content of the message.
+     * @param metadata is the {@link Metadata} associated with the message.
+     */
+    public PubSubMessage(String id, String content, Metadata metadata) {
+        this(id, content);
+        this.metadata = metadata;
+    }
+
+    /**
+     * Constructor for a message having content, a {@link Metadata.Signal} and a sequence number.
      *
      * @param id is the query ID associated with the message.
      * @param content is the content of the message.
@@ -50,7 +64,7 @@ public class PubSubMessage implements Serializable {
     }
 
     /**
-     * Constructor for a PubSubMessage containing Metadata and content.
+     * Constructor for a PubSubMessage having content, Metadata and a sequence number.
      *
      * @param id is the query ID associated with the message.
      * @param content is the content of the message.
@@ -58,9 +72,7 @@ public class PubSubMessage implements Serializable {
      * @param metadata is the {@link Metadata} associated with the message.
      */
     public PubSubMessage(String id, String content, long sequenceNumber, Metadata metadata) {
-        this.id = id;
-        this.content = content;
-        this.sequenceNumber = sequenceNumber;
+        this(id, content, sequenceNumber);
         this.metadata = metadata;
     }
 
