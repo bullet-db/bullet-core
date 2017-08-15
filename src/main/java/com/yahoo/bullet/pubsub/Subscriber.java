@@ -1,6 +1,6 @@
 package com.yahoo.bullet.pubsub;
 
-public interface Subscriber {
+public abstract class Subscriber {
     /**
      * Gets a new {@link PubSubMessage} from the assigned partition/partitions (Here a partition is a unit of
      * parallelism in the Pub/Sub queue, See {@link PubSub}).
@@ -8,12 +8,12 @@ public interface Subscriber {
      * @return the received {@link PubSubMessage}.
      * @throws PubSubException when a receive fails.
      */
-    PubSubMessage receive() throws PubSubException;
+    public abstract PubSubMessage receive() throws PubSubException;
 
     /**
      * Close the Subscriber and delete all associated Context.
      */
-    void close();
+    public abstract void close();
 
     /**
      * Commits allow clients to implement at least once, at most once or exactly once semantics when processing messages.
@@ -22,14 +22,23 @@ public interface Subscriber {
      *  1. Ack all received messages.
      *  2. Commit current read offset to persistent/fault tolerant storage.
      *
-     *  @param id the ID of the message to be marked as committed.
+     *  @param id the query ID of the message to be marked as committed.
+     *  @param sequenceNumber the sequence number of the message to be committed.
      */
-    void commit(String id);
+    public abstract void commit(String id, long sequenceNumber);
+
+    /**
+     * Convenience method at commit a message that doesn't contain a sequence number.
+     * @param id is the ID of the message to be marked as committed.
+     */
+    public void commit(String id) {
+        commit(id, -1);
+    }
 
     /**
      * Marks the processing of the {@link PubSubMessage} with the given id as failed.
      *
      * @param id the ID of the PubSubMessage to mark as a processing failure.
      */
-    void fail(String id);
+    public abstract void fail(String id, long sequenceNumber);
 }

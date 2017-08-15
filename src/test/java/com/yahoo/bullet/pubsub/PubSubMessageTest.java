@@ -18,6 +18,7 @@ public class PubSubMessageTest {
 
         PubSubMessage message = new PubSubMessage(messageId, messageContent);
         Assert.assertTrue(messageId.equals(message.getId()));
+        Assert.assertEquals(message.getSequenceNumber(), -1);
         Assert.assertTrue(messageContent.equals(message.getContent()));
         Assert.assertNotNull(message.getMetadata());
         Assert.assertNull(message.getMetadata().getSignal());
@@ -30,9 +31,10 @@ public class PubSubMessageTest {
         String messageContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
 
-        PubSubMessage message = new PubSubMessage(messageId, messageContent, signal);
+        PubSubMessage message = new PubSubMessage(messageId, messageContent, 0, signal);
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertTrue(messageContent.equals(message.getContent()));
+        Assert.assertEquals(message.getSequenceNumber(), 0);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertNull(message.getMetadata().getContent());
@@ -46,9 +48,10 @@ public class PubSubMessageTest {
         String metadataContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
 
-        PubSubMessage message = new PubSubMessage(messageId, messageContent, new Metadata(signal, metadataContent));
+        PubSubMessage message = new PubSubMessage(messageId, messageContent, 0, new Metadata(signal, metadataContent));
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertTrue(messageContent.equals(message.getContent()));
+        Assert.assertEquals(message.getSequenceNumber(), 0);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertTrue(message.getMetadata().getContent().toString().equals(metadataContent));
