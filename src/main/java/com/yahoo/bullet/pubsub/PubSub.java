@@ -30,7 +30,7 @@ public abstract class PubSub implements Serializable {
     /**
      * Instantiate a PubSub using parameters from {@link PubSubConfig}.
      *
-     * @param config the {@link PubSubConfig} containing all required PubSub parameters.
+     * @param config The {@link PubSubConfig} containing all required PubSub parameters.
      */
     public PubSub(PubSubConfig config) {
         context = Context.valueOf(config.get(PubSubConfig.CONTEXT_NAME).toString());
@@ -49,7 +49,7 @@ public abstract class PubSub implements Serializable {
      * (See {@link PubSub#context}) split as evenly as possible among them.
      *
      * @param n The number of Publishers requested.
-     * @return List of n Publishers wired as required.
+     * @return The {@link List} of n Publishers wired as required.
      */
     public abstract List<Publisher> getPublishers(int n);
 
@@ -57,7 +57,7 @@ public abstract class PubSub implements Serializable {
      * Get a {@link Subscriber} instance wired to read from all allocated partitions in the appropriate queue (See
      * {@link PubSub#context}).
      *
-     * @return {@link Subscriber} wired as required.
+     * @return The {@link Subscriber} wired as required.
      */
     public abstract Subscriber getSubscriber();
 
@@ -66,13 +66,14 @@ public abstract class PubSub implements Serializable {
      * (See {@link PubSub#context}) split as evenly as possible among them.
      *
      * @param n The number of Subscribers requested.
-     * @return List of n Subscribers wired as required.
+     * @return The {@link List} of n Subscribers wired as required.
      */
     public abstract List<Subscriber> getSubscribers(int n);
 
     /**
      * Create a PubSub instance using the class specified in the config file.
-     * @param config {@link PubSubConfig} containing the class name and PubSub settings.
+     *
+     * @param config The {@link PubSubConfig} containing the class name and PubSub settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.
      * @throws PubSubException if PubSub creation fails.
      */
