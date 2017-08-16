@@ -2,3 +2,6 @@ bullet.query.max.duration: 10000
 bullet.query.aggregation.max.size: 100
 # Some random fake setting
 fake.setting: null
+
+bullet.pubsub.context.name: "QUERY_PROCESSING"
+bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.MockPubSub"
