@@ -1,6 +1,8 @@
 package com.yahoo.bullet.pubsub;
 
 import java.io.Serializable;
+import java.util.Objects;
+
 import com.yahoo.bullet.pubsub.Metadata.Signal;
 import lombok.Getter;
 
@@ -17,62 +19,73 @@ public class PubSubMessage implements Serializable {
     private Metadata metadata;
 
     /**
-     * Constructor for a message having only content.
+     * Constructor for a message that contains an id and content.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
      */
     public PubSubMessage(String id, String content) {
-        this(id, content, -1, new Metadata());
+        this(id, content, (Metadata) null, -1);
     }
 
     /**
-     * Constructor for a message having content and a sequence number.
+     * Constructor for a message that contains an id, content and a sequence number.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param sequence The sequence number of the message.
+     * @param sequence The integer sequence number of the message.
      */
     public PubSubMessage(String id, String content, int sequence) {
-        this(id, content, sequence, new Metadata());
+        this(id, content, (Metadata) null, sequence);
     }
 
     /**
-     * Constructor for a PubSubMessage having content and Metadata.
+     * Constructor for a message that contains an id, {@link Metadata} and content.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param metadata The {@link Metadata} associated with the message.
+     * @param metadata The Metadata associated with the message.
      */
     public PubSubMessage(String id, String content, Metadata metadata) {
-        this(id, content, -1, metadata);
+        this(id, content, metadata, -1);
     }
 
     /**
-     * Constructor for a message having content, a {@link Metadata.Signal} and a sequence number.
+     * Constructor for a message that contains an id, {@link Metadata.Signal} and may contain content.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param sequence The sequence number of the message.
-     * @param signal The Metadata.Signal of the message.
+     * @param signal The Signal to be sent with the message.
      */
-    public PubSubMessage(String id, String content, int sequence, Signal signal) {
-        this(id, content, sequence, new Metadata(signal, null));
+    public PubSubMessage(String id, String content, Signal signal) {
+        this(id, content, signal, -1);
     }
 
     /**
-     * Constructor for a PubSubMessage having content, Metadata and a sequence number.
+     * Constructor for a message that contains an id, {@link Metadata.Signal}, a sequence number and may contain content.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param sequence The sequence number associated with the message.
-     * @param metadata The {@link Metadata} associated with the message.
+     * @param signal The Signal to be sent with the message.
+     * @param sequence The integer sequence number of the message.
      */
-    public PubSubMessage(String id, String content, int sequence, Metadata metadata) {
-        this.id = id;
+    public PubSubMessage(String id, String content, Signal signal, int sequence) {
+        this(id, content, new Metadata(signal, null), sequence);
+    }
+
+    /**
+     * Constructor for a message that contains an id, {@link Metadata}, a sequence number and content.
+     *
+     * @param id The ID associated with the message.
+     * @param content The content of the message.
+     * @param metadata The Metadata associated with the message.
+     * @param sequence The integer sequence number of the message.
+     */
+    public PubSubMessage(String id, String content, Metadata metadata, int sequence) {
+        this.id = Objects.requireNonNull(id, "ID cannot be null");
         this.content = content;
-        this.sequence = sequence;
         this.metadata = metadata;
+        this.sequence = sequence;
     }
 
     /**

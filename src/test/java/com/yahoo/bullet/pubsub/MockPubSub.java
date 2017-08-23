@@ -1,5 +1,6 @@
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.BulletConfig;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -10,7 +11,7 @@ class MockPubSub extends PubSub {
     public static final String MOCK_MESSAGE_NAME = "MOCK_MESSAGE";
     private String mockMessage;
 
-    public MockPubSub(PubSubConfig config) {
+    public MockPubSub(BulletConfig config) {
         super(config);
         mockMessage = config.get(MOCK_MESSAGE_NAME).toString();
     }

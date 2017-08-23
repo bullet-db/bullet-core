@@ -22,8 +22,8 @@ public interface Subscriber {
      *  1. Ack all received messages.
      *  2. Commit current read offset to persistent/fault tolerant storage.
      *
-     * @param id The ID of the message to be marked as committed.
-     * @param sequence The sequence number of the message to be committed.
+     *  @param id The ID of the message to be marked as committed.
+     *  @param sequence The sequence number of the message to be committed.
      */
     void commit(String id, int sequence);
 

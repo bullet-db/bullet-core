@@ -46,6 +46,9 @@ public class BulletConfig extends Config {
 
     public static final String RESULT_METADATA_METRICS_MAPPING = "bullet.result.metadata.metrics.mapping";
 
+    public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
+    public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
+
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
 
     /**
