@@ -77,7 +77,7 @@ public abstract class PubSub implements Serializable {
      *
      * @param config The {@link BulletConfig} containing the class name and PubSub settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.
-     * @throws {@link PubSubException} if PubSub creation fails.
+     * @throws PubSubException if PubSub creation fails.
      */
     public static PubSub from(BulletConfig config) throws PubSubException {
         try {
