@@ -1,10 +1,10 @@
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.pubsub.Metadata.Signal;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.UUID;
-import com.yahoo.bullet.pubsub.Metadata.Signal;
 
 public class PubSubMessageTest {
     private String getRandomString() {
