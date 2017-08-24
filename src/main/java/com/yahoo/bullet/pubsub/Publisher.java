@@ -6,7 +6,7 @@ public interface Publisher {
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @throws PubSubException if the messaging system throws an error.
+     * @throws {@link PubSubException} if the messaging system throws an error.
      */
     default void send(String id, String content) throws PubSubException {
         send(new PubSubMessage(id, content));
@@ -16,7 +16,7 @@ public interface Publisher {
      * Sends a {@link PubSubMessage}. Messages with the same ID should be received in order.
      *
      * @param message The {@link PubSubMessage} to be sent.
-     * @throws PubSubException if the messaging system throws an error.
+     * @throws {@link PubSubException} if the messaging system throws an error.
      */
     void send(PubSubMessage message) throws PubSubException;
 

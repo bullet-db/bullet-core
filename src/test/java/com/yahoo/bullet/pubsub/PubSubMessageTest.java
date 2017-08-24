@@ -97,7 +97,7 @@ public class PubSubMessageTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void testNoIdIllegalCreation() {
+    public void testNoIDIllegalCreation() {
         new PubSubMessage(null, "");
     }
 }

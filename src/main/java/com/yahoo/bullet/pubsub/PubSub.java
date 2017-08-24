@@ -51,7 +51,7 @@ public abstract class PubSub implements Serializable {
      * (See {@link PubSub#context}) split as evenly as possible among them.
      *
      * @param n The number of Publishers requested.
-     * @return List of n Publishers wired as required.
+     * @return The {@link List} of n Publishers wired as required.
      */
     public abstract List<Publisher> getPublishers(int n);
 
@@ -68,7 +68,7 @@ public abstract class PubSub implements Serializable {
      * (See {@link PubSub#context}) split as evenly as possible among them.
      *
      * @param n The number of Subscribers requested.
-     * @return List of n Subscribers wired as required.
+     * @return The {@link List} of n Subscribers wired as required.
      */
     public abstract List<Subscriber> getSubscribers(int n);
 
@@ -77,7 +77,7 @@ public abstract class PubSub implements Serializable {
      *
      * @param config The {@link BulletConfig} containing the class name and PubSub settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.
-     * @throws PubSubException if PubSub creation fails.
+     * @throws {@link PubSubException} if PubSub creation fails.
      */
     public static PubSub from(BulletConfig config) throws PubSubException {
         try {
