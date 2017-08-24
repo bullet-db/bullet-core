@@ -1,8 +1,10 @@
 package com.yahoo.bullet.pubsub;
 
-import java.io.Serializable;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
 import lombok.Getter;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * The class of messages that can be understood by the PubSub package. The id should be set to the query ID generated
@@ -23,7 +25,7 @@ public class PubSubMessage implements Serializable {
      * @param content The content of the message.
      */
     public PubSubMessage(String id, String content) {
-        this(id, content, -1, new Metadata());
+        this(id, content, (Metadata) null, -1);
     }
 
     /**
@@ -34,18 +36,29 @@ public class PubSubMessage implements Serializable {
      * @param sequence The sequence number of the message.
      */
     public PubSubMessage(String id, String content, int sequence) {
-        this(id, content, sequence, new Metadata());
+        this(id, content, (Metadata) null, sequence);
     }
 
     /**
-     * Constructor for a PubSubMessage having content and Metadata.
+     * Constructor for a message having content and {@link Metadata}.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param metadata The {@link Metadata} associated with the message.
+     * @param metadata The Metadata associated with the message.
      */
     public PubSubMessage(String id, String content, Metadata metadata) {
-        this(id, content, -1, metadata);
+        this(id, content, metadata, -1);
+    }
+
+    /**
+     * Constructor for a message having content and a {@link Metadata.Signal}.
+     *
+     * @param id The ID associated with the message.
+     * @param content The content of the message.
+     * @param signal The Metadata.Signal to be sent with the message.
+     */
+    public PubSubMessage(String id, String content, Signal signal) {
+        this(id, content, signal, -1);
     }
 
     /**
@@ -53,26 +66,26 @@ public class PubSubMessage implements Serializable {
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
+     * @param signal The Signal to be sent with the message.
      * @param sequence The sequence number of the message.
-     * @param signal The Metadata.Signal of the message.
      */
-    public PubSubMessage(String id, String content, int sequence, Signal signal) {
-        this(id, content, sequence, new Metadata(signal, null));
+    public PubSubMessage(String id, String content, Signal signal, int sequence) {
+        this(id, content, new Metadata(signal, null), sequence);
     }
 
     /**
-     * Constructor for a PubSubMessage having content, Metadata and a sequence number.
+     * Constructor for a message having content, {@link Metadata} and a sequence number.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param sequence The sequence number associated with the message.
-     * @param metadata The {@link Metadata} associated with the message.
+     * @param metadata The Metadata associated with the message.
+     * @param sequence The sequence number of the message.
      */
-    public PubSubMessage(String id, String content, int sequence, Metadata metadata) {
-        this.id = id;
+    public PubSubMessage(String id, String content, Metadata metadata, int sequence) {
+        this.id = Objects.requireNonNull(id, "ID cannot be null");
         this.content = content;
-        this.sequence = sequence;
         this.metadata = metadata;
+        this.sequence = sequence;
     }
 
     /**

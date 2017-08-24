@@ -1,10 +1,10 @@
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.pubsub.Metadata.Signal;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.UUID;
-import com.yahoo.bullet.pubsub.Metadata.Signal;
 
 public class PubSubMessageTest {
     private String getRandomString() {
@@ -20,9 +20,7 @@ public class PubSubMessageTest {
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertEquals(message.getSequence(), -1);
         Assert.assertTrue(messageContent.equals(message.getContent()));
-        Assert.assertNotNull(message.getMetadata());
-        Assert.assertNull(message.getMetadata().getSignal());
-        Assert.assertNull(message.getMetadata().getContent());
+        Assert.assertNull(message.getMetadata());
     }
 
     @Test
@@ -34,9 +32,7 @@ public class PubSubMessageTest {
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertTrue(messageContent.equals(message.getContent()));
         Assert.assertEquals(message.getSequence(), 0);
-        Assert.assertNotNull(message.getMetadata());
-        Assert.assertNull(message.getMetadata().getSignal());
-        Assert.assertNull(message.getMetadata().getContent());
+        Assert.assertNull(message.getMetadata());
     }
 
     @Test
@@ -45,7 +41,7 @@ public class PubSubMessageTest {
         String messageContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
 
-        PubSubMessage message = new PubSubMessage(messageId, messageContent, 0, signal);
+        PubSubMessage message = new PubSubMessage(messageId, messageContent, signal, 0);
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertTrue(messageContent.equals(message.getContent()));
         Assert.assertEquals(message.getSequence(), 0);
@@ -78,7 +74,7 @@ public class PubSubMessageTest {
         String metadataContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
         //Test creation with a sequence number.
-        PubSubMessage message = new PubSubMessage(messageId, messageContent, 0, new Metadata(signal, metadataContent));
+        PubSubMessage message = new PubSubMessage(messageId, messageContent, new Metadata(signal, metadataContent), 0);
         Assert.assertTrue(messageId.equals(message.getId()));
         Assert.assertTrue(messageContent.equals(message.getContent()));
         Assert.assertEquals(message.getSequence(), 0);
@@ -96,7 +92,12 @@ public class PubSubMessageTest {
         message = new PubSubMessage(messageId, messageContent);
         Assert.assertTrue(message.hasContent());
 
-        message = new PubSubMessage(messageId, null);
+        message = new PubSubMessage(messageId, null, Signal.COMPLETE);
         Assert.assertFalse(message.hasContent());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testNoIDIllegalCreation() {
+        new PubSubMessage(null, "");
     }
 }

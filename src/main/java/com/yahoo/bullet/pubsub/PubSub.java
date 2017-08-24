@@ -1,5 +1,7 @@
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.BulletConfig;
+
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 /**
  * Notation: Partition is a unit of parallelism in the Pub/Sub queue.
  *
- * Implementations of PubSub should take in a {@link PubSubConfig} and use the information to wire up and return
+ * Implementations of PubSub should take in a {@link BulletConfig} and use the information to wire up and return
  * Publishers and Subscribers.
  */
 public abstract class PubSub implements Serializable {
@@ -28,12 +30,12 @@ public abstract class PubSub implements Serializable {
     protected Context context;
 
     /**
-     * Instantiate a PubSub using parameters from {@link PubSubConfig}.
+     * Instantiate a PubSub using parameters from {@link BulletConfig}.
      *
-     * @param config The {@link PubSubConfig} containing all required PubSub parameters.
+     * @param config The {@link BulletConfig} containing all required PubSub parameters.
      */
-    public PubSub(PubSubConfig config) {
-        context = Context.valueOf(config.get(PubSubConfig.CONTEXT_NAME).toString());
+    public PubSub(BulletConfig config) {
+        context = Context.valueOf(config.get(BulletConfig.PUBSUB_CONTEXT_NAME).toString());
     }
 
     /**
@@ -57,7 +59,7 @@ public abstract class PubSub implements Serializable {
      * Get a {@link Subscriber} instance wired to read from all allocated partitions in the appropriate queue (See
      * {@link PubSub#context}).
      *
-     * @return The {@link Subscriber} wired as required.
+     * @return {@link Subscriber} wired as required.
      */
     public abstract Subscriber getSubscriber();
 
@@ -73,18 +75,18 @@ public abstract class PubSub implements Serializable {
     /**
      * Create a PubSub instance using the class specified in the config file.
      *
-     * @param config The {@link PubSubConfig} containing the class name and PubSub settings.
+     * @param config The {@link BulletConfig} containing the class name and PubSub settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.
      * @throws PubSubException if PubSub creation fails.
      */
-    public static PubSub from(PubSubConfig config) throws PubSubException {
+    public static PubSub from(BulletConfig config) throws PubSubException {
         try {
-            String pubSubClassName = (String) config.get(PubSubConfig.PUBSUB_CLASS_NAME);
+            String pubSubClassName = (String) config.get(BulletConfig.PUBSUB_CLASS_NAME);
             Class<? extends PubSub> pubSubClass = (Class<? extends PubSub>) Class.forName(pubSubClassName);
-            Constructor<? extends PubSub> constructor = pubSubClass.getConstructor(PubSubConfig.class);
+            Constructor<? extends PubSub> constructor = pubSubClass.getConstructor(BulletConfig.class);
             return constructor.newInstance(config);
         } catch (Exception e) {
-            throw new PubSubException("Cannot create PubSub instance. Error: " + e.toString());
+            throw new PubSubException("Cannot create PubSub instance.", e);
         }
     }
 }

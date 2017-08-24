@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-@Getter @NoArgsConstructor @Setter @AllArgsConstructor
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class Metadata implements Serializable {
     public enum Signal {
         ACKNOWLEDGE,
