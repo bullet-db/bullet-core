@@ -23,6 +23,7 @@ import java.util.Set;
 @Slf4j
 public class Config implements Serializable {
     private Map<String, Object> data;
+    public static final String DELIMITER = ".";
 
     /**
      * Constructor that loads a specific file and loads the settings in that file.
@@ -84,6 +85,24 @@ public class Config implements Serializable {
         return this.data.entrySet().stream()
                         .filter(e -> inclusions.contains(e.getKey()))
                         .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
+    }
+
+    /**
+     * Get mappings for all keys with the specified prefix. If stripPrefix is set, the output keys do not contain the
+     * prefix.
+     *
+     * @param keys an {@link Optional} {@link Set} of mapping names.
+     * @param prefix The prefix that relevant keys must contain.
+     * @param stripPrefix If true, the output keys do not contain the prefix.
+     * @return mapping for keys (or all keys in data, if keys is empty) with the prefix.
+     */
+    public Map<String, Object> getAllWithPrefix(Optional<Set<String>> keys, String prefix, boolean stripPrefix) {
+        Set<String> inclusions = keys.orElse(data.keySet());
+        int prefixLength = stripPrefix ? prefix.length() : 0;
+        return this.data.entrySet().stream()
+                        .filter(e -> inclusions.contains(e.getKey()))
+                        .filter(e -> e.getKey().startsWith(prefix))
+                        .collect(HashMap::new, (m, e) -> m.put(e.getKey().substring(prefixLength), e.getValue()), HashMap::putAll);
     }
 
     /**

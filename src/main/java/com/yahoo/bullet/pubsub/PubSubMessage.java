@@ -96,4 +96,27 @@ public class PubSubMessage implements Serializable {
     public boolean hasContent() {
         return content != null;
     }
+
+    /**
+     * Check if message has {@link Metadata}.
+     *
+     * @return true if message has Metadata.
+     */
+    public boolean hasMetadata() {
+        return metadata != null;
+    }
+
+    @Override
+    public int hashCode() {
+        return (id + sequence).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null || other.getClass() != PubSubMessage.class) {
+            return false;
+        }
+        PubSubMessage otherMessage = (PubSubMessage) other;
+        return id.equals(otherMessage.getId()) && sequence == otherMessage.getSequence();
+    }
 }
