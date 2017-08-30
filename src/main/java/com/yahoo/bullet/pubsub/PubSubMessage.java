@@ -117,6 +117,6 @@ public class PubSubMessage implements Serializable {
             return false;
         }
         PubSubMessage otherMessage = (PubSubMessage) other;
-        return (id.equals(otherMessage.getId()) && sequence == otherMessage.getSequence());
+        return id.equals(otherMessage.getId()) && sequence == otherMessage.getSequence();
     }
 }
