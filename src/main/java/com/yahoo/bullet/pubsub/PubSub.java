@@ -43,11 +43,7 @@ public abstract class PubSub {
      */
     public PubSub(BulletConfig config) throws PubSubException {
         this.config = config;
-        try {
-            this.context = Context.valueOf(getRequiredConfig(String.class, BulletConfig.PUBSUB_CONTEXT_NAME));
-        } catch (RuntimeException e) {
-            throw new PubSubException("Cannot create PubSub", e);
-        }
+        this.context = Context.valueOf(getRequiredConfig(String.class, BulletConfig.PUBSUB_CONTEXT_NAME));
     }
 
     /**
@@ -110,14 +106,14 @@ public abstract class PubSub {
      * A method to get a required configuration of a particular type.
      *
      * @param name The name of the required configuration.
-     * @param tClass The class of the required configuration.
+     * @param clazz The class of the required configuration.
      * @param <T> The type to cast the configuration to. Inferred from tClass.
      * @return The extracted configuration of type T.
      * @throws PubSubException if the configuration is missing or cannot be cast to type T.
      */
-    public <T> T getRequiredConfig(Class<T> tClass, String name) throws PubSubException {
+    public <T> T getRequiredConfig(Class<T> clazz, String name) throws PubSubException {
         try {
-            return (T) Objects.requireNonNull(config.get(name));
+            return clazz.cast(Objects.requireNonNull(config.get(name)));
         } catch (Exception e) {
             throw PubSubException.forArgument(name, e);
         }
