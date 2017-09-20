@@ -1,3 +1,8 @@
+/*
+ *  Copyright 2017, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.BulletConfig;
@@ -11,7 +16,7 @@ class MockPubSub extends PubSub {
     public static final String MOCK_MESSAGE_NAME = "MOCK_MESSAGE";
     private String mockMessage;
 
-    public MockPubSub(BulletConfig config) {
+    public MockPubSub(BulletConfig config) throws PubSubException {
         super(config);
         mockMessage = config.get(MOCK_MESSAGE_NAME).toString();
     }
