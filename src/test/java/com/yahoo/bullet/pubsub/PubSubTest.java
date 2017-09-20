@@ -38,6 +38,7 @@ public class PubSubTest {
     @Test(expectedExceptions = PubSubException.class)
     public void testIllegalPubSubClassName() throws Exception {
         BulletConfig config = new BulletConfig(null);
+        config.set(BulletConfig.PUBSUB_CLASS_NAME, null);
         try {
             PubSub.from(config);
         } catch (Exception e) {

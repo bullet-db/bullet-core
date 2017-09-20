@@ -180,3 +180,9 @@ bullet.record.inject.timestamp.enable: true
 # This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
 # the record is projected. This is only applicable to RAW queries.
 bullet.record.inject.timestamp.key: "bullet_project_timestamp"
+
+## PubSub default settings
+# This should point to a concrete implementation of PubSub.
+bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.PubSub"
+# The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
+bullet.pubsub.context.name: "QUERY_PROCESSING"

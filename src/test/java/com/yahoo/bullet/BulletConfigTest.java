@@ -118,4 +118,32 @@ public class BulletConfigTest {
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
+
+    @Test
+    public void testPropertiesWithPrefix() throws IOException {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        String prefix = "bullet.pubsub";
+        String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
+
+        int configSize = config.getAllWithPrefix(Optional.empty(), prefix, false).size();
+        Assert.assertEquals(configSize, 2);
+
+        Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
+        Assert.assertEquals(properties.get(BulletConfig.PUBSUB_CLASS_NAME), fieldValue);
+    }
+
+    @Test
+    public void testPropertiesStripPrefix() throws IOException {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        String prefix = "bullet.pubsub.";
+        String fieldName = "class.name";
+        String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
+
+        int configSize = config.getAllWithPrefix(Optional.empty(), prefix, true).size();
+        Assert.assertEquals(configSize, 2);
+
+        Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
+        Assert.assertNull(properties.get(BulletConfig.PUBSUB_CLASS_NAME));
+        Assert.assertEquals(properties.get(fieldName), fieldValue);
+    }
 }
