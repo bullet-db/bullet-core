@@ -18,7 +18,7 @@ class MockPubSub extends PubSub {
 
     public MockPubSub(BulletConfig config) throws PubSubException {
         super(config);
-        mockMessage = config.get(MOCK_MESSAGE_NAME).toString();
+        mockMessage = getRequiredConfig(String.class, MOCK_MESSAGE_NAME);
     }
 
     @Override
