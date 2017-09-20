@@ -1,3 +1,8 @@
+/*
+ *  Copyright 2017, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.pubsub.Metadata.Signal;
@@ -13,6 +18,8 @@ import java.util.Objects;
  */
 @Getter
 public class PubSubMessage implements Serializable {
+    private static final long serialVersionUID = 2407848310969237888L;
+
     private String id;
     private int sequence;
     private String content;

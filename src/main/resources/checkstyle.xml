@@ -14,6 +14,13 @@
         <property name="severity" value="error"/>
     </module>
 
+    <!--Checks that all files have a copyright header. -->
+    <module name="Header">
+        <property name="headerFile" value="src/main/resources/copyright.txt"/>
+        <property name="ignoreLines" value="2"/>
+        <property name="fileExtensions" value="java"/>
+    </module>
+
     <!-- Check each Java file for violations. -->
     <module name="TreeWalker">
 

@@ -1,10 +1,15 @@
+/*
+ *  Copyright 2017, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.BulletConfig;
 
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Notation: Partition is a unit of parallelism in the Pub/Sub queue.
@@ -12,7 +17,7 @@ import java.util.List;
  * Implementations of PubSub should take in a {@link BulletConfig} and use the information to wire up and return
  * Publishers and Subscribers.
  */
-public abstract class PubSub implements Serializable {
+public abstract class PubSub {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
      * If the Context is {@link Context#QUERY_SUBMISSION}:
@@ -28,14 +33,21 @@ public abstract class PubSub implements Serializable {
     }
 
     protected Context context;
+    protected BulletConfig config;
 
     /**
      * Instantiate a PubSub using parameters from {@link BulletConfig}.
      *
      * @param config The {@link BulletConfig} containing all required PubSub parameters.
+     * @throws PubSubException if the context name is not present or cannot be parsed.
      */
-    public PubSub(BulletConfig config) {
-        context = Context.valueOf(config.get(BulletConfig.PUBSUB_CONTEXT_NAME).toString());
+    public PubSub(BulletConfig config) throws PubSubException {
+        this.config = config;
+        try {
+            this.context = Context.valueOf(getRequiredConfig(String.class, BulletConfig.PUBSUB_CONTEXT_NAME));
+        } catch (RuntimeException e) {
+            throw new PubSubException("Cannot create PubSub", e);
+        }
     }
 
     /**
@@ -43,8 +55,9 @@ public abstract class PubSub implements Serializable {
      * {@link PubSub#context}).
      *
      * @return {@link Publisher} wired as required.
+     * @throws PubSubException if the Publisher could not be created.
      */
-    public abstract Publisher getPublisher();
+    public abstract Publisher getPublisher() throws PubSubException;
 
     /**
      * Get a list of n {@link Publisher} instances with the allocated partitions in the appropriate queue
@@ -52,16 +65,18 @@ public abstract class PubSub implements Serializable {
      *
      * @param n The number of Publishers requested.
      * @return The {@link List} of n Publishers wired as required.
+     * @throws PubSubException if Publishers could not be created.
      */
-    public abstract List<Publisher> getPublishers(int n);
+    public abstract List<Publisher> getPublishers(int n) throws PubSubException;
 
     /**
      * Get a {@link Subscriber} instance wired to read from all allocated partitions in the appropriate queue (See
      * {@link PubSub#context}).
      *
      * @return {@link Subscriber} wired as required.
+     * @throws PubSubException if the Subscriber could not be created.
      */
-    public abstract Subscriber getSubscriber();
+    public abstract Subscriber getSubscriber() throws PubSubException;
 
     /**
      * Get a list of n {@link Subscriber} instances with allocated partitions from the appropriate queue
@@ -69,8 +84,9 @@ public abstract class PubSub implements Serializable {
      *
      * @param n The number of Subscribers requested.
      * @return The {@link List} of n Subscribers wired as required.
+     * @throws PubSubException if Subscribers could not be created.
      */
-    public abstract List<Subscriber> getSubscribers(int n);
+    public abstract List<Subscriber> getSubscribers(int n) throws PubSubException;
 
     /**
      * Create a PubSub instance using the class specified in the config file.
@@ -87,6 +103,23 @@ public abstract class PubSub implements Serializable {
             return constructor.newInstance(config);
         } catch (Exception e) {
             throw new PubSubException("Cannot create PubSub instance.", e);
+        }
+    }
+
+    /**
+     * A method to get a required configuration of a particular type.
+     *
+     * @param name The name of the required configuration.
+     * @param tClass The class of the required configuration.
+     * @param <T> The type to cast the configuration to. Inferred from tClass.
+     * @return The extracted configuration of type T.
+     * @throws PubSubException if the configuration is missing or cannot be cast to type T.
+     */
+    public <T> T getRequiredConfig(Class<T> tClass, String name) throws PubSubException {
+        try {
+            return (T) Objects.requireNonNull(config.get(name));
+        } catch (Exception e) {
+            throw PubSubException.forArgument(name, e);
         }
     }
 }
