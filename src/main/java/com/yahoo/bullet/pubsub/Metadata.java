@@ -75,29 +75,12 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * Is this a failed signal?
+     * Check if Metadata has the given signal.
      *
-     * @return A boolean representing whether this represents a failed state.
+     * @param signal The signal to check against.
+     * @return true if message has {@link Metadata#signal}
      */
-    public boolean hasFail() {
-        return hasSignal() && signal == Signal.FAIL;
-    }
-
-    /**
-     * Is this a ack signal?
-     *
-     * @return A boolean representing whether this represents an ack signal.
-     */
-    public boolean hasAck() {
-        return hasSignal() && signal == Signal.ACKNOWLEDGE;
-    }
-
-    /**
-     * Is this a complete signal?
-     *
-     * @return A boolean representing whether this represents a complete signal.
-     */
-    public boolean hasComplete() {
-        return hasSignal() && signal == Signal.COMPLETE;
+    public boolean hasSignal(Signal signal) {
+        return hasSignal() && this.signal == signal;
     }
 }

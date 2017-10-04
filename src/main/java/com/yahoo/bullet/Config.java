@@ -100,7 +100,7 @@ public class Config implements Serializable {
     }
 
     /**
-     * Get a value from the config as a particular type or throw an exception with a message if not found..
+     * Get a value from the config as a particular type or throw an exception with a message if not found.
      *
      * @param key The name of the config.
      * @param clazz The Class of the type.

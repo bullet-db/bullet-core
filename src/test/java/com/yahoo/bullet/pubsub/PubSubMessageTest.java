@@ -159,17 +159,17 @@ public class PubSubMessageTest {
     @Test
     public void testToString() {
         assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.FAIL, 42.0), 42).toString(),
-                "{ 'id': 'foo', 'sequence': 42, 'content': 'bar', 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
+                         "{ 'id': 'foo', 'sequence': 42, 'content': 'bar', 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.COMPLETE, new ArrayList<>())).toString(),
-                "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
+                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", Signal.COMPLETE, 22).toString(),
-                "{ 'id': 'foo', 'sequence': 22, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
+                         "{ 'id': 'foo', 'sequence': 22, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", Signal.ACKNOWLEDGE).toString(),
-                "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
+                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", 34).toString(),
-                "{ 'id': 'foo', 'sequence': 34, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'sequence': 34, 'content': 'bar', 'metadata': null }");
         assertJSONEquals(new PubSubMessage("foo", "bar").toString(),
-                "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': null }");
         assertJSONEquals(new PubSubMessage().toString(),
                          "{ 'id': '', 'sequence': -1, 'content': null, 'metadata': null }");
     }
