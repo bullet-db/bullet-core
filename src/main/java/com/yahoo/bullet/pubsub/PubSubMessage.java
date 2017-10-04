@@ -70,14 +70,14 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
-     * @param signal The Metadata.Signal to be sent with the message.
+     * @param signal The Signal to be sent with the message.
      */
     public PubSubMessage(String id, String content, Signal signal) {
         this(id, content, signal, -1);
     }
 
     /**
-     * Constructor for a message having content, a {@link Metadata.Signal} and a sequence number.
+     * Constructor for a message having content, a {@link Signal} and a sequence number.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
@@ -122,7 +122,17 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Check if message has a {@link Metadata.Signal}.
+     * Check if message has a given {@link Signal}.
+     *
+     * @param signal The signal to check for.
+     * @return true if message has the given signal.
+     */
+    public boolean hasSignal(Signal signal) {
+        return hasMetadata() && metadata.hasSignal(signal);
+    }
+
+    /**
+     * Check if the message has a {@link Signal}.
      *
      * @return true if message has a signal.
      */

@@ -149,7 +149,7 @@ public class PubSubMessageTest {
 
         message = new PubSubMessage(messageID, null, Signal.COMPLETE);
         Assert.assertTrue(message.hasMetadata());
-        Assert.assertTrue(message.hasSignal());
+        Assert.assertTrue(message.hasSignal(Signal.COMPLETE));
 
         message = new PubSubMessage(messageID, null, new Metadata());
         Assert.assertTrue(message.hasMetadata());
@@ -201,6 +201,7 @@ public class PubSubMessageTest {
 
         Assert.assertTrue(actual.hasMetadata());
         Assert.assertTrue(actual.hasSignal());
+        Assert.assertTrue(actual.hasSignal(Signal.FAIL));
         Assert.assertEquals(actual.getMetadata().getSignal(), Signal.FAIL);
         Assert.assertEquals(actual.getMetadata().getContent(), Collections.singletonMap("type", null));
     }
@@ -219,7 +220,8 @@ public class PubSubMessageTest {
         Assert.assertEquals(actual.getId(), "");
         Assert.assertEquals(actual.getSequence(), -1);
         Assert.assertTrue(actual.hasSignal());
-        Assert.assertTrue(actual.getMetadata().hasAck());
+        Assert.assertTrue(actual.hasSignal(Signal.ACKNOWLEDGE));
+        Assert.assertTrue(actual.getMetadata().hasSignal(Signal.ACKNOWLEDGE));
         Assert.assertNull(actual.getMetadata().getContent());
         Assert.assertNull(actual.getContent());
     }
