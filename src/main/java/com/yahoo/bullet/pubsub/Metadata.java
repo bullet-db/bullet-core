@@ -23,6 +23,9 @@ public class Metadata implements Serializable {
 
     @Getter @Setter
     private Signal signal;
+
+    // This is a Serializable object enforced through the constructor, getter and setter.  Storing it as an Object so
+    // GSON can reify an instance.
     private Object content;
 
     /**
