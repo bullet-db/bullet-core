@@ -9,7 +9,6 @@ import com.yahoo.bullet.BulletConfig;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Notation: Partition is a unit of parallelism in the Pub/Sub queue.
@@ -113,7 +112,7 @@ public abstract class PubSub {
      */
     public <T> T getRequiredConfig(Class<T> clazz, String name) throws PubSubException {
         try {
-            return clazz.cast(Objects.requireNonNull(config.get(name)));
+            return config.getRequiredConfigAs(name, clazz);
         } catch (Exception e) {
             throw PubSubException.forArgument(name, e);
         }

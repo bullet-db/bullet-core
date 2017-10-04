@@ -25,6 +25,18 @@ public interface JSONFormatter {
     }
 
     /**
+     * Returns a deserialized object from JSON using {@link JSONFormatter#GSON}.
+     *
+     * @param json The String json that represents the object.
+     * @param clazz The class of the object.
+     * @param <T> The type of the object. It must implement {@link JSONFormatter}.
+     * @return An instance of the object deserialized from JSON.
+     */
+    static <T extends JSONFormatter> T fromJSON(String json, Class<T> clazz) {
+        return GSON.fromJson(json, clazz);
+    }
+
+    /**
      * Convert this object to a JSON string.
      * @return The JSON representation of this.
      */

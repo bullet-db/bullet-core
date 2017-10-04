@@ -7,8 +7,6 @@ package com.yahoo.bullet;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-
 @Slf4j
 public class BulletConfig extends Config {
     public static final String SPECIFICATION_DEFAULT_DURATION = "bullet.query.default.duration";
@@ -55,9 +53,15 @@ public class BulletConfig extends Config {
      * Constructor that loads specific file augmented with defaults.
      *
      * @param file YAML file to load.
-     * @throws IOException if an error occurred with the file loading.
      */
-    public BulletConfig(String file) throws IOException {
+    public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
+    }
+
+    /**
+     * Constructor that loads just the defaults.
+     */
+    public BulletConfig() {
+        super(DEFAULT_CONFIGURATION_NAME);
     }
 }
