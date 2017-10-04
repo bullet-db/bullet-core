@@ -1,0 +1,6 @@
+my.custom.list:
+  - foo
+  - bar
+my.custom.map:
+  first: 10
+  second: 42

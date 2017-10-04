@@ -5,21 +5,56 @@
  */
 package com.yahoo.bullet.pubsub;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@NoArgsConstructor
 public class Metadata implements Serializable {
     public enum Signal {
         ACKNOWLEDGE,
-        COMPLETE
+        COMPLETE,
+        FAIL
     }
+
+    private static final long serialVersionUID = 4234800234857923112L;
+
+    @Getter @Setter
     private Signal signal;
-    private Serializable content;
+    private Object content;
+
+    /**
+     * Allows you to create an instance with a {@link com.yahoo.bullet.pubsub.Metadata.Signal} and a
+     * {@link Serializable} object.
+     *
+     * @param signal The signal to set.
+     * @param object The object that is the metadata.
+     */
+    public Metadata(Signal signal, Serializable object) {
+        this.signal = signal;
+        this.content = object;
+    }
+
+    /**
+     * Set a serializable content for this metadata.
+     *
+     * @param content The content for this metadata.
+     */
+    public void setContent(Serializable content) {
+        this.content = content;
+    }
+
+    /**
+     * Returns the {@link Serializable} content in this metadata.
+     *
+     * @return The serializable content or null.
+     */
+    public Serializable getContent() {
+        return (Serializable) content;
+
+    }
 
     /**
      * Check if Metadata has content.
@@ -37,5 +72,32 @@ public class Metadata implements Serializable {
      */
     public boolean hasSignal() {
         return signal != null;
+    }
+
+    /**
+     * Is this a failed signal?
+     *
+     * @return A boolean representing whether this represents a failed state.
+     */
+    public boolean hasFail() {
+        return hasSignal() && signal == Signal.FAIL;
+    }
+
+    /**
+     * Is this a ack signal?
+     *
+     * @return A boolean representing whether this represents an ack signal.
+     */
+    public boolean hasAck() {
+        return hasSignal() && signal == Signal.ACKNOWLEDGE;
+    }
+
+    /**
+     * Is this a complete signal?
+     *
+     * @return A boolean representing whether this represents a complete signal.
+     */
+    public boolean hasComplete() {
+        return hasSignal() && signal == Signal.COMPLETE;
     }
 }

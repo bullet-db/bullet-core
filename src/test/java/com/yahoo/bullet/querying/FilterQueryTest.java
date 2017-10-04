@@ -8,6 +8,7 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
 import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -101,5 +102,10 @@ public class FilterQueryTest {
             Assert.assertFalse(query.consume(boxB.getRecord()));
             Assert.assertNull(query.getData());
         }
+    }
+
+    @Test(expectedExceptions = ParsingException.class)
+    public void testValidationFail() throws ParsingException {
+        new FilterQuery("{ 'aggregation': { 'type': null } }", emptyMap());
     }
 }

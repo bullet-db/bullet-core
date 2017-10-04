@@ -86,4 +86,12 @@ public class ClipTest {
                          makeJSON("{'foo': 'Infinity', 'baz': '-Infinity', 'bar': 'NaN'}",
                                  "[{'field': null, 'plus_inf': 'Infinity', 'neg_inf': '-Infinity', 'not_a_number': 'NaN'}]"));
     }
+
+    @Test
+    public void testMetadataAddition() {
+        Clip clip = new Clip();
+        clip.add((Metadata) null);
+        clip.add(new Metadata().add("foo", 1.2));
+        assertJSONEquals(clip.asJSON(), makeJSON("{'foo': 1.2}", "[]"));
+    }
 }

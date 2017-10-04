@@ -80,6 +80,26 @@ public class MetadataTest {
     }
 
     @Test
+    public void testMetadataWithErrors() {
+        Error errorA = Error.makeError("foo", "bar");
+        Error errorB = Error.makeError("baz", "qux");
+        Metadata meta = Metadata.of(Arrays.asList(errorA, errorB));
+        Error errorC = Error.makeError("norf", "foo");
+        meta.addErrors(Collections.singletonList(errorC));
+
+        Map<String, Object> actual = meta.asMap();
+        Assert.assertEquals(actual.size(), 1);
+        List<Error> actualErrors = (List<Error>) actual.get(Metadata.ERROR_KEY);
+        Assert.assertEquals(actualErrors.size(), 3);
+        Assert.assertEquals(actualErrors.get(0).getError(), "foo");
+        Assert.assertEquals(actualErrors.get(0).getResolutions(), singletonList("bar"));
+        Assert.assertEquals(actualErrors.get(1).getError(), "baz");
+        Assert.assertEquals(actualErrors.get(1).getResolutions(), singletonList("qux"));
+        Assert.assertEquals(actualErrors.get(2).getError(), "norf");
+        Assert.assertEquals(actualErrors.get(2).getResolutions(), singletonList("foo"));
+    }
+
+    @Test
     public void testMerging() {
         Metadata metaA = new Metadata();
         metaA.add("foo", singletonList("bar"));
@@ -117,6 +137,7 @@ public class MetadataTest {
         configuration.put(BulletConfig.RESULT_METADATA_METRICS,
                           asMetadataEntries(Pair.of("Estimated Result", "foo"),
                                             Pair.of("Sketch Metadata", "bar"),
+                                            Pair.of("Non Existent", "bar"),
                                             Pair.of("Standard Deviations", "baz")));
 
         Set<Concept> concepts = new HashSet<>(asList(Concept.ESTIMATED_RESULT,

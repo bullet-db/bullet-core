@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,11 +30,10 @@ public class Config implements Serializable {
      * Constructor that loads a specific file and loads the settings in that file.
      *
      * @param file YAML file to load.
-     * @throws IOException if an error occurred with the file loading.
      */
-    public Config(String file) throws IOException {
+    public Config(String file) {
         data = readYAML(file);
-        log.info("Configuration: {} ", data);
+        log.info("Final Configuration:\n{} ", data);
     }
 
     /**
@@ -41,14 +41,13 @@ public class Config implements Serializable {
      *
      * @param file YAML file to load.
      * @param defaultConfigurationFile Default YAML file to load.
-     * @throws IOException if an error occurred with the file loading.
      */
-    public Config(String file, String defaultConfigurationFile) throws IOException {
-        this(defaultConfigurationFile);
+    public Config(String file, String defaultConfigurationFile) {
+        data = readYAML(defaultConfigurationFile);
         // Override
         Map<String, Object> specificConf = readYAML(file);
         data.putAll(specificConf);
-        log.info("Final configuration: {} ", data);
+        log.info("Final Configuration with defaults:\n{} ", data);
     }
 
     /**
@@ -71,6 +70,47 @@ public class Config implements Serializable {
     public Object getOrDefault(String key, Object defaultValue) {
         Object value = get(key);
         return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Get a value from the config as a particular type.
+     *
+     * @param key The name of the config.
+     * @param clazz The Class of the type.
+     * @param <T> The type of the config.
+     * @return The config as the particular type or null.
+     * @throws ClassCastException if the value of the config could not be casted to the type.
+     */
+    public <T> T getAs(String key, Class<T> clazz) {
+        return clazz.cast(get(key));
+    }
+
+    /**
+     * Get a value from the config as a particular type or default to a provided value.
+     *
+     * @param key The name of the config.
+     * @param defaultValue A default of the same type to use if the config was not found.
+     * @param clazz The Class of the type.
+     * @param <T> The type of the config.
+     * @return The config or your default value as the particular type.
+     * @throws ClassCastException if the value of the config or default could not be casted to the type.
+     */
+    public <T> T getOrDefaultAs(String key, T defaultValue, Class<T> clazz) {
+        return clazz.cast(getOrDefault(key, defaultValue));
+    }
+
+    /**
+     * Get a value from the config as a particular type or throw an exception with a message if not found..
+     *
+     * @param key The name of the config.
+     * @param clazz The Class of the type.
+     * @param <T> The type of the config.
+     * @return The config as the particular type.
+     * @throws ClassCastException if the value of the config could not be casted to the type.
+     * @throws NullPointerException if the config was not found.
+     */
+    public <T> T getRequiredConfigAs(String key, Class<T> clazz) {
+        return Objects.requireNonNull(getAs(key, clazz), "Required value for " + key + " was missing");
     }
 
     /**
@@ -152,15 +192,19 @@ public class Config implements Serializable {
      *
      * @param yamlFile The String name of the YAML resource file in classpath or the path to a YAML file containing the mappings.
      * @return A {@link Map} of String names to Objects of the mappings in the YAML file.
-     * @throws IOException if the resource could not be read.
      */
-    protected Map<String, Object> readYAML(String yamlFile) throws IOException {
-        if (yamlFile != null && yamlFile.length() > 0) {
-            log.info("Loading configuration file: {}", yamlFile);
+    protected Map<String, Object> readYAML(String yamlFile) {
+        if (yamlFile == null || yamlFile.isEmpty()) {
+            return new HashMap<>();
+        }
+        log.info("Loading configuration file: {}", yamlFile);
+        try {
             InputStream is = this.getClass().getResourceAsStream("/" + yamlFile);
             Reader reader = (is != null ? new InputStreamReader(is) : new FileReader(yamlFile));
             return (Map<String, Object>) YAML.load(reader);
+        } catch (IOException ioe) {
+            log.error("Error loading configuration", ioe);
+            return new HashMap<>();
         }
-        return new HashMap<>();
     }
 }

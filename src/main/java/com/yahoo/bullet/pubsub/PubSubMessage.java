@@ -6,6 +6,7 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.pubsub.Metadata.Signal;
+import com.yahoo.bullet.result.JSONFormatter;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -17,13 +18,20 @@ import java.util.Objects;
  * emitted by Bullet.
  */
 @Getter
-public class PubSubMessage implements Serializable {
+public class PubSubMessage implements Serializable, JSONFormatter {
     private static final long serialVersionUID = 2407848310969237888L;
 
     private String id;
     private int sequence;
     private String content;
     private Metadata metadata;
+
+    /**
+     * Constructor for a message having no information. Used internally. Not recommended for use.
+     */
+    public PubSubMessage() {
+        this("", null);
+    }
 
     /**
      * Constructor for a message having only content.
@@ -113,6 +121,15 @@ public class PubSubMessage implements Serializable {
         return metadata != null;
     }
 
+    /**
+     * Check if message has a {@link Metadata.Signal}.
+     *
+     * @return true if message has a signal.
+     */
+    public boolean hasSignal() {
+        return hasMetadata() && metadata.hasSignal();
+    }
+
     @Override
     public int hashCode() {
         return (id + sequence).hashCode();
@@ -125,5 +142,25 @@ public class PubSubMessage implements Serializable {
         }
         PubSubMessage otherMessage = (PubSubMessage) other;
         return id.equals(otherMessage.getId()) && sequence == otherMessage.getSequence();
+    }
+
+    @Override
+    public String toString() {
+        return asJSON();
+    }
+
+    @Override
+    public String asJSON() {
+        return JSONFormatter.asJSON(this);
+    }
+
+    /**
+     * Converts a json representation back to an instance.
+     *
+     * @param json The string representation of the JSON.
+     * @return An instance of this class.
+     */
+    public static PubSubMessage fromJSON(String json) {
+        return JSONFormatter.fromJSON(json, PubSubMessage.class);
     }
 }

@@ -8,25 +8,34 @@ package com.yahoo.bullet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public class BulletConfigTest {
-
     @Test
-    public void testNoFiles() throws IOException {
-        BulletConfig config = new BulletConfig(null);
+    public void testNoFiles() {
+        BulletConfig config = new BulletConfig();
         Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+
+        config = new BulletConfig(null);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+
         config = new BulletConfig("");
         Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
     }
 
     @Test
-    public void testCustomConfig() throws IOException {
+    public void testMissingFile() {
+        BulletConfig config = new BulletConfig("/path/to/non/existant/file");
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+    }
+
+    @Test
+    public void testCustomConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000L);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
@@ -34,7 +43,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testCustomProperties() throws IOException {
+    public void testCustomProperties() {
         BulletConfig config = new BulletConfig(null);
         Assert.assertNull(config.get("foo"));
         config.set("foo", "bar");
@@ -42,7 +51,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGettingWithDefault() throws IOException {
+    public void testGettingWithDefault() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         Assert.assertEquals(config.getOrDefault(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, ";"), "|");
         Assert.assertEquals(config.getOrDefault("does.not.exist", "foo"), "foo");
@@ -50,7 +59,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGettingMultipleProperties() throws IOException {
+    public void testGettingMultipleProperties() {
         BulletConfig config = new BulletConfig(null);
         config.clear();
         config.set("1", 1);
@@ -73,7 +82,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGettingMaskedProperties() throws IOException {
+    public void testGettingMaskedProperties() {
         BulletConfig config = new BulletConfig(null);
         config.clear();
         config.set("1", 1);
@@ -96,7 +105,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testMerging() throws IOException {
+    public void testMerging() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
@@ -120,7 +129,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testPropertiesWithPrefix() throws IOException {
+    public void testPropertiesWithPrefix() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub";
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
@@ -133,7 +142,7 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testPropertiesStripPrefix() throws IOException {
+    public void testPropertiesStripPrefix() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub.";
         String fieldName = "class.name";
@@ -145,5 +154,56 @@ public class BulletConfigTest {
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
         Assert.assertNull(properties.get(BulletConfig.PUBSUB_CLASS_NAME));
         Assert.assertEquals(properties.get(fieldName), fieldValue);
+    }
+
+    @Test
+    public void testGetAsAGivenType() {
+        BulletConfig config = new BulletConfig("src/test/resources/custom_config.yaml");
+
+        long defaulted = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Long.class);
+        Assert.assertEquals(defaulted, 100);
+
+        Map customMap = config.getAs("my.custom.map", Map.class);
+        Assert.assertNotNull(customMap);
+        Assert.assertEquals(customMap.size(), 2);
+        Assert.assertEquals(customMap.get("first"), 10L);
+        Assert.assertEquals(customMap.get("second"), 42L);
+
+        List customList = config.getAs("my.custom.list", List.class);
+        Assert.assertNotNull(customList);
+        Assert.assertEquals(customList.size(), 2);
+        Assert.assertEquals(customList.get(0), "foo");
+        Assert.assertEquals(customList.get(1), "bar");
+    }
+
+    @Test
+    public void testGetOrDefaultAsAGivenType() {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+
+
+        long notDefaulted = config.getOrDefaultAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42L, Long.class);
+        Assert.assertEquals(notDefaulted, 100);
+
+        String defaulted = config.getOrDefaultAs("foo", "value", String.class);
+        Assert.assertEquals(defaulted, "value");
+
+        List anotherDefaulted = config.getOrDefaultAs("foo", Arrays.asList("foo", "bar"), List.class);
+        Assert.assertEquals(anotherDefaulted, Arrays.asList("foo", "bar"));
+    }
+
+    @Test
+    public void testGettingRequiredConfig() {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+
+
+        long present = config.getRequiredConfigAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Long.class);
+        Assert.assertEquals(present, 100);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = ".*was missing.*")
+    public void testMissingRequiredConfig() {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+
+        config.getRequiredConfigAs("does.not.exist", Long.class);
     }
 }
