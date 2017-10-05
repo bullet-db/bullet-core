@@ -69,7 +69,6 @@ public class BufferingSubscriberTest {
         Assert.assertNull(subscriber.receive());
     }
 
-
     @Test
     public void testNoMoreMessages() throws PubSubException {
         List<PubSubMessage> messages = make(5);
