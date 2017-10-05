@@ -44,7 +44,7 @@ public class BufferingSubscriberTest {
 
         @Override
         public void close() {
-            testMessages = new LinkedList<>();
+            testMessages.clear();
         }
     }
 
