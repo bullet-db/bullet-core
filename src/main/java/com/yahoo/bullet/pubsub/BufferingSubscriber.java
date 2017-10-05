@@ -18,7 +18,7 @@ import java.util.Map;
  * This implements a {@link Subscriber} that provides a base subscriber that buffers a fixed number of messages read.
  * See {@link BufferingSubscriber#maxUncommitedMessages}.
  *
- * It provides  implementations of {@link Subscriber#commit(String, int)}, {@link Subscriber#fail(String, int)} and
+ * It provides implementations of {@link Subscriber#commit(String, int)}, {@link Subscriber#fail(String, int)} and
  * {@link Subscriber#receive()} that honor the fixed number of messages to read.
  *
  * This class is intended to be used if your PubSub implementation does not care about (or cannot be) using commit and
