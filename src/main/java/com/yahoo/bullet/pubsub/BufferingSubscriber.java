@@ -98,8 +98,9 @@ public abstract class BufferingSubscriber implements Subscriber {
      * and non-empty {@link List} of messages. Otherwise, returns false.
      *
      * @return A boolean denoting whether we do have messages to emit.
+     * @throws PubSubException if there was an issue reading the messages.
      */
-    protected boolean haveMessages() {
+    protected boolean haveMessages() throws PubSubException {
         if (!receivedMessages.isEmpty()) {
             return true;
         }
@@ -115,6 +116,7 @@ public abstract class BufferingSubscriber implements Subscriber {
      * Implement this method to read and return a {@link List} of {@link PubSubMessage} from your actual PubSub source.
      *
      * @return A {@link List} of {@link PubSubMessage} if any were read. A null or an empty list if not.
+     * @throws PubSubException if there was an issue reading the messages.
      */
-    protected abstract List<PubSubMessage> getMessages();
+    protected abstract List<PubSubMessage> getMessages() throws PubSubException;
 }
