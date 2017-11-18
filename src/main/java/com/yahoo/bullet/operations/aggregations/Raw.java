@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Implements the LIMIT operation on multiple raw {@link BulletRecord}.
@@ -30,14 +29,12 @@ import java.util.Map;
  */
 @Slf4j
 public class Raw implements Strategy {
-    public static final Integer DEFAULT_MAX_SIZE = 30;
-    public static final Integer DEFAULT_MICRO_BATCH_SIZE = 1;
     private ArrayList<BulletRecord> aggregate = new ArrayList<>();
 
     private Integer size;
     private int consumed = 0;
     private int combined = 0;
-    private int microBatchSize = DEFAULT_MICRO_BATCH_SIZE;
+    private int microBatchSize;
 
     /**
      * Constructor that takes in an {@link Aggregation}. The size of the aggregation is used as a LIMIT
@@ -47,13 +44,11 @@ public class Raw implements Strategy {
      */
     @SuppressWarnings("unchecked")
     public Raw(Aggregation aggregation) {
-        Map config = aggregation.getConfiguration();
-        int maximumSize = ((Number) config.getOrDefault(BulletConfig.RAW_AGGREGATION_MAX_SIZE,
-                                                        DEFAULT_MAX_SIZE)).intValue();
+        BulletConfig config = aggregation.getConfiguration();
+        int maximumSize = config.getAs(BulletConfig.RAW_AGGREGATION_MAX_SIZE, Integer.class);
 
         size = Math.min(aggregation.getSize(), maximumSize);
-        microBatchSize = ((Number) aggregation.getConfiguration().getOrDefault(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE,
-                                                                               DEFAULT_MICRO_BATCH_SIZE)).intValue();
+        microBatchSize = config.getAs(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE, Integer.class);
     }
 
     @Override

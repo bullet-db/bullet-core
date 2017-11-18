@@ -32,8 +32,8 @@ import java.util.stream.Stream;
 public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     // The metadata concept to key mapping
     protected final Map<String, String> metadataKeys;
-    // A  copy of the configuration
-    protected final Map config;
+    // A copy of the configuration
+    protected final BulletConfig config;
 
     // Separator for multiple fields when inserting into the Sketch
     protected final String separator;
@@ -53,10 +53,10 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     @SuppressWarnings("unchecked")
     public SketchingStrategy(Aggregation aggregation) {
         config = aggregation.getConfiguration();
-        metadataKeys = (Map<String, String>) config.getOrDefault(BulletConfig.RESULT_METADATA_METRICS_MAPPING,
-                                                                 Collections.emptyMap());
-        separator = config.getOrDefault(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR,
-                                        Aggregation.DEFAULT_FIELD_SEPARATOR).toString();
+        boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
+        metadataKeys = shouldMeta ? (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class) :
+                                    Collections.emptyMap();
+        separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
 
         fieldsToNames = aggregation.getFields();
         fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());

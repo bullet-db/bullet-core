@@ -5,11 +5,10 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.result.Clip;
 import lombok.Getter;
-
-import java.util.Map;
 
 public class AggregationQuery extends AbstractQuery<byte[], Clip> {
     @Getter
@@ -19,11 +18,11 @@ public class AggregationQuery extends AbstractQuery<byte[], Clip> {
      * Constructor that takes a String representation of the query.
      *
      * @param queryString The query as a string.
-     * @param configuration A map of configurations to use.
+     * @param config A {@link BulletConfig} configuration that has been validated.
      * @throws ParsingException if there was an issue.
      */
-    public AggregationQuery(String queryString, Map configuration) throws ParsingException {
-        super(queryString, configuration);
+    public AggregationQuery(String queryString, BulletConfig config) throws ParsingException {
+        super(queryString, config);
     }
 
     @Override

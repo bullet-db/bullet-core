@@ -34,9 +34,6 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     // This is reused for the duration of the strategy.
     private final CachingGroupData container;
 
-    // 13.27% error rate at 99.73% confidence (3 SD). Irrelevant since we are using this to cap the number of groups.
-    public static final int DEFAULT_NOMINAL_ENTRIES = 512;
-
     private final Set<GroupOperation> operations;
 
     /**
@@ -54,10 +51,11 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         container = new CachingGroupData(null, metrics);
 
         ResizeFactor resizeFactor = getResizeFactor(BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR);
-        float samplingProbability = ((Number) config.getOrDefault(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING,
-                                                                  DEFAULT_SAMPLING_PROBABILITY)).floatValue();
-        int nominalEntries = ((Number) config.getOrDefault(BulletConfig.GROUP_AGGREGATION_SKETCH_ENTRIES,
-                                                           DEFAULT_NOMINAL_ENTRIES)).intValue();
+        float samplingProbability = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, Float.class);
+
+        // Default at 512 gives a 13.27% error rate at 99.73% confidence (3 SD). Irrelevant since we are using this to
+        // mostly cap the number of groups. You can use the Sketch theta to extrapolate the aggregation for all the data.
+        int nominalEntries = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_ENTRIES, Integer.class);
         int size = aggregation.getSize();
 
         sketch = new TupleSketch(resizeFactor, samplingProbability, nominalEntries, size);

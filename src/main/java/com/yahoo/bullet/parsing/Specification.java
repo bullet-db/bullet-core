@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,9 +38,6 @@ public class Specification implements Configurable, Validatable  {
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-    public static final String DEFAULT_RECEIVE_TIMESTAMP_KEY = "bullet_receive_timestamp";
-    public static final Integer DEFAULT_DURATION_MS = 30 * 1000;
-    public static final Integer DEFAULT_MAX_DURATION_MS = 120 * 1000;
     public static final String SUB_KEY_SEPERATOR = "\\.";
 
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
@@ -159,26 +155,24 @@ public class Specification implements Configurable, Validatable  {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void configure(Map configuration) {
+    public void configure(BulletConfig config) {
         if (filters != null) {
-            filters.forEach(f -> f.configure(configuration));
+            filters.forEach(f -> f.configure(config));
         }
         if (projection != null) {
-            projection.configure(configuration);
+            projection.configure(config);
         }
         // Must have an aggregation
         if (aggregation == null) {
             aggregation = new Aggregation();
         }
-        aggregation.configure(configuration);
+        aggregation.configure(config);
 
-        shouldInjectTimestamp = (Boolean) configuration.getOrDefault(BulletConfig.RECORD_INJECT_TIMESTAMP, false);
-        timestampKey = (String) configuration.getOrDefault(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, DEFAULT_RECEIVE_TIMESTAMP_KEY);
+        shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
+        timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
 
-        Number defaultDuration = (Number) configuration.getOrDefault(BulletConfig.SPECIFICATION_DEFAULT_DURATION, DEFAULT_DURATION_MS);
-        Number maxDuration = (Number) configuration.getOrDefault(BulletConfig.SPECIFICATION_MAX_DURATION, DEFAULT_MAX_DURATION_MS);
-        int durationDefault = defaultDuration.intValue();
-        int durationMax = maxDuration.intValue();
+        int durationDefault = config.getAs(BulletConfig.SPECIFICATION_DEFAULT_DURATION, Integer.class);
+        int durationMax = config.getAs(BulletConfig.SPECIFICATION_MAX_DURATION, Integer.class);
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration < 0) ? durationDefault : Math.min(duration, durationMax);

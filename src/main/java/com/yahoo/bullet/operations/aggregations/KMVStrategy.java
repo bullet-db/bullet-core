@@ -13,12 +13,6 @@ import com.yahoo.sketches.ResizeFactor;
  * The parent class for {@link SketchingStrategy} that use the KMV type of Sketch - Theta and Tuple.
  */
 public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy<S> {
-    // Common defaults for KMV type sketches
-    // No Sampling
-    public static final float DEFAULT_SAMPLING_PROBABILITY = 1.0f;
-    // Sketch * 8 its size upto 2 * nominal entries everytime it reaches cap
-    public static final int DEFAULT_RESIZE_FACTOR = ResizeFactor.X8.lg();
-
     /**
      * Constructor that requires an {@link Aggregation}.
      *
@@ -37,7 +31,7 @@ public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy
      */
     @SuppressWarnings("unchecked")
     public ResizeFactor getResizeFactor(String key) {
-        return getResizeFactor((Number) config.getOrDefault(key, DEFAULT_RESIZE_FACTOR));
+        return getResizeFactor(config.getAs(key, Integer.class));
     }
     /**
      * Converts a integer representing the resizing for Sketches into a {@link ResizeFactor}.
@@ -45,9 +39,8 @@ public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy
      * @param factor An int representing the scaling when the Sketch reaches its threshold. Supports 1, 2, 4 and 8.
      * @return A {@link ResizeFactor} represented by the integer or {@link ResizeFactor#X8} otherwise.
      */
-    public static ResizeFactor getResizeFactor(Number factor) {
-        int resizeFactor = factor.intValue();
-        switch (resizeFactor) {
+    public static ResizeFactor getResizeFactor(int factor) {
+        switch (factor) {
             case 1:
                 return ResizeFactor.X1;
             case 2:

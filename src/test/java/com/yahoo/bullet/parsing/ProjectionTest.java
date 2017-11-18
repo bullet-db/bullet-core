@@ -118,7 +118,7 @@ public class ProjectionTest {
     public void testValidate() {
         Projection projection = new Projection();
         Optional<List<Error>> errors = projection.validate();
-        // currently Projection.validate() does nothing
+        // currently Projection.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }
 

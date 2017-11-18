@@ -30,12 +30,6 @@ import static java.util.Collections.singletonList;
  * configured for the sketch, the normalized rank error can be determined and tightly bound.
  */
 public class Distribution extends SketchingStrategy<QuantileSketch> {
-    public static final int DEFAULT_ENTRIES = 1024;
-
-    public static final int DEFAULT_MAX_POINTS = 100;
-    public static final int DEFAULT_POINTS = 1;
-    public static final int DEFAULT_ROUNDING = 6;
-
     // Distribution fields
     public static final String TYPE = "type";
     public static final String POINTS = "points";
@@ -82,14 +76,11 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     @SuppressWarnings("unchecked")
     public Distribution(Aggregation aggregation) {
         super(aggregation);
-        entries = ((Number) config.getOrDefault(BulletConfig.DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES,
-                                                DEFAULT_ENTRIES)).intValue();
-        rounding = ((Number) config.getOrDefault(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING,
-                                                 DEFAULT_ROUNDING)).intValue();
-        int pointLimit = ((Number) config.getOrDefault(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS,
-                                                       DEFAULT_MAX_POINTS)).intValue();
-        // The max gets rid of negative sizes if accidentally configured.
-        maxPoints = Math.max(DEFAULT_POINTS, Math.min(pointLimit, aggregation.getSize()));
+        entries = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES, Integer.class);
+        rounding = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, Integer.class);
+
+        int pointLimit = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
+        maxPoints = Math.min(pointLimit, aggregation.getSize());
         this.aggregation = aggregation;
 
         // The sketch is initialized in initialize!

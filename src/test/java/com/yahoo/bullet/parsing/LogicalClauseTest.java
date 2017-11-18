@@ -239,7 +239,7 @@ public class LogicalClauseTest {
     public void testValidate() {
         LogicalClause logicalClause = new LogicalClause();
         Optional<List<Error>> errors = logicalClause.validate();
-        // currently LogicalClause.validate() does nothing
+        // currently LogicalClause.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }
 }

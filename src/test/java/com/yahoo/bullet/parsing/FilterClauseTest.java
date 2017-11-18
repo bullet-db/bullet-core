@@ -218,7 +218,7 @@ public class FilterClauseTest {
     public void testValidate() {
         FilterClause filterClause = new FilterClause();
         Optional<List<Error>> errors = filterClause.validate();
-        // currently FilterClause.validate() does nothing
+        // currently FilterClause.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }
 
