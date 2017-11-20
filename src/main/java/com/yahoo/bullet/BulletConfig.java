@@ -105,6 +105,8 @@ public class BulletConfig extends Config {
         DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.ACTIVE_ITEMS.getName(), "active_items");
     }
 
+    // It is ok for this to be static since the VALIDATOR itself does not change for different values for fields
+    // in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
     static {
         VALIDATOR.define(SPECIFICATION_DEFAULT_DURATION)
@@ -204,13 +206,13 @@ public class BulletConfig extends Config {
                  .checkIf(Validator::isList)
                  .castTo(BulletConfig::mapifyMetadata);
 
-        VALIDATOR.relatesTo("Max should be less or equal to default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
+        VALIDATOR.relate("Max should be less or equal to default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
-        VALIDATOR.relatesTo("Max should be less or equal to default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
+        VALIDATOR.relate("Max should be less or equal to default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
                  .checkIf(Validator::isGreaterOrEqual);
-        VALIDATOR.relatesTo("Metadata is enabled and keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
+        VALIDATOR.relate("Metadata is enabled and keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNotConfigured);
-        VALIDATOR.relatesTo("Metadata is disabled and keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
+        VALIDATOR.relate("Metadata is disabled and keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataUnnecessary)
                  .orElseUse(false, Collections.emptyMap());
     }
@@ -237,7 +239,10 @@ public class BulletConfig extends Config {
     /**
      * Validates and fixes configuration for this config. If there are undefaulted or wrongly typed elements, you
      * should use a {@link Validator} to define the appropriate definitions, casters and defaults to use. You
-     * should call this method before you use the config to ensure that all configurations are valid.
+     * should call this method before you use the config to ensure that all configurations are valid. This class
+     * defines a validator for all the fields it knows about. If you subclass it and define your own fields, you should
+     * create your own Validator and define entries and relationships that you need to validate. Make sure to call this
+     * method in your override if you wish validate the fields defined by this config.
      */
     public void validate() {
         validate(this);
