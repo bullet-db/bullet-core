@@ -206,4 +206,38 @@ public class BulletConfigTest {
 
         config.getRequiredConfigAs("does.not.exist", Long.class);
     }
+
+    /*
+    @Test
+    public void testConceptKeyExtractionWithMetadataNotEnabled() {
+        Map<String, Object> configuration = new HashMap<>();
+        configuration.put(BulletConfig.RESULT_METADATA_METRICS, asMetadataEntries(Pair.of("Estimated Result", "foo")));
+
+        Set<Concept> concepts = new HashSet<>(singletonList(Concept.ESTIMATED_RESULT));
+
+        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), Collections.emptyMap());
+    }
+
+    @Test
+    public void testConceptKeyExtraction() {
+        Map<String, Object> configuration = new HashMap<>();
+        configuration.put(BulletConfig.RESULT_METADATA_ENABLE, true);
+        configuration.put(BulletConfig.RESULT_METADATA_METRICS,
+                asMetadataEntries(Pair.of("Estimated Result", "foo"),
+                        Pair.of("Sketch Metadata", "bar"),
+                        Pair.of("Non Existent", "bar"),
+                        Pair.of("Standard Deviations", "baz")));
+
+        Set<Concept> concepts = new HashSet<>(asList(Concept.ESTIMATED_RESULT,
+                Concept.SKETCH_METADATA,
+                Concept.STANDARD_DEVIATIONS));
+
+        Map<String, String> expectedMap = new HashMap<>();
+        expectedMap.put(Concept.ESTIMATED_RESULT.getName(), "foo");
+        expectedMap.put(Concept.SKETCH_METADATA.getName(), "bar");
+        expectedMap.put(Concept.STANDARD_DEVIATIONS.getName(), "baz");
+
+        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), expectedMap);
+    }
+    */
 }

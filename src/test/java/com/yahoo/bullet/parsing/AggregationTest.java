@@ -18,10 +18,7 @@ import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.yahoo.bullet.operations.AggregationOperations.AggregationType.COUNT_DISTINCT;
@@ -32,7 +29,6 @@ import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationTy
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
@@ -40,37 +36,39 @@ public class AggregationTest {
     @Test
     public void testSize() {
         Aggregation aggregation = new Aggregation();
+        BulletConfig config = new BulletConfig().validate();
 
         aggregation.setSize(null);
-        aggregation.configure(emptyMap());
-        Assert.assertEquals(aggregation.getSize(), Aggregation.DEFAULT_SIZE);
+        aggregation.configure(config);
+        Assert.assertEquals((Object) aggregation.getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
         aggregation.setSize(-10);
-        aggregation.configure(emptyMap());
-        Assert.assertEquals(aggregation.getSize(), Aggregation.DEFAULT_SIZE);
+        aggregation.configure(config);
+        Assert.assertEquals((Object) aggregation.getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
         aggregation.setSize(0);
-        aggregation.configure(emptyMap());
+        aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 0);
 
         aggregation.setSize(1);
-        aggregation.configure(emptyMap());
+        aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 1);
 
-        aggregation.setSize(Aggregation.DEFAULT_SIZE);
-        aggregation.configure(emptyMap());
-        Assert.assertEquals(aggregation.getSize(), Aggregation.DEFAULT_SIZE);
+        aggregation.setSize(BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        aggregation.configure(config);
+        Assert.assertEquals((Object) aggregation.getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
-        aggregation.setSize(Aggregation.DEFAULT_MAX_SIZE + 1);
-        aggregation.configure(emptyMap());
-        Assert.assertEquals(aggregation.getSize(), Aggregation.DEFAULT_MAX_SIZE);
+        aggregation.setSize(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE + 1);
+        aggregation.configure(config);
+        Assert.assertEquals((Object) aggregation.getSize(), BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE);
     }
 
     @Test
     public void testConfiguredSize() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.AGGREGATION_DEFAULT_SIZE, 10);
-        config.put(BulletConfig.AGGREGATION_MAX_SIZE, 200);
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.AGGREGATION_DEFAULT_SIZE, 10);
+        config.set(BulletConfig.AGGREGATION_MAX_SIZE, 200);
+        config.validate();
 
         Aggregation aggregation = new Aggregation();
 
@@ -117,8 +115,8 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
         aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT, null, "count")));
+        aggregation.configure(new BulletConfig().validate());
 
-        aggregation.configure(emptyMap());
         Assert.assertFalse(aggregation.validate().isPresent());
     }
 
@@ -127,7 +125,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
         aggregation.setAttributes(makeAttributes(makeGroupOperation(SUM, null, null)));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         List<Error> errors = aggregation.validate().get();
         Assert.assertEquals(errors.size(), 1);
@@ -139,7 +137,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
         aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT_FIELD, "someField", "myCountField")));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         List<Error> errors = aggregation.validate().get();
         Assert.assertEquals(errors.size(), 1);
@@ -151,7 +149,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS, null));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         // Missing attribute operations should be silently validated
         List<Error> errors = aggregation.validate().get();
@@ -164,7 +162,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS, asList("foo")));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         // Bad attribute operations should be silently validated
         List<Error> errors = aggregation.validate().get();
@@ -178,7 +176,7 @@ public class AggregationTest {
         aggregation.setType(GROUP);
         aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT, null, "bar"),
                                                  makeGroupOperation(COUNT_FIELD, "foo", "foo_avg")));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         // The bad operation should have been thrown out.
         Assert.assertEquals(aggregation.validate(), Optional.<List<Error>>empty());
@@ -195,7 +193,7 @@ public class AggregationTest {
                 makeGroupOperation(COUNT, "bar", null),
                 makeGroupOperation(COUNT, "foo", null),
                 makeGroupOperation(COUNT, "bar", null)));
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
         // The bad ones should be removed.
         Assert.assertEquals(aggregation.validate(), Optional.<List<Error>>empty());
     }
@@ -204,7 +202,7 @@ public class AggregationTest {
     public void testFailValidateOnCountDistinctFieldsMissing() {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(COUNT_DISTINCT);
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         List<Error> errors = aggregation.validate().get();
         Assert.assertEquals(errors.size(), 1);
@@ -215,7 +213,7 @@ public class AggregationTest {
     public void testFailValidateOnGroupFieldsAndOperationsMissing() {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(GROUP);
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         List<Error> errors = aggregation.validate().get();
         Assert.assertEquals(errors.size(), 1);
@@ -225,7 +223,7 @@ public class AggregationTest {
     @Test
     public void testToString() {
         Aggregation aggregation = new Aggregation();
-        aggregation.configure(emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.toString(), "{size: 1, type: RAW, fields: null, attributes: null}");
 
@@ -244,16 +242,16 @@ public class AggregationTest {
     @Test
     public void testUnimplementedStrategies() {
         Aggregation aggregation = new Aggregation();
-
         aggregation.setType(null);
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
+
         Assert.assertNull(aggregation.getStrategy());
     }
 
     @Test
     public void testRawStrategy() {
         Aggregation aggregation = new Aggregation();
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.findStrategy().getClass(), Raw.class);
     }
@@ -265,7 +263,7 @@ public class AggregationTest {
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS,
                                                singletonList(singletonMap(GroupOperation.OPERATION_TYPE,
                                                                           GroupOperationType.COUNT.getName()))));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), GroupAll.class);
     }
@@ -275,7 +273,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(AggregationOperations.AggregationType.COUNT_DISTINCT);
         aggregation.setFields(singletonMap("field", "foo"));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), CountDistinct.class);
     }
@@ -285,7 +283,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(AggregationOperations.AggregationType.GROUP);
         aggregation.setFields(singletonMap("field", "foo"));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), GroupBy.class);
     }
@@ -298,7 +296,7 @@ public class AggregationTest {
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS,
                                                singletonList(singletonMap(GroupOperation.OPERATION_TYPE,
                                                                           GroupOperationType.COUNT.getName()))));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), GroupBy.class);
     }
@@ -308,7 +306,7 @@ public class AggregationTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(AggregationOperations.AggregationType.DISTRIBUTION);
         aggregation.setFields(singletonMap("field", "foo"));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), Distribution.class);
     }

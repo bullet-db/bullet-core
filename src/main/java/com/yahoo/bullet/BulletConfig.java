@@ -56,7 +56,7 @@ public class BulletConfig extends Config {
     public static final int DEFAULT_SPECIFICATION_DURATION = 30 * 1000;
     public static final int DEFAULT_SPECIFICATION_MAX_DURATION = 120 * 1000;
     public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
-    public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_receive_timestamp";
+    public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
     public static final int DEFAULT_AGGREGATION_SIZE = 1;
     public static final int DEFAULT_AGGREGATION_MAX_SIZE = 512;
@@ -122,8 +122,7 @@ public class BulletConfig extends Config {
                  .checkIf(Validator::isBoolean);
         VALIDATOR.define(RECORD_INJECT_TIMESTAMP_KEY)
                  .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP_KEY)
-                 .checkIf(Validator::isNotNull)
-                 .castTo(Validator::asInt);
+                 .checkIf(Validator::isString);
 
         VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_SIZE)
@@ -211,9 +210,9 @@ public class BulletConfig extends Config {
         VALIDATOR.relate("Max should be less or equal to default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Metadata is enabled and keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
-                 .checkIf(BulletConfig::isMetadataNotConfigured);
+                 .checkIf(BulletConfig::isMetadataConfigured);
         VALIDATOR.relate("Metadata is disabled and keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
-                 .checkIf(BulletConfig::isMetadataUnnecessary)
+                 .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
     }
 
@@ -243,9 +242,12 @@ public class BulletConfig extends Config {
      * defines a validator for all the fields it knows about. If you subclass it and define your own fields, you should
      * create your own Validator and define entries and relationships that you need to validate. Make sure to call this
      * method in your override if you wish validate the fields defined by this config.
+     *
+     * @return This config for chaining.
      */
-    public void validate() {
+    public BulletConfig validate() {
         validate(this);
+        return this;
     }
 
     /**
@@ -273,13 +275,16 @@ public class BulletConfig extends Config {
         return mapping;
     }
 
-    @SuppressWarnings("unchecked")
-    private static boolean isMetadataNotConfigured(Object enabled, Object keys) {
-        return (Boolean) enabled && keys == null;
+    private static boolean isMetadataConfigured(Object enabled, Object keys) {
+        // This function should return false when metadata is enabled but keys are not set.
+        boolean isMetadataOff = !((Boolean) enabled);
+        return isMetadataOff || keys != null;
     }
 
-    private static boolean isMetadataUnnecessary(Object enabled, Object keys) {
-        return !((Boolean) enabled) && keys != null;
+    private static boolean isMetadataNecessary(Object enabled, Object keys) {
+        // This function should return false when metadata is disabled but keys are set.
+        boolean isMetadataOn = (Boolean) enabled;
+        return isMetadataOn || keys == null;
     }
 }
 

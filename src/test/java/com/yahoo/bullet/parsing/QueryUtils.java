@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
 import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
@@ -379,17 +380,25 @@ public class QueryUtils {
         }
     }
 
-    public static AggregationQuery getAggregationQuery(String queryString, Map configuration) {
+    public static AggregationQuery getAggregationQuery(String queryString, Map<String, Object> configuration) {
         try {
-            return new AggregationQuery(queryString, configuration);
+            BulletConfig config = new BulletConfig();
+            configuration.forEach(config::set);
+            config.validate();
+
+            return new AggregationQuery(queryString, config);
         } catch (ParsingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static FilterQuery getFilterQuery(String input, Map configuration) {
+    public static FilterQuery getFilterQuery(String input, Map<String, Object> configuration) {
         try {
-            return new FilterQuery(input, configuration);
+            BulletConfig config = new BulletConfig();
+            configuration.forEach(config::set);
+            config.validate();
+
+            return new FilterQuery(input, config);
         } catch (ParsingException e) {
             throw new RuntimeException(e);
         }

@@ -20,7 +20,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ import static com.yahoo.bullet.TestHelpers.assertContains;
 import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.AVG;
 import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT;
 import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.SUM;
-import static com.yahoo.bullet.parsing.AggregationUtils.addParsedMetadata;
+import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
@@ -47,7 +46,7 @@ public class GroupByTest {
                    Pair.of(Concept.UNIQUES_ESTIMATE, "uniquesApprox"),
                    Pair.of(Concept.STANDARD_DEVIATIONS, "stddev"));
 
-    public static GroupBy makeGroupBy(Map<Object, Object> configuration, Map<String, String> fields, int size,
+    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
                                       List<Map<String, String>> operations,
                                       List<Map.Entry<Concept, String>> metadata) {
         Aggregation aggregation = new Aggregation();
@@ -57,14 +56,15 @@ public class GroupByTest {
         if (operations != null) {
             aggregation.setAttributes(makeAttributes(operations));
         }
-        aggregation.configure(addParsedMetadata(configuration, metadata));
+        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
+
         GroupBy by = new GroupBy(aggregation);
         by.initialize();
         return by;
     }
 
     @SafeVarargs
-    public static GroupBy makeGroupBy(Map<Object, Object> configuration, Map<String, String> fields, int size,
+    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
                                       Map<String, String>... operations) {
         return makeGroupBy(configuration, fields, size, asList(operations), ALL_METADATA);
     }
@@ -87,18 +87,19 @@ public class GroupByTest {
         return makeDistinct(makeGroupFields(fields), size);
     }
 
-    public static Map<Object, Object> makeConfiguration(int resizeFactor, float sampling, String separator, int k) {
-        Map<Object, Object> config = new HashMap<>();
-        config.put(BulletConfig.GROUP_AGGREGATION_SKETCH_ENTRIES, k);
-        config.put(BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR, resizeFactor);
-        config.put(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, sampling);
-        config.put(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, separator);
+    public static BulletConfig makeConfiguration(int resizeFactor, float sampling, String separator, int k) {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.GROUP_AGGREGATION_SKETCH_ENTRIES, k);
+        config.set(BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR, resizeFactor);
+        config.set(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, sampling);
+        config.set(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, separator);
         return config;
     }
 
-    public static Map<Object, Object> makeConfiguration(int k) {
-        return makeConfiguration(GroupBy.DEFAULT_RESIZE_FACTOR, GroupBy.DEFAULT_SAMPLING_PROBABILITY,
-                                 Aggregation.DEFAULT_FIELD_SEPARATOR, k);
+    public static BulletConfig makeConfiguration(int k) {
+        return makeConfiguration(BulletConfig.DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR,
+                                 BulletConfig.DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING,
+                                 BulletConfig.DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR, k);
     }
 
     @Test

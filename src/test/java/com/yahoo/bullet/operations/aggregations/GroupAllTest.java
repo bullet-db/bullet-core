@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.operations.aggregations;
 
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
 import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
@@ -36,7 +37,7 @@ public class GroupAllTest {
         // Does not matter
         aggregation.setSize(1);
         aggregation.setAttributes(makeAttributes(groupOperations));
-        aggregation.configure(Collections.emptyMap());
+        aggregation.configure(new BulletConfig().validate());
         GroupAll all = new GroupAll(aggregation);
         all.initialize();
         return all;
@@ -123,14 +124,14 @@ public class GroupAllTest {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.COUNT, null, null));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
 
-        IntStream.range(0, 2 * Aggregation.DEFAULT_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
+        IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
 
         Assert.assertNotNull(groupAll.getSerializedAggregation());
         List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add(GroupOperationType.COUNT.getName(),
-                                                    2L * Aggregation.DEFAULT_MAX_SIZE).getRecord();
+                                                    2L * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).getRecord();
         Assert.assertEquals(actual, expected);
     }
 

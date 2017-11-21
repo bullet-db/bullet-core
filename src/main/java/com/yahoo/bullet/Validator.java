@@ -50,7 +50,7 @@ public class Validator {
          */
         public Entry checkIf(Predicate<Object> validator) {
             Objects.requireNonNull(validator);
-            this.validation.and(validator);
+            this.validation = this.validation.and(validator);
             return this;
         }
 
@@ -134,7 +134,7 @@ public class Validator {
          * @return This Relationship for chaining.
          */
         public Relationship checkIf(BiPredicate<Object, Object> binaryRelation) {
-            this.binaryRelation.and(binaryRelation);
+            this.binaryRelation = this.binaryRelation.and(binaryRelation);
             return this;
         }
 
@@ -160,8 +160,8 @@ public class Validator {
         public void normalize(BulletConfig config) {
             Object objectA = config.get(keyA);
             Object objectB = config.get(keyB);
-            boolean result = binaryRelation.test(objectA, objectB);
-            if (!result) {
+            boolean isValid = binaryRelation.test(objectA, objectB);
+            if (!isValid) {
                 log.warn("{}: {} and {}: {} do not satisfy: {}. Using their defaults", keyA, objectA, keyB, objectB, description);
                 log.warn("Using default {} for {}", defaultA, keyA);
                 log.warn("Using default {} for {}", defaultB, keyB);

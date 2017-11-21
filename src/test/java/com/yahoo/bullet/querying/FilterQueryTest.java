@@ -5,9 +5,9 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
@@ -42,7 +42,7 @@ public class FilterQueryTest {
     @Test
     public void testNoAggregationAttempted() {
         FilterQuery query = getFilterQuery(makeRawFullQuery("map_field.id", Arrays.asList("1", "23"), FilterType.EQUALS,
-                                                            AggregationType.RAW, Aggregation.DEFAULT_MAX_SIZE,
+                                                            AggregationType.RAW, BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE,
                                                             Pair.of("map_field.id", "mid")),
                 emptyMap());
 
@@ -106,6 +106,6 @@ public class FilterQueryTest {
 
     @Test(expectedExceptions = ParsingException.class)
     public void testValidationFail() throws ParsingException {
-        new FilterQuery("{ 'aggregation': { 'type': null } }", emptyMap());
+        new FilterQuery("{ 'aggregation': { 'type': null } }", new BulletConfig().validate());
     }
 }

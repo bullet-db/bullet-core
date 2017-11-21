@@ -14,6 +14,8 @@ import com.yahoo.bullet.operations.aggregations.TopK;
 import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.result.Metadata;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,28 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public class AggregationUtils {
+    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Metadata.Concept, String>> metadata) {
+        if (metadata == null) {
+            config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
+            return config;
+        }
+        List<Map<String, String>> metadataList = new ArrayList<>();
+        for (Map.Entry<Metadata.Concept, String> meta : metadata) {
+            Map<String, String> entry = new HashMap<>();
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, meta.getKey().getName());
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, meta.getValue());
+            metadataList.add(entry);
+        }
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadataList);
+        config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
+        return config;
+    }
+
+    @SafeVarargs
+    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Metadata.Concept, String>... metadata) {
+        return addMetadata(config, metadata == null ? null : Arrays.asList(metadata));
+    }
+
     public static Map<String, String> makeGroupFields(List<String> fields) {
         if (fields != null) {
             return fields.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
@@ -58,23 +82,6 @@ public class AggregationUtils {
     @SafeVarargs
     public static Map<String, Object> makeAttributes(Map<String, String>... maps) {
         return makeAttributes(asList(maps));
-    }
-
-    @SafeVarargs
-    public static Map<Object, Object> addParsedMetadata(Map<Object, Object> configuration, Map.Entry<Metadata.Concept, String>... metadata) {
-        return addParsedMetadata(configuration, metadata != null ? asList(metadata) : null);
-    }
-
-    public static Map<Object, Object> addParsedMetadata(Map<Object, Object> configuration, List<Map.Entry<Metadata.Concept, String>> metadata) {
-        if (metadata != null) {
-            Map<String, String> metadataKeys = new HashMap<>();
-            for (Map.Entry<Metadata.Concept, String> e : metadata) {
-                metadataKeys.put(e.getKey().getName(), e.getValue());
-            }
-            configuration.put(BulletConfig.RESULT_METADATA_METRICS_MAPPING, metadataKeys);
-            configuration.put(BulletConfig.RESULT_METADATA_METRICS_MAPPING, metadataKeys);
-        }
-        return configuration;
     }
 
     public static Map<String, Object> makeAttributes(List<Map<String, String>> maps) {

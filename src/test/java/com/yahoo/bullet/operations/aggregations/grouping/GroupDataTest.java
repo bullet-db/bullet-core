@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.operations.aggregations.grouping;
 
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.operations.SerializerDeserializer;
 import com.yahoo.bullet.parsing.Aggregation;
@@ -98,10 +99,10 @@ public class GroupDataTest {
         GroupData data = make(new GroupOperation(GroupOperationType.COUNT, null, null));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
 
-        IntStream.range(0, 2 * Aggregation.DEFAULT_MAX_SIZE).forEach(i -> data.consume(someRecord));
+        IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> data.consume(someRecord));
 
         BulletRecord expected = RecordBox.get().add(GroupOperationType.COUNT.getName(),
-                                                    2L * Aggregation.DEFAULT_MAX_SIZE).getRecord();
+                                                    2L * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).getRecord();
         Assert.assertEquals(data.getMetricsAsBulletRecord(), expected);
     }
 
