@@ -62,7 +62,7 @@ public class BulletConfig extends Config {
     public static final int DEFAULT_AGGREGATION_MAX_SIZE = 512;
     public static final String DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "|";
 
-    public static final int DEFAULT_RAW_AGGREGATION_MAX_SIZE = 30;
+    public static final int DEFAULT_RAW_AGGREGATION_MAX_SIZE = 100;
     public static final int DEFAULT_RAW_AGGREGATION_MICRO_BATCH_SIZE = 1;
 
     public static final int DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES = 16384;

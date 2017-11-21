@@ -19,7 +19,7 @@ public class Utilities {
     * @param <U> The type to get the object as.
     * @return The casted object of type U or null if the cast could not be done.
     */
-   @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static <U> U getCasted(Object entry, Class<U> clazz) {
         try {
             return clazz.cast(entry);

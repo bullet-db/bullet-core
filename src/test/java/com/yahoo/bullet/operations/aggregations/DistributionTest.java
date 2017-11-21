@@ -451,9 +451,10 @@ public class DistributionTest {
 
     @Test
     public void testNegativeSize() {
-        // We will default to MAX_POINTS is configured to -1 and we will default to Distribution.DEFAULT_SIZE which is 1
+        // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
+        // and aggregation size, which is 1
         Distribution distribution = makeDistribution(makeConfiguration(-1, 128), makeAttributes(DistributionType.PMF, 10L),
-                                                     "field", 10, ALL_METADATA);
+                                                     "field", 1, ALL_METADATA);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);

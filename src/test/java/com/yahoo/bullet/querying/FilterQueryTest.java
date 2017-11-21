@@ -15,20 +15,25 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static com.yahoo.bullet.parsing.QueryUtils.getFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
-import static java.util.Collections.emptyMap;
 
 public class FilterQueryTest {
+    private static Map<String, Object> configWithNoTimestamp() {
+        return Collections.singletonMap(BulletConfig.RECORD_INJECT_TIMESTAMP, false);
+    }
+
     @Test
     public void testFilteringProjection() {
         FilterQuery query = getFilterQuery(makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
                                                                      FilterType.EQUALS, Pair.of("map_field.id", "mid")),
-                                                                     emptyMap());
+                                                                     configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         Assert.assertFalse(query.consume(boxA.getRecord()));
         Assert.assertNull(query.getData());
@@ -43,8 +48,7 @@ public class FilterQueryTest {
     public void testNoAggregationAttempted() {
         FilterQuery query = getFilterQuery(makeRawFullQuery("map_field.id", Arrays.asList("1", "23"), FilterType.EQUALS,
                                                             AggregationType.RAW, BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE,
-                                                            Pair.of("map_field.id", "mid")),
-                emptyMap());
+                                                            Pair.of("map_field.id", "mid")), configWithNoTimestamp());
 
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
         RecordBox expectedA = RecordBox.get().add("mid", "23");
@@ -63,7 +67,7 @@ public class FilterQueryTest {
 
     @Test
     public void testMaximumEmitted() {
-        FilterQuery query = getFilterQuery(makeAggregationQuery(AggregationType.RAW, 2), emptyMap());
+        FilterQuery query = getFilterQuery(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
         RecordBox box = RecordBox.get();
         Assert.assertTrue(query.consume(box.getRecord()));
         Assert.assertEquals(query.getData(), getListBytes(box.getRecord()));
@@ -78,7 +82,8 @@ public class FilterQueryTest {
     @Test
     public void testMaximumEmittedWithNonMatchingRecords() {
         FilterQuery query = getFilterQuery(makeRawFullQuery("mid", Arrays.asList("1", "23"), FilterType.EQUALS,
-                                                            AggregationType.RAW, 2, Pair.of("mid", "mid")), emptyMap());
+                                                            AggregationType.RAW, 2, Pair.of("mid", "mid")),
+                                           configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().add("mid", "23");
         RecordBox expectedA = RecordBox.get().add("mid", "23");
 
