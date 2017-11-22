@@ -5,14 +5,16 @@
  */
 package com.yahoo.bullet;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -20,6 +22,9 @@ import java.util.function.Predicate;
 /**
  * This class validates instances of {@link BulletConfig}. Use {@link com.yahoo.bullet.Validator.Entry} to define
  * fields and {@link com.yahoo.bullet.Validator.Relationship} to define relationships between them.
+ *
+ * It also provides a bunch of useful {@link Predicate} and {@link BiPredicate} for use in the checks for the entries
+ * and relationships and type converting {@link Function} for converting types of entries.
  */
 @Slf4j
 public class Validator {
@@ -35,7 +40,6 @@ public class Validator {
     public class Entry {
         private String key;
         private Predicate<Object> validation;
-        @Getter
         private Object defaultValue;
         private Function<Object, Object> adapter;
 
@@ -85,6 +89,18 @@ public class Validator {
         }
 
         /**
+         * Get the defaultValue in the Entry after applying the cast, if present.
+         *
+         * @return The defaultValue after any casts.
+         */
+        public Object getDefaultValue() {
+            if (adapter == null) {
+                return defaultValue;
+            }
+            return adapter.apply(defaultValue);
+        }
+
+        /**
          * Normalizes a {@link BulletConfig} by validating, apply defaults and converting the object represented by the
          * field in this Entry.
          *
@@ -112,9 +128,7 @@ public class Validator {
      * {@link Entry#defaultTo(Object)}) if the check fails.
      */
     public class Relationship {
-        @Getter
         private String keyA;
-        @Getter
         private String keyB;
         private String description;
         private BiPredicate<Object, Object> binaryRelation;
@@ -176,8 +190,8 @@ public class Validator {
         }
     }
 
-    private Map<String, Entry> entries = new HashMap<>();
-    private List<Relationship> relations = new ArrayList<>();
+    private final Map<String, Entry> entries = new HashMap<>();
+    private final List<Relationship> relations = new ArrayList<>();
 
     /**
      * Creates an instance of the Entry using the name of the field. This field by default will pass the
@@ -253,6 +267,16 @@ public class Validator {
      */
     public static Object asDouble(Object value) {
         return ((Number) value).doubleValue();
+    }
+
+    /**
+     * This casts an Object to an {@link String}.
+     *
+     * @param value The value to cast.
+     * @return The converted String object.
+     */
+    public static Object asString(Object value) {
+        return value.toString();
     }
 
     // Unary Predicates
@@ -380,6 +404,23 @@ public class Validator {
         }
         int toCheck = ((Number) value).intValue();
         return (toCheck & toCheck - 1) == 0;
+    }
+
+    // Unary Predicate Generators
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is in the list of values.
+     *
+     * @param type The class of the object whose membership is being tested.
+     * @param values The values that the object could be equal to that is being tested.
+     * @param <T> The type of the values and the object.
+     * @return A predicate that checks to see if the object provided to it is of the given type and is in the given values.
+     */
+    public static <T> Predicate<Object> isIn(Class<T> type, T... values) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(values);
+        Set<T> set = new HashSet<>(Arrays.asList(values));
+        return o -> isType(o, type) && set.contains(o);
     }
 
     // Binary Predicates.

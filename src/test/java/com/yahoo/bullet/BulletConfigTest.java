@@ -5,17 +5,46 @@
  */
 package com.yahoo.bullet;
 
+import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Metadata.Concept;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
+
 public class BulletConfigTest {
+    private static Map<String, String> allMetadataAsMap() {
+        Map<String, String> meta = new HashMap<>();
+        for (Map<String, String> m : BulletConfig.DEFAULT_RESULT_METADATA_METRICS) {
+            meta.put(m.get(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY), m.get(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY));
+        }
+        return meta;
+    }
+
+    private static class CustomConfig extends BulletConfig {
+        private static final Validator CUSTOM = new Validator();
+        static {
+            CUSTOM.define("foo").defaultTo(42).checkIf(Validator::isPositiveInt);
+            CUSTOM.define("bar").defaultTo(0.4).checkIf(Validator::isPositive);
+            CUSTOM.relate("foo > bar", "foo", "bar").checkIf(Validator::isGreaterOrEqual);
+        }
+
+        @Override
+        public BulletConfig validate() {
+            CUSTOM.normalize(this);
+            return super.validate();
+        }
+    }
+
     @Test
     public void testNoFiles() {
         BulletConfig config = new BulletConfig();
@@ -207,37 +236,154 @@ public class BulletConfigTest {
         config.getRequiredConfigAs("does.not.exist", Long.class);
     }
 
-    /*
     @Test
-    public void testConceptKeyExtractionWithMetadataNotEnabled() {
-        Map<String, Object> configuration = new HashMap<>();
-        configuration.put(BulletConfig.RESULT_METADATA_METRICS, asMetadataEntries(Pair.of("Estimated Result", "foo")));
+    public void testMetadataConversion() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Metadata.KNOWN_CONCEPTS) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
 
-        Set<Concept> concepts = new HashSet<>(singletonList(Concept.ESTIMATED_RESULT));
+        BulletConfig config = new BulletConfig().validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
 
-        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), Collections.emptyMap());
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
     }
 
     @Test
-    public void testConceptKeyExtraction() {
-        Map<String, Object> configuration = new HashMap<>();
-        configuration.put(BulletConfig.RESULT_METADATA_ENABLE, true);
-        configuration.put(BulletConfig.RESULT_METADATA_METRICS,
-                asMetadataEntries(Pair.of("Estimated Result", "foo"),
-                        Pair.of("Sketch Metadata", "bar"),
-                        Pair.of("Non Existent", "bar"),
-                        Pair.of("Standard Deviations", "baz")));
+    public void testUnknownMetadata() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
 
-        Set<Concept> concepts = new HashSet<>(asList(Concept.ESTIMATED_RESULT,
-                Concept.SKETCH_METADATA,
-                Concept.STANDARD_DEVIATIONS));
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
 
-        Map<String, String> expectedMap = new HashMap<>();
-        expectedMap.put(Concept.ESTIMATED_RESULT.getName(), "foo");
-        expectedMap.put(Concept.SKETCH_METADATA.getName(), "bar");
-        expectedMap.put(Concept.STANDARD_DEVIATIONS.getName(), "baz");
+        // Add an unknown one
+        Map<String, String> entry = new HashMap<>();
+        entry.put("foo", "bar");
+        entry.put("baz", "qux");
+        metadata.add(entry);
 
-        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), expectedMap);
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
     }
-    */
+
+    @Test
+    public void testBadMetadata() {
+        List<Map<String, Object>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, Object> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+
+        // Add a badly typed one
+        Map<String, Object> entry = new HashMap<>();
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, new ArrayList<>());
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, new ArrayList<>());
+        metadata.add(entry);
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+    }
+
+    @Test
+    public void testIncompleteMetadata() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+
+        // Add only one entry
+        Map<String, String> entry = new HashMap<>();
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, Concept.QUERY_ID.getName());
+        metadata.add(entry);
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+    }
+
+    @Test
+    public void testStringification() {
+        BulletConfig config = new BulletConfig();
+        config.clear();
+        String key = BulletConfig.AGGREGATION_DEFAULT_SIZE;
+        config.set(key, 20);
+        assertJSONEquals(config.toString(), "{'" + key + "': 20 }");
+    }
+
+    @Test
+    public void testCustomConfigValidation() {
+        CustomConfig config = new CustomConfig();
+        Assert.assertNull(config.get("foo"));
+        Assert.assertNull(config.get("bar"));
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), (long) BulletConfig.DEFAULT_AGGREGATION_SIZE);
+
+        config.set("foo", 42);
+        config.set("bar", 10.1);
+        config.validate();
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 10.1);
+
+        config.set("foo", 4.2);
+        config.set("bar", 12);
+        config.validate();
+        // Entry defaults before relationship
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 12);
+
+        config.set("foo", 13);
+        config.set("bar", 16);
+        config.validate();
+        // Relationship defaults both
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 0.4);
+    }
 }

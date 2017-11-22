@@ -14,6 +14,7 @@ import com.yahoo.bullet.operations.aggregations.GroupAll;
 import com.yahoo.bullet.operations.aggregations.GroupBy;
 import com.yahoo.bullet.operations.aggregations.Raw;
 import com.yahoo.bullet.operations.aggregations.Strategy;
+import com.yahoo.bullet.operations.aggregations.TopK;
 import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -309,5 +310,15 @@ public class AggregationTest {
         aggregation.configure(new BulletConfig().validate());
 
         Assert.assertEquals(aggregation.getStrategy().getClass(), Distribution.class);
+    }
+
+    @Test
+    public void testTopKStrategy() {
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(AggregationOperations.AggregationType.TOP_K);
+        aggregation.setFields(singletonMap("field", "foo"));
+        aggregation.configure(new BulletConfig().validate());
+
+        Assert.assertEquals(aggregation.getStrategy().getClass(), TopK.class);
     }
 }

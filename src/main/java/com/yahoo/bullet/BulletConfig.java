@@ -5,9 +5,14 @@
  */
 package com.yahoo.bullet;
 
+import com.yahoo.bullet.pubsub.PubSub.Context;
 import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Metadata.Concept;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -82,28 +87,27 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_TOP_K_AGGREGATION_SKETCH_ERROR_TYPE = "NFN";
 
     public static final boolean DEFAULT_RESULT_METADATA_ENABLE = true;
-    // This is a Map for simplicity. The YAML is a list. We ensure that the names are unique. The
-    // final Metadata in the result is a map so if the names are not unique, they get overridden.
-    public static final Map<String, String> DEFAULT_RESULT_METADATA_METRICS = new HashMap<>();
-    static {
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.QUERY_ID.getName(), "query_id");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.QUERY_BODY.getName(), "query");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.QUERY_CREATION_TIME.getName(), "query_receive_time");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.QUERY_TERMINATION_TIME.getName(), "query_finish_time");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.SKETCH_METADATA.getName(), "sketches");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.ESTIMATED_RESULT.getName(), "was_estimated");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.STANDARD_DEVIATIONS.getName(), "standard_deviations");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.FAMILY.getName(), "family");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.SIZE.getName(), "size");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.THETA.getName(), "theta");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.UNIQUES_ESTIMATE.getName(), "uniques_estimate");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.MINIMUM_VALUE.getName(), "minimum_value");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.MAXIMUM_VALUE.getName(), "maximum_value");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.ITEMS_SEEN.getName(), "items_seen");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.NORMALIZED_RANK_ERROR.getName(), "normalized_rank_error");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.MAXIMUM_COUNT_ERROR.getName(), "maximum_count_error");
-        DEFAULT_RESULT_METADATA_METRICS.put(Metadata.Concept.ACTIVE_ITEMS.getName(), "active_items");
-    }
+    public static final List<Map<String, String>> DEFAULT_RESULT_METADATA_METRICS =
+        makeMetadata(ImmutablePair.of(Concept.QUERY_ID, "query_id"),
+                     ImmutablePair.of(Concept.QUERY_BODY, "query"),
+                     ImmutablePair.of(Concept.QUERY_CREATION_TIME, "query_receive_time"),
+                     ImmutablePair.of(Concept.QUERY_TERMINATION_TIME, "query_finish_time"),
+                     ImmutablePair.of(Concept.SKETCH_METADATA, "sketches"),
+                     ImmutablePair.of(Concept.ESTIMATED_RESULT, "was_estimated"),
+                     ImmutablePair.of(Concept.STANDARD_DEVIATIONS, "standard_deviations"),
+                     ImmutablePair.of(Concept.FAMILY, "family"),
+                     ImmutablePair.of(Concept.SIZE, "size"),
+                     ImmutablePair.of(Concept.THETA, "theta"),
+                     ImmutablePair.of(Concept.UNIQUES_ESTIMATE, "uniques_estimate"),
+                     ImmutablePair.of(Concept.MINIMUM_VALUE, "minimum_value"),
+                     ImmutablePair.of(Concept.MAXIMUM_VALUE, "maximum_value"),
+                     ImmutablePair.of(Concept.ITEMS_SEEN, "items_seen"),
+                     ImmutablePair.of(Concept.NORMALIZED_RANK_ERROR, "normalized_rank_error"),
+                     ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "maximum_count_error"),
+                     ImmutablePair.of(Concept.ACTIVE_ITEMS, "active_items"));
+
+    public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
+    public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
     // It is ok for this to be static since the VALIDATOR itself does not change for different values for fields
     // in the BulletConfig.
@@ -203,7 +207,15 @@ public class BulletConfig extends Config {
         VALIDATOR.define(RESULT_METADATA_METRICS)
                  .defaultTo(DEFAULT_RESULT_METADATA_METRICS)
                  .checkIf(Validator::isList)
+                 .checkIf(BulletConfig::isMetadata)
                  .castTo(BulletConfig::mapifyMetadata);
+
+        VALIDATOR.define(PUBSUB_CONTEXT_NAME)
+                 .defaultTo(DEFAULT_PUBSUB_CONTEXT_NAME)
+                 .checkIf(Validator.isIn(String.class, Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
+        VALIDATOR.define(PUBSUB_CLASS_NAME)
+                 .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
+                 .checkIf(Validator::isString);
 
         VALIDATOR.relate("Max should be less or equal to default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
@@ -262,17 +274,37 @@ public class BulletConfig extends Config {
 
     @SuppressWarnings("unchecked")
     private static Object mapifyMetadata(Object metadata) {
-        List<Map> keys = (List<Map>) metadata;
+        List<Map> entries = (List<Map>) metadata;
         Map<String, String> mapping = new HashMap<>();
-        // For each metric configured, load the name of the field to add it to the metadata as.
-        for (Map m : keys) {
-            String concept = (String) m.get(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY);
-            String name = (String) m.get(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY);
-            if (Metadata.KNOWN_CONCEPTS.contains(Metadata.Concept.from(concept))) {
-                mapping.put(concept, name);
-            }
+        // For each metadata entry that is configured, load the name of the field to add it to the metadata as.
+        for (Map m : entries) {
+            mapping.put((String) m.get(RESULT_METADATA_METRICS_CONCEPT_KEY),
+                        (String) m.get(RESULT_METADATA_METRICS_NAME_KEY));
         }
         return mapping;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean isMetadata(Object metadata) {
+        try {
+            for (Map m : (List<Map>) metadata) {
+                if (m.size() != 2) {
+                    log.warn("Metadata should only contain the keys {}, {}. Found {}", RESULT_METADATA_METRICS_CONCEPT_KEY,
+                             RESULT_METADATA_METRICS_NAME_KEY, m);
+                    return false;
+                }
+                String concept = (String) m.get(RESULT_METADATA_METRICS_CONCEPT_KEY);
+                String name = (String) m.get(RESULT_METADATA_METRICS_CONCEPT_KEY);
+                if (!Metadata.KNOWN_CONCEPTS.contains(Concept.from(concept))) {
+                    log.warn("Unknown metadata concept: {}", concept);
+                    return false;
+                }
+            }
+        } catch (ClassCastException e) {
+            log.warn("Metadata should be a list containing maps of string keys and values. Found {}", metadata);
+            return false;
+        }
+        return true;
     }
 
     private static boolean isMetadataConfigured(Object enabled, Object keys) {
@@ -285,6 +317,17 @@ public class BulletConfig extends Config {
         // This function should return false when metadata is disabled but keys are set.
         boolean isMetadataOn = (Boolean) enabled;
         return isMetadataOn || keys == null;
+    }
+
+    private static List<Map<String, String>> makeMetadata(Pair<Concept, String>... entries) {
+        List<Map<String, String>> metadataList = new ArrayList<>();
+        for (Pair<Concept, String> entry : entries) {
+            Map<String, String> metadata = new HashMap<>();
+            metadata.put(RESULT_METADATA_METRICS_CONCEPT_KEY, entry.getKey().getName());
+            metadata.put(RESULT_METADATA_METRICS_NAME_KEY, entry.getValue());
+            metadataList.add(metadata);
+        }
+        return metadataList;
     }
 }
 
