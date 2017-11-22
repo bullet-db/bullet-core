@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.parsing.AggregationUtils.addParsedMetadata;
+import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
@@ -44,14 +44,15 @@ public class TopKTest {
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
 
-    public static TopK makeTopK(Map<Object, Object> configuration, Map<String, Object> attributes,
+    public static TopK makeTopK(BulletConfig configuration, Map<String, Object> attributes,
                                 Map<String, String> fields, int size, List<Map.Entry<Concept, String>> metadata) {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(AggregationOperations.AggregationType.TOP_K);
         aggregation.setFields(fields);
         aggregation.setAttributes(attributes);
         aggregation.setSize(size);
-        aggregation.configure(addParsedMetadata(configuration, metadata));
+        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
+
         TopK topK = new TopK(aggregation);
         topK.initialize();
         return topK;
@@ -67,11 +68,11 @@ public class TopKTest {
         return makeTopK(ErrorType.NO_FALSE_NEGATIVES, fields, null, maxMapSize, size, null);
     }
 
-    public static Map<Object, Object> makeConfiguration(ErrorType errorType, int maxMapSize) {
-        Map<Object, Object> config = new HashMap<>();
-        config.put(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES, maxMapSize);
-        config.put(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE,
-                   errorType == ErrorType.NO_FALSE_POSITIVES ? TopK.NO_FALSE_POSITIVES : TopK.NO_FALSE_NEGATIVES);
+    public static BulletConfig makeConfiguration(ErrorType errorType, int maxMapSize) {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES, maxMapSize);
+        config.set(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE,
+                errorType == ErrorType.NO_FALSE_POSITIVES ? TopK.NO_FALSE_POSITIVES : TopK.NO_FALSE_NEGATIVES);
         return config;
     }
 
@@ -273,8 +274,8 @@ public class TopKTest {
     @Test
     public void testBadMaxMapEntries() {
         TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, -1), null, singletonMap("A", "foo"),
-                             TopK.DEFAULT_MAX_MAP_ENTRIES, null);
-        int uniqueGroups = TopK.DEFAULT_MAX_MAP_ENTRIES / 4;
+                             BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null);
+        int uniqueGroups = BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES / 4;
 
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
                                         .forEach(topK::consume);
@@ -293,7 +294,7 @@ public class TopKTest {
 
         // Not a power of 2
         TopK another = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 5), null, singletonMap("A", "foo"),
-                                TopK.DEFAULT_MAX_MAP_ENTRIES, null);
+                                BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null);
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
                                         .forEach(another::consume);
 

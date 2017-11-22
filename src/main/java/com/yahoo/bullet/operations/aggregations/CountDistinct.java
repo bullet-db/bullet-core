@@ -44,12 +44,9 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
         Map<String, Object> attributes = aggregation.getAttributes();
 
         ResizeFactor resizeFactor = getResizeFactor(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR);
-        float samplingProbability = ((Number) config.getOrDefault(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING,
-                                                                  DEFAULT_SAMPLING_PROBABILITY)).floatValue();
-        Family family = getFamily(config.getOrDefault(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY,
-                                                      DEFAULT_UPDATE_SKETCH_FAMILY).toString());
-        int nominalEntries = ((Number) config.getOrDefault(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES,
-                                                           DEFAULT_NOMINAL_ENTRIES)).intValue();
+        float samplingProbability = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING, Float.class);
+        Family family = getFamily(config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY, String.class));
+        int nominalEntries = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES, Integer.class);
         newName = attributes == null ? DEFAULT_NEW_NAME :
                                        attributes.getOrDefault(NEW_NAME_FIELD, DEFAULT_NEW_NAME).toString();
 

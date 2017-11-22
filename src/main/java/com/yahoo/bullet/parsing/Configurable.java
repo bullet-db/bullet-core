@@ -5,15 +5,15 @@
  */
 package com.yahoo.bullet.parsing;
 
-import java.util.Map;
+import com.yahoo.bullet.BulletConfig;
 
 public interface Configurable {
     /**
-     * Takes a map containing configuration and applies it to itself.
+     * Takes a {@link BulletConfig} containing configuration and applies it to itself.
      *
-     * @param configuration A Map of configuration key values.
+     * @param configuration The configuration containing the settings.
      */
-    default void configure(Map configuration) {
+    default void configure(BulletConfig configuration) {
         // Do nothing
     }
 }

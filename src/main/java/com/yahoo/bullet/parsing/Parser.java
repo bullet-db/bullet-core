@@ -7,9 +7,8 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
-
-import java.util.Map;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
@@ -25,15 +24,14 @@ public class Parser {
      * Parses a Specification out of the query string.
      *
      * @param queryString The String version of the query.
-     * @param configuration Additional configuration for the specification.
+     * @param config Additional configuration for the specification.
      *
      * @return The parsed, configured Specification.
      */
-    public static Specification parse(String queryString, Map configuration) {
+    public static Specification parse(String queryString, BulletConfig config) {
         Specification specification = GSON.fromJson(queryString, Specification.class);
-        specification.configure(configuration);
+        specification.configure(config);
         return specification;
     }
-
 }
 

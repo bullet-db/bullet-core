@@ -23,11 +23,8 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     public static final String NEW_NAME_FIELD = "newName";
     public static final String DEFAULT_NEW_NAME = "COUNT";
 
-    public static final int DEFAULT_MAX_MAP_ENTRIES = 1024;
-
     public static final String NO_FALSE_NEGATIVES = "NFN";
     public static final String NO_FALSE_POSITIVES = "NFP";
-    public static final String DEFAULT_ERROR_TYPE = NO_FALSE_NEGATIVES;
 
     public static final String THRESHOLD_FIELD = "threshold";
 
@@ -42,8 +39,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     public TopK(Aggregation aggregation) {
         super(aggregation);
 
-        String errorConfiguration = (config.getOrDefault(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE,
-                                                         DEFAULT_ERROR_TYPE)).toString();
+        String errorConfiguration = config.getAs(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE, String.class);
 
         ErrorType errorType = getErrorType(errorConfiguration);
 
@@ -52,7 +48,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
         newName = attributes == null ? DEFAULT_NEW_NAME :
                                        attributes.getOrDefault(NEW_NAME_FIELD, DEFAULT_NEW_NAME).toString();
 
-        int maxMapSize = getMaxMapEntries(config);
+        int maxMapSize = config.getAs(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES, Integer.class);
         Number threshold = getThreshold(attributes);
         int size = aggregation.getSize();
         sketch = threshold != null ? new FrequentItemsSketch(errorType, maxMapSize, threshold.longValue(), size) :
@@ -88,17 +84,6 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
             record.setString(Utilities.isEmpty(fieldName) ? originalField : fieldName, values.get(i));
         }
         record.rename(FrequentItemsSketch.COUNT_FIELD, newName);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static int getMaxMapEntries(Map config) {
-        int entries = ((Number) config.getOrDefault(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES,
-                                                   DEFAULT_MAX_MAP_ENTRIES)).intValue();
-        // If non-positive or not a power of 2
-        if (entries <= 0 || (entries & entries - 1) != 0) {
-            return DEFAULT_MAX_MAP_ENTRIES;
-        }
-        return entries;
     }
 
     private static Number getThreshold(Map<String, Object> attributes)  {

@@ -10,9 +10,27 @@ import java.util.Collection;
 import java.util.Map;
 
 public class Utilities {
+   /**
+    * Tries to get the object casted as the target type. If it is generic, the captured types cannot not be
+    * validated. Only the base object type is validated.
+    *
+    * @param entry The object to cast.
+    * @param clazz The class of the U.
+    * @param <U> The type to get the object as.
+    * @return The casted object of type U or null if the cast could not be done.
+    */
+    @SuppressWarnings("unchecked")
+    public static <U> U getCasted(Object entry, Class<U> clazz) {
+        try {
+            return clazz.cast(entry);
+        } catch (ClassCastException ignored) {
+        }
+        return null;
+    }
+
     /**
-     * Tries to get a key from a map as the target type. If it is a composite type, the internal types are not
-     * validated. Only the outermost object type is validated.
+     * Tries to get a key from a map as the target type. If it is a generic type, the captured types are not
+     * validated. Only the base object type is validated.
      *
      * @param map  The non-null map that possibly contains the key.
      * @param key  The String key to get the value for from the map.
@@ -23,11 +41,7 @@ public class Utilities {
      */
     @SuppressWarnings("unchecked")
     public static <U> U getCasted(Map<String, Object> map, String key, Class<U> clazz) {
-        try {
-            return clazz.cast(map.get(key));
-        } catch (ClassCastException ignored) {
-        }
-        return null;
+        return getCasted(map.get(key), clazz);
     }
 
     /**

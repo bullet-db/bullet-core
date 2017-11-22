@@ -45,7 +45,7 @@ public class Aggregation implements Configurable, Validatable {
     private Strategy strategy;
 
     // In case any strategies need it.
-    private Map configuration;
+    private BulletConfig configuration;
 
     public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
             new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
@@ -53,12 +53,6 @@ public class Aggregation implements Configurable, Validatable {
     public static final Error TYPE_NOT_SUPPORTED_ERROR =
             makeError("Unknown aggregation type", "Current supported aggregation types are: RAW (or LIMIT), " +
                                                   "GROUP (or DISTINCT), COUNT DISTINCT, DISTRIBUTION, TOP K");
-
-    public static final Integer DEFAULT_SIZE = 1;
-    public static final Integer DEFAULT_MAX_SIZE = 512;
-
-    public static final String DEFAULT_FIELD_SEPARATOR = "|";
-
 
     /**
      * Default constructor. GSON recommended
@@ -69,13 +63,11 @@ public class Aggregation implements Configurable, Validatable {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void configure(Map configuration) {
-        this.configuration = configuration;
+    public void configure(BulletConfig config) {
+        this.configuration = config;
 
-        Number defaultSize = (Number) configuration.getOrDefault(BulletConfig.AGGREGATION_DEFAULT_SIZE, DEFAULT_SIZE);
-        Number maximumSize = (Number) configuration.getOrDefault(BulletConfig.AGGREGATION_MAX_SIZE, DEFAULT_MAX_SIZE);
-        int sizeDefault = defaultSize.intValue();
-        int sizeMaximum = maximumSize.intValue();
+        int sizeDefault = config.getAs(BulletConfig.AGGREGATION_DEFAULT_SIZE, Integer.class);
+        int sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
 
         // Null or negative, then default, else min of size and max
         size = (size == null || size < 0) ? sizeDefault : Math.min(size, sizeMaximum);
@@ -120,5 +112,4 @@ public class Aggregation implements Configurable, Validatable {
     public String toString() {
         return "{size: " + size + ", type: " + type + ", fields: " + fields + ", attributes: " + attributes + "}";
     }
-
 }

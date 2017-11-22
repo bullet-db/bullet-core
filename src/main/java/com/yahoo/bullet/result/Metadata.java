@@ -5,17 +5,14 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.parsing.Error;
 import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -77,6 +74,7 @@ public class Metadata {
 
     /**
      * Returns a backing view of the meta information as a Map.
+     *
      * @return A Map of keys to objects that denote the meta information.
      */
     public Map<String, Object> asMap() {
@@ -85,6 +83,7 @@ public class Metadata {
 
     /**
      * Add a piece of meta information.
+     *
      * @param key The name of the meta tag
      * @param information An object that represents the information.
      * @return This object for chaining.
@@ -96,6 +95,7 @@ public class Metadata {
 
     /**
      * Add an error to the Metadata.
+     *
      * @param errors Error objects to add.
      * @return This object for chaining.
      */
@@ -113,6 +113,7 @@ public class Metadata {
 
     /**
      * Static construction of Metadata with some errors.
+     *
      * @param errors A non-null list of Error objects.
      * @return The Metadata object with the errors.
      */
@@ -124,6 +125,7 @@ public class Metadata {
 
     /**
      * Static construction of Metadata with some errors.
+     *
      * @param errors A non-null list of Error objects.
      * @return The Metadata object with the errors.
      */
@@ -135,6 +137,7 @@ public class Metadata {
 
     /**
      * Merge another Metadata into this Metadata.
+     *
      * @param metadata A Metadata to merge.
      * @return This Object after the merge.
      */
@@ -143,33 +146,5 @@ public class Metadata {
             this.meta.putAll(metadata.asMap());
         }
         return this;
-    }
-
-    /**
-     * For each {@link Concept} in a given {@link Set}, return a mapping of the {@link Concept} to its name.
-     *
-     * @param configuration The configuration that contains the metadata configuration.
-     * @param concepts A {@link Set} of {@link Concept} to get the mappings for.
-     *
-     * @return A mapping of the names or an empty mapping if metadata is not enabled or none of the concepts were found.
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, String> getConceptNames(Map configuration, Set<Concept> concepts) {
-        boolean isMetadataEnabled = (Boolean) configuration.getOrDefault(BulletConfig.RESULT_METADATA_ENABLE, false);
-        if (!isMetadataEnabled) {
-            return Collections.emptyMap();
-        }
-        List<Map> keys = (List<Map>) configuration.getOrDefault(BulletConfig.RESULT_METADATA_METRICS,
-                                                                Collections.emptyList());
-        Map<String, String> mapping = new HashMap<>();
-        // For each metric configured, load the name of the field to add it to the metadata as.
-        for (Map m : keys) {
-            String concept = (String) m.get(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY);
-            String name = (String) m.get(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY);
-            if (concepts.contains(Concept.from(concept))) {
-                mapping.put(concept, name);
-            }
-        }
-        return mapping;
     }
 }

@@ -40,7 +40,7 @@ import static com.yahoo.bullet.operations.aggregations.sketches.QuantileSketch.R
 import static com.yahoo.bullet.operations.aggregations.sketches.QuantileSketch.SEPARATOR;
 import static com.yahoo.bullet.operations.aggregations.sketches.QuantileSketch.START_INCLUSIVE;
 import static com.yahoo.bullet.operations.aggregations.sketches.QuantileSketch.VALUE_FIELD;
-import static com.yahoo.bullet.parsing.AggregationUtils.addParsedMetadata;
+import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static java.util.Arrays.asList;
 
@@ -55,13 +55,13 @@ public class DistributionTest {
                Pair.of(Concept.MAXIMUM_VALUE, "max"),
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
-    public static Distribution makeDistribution(Map<Object, Object> configuration, Map<String, Object> attributes,
+    public static Distribution makeDistribution(BulletConfig configuration, Map<String, Object> attributes,
                                                 String field, int size, List<Map.Entry<Concept, String>> metadata) {
         Aggregation aggregation = new Aggregation();
         aggregation.setFields(Collections.singletonMap(field, field));
         aggregation.setSize(size);
         aggregation.setAttributes(attributes);
-        aggregation.configure(addParsedMetadata(configuration, metadata));
+        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
 
         Distribution distribution = new Distribution(aggregation);
         distribution.initialize();
@@ -81,15 +81,15 @@ public class DistributionTest {
         return makeDistribution(makeConfiguration(10, 128), makeAttributes(type, points), "field", 20, ALL_METADATA);
     }
 
-    public static Map<Object, Object> makeConfiguration(int maxPoints, int k, int rounding) {
-        Map<Object, Object> config = new HashMap<>();
-        config.put(BulletConfig.DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES, k);
-        config.put(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, maxPoints);
-        config.put(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, rounding);
+    public static BulletConfig makeConfiguration(int maxPoints, int k, int rounding) {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES, k);
+        config.set(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, maxPoints);
+        config.set(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, rounding);
         return config;
     }
 
-    public static Map<Object, Object> makeConfiguration(int maxPoints, int k) {
+    public static BulletConfig makeConfiguration(int maxPoints, int k) {
         return makeConfiguration(maxPoints, k, 4);
     }
 
@@ -98,7 +98,7 @@ public class DistributionTest {
         List<Error> errors;
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(Collections.emptyMap());
+        aggregation.setConfiguration(new BulletConfig());
         Distribution distribution = new Distribution(aggregation);
 
         errors = distribution.initialize();
@@ -128,7 +128,7 @@ public class DistributionTest {
     public void testRangeInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(Collections.emptyMap());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;
@@ -191,7 +191,7 @@ public class DistributionTest {
     public void testNumberOfPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(Collections.emptyMap());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;
@@ -230,7 +230,7 @@ public class DistributionTest {
     public void testProvidedPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(Collections.emptyMap());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;
@@ -451,9 +451,10 @@ public class DistributionTest {
 
     @Test
     public void testNegativeSize() {
-        // We will default to MAX_POINTS is configured to -1 and we will default to Distribution.DEFAULT_SIZE which is 1
+        // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
+        // and aggregation size, which is 1
         Distribution distribution = makeDistribution(makeConfiguration(-1, 128), makeAttributes(DistributionType.PMF, 10L),
-                                                     "field", 10, ALL_METADATA);
+                                                     "field", 1, ALL_METADATA);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);

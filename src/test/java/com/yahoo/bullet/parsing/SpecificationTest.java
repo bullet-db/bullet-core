@@ -18,8 +18,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +27,6 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
@@ -92,13 +89,15 @@ public class SpecificationTest {
     @Test
     public void testDefaults() {
         Specification specification = new Specification();
-        specification.configure(emptyMap());
+        BulletConfig config = new BulletConfig();
+        config.validate();
+        specification.configure(config);
 
         Assert.assertNull(specification.getProjection());
         Assert.assertNull(specification.getFilters());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_DURATION_MS);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_DURATION);
         Assert.assertEquals(specification.getAggregation().getType(), AggregationType.RAW);
-        Assert.assertEquals(specification.getAggregation().getSize(), Aggregation.DEFAULT_SIZE);
+        Assert.assertEquals((Object) specification.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
         Assert.assertTrue(specification.isAcceptingData());
         Assert.assertEquals(specification.getAggregate().getRecords(), emptyList());
     }
@@ -139,47 +138,51 @@ public class SpecificationTest {
         Assert.assertNull(specification.getFilters());
         // If you had null for aggregation
         Assert.assertNull(specification.getAggregation());
-        specification.configure(Collections.emptyMap());
+        specification.configure(new BulletConfig());
+
         Assert.assertTrue(specification.isAcceptingData());
         Assert.assertEquals(specification.getAggregate().getRecords(), emptyList());
     }
 
     @Test
     public void testDuration() {
+        BulletConfig config = new BulletConfig();
+
         Specification specification = new Specification();
-        specification.configure(emptyMap());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_DURATION_MS);
+        specification.configure(config);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_DURATION);
 
         specification.setDuration(-1000);
-        specification.configure(emptyMap());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_DURATION_MS);
+        specification.configure(config);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_DURATION);
 
         specification.setDuration(0);
-        specification.configure(emptyMap());
+        specification.configure(config);
         Assert.assertEquals(specification.getDuration(), (Integer) 0);
 
         specification.setDuration(1);
-        specification.configure(emptyMap());
+        specification.configure(config);
         Assert.assertEquals(specification.getDuration(), (Integer) 1);
 
-        specification.setDuration(Specification.DEFAULT_DURATION_MS);
-        specification.configure(emptyMap());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_DURATION_MS);
+        specification.setDuration(BulletConfig.DEFAULT_SPECIFICATION_DURATION);
+        specification.configure(config);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_DURATION);
 
-        specification.setDuration(Specification.DEFAULT_MAX_DURATION_MS);
-        specification.configure(emptyMap());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_MAX_DURATION_MS);
+        specification.setDuration(BulletConfig.DEFAULT_SPECIFICATION_MAX_DURATION);
+        specification.configure(config);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_MAX_DURATION);
 
-        specification.setDuration(Specification.DEFAULT_MAX_DURATION_MS * 2);
-        specification.configure(emptyMap());
-        Assert.assertEquals(specification.getDuration(), Specification.DEFAULT_MAX_DURATION_MS);
+        specification.setDuration(BulletConfig.DEFAULT_SPECIFICATION_MAX_DURATION * 2);
+        specification.configure(config);
+        Assert.assertEquals((Object) specification.getDuration(), BulletConfig.DEFAULT_SPECIFICATION_MAX_DURATION);
     }
 
     @Test
     public void testCustomDuration() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.SPECIFICATION_DEFAULT_DURATION, 200);
-        config.put(BulletConfig.SPECIFICATION_MAX_DURATION, 1000);
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.SPECIFICATION_DEFAULT_DURATION, 200);
+        config.set(BulletConfig.SPECIFICATION_MAX_DURATION, 1000);
+        config.validate();
 
         Specification specification = new Specification();
 
@@ -216,7 +219,7 @@ public class SpecificationTest {
     public void testFiltering() {
         Specification specification = new Specification();
         specification.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
-        specification.configure(emptyMap());
+        specification.configure(new BulletConfig());
 
         Assert.assertTrue(specification.filter(RecordBox.get().add("field", "foo").getRecord()));
         Assert.assertTrue(specification.filter(RecordBox.get().add("field", "bar").getRecord()));
@@ -227,10 +230,11 @@ public class SpecificationTest {
     public void testReceiveTimestampNoProjection() {
         Long start = System.currentTimeMillis();
 
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         Specification specification = new Specification();
         specification.setProjection(null);
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
+        config.validate();
         specification.configure(config);
 
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
@@ -242,7 +246,7 @@ public class SpecificationTest {
         Assert.assertEquals(actual.get("field"), "foo");
         Assert.assertEquals(actual.get("mid"), "123");
 
-        Long recordedTimestamp = (Long) actual.get(Specification.DEFAULT_RECEIVE_TIMESTAMP_KEY);
+        Long recordedTimestamp = (Long) actual.get(BulletConfig.DEFAULT_RECORD_INJECT_TIMESTAMP_KEY);
         Assert.assertTrue(recordedTimestamp >= start);
         Assert.assertTrue(recordedTimestamp <= end);
     }
@@ -251,12 +255,13 @@ public class SpecificationTest {
     public void testReceiveTimestamp() {
         Long start = System.currentTimeMillis();
 
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         Specification specification = new Specification();
         Projection projection = new Projection();
         projection.setFields(singletonMap("field", "bid"));
         specification.setProjection(projection);
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
+        config.validate();
         specification.configure(config);
 
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
@@ -267,7 +272,7 @@ public class SpecificationTest {
         Assert.assertEquals(size(actual), 2);
         Assert.assertEquals(actual.get("bid"), "foo");
 
-        Long recordedTimestamp = (Long) actual.get(Specification.DEFAULT_RECEIVE_TIMESTAMP_KEY);
+        Long recordedTimestamp = (Long) actual.get(BulletConfig.DEFAULT_RECORD_INJECT_TIMESTAMP_KEY);
         Assert.assertTrue(recordedTimestamp >= start);
         Assert.assertTrue(recordedTimestamp <= end);
     }
@@ -277,25 +282,26 @@ public class SpecificationTest {
         Specification specification = new Specification();
         Aggregation aggregation = new Aggregation();
         aggregation.setType(null);
-        aggregation.setSize(Aggregation.DEFAULT_MAX_SIZE - 1);
+        aggregation.setSize(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE - 1);
         specification.setAggregation(aggregation);
 
         Assert.assertNull(aggregation.getType());
-        specification.configure(emptyMap());
+        specification.configure(new BulletConfig());
 
         // Specification no longer fixes type
         Assert.assertNull(aggregation.getType());
-        Assert.assertEquals(aggregation.getSize(), new Integer(Aggregation.DEFAULT_MAX_SIZE - 1));
+        Assert.assertEquals(aggregation.getSize(), new Integer(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE - 1));
     }
 
     @Test
     public void testMeetingDefaultSpecification() {
         Specification specification = new Specification();
-        specification.configure(emptyMap());
-        Assert.assertTrue(makeStream(Aggregation.DEFAULT_SIZE - 1).map(specification::filter).allMatch(x -> x));
+        specification.configure(new BulletConfig());
+
+        Assert.assertTrue(makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).map(specification::filter).allMatch(x -> x));
         // Check that we only get the default number out
-        makeList(Aggregation.DEFAULT_SIZE + 2).forEach(specification::aggregate);
-        Assert.assertEquals((Integer) specification.getAggregate().getRecords().size(), Aggregation.DEFAULT_SIZE);
+        makeList(BulletConfig.DEFAULT_AGGREGATION_SIZE + 2).forEach(specification::aggregate);
+        Assert.assertEquals((Object) specification.getAggregate().getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
     }
 
     @Test
@@ -367,18 +373,19 @@ public class SpecificationTest {
 
     @Test
     public void testToString() {
+        BulletConfig config = new BulletConfig();
         Specification specification = new Specification();
-        specification.configure(emptyMap());
+        specification.configure(config);
 
         Assert.assertEquals(specification.toString(),
-                            "{filters: null, projection: null, " +
-                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, duration: 30000}");
+                "{filters: null, projection: null, " +
+                        "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, duration: 30000}");
 
         specification.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
         Projection projection = new Projection();
         projection.setFields(singletonMap("field", "bid"));
         specification.setProjection(projection);
-        specification.configure(emptyMap());
+        specification.configure(config);
 
         Assert.assertEquals(specification.toString(),
                             "{filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +

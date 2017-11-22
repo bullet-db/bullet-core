@@ -8,7 +8,6 @@ package com.yahoo.bullet.result;
 import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.result.Metadata.Concept;
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,10 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -118,37 +115,5 @@ public class MetadataTest {
         expected.put("baz", singletonMap("a", 1));
 
         Assert.assertEquals(metaA.asMap(), expected);
-    }
-
-    @Test
-    public void testConceptKeyExtractionWithMetadataNotEnabled() {
-        Map<String, Object> configuration = new HashMap<>();
-        configuration.put(BulletConfig.RESULT_METADATA_METRICS, asMetadataEntries(Pair.of("Estimated Result", "foo")));
-
-        Set<Concept> concepts = new HashSet<>(singletonList(Concept.ESTIMATED_RESULT));
-
-        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), Collections.emptyMap());
-    }
-
-    @Test
-    public void testConceptKeyExtraction() {
-        Map<String, Object> configuration = new HashMap<>();
-        configuration.put(BulletConfig.RESULT_METADATA_ENABLE, true);
-        configuration.put(BulletConfig.RESULT_METADATA_METRICS,
-                          asMetadataEntries(Pair.of("Estimated Result", "foo"),
-                                            Pair.of("Sketch Metadata", "bar"),
-                                            Pair.of("Non Existent", "bar"),
-                                            Pair.of("Standard Deviations", "baz")));
-
-        Set<Concept> concepts = new HashSet<>(asList(Concept.ESTIMATED_RESULT,
-                                                     Concept.SKETCH_METADATA,
-                                                     Concept.STANDARD_DEVIATIONS));
-
-        Map<String, String> expectedMap = new HashMap<>();
-        expectedMap.put(Concept.ESTIMATED_RESULT.getName(), "foo");
-        expectedMap.put(Concept.SKETCH_METADATA.getName(), "bar");
-        expectedMap.put(Concept.STANDARD_DEVIATIONS.getName(), "baz");
-
-        Assert.assertEquals(Metadata.getConceptNames(configuration, concepts), expectedMap);
     }
 }

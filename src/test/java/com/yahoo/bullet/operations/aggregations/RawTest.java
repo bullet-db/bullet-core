@@ -17,9 +17,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,17 +38,17 @@ public class RawTest {
     public static Raw makeRaw(int size, int microBatchSize, int maxSize) {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(size);
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
-        config.put(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE, microBatchSize);
-        aggregation.setConfiguration(config);
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
+        config.set(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE, microBatchSize);
+        aggregation.setConfiguration(config.validate());
         Raw raw = new Raw(aggregation);
         raw.initialize();
         return raw;
     }
 
     public static Raw makeRaw(int size, int microBatchSize) {
-        return makeRaw(size, microBatchSize, Raw.DEFAULT_MAX_SIZE);
+        return makeRaw(size, microBatchSize, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
     }
 
     public static Raw makeRaw(int size) {

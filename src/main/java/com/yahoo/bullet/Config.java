@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jvyaml.YAML;
 
@@ -24,7 +26,9 @@ import java.util.Set;
 @Slf4j
 public class Config implements Serializable {
     private Map<String, Object> data;
+
     public static final String DELIMITER = ".";
+    private static Gson GSON = new GsonBuilder().serializeNulls().setPrettyPrinting().disableHtmlEscaping().create();
 
     /**
      * Constructor that loads a specific file and loads the settings in that file.
@@ -33,7 +37,6 @@ public class Config implements Serializable {
      */
     public Config(String file) {
         data = readYAML(file);
-        log.info("Final Configuration:\n{} ", data);
     }
 
     /**
@@ -47,7 +50,6 @@ public class Config implements Serializable {
         // Override
         Map<String, Object> specificConf = readYAML(file);
         data.putAll(specificConf);
-        log.info("Final Configuration with defaults:\n{} ", data);
     }
 
     /**
@@ -206,5 +208,10 @@ public class Config implements Serializable {
             log.error("Error loading configuration", ioe);
             return new HashMap<>();
         }
+    }
+
+    @Override
+    public String toString() {
+        return GSON.toJson(data);
     }
 }

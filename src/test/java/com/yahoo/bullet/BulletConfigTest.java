@@ -5,41 +5,70 @@
  */
 package com.yahoo.bullet;
 
+import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Metadata.Concept;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
+
 public class BulletConfigTest {
+    private static Map<String, String> allMetadataAsMap() {
+        Map<String, String> meta = new HashMap<>();
+        for (Map<String, String> m : BulletConfig.DEFAULT_RESULT_METADATA_METRICS) {
+            meta.put(m.get(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY), m.get(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY));
+        }
+        return meta;
+    }
+
+    private static class CustomConfig extends BulletConfig {
+        private static final Validator CUSTOM = new Validator();
+        static {
+            CUSTOM.define("foo").defaultTo(42).checkIf(Validator::isPositiveInt);
+            CUSTOM.define("bar").defaultTo(0.4).checkIf(Validator::isPositive);
+            CUSTOM.relate("foo > bar", "foo", "bar").checkIf(Validator::isGreaterOrEqual);
+        }
+
+        @Override
+        public BulletConfig validate() {
+            CUSTOM.validate(this);
+            return super.validate();
+        }
+    }
+
     @Test
     public void testNoFiles() {
         BulletConfig config = new BulletConfig();
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
 
         config = new BulletConfig(null);
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
 
         config = new BulletConfig("");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
     }
 
     @Test
     public void testMissingFile() {
         BulletConfig config = new BulletConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
     }
 
     @Test
     public void testCustomConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000L);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
-        Assert.assertEquals(config.get(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES), 16384L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
+        Assert.assertEquals(config.get(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES), 16384);
     }
 
     @Test
@@ -109,12 +138,12 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000L);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
 
         Config another = new BulletConfig(null);
         another.clear();
-        another.set(BulletConfig.SPECIFICATION_MAX_DURATION, 42L);
+        another.set(BulletConfig.SPECIFICATION_MAX_DURATION, 42);
         config.set("pi", 3.14);
 
         config.merge(another);
@@ -123,8 +152,8 @@ public class BulletConfigTest {
         config.merge(null);
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 42L);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100L);
+        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 42);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
 
@@ -160,7 +189,7 @@ public class BulletConfigTest {
     public void testGetAsAGivenType() {
         BulletConfig config = new BulletConfig("src/test/resources/custom_config.yaml");
 
-        long defaulted = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Long.class);
+        int defaulted = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
         Assert.assertEquals(defaulted, 100);
 
         Map customMap = config.getAs("my.custom.map", Map.class);
@@ -181,7 +210,7 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
 
-        long notDefaulted = config.getOrDefaultAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42L, Long.class);
+        int notDefaulted = config.getOrDefaultAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42, Integer.class);
         Assert.assertEquals(notDefaulted, 100);
 
         String defaulted = config.getOrDefaultAs("foo", "value", String.class);
@@ -196,7 +225,7 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
 
-        long present = config.getRequiredConfigAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Long.class);
+        int present = config.getRequiredConfigAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
         Assert.assertEquals(present, 100);
     }
 
@@ -204,6 +233,157 @@ public class BulletConfigTest {
     public void testMissingRequiredConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
-        config.getRequiredConfigAs("does.not.exist", Long.class);
+        config.getRequiredConfigAs("does.not.exist", Integer.class);
+    }
+
+    @Test
+    public void testMetadataConversion() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Metadata.KNOWN_CONCEPTS) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+    }
+
+    @Test
+    public void testUnknownMetadata() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+
+        // Add an unknown one
+        Map<String, String> entry = new HashMap<>();
+        entry.put("foo", "bar");
+        entry.put("baz", "qux");
+        metadata.add(entry);
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+    }
+
+    @Test
+    public void testBadMetadata() {
+        List<Map<String, Object>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, Object> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+
+        // Add a badly typed one
+        Map<String, Object> entry = new HashMap<>();
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, new ArrayList<>());
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, new ArrayList<>());
+        metadata.add(entry);
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+    }
+
+    @Test
+    public void testIncompleteMetadata() {
+        List<Map<String, String>> metadata = new ArrayList<>();
+        Map<String, String> expected = new HashMap<>();
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+            Map<String, String> entry = new HashMap<>();
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, name);
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, key);
+            metadata.add(entry);
+            expected.put(name, key);
+        }
+
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), expected);
+
+        // Add only one entry
+        Map<String, String> entry = new HashMap<>();
+        entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, Concept.QUERY_ID.getName());
+        metadata.add(entry);
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // Now it's all defaults
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+    }
+
+    @Test
+    public void testStringification() {
+        BulletConfig config = new BulletConfig();
+        config.clear();
+        String key = BulletConfig.AGGREGATION_DEFAULT_SIZE;
+        config.set(key, 20);
+        assertJSONEquals(config.toString(), "{'" + key + "': 20 }");
+    }
+
+    @Test
+    public void testCustomConfigValidation() {
+        CustomConfig config = new CustomConfig();
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 0.4);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+
+        config.set("foo", 42);
+        config.set("bar", 10.1);
+        config.validate();
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 10.1);
+
+        config.set("foo", 4.2);
+        config.set("bar", 12);
+        config.validate();
+        // Entry defaults before relationship
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 12);
+
+        config.set("foo", 13);
+        config.set("bar", 16);
+        config.validate();
+        // Relationship defaults both
+        Assert.assertEquals(config.get("foo"), 42);
+        Assert.assertEquals(config.get("bar"), 0.4);
     }
 }
