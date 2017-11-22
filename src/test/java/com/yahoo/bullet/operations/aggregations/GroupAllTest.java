@@ -37,7 +37,7 @@ public class GroupAllTest {
         // Does not matter
         aggregation.setSize(1);
         aggregation.setAttributes(makeAttributes(groupOperations));
-        aggregation.configure(new BulletConfig().validate());
+        aggregation.configure(new BulletConfig());
         GroupAll all = new GroupAll(aggregation);
         all.initialize();
         return all;

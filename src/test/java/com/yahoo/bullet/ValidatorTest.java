@@ -67,7 +67,8 @@ public class ValidatorTest {
     public void testEntryMultipleChecks() {
         Validator validator = new Validator();
         Entry entry = validator.define("foo")
-                               .checkIf(Validator::isNotNull).checkIf(Validator.isIn(String.class, "baz", "bar"))
+                               .checkIf(Validator::isNotNull)
+                               .checkIf(Validator.isIn("baz", "bar"))
                                .defaultTo("qux");
 
         Assert.assertNull(empty.get("foo"));
@@ -176,19 +177,34 @@ public class ValidatorTest {
         Assert.assertFalse(Validator.isMap("foo"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testIsIn() {
-        Assert.assertTrue(Validator.isIn(String.class, "foo", "bar", "baz", "qux").test("foo"));
-        Assert.assertTrue(Validator.isIn(String.class, "foo", "bar", "baz", "qux").test("qux"));
-        Assert.assertFalse(Validator.isIn(String.class, "foo", "bar", "baz", "qux").test("f"));
-        Assert.assertFalse(Validator.isIn(String.class, "foo", "bar", "baz", "qux").test(1.0));
+        Assert.assertTrue(Validator.isIn("foo", "bar", "baz", "qux").test("foo"));
+        Assert.assertTrue(Validator.isIn("foo", "bar", "baz", "qux").test("qux"));
+        Assert.assertFalse(Validator.isIn("foo", "bar", "baz", "qux").test("f"));
+        Assert.assertFalse(Validator.isIn("foo", "bar", "baz", "qux").test(1.0));
 
-        Assert.assertTrue(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test(asList("foo", "bar")));
-        Assert.assertTrue(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test(asList("baz", "qux")));
-        Assert.assertFalse(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test(singletonList("baz")));
-        Assert.assertFalse(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test(singletonList("foo")));
-        Assert.assertFalse(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test(null));
-        Assert.assertFalse(Validator.isIn(List.class, asList("foo", "bar"), asList("baz", "qux")).test("foo"));
+        Assert.assertTrue(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test(asList("foo", "bar")));
+        Assert.assertTrue(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test(asList("baz", "qux")));
+        Assert.assertFalse(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test(singletonList("baz")));
+        Assert.assertFalse(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test(singletonList("foo")));
+        Assert.assertFalse(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test(null));
+        Assert.assertFalse(Validator.isIn(asList("foo", "bar"), asList("baz", "qux")).test("foo"));
+    }
+
+    @Test
+    public void testIsInRange() {
+        Assert.assertTrue(Validator.isInRange(-1, 2.0).test(-1));
+        Assert.assertTrue(Validator.isInRange(-1, 2.0).test(0));
+        Assert.assertTrue(Validator.isInRange(-1, 2.0).test(2.0));
+        Assert.assertTrue(Validator.isInRange(-1.0, 2.0).test(0.1));
+        Assert.assertTrue(Validator.isInRange(-1.0, 2.0).test(0.0f));
+        Assert.assertTrue(Validator.isInRange(-1.0, 2.0).test(1L));
+        Assert.assertFalse(Validator.isInRange(-1, 2.0).test("0"));
+        Assert.assertFalse(Validator.isInRange(-1, 2.0).test(-1.1));
+        Assert.assertFalse(Validator.isInRange(-1, 2.0).test(2.1));
+        Assert.assertFalse(Validator.isInRange(-1, 2.0).test(null));
     }
 
     @Test

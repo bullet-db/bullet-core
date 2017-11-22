@@ -84,7 +84,7 @@ public class Metadata {
     /**
      * Add a piece of meta information.
      *
-     * @param key         The name of the meta tag
+     * @param key The name of the meta tag
      * @param information An object that represents the information.
      * @return This object for chaining.
      */

@@ -109,6 +109,7 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
+    // Validator definitions for the configs in this class.
     // It is ok for this to be static since the VALIDATOR itself does not change for different values for fields
     // in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
@@ -151,38 +152,40 @@ public class BulletConfig extends Config {
 
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES)
-                 .checkIf(Validator::isPositiveInt)
+                 .checkIf(Validator::isPowerOfTwo)
                  .castTo(Validator::asInt);
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING)
-                 .checkIf(Validator::isPositive)
                  .checkIf(Validator::isFloat)
+                 .checkIf(Validator.isInRange(0.0, 1.0))
                  .castTo(Validator::asFloat);
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY)
                  .checkIf(Validator::isString);
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR)
-                 .checkIf(Validator::isPositiveInt)
+                 .checkIf(Validator::isPowerOfTwo)
+                 .checkIf(Validator.isInRange(1, 8))
                  .castTo(Validator::asInt);
 
         VALIDATOR.define(GROUP_AGGREGATION_SKETCH_ENTRIES)
-                .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_ENTRIES)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_ENTRIES)
+                 .checkIf(Validator::isPowerOfTwo)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(GROUP_AGGREGATION_SKETCH_SAMPLING)
-                .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING)
-                .checkIf(Validator::isPositive)
-                .checkIf(Validator::isFloat)
-                .castTo(Validator::asFloat);
+                 .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING)
+                 .checkIf(Validator::isFloat)
+                 .checkIf(Validator.isInRange(0.0, 1.0))
+                 .castTo(Validator::asFloat);
         VALIDATOR.define(GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR)
                  .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR)
-                 .checkIf(Validator::isPositiveInt)
+                 .checkIf(Validator::isPowerOfTwo)
+                 .checkIf(Validator.isInRange(1, 8))
                  .castTo(Validator::asInt);
 
         VALIDATOR.define(DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES)
                  .defaultTo(DEFAULT_DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES)
-                 .checkIf(Validator::isPositiveInt)
+                 .checkIf(Validator::isPowerOfTwo)
                  .castTo(Validator::asInt);
         VALIDATOR.define(DISTRIBUTION_AGGREGATION_MAX_POINTS)
                  .defaultTo(DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS)
@@ -217,13 +220,13 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);
 
-        VALIDATOR.relate("Max should be less or equal to default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
+        VALIDATOR.relate("Max should be >= default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
-        VALIDATOR.relate("Max should be less or equal to default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
+        VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
                  .checkIf(Validator::isGreaterOrEqual);
-        VALIDATOR.relate("Metadata is enabled and keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
+        VALIDATOR.relate("If metadata is enabled, keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataConfigured);
-        VALIDATOR.relate("Metadata is disabled and keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
+        VALIDATOR.relate("If metadata is disabled, keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
     }
@@ -232,28 +235,32 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
 
     /**
-     * Constructor that loads specific file augmented with defaults.
+     * Constructor that loads specific file augmented with defaults and performs a {@link BulletConfig#validate()}.
      *
      * @param file YAML file to load.
      */
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
+        validate();
     }
 
     /**
-     * Constructor that loads just the defaults.
+     * Constructor that loads just the defaults and performs a {@link BulletConfig#validate()}.
      */
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
+        validate();
     }
 
     /**
      * Validates and fixes configuration for this config. If there are undefaulted or wrongly typed elements, you
      * should use a {@link Validator} to define the appropriate definitions, casters and defaults to use. You
-     * should call this method before you use the config to ensure that all configurations are valid. This class
-     * defines a validator for all the fields it knows about. If you subclass it and define your own fields, you should
-     * create your own Validator and define entries and relationships that you need to validate. Make sure to call this
-     * method in your override if you wish validate the fields defined by this config.
+     * should call this method before you use the config if you set additional settings to ensure that all configurations
+     * are valid.
+     *
+     * This class defines a validator for all the fields it knows about. If you subclass it and define your own fields,
+     * you should create your own Validator and define entries and relationships that you need to validate. Make sure
+     * to call this method from your override if you wish re-validate the fields defined by this config.
      *
      * @return This config for chaining.
      */
@@ -266,10 +273,10 @@ public class BulletConfig extends Config {
      * Validates and fixes configuration for a given {@link BulletConfig}. This method checks, defaults and fixes the
      * various settings defined in this class.
      *
-     * @param config The {@link BulletConfig} to normalize.
+     * @param config The {@link BulletConfig} to validate.
      */
     public static void validate(BulletConfig config) {
-        VALIDATOR.normalize(config);
+        VALIDATOR.validate(config);
     }
 
     @SuppressWarnings("unchecked")
@@ -319,6 +326,7 @@ public class BulletConfig extends Config {
         return isMetadataOn || keys == null;
     }
 
+    @SafeVarargs
     private static List<Map<String, String>> makeMetadata(Pair<Concept, String>... entries) {
         List<Map<String, String>> metadataList = new ArrayList<>();
         for (Pair<Concept, String> entry : entries) {

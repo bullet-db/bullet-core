@@ -98,7 +98,7 @@ public class DistributionTest {
         List<Error> errors;
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig().validate());
+        aggregation.setConfiguration(new BulletConfig());
         Distribution distribution = new Distribution(aggregation);
 
         errors = distribution.initialize();
@@ -128,7 +128,7 @@ public class DistributionTest {
     public void testRangeInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig().validate());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;
@@ -191,7 +191,7 @@ public class DistributionTest {
     public void testNumberOfPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig().validate());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;
@@ -230,7 +230,7 @@ public class DistributionTest {
     public void testProvidedPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig().validate());
+        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation);
         List<Error> errors;

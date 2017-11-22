@@ -138,7 +138,7 @@ public class SpecificationTest {
         Assert.assertNull(specification.getFilters());
         // If you had null for aggregation
         Assert.assertNull(specification.getAggregation());
-        specification.configure(new BulletConfig().validate());
+        specification.configure(new BulletConfig());
 
         Assert.assertTrue(specification.isAcceptingData());
         Assert.assertEquals(specification.getAggregate().getRecords(), emptyList());
@@ -146,7 +146,7 @@ public class SpecificationTest {
 
     @Test
     public void testDuration() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
 
         Specification specification = new Specification();
         specification.configure(config);
@@ -219,7 +219,7 @@ public class SpecificationTest {
     public void testFiltering() {
         Specification specification = new Specification();
         specification.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
-        specification.configure(new BulletConfig().validate());
+        specification.configure(new BulletConfig());
 
         Assert.assertTrue(specification.filter(RecordBox.get().add("field", "foo").getRecord()));
         Assert.assertTrue(specification.filter(RecordBox.get().add("field", "bar").getRecord()));
@@ -286,7 +286,7 @@ public class SpecificationTest {
         specification.setAggregation(aggregation);
 
         Assert.assertNull(aggregation.getType());
-        specification.configure(new BulletConfig().validate());
+        specification.configure(new BulletConfig());
 
         // Specification no longer fixes type
         Assert.assertNull(aggregation.getType());
@@ -296,7 +296,7 @@ public class SpecificationTest {
     @Test
     public void testMeetingDefaultSpecification() {
         Specification specification = new Specification();
-        specification.configure(new BulletConfig().validate());
+        specification.configure(new BulletConfig());
 
         Assert.assertTrue(makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).map(specification::filter).allMatch(x -> x));
         // Check that we only get the default number out
@@ -373,7 +373,7 @@ public class SpecificationTest {
 
     @Test
     public void testToString() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Specification specification = new Specification();
         specification.configure(config);
 

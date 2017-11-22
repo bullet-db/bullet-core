@@ -104,9 +104,9 @@ public class Validator {
          * Normalizes a {@link BulletConfig} by validating, apply defaults and converting the object represented by the
          * field in this Entry.
          *
-         * @param config The config to normalize.
+         * @param config The config to validate.
          */
-        public void normalize(BulletConfig config) {
+        void normalize(BulletConfig config) {
             Object value = config.get(key);
             boolean isValid = validation.test(value);
             if (!isValid) {
@@ -123,7 +123,7 @@ public class Validator {
 
     /**
      * This represents a binary relationship between two fields in a {@link BulletConfig}. You should have defined
-     * {@link Entry} for these fields before you try to define relationships between them. You can use this apply a
+     * {@link Entry} for these fields before you try to define relationships between them. You can use this to apply a
      * {@link BiPredicate} to these fields and provide or use their defined defaults (defined using
      * {@link Entry#defaultTo(Object)}) if the check fails.
      */
@@ -174,9 +174,9 @@ public class Validator {
          * and uses the defaults (provided using {@link Relationship#orElseUse(Object, Object)} or the Entry defaults
          * for these fields if the check fails.
          *
-         * @param config The config to normalize.
+         * @param config The config to validate.
          */
-        public void normalize(BulletConfig config) {
+        void normalize(BulletConfig config) {
             Object objectA = config.get(keyA);
             Object objectB = config.get(keyB);
             boolean isValid = binaryRelation.test(objectA, objectB);
@@ -228,11 +228,11 @@ public class Validator {
 
     /**
      * Validate and normalize the provided {@link BulletConfig} for the defined entries and relationships. Then entries
-     * are used to normalize the config first.
+     * are used to validate the config first.
      *
-     * @param config The config containing fields to normalize.
+     * @param config The config containing fields to validate.
      */
-    public void normalize(BulletConfig config) {
+    public void validate(BulletConfig config) {
         entries.values().forEach(e -> e.normalize(config));
         relations.stream().forEach(r -> r.normalize(config));
     }
@@ -411,16 +411,32 @@ public class Validator {
     /**
      * Creates a {@link Predicate} that checks to see if the given object is in the list of values.
      *
-     * @param type The class of the object whose membership is being tested.
      * @param values The values that the object could be equal to that is being tested.
      * @param <T> The type of the values and the object.
-     * @return A predicate that checks to see if the object provided to it is of the given type and is in the given values.
+     * @return A predicate that checks to see if the object provided to it is in the given values.
      */
-    public static <T> Predicate<Object> isIn(Class<T> type, T... values) {
-        Objects.requireNonNull(type);
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<Object> isIn(T... values) {
         Objects.requireNonNull(values);
         Set<T> set = new HashSet<>(Arrays.asList(values));
-        return o -> isType(o, type) && set.contains(o);
+        return set::contains;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is a {@link Number} in the proper range.
+     *
+     * @param min The smallest this number value could be.
+     * @param max The largest this number value could be.
+     * @param <T> The type of the value, min, and max.
+     * @return A predicate that checks to see if the provided object is a Number and is in the proper range.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Number> Predicate<Object> isInRange(T min, T max) {
+        Objects.requireNonNull(min);
+        Objects.requireNonNull(max);
+        double minimum = min.doubleValue();
+        double maximum = max.doubleValue();
+        return o -> isNumber(o) && ((T) o).doubleValue() >= minimum && ((T) o).doubleValue() <= maximum;
     }
 
     // Binary Predicates.

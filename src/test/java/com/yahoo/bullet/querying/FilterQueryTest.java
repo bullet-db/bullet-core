@@ -111,6 +111,6 @@ public class FilterQueryTest {
 
     @Test(expectedExceptions = ParsingException.class)
     public void testValidationFail() throws ParsingException {
-        new FilterQuery("{ 'aggregation': { 'type': null } }", new BulletConfig().validate());
+        new FilterQuery("{ 'aggregation': { 'type': null } }", new BulletConfig());
     }
 }
