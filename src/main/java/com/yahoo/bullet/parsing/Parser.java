@@ -7,7 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
 
 public class Parser {
@@ -21,17 +21,17 @@ public class Parser {
                                          .create();
 
     /**
-     * Parses a Specification out of the query string.
+     * Parses a Query out of the query string.
      *
      * @param queryString The String version of the query.
-     * @param config Additional configuration for the specification.
+     * @param config Additional configuration for the query.
      *
-     * @return The parsed, configured Specification.
+     * @return The parsed, configured Query.
      */
-    public static Specification parse(String queryString, BulletConfig config) {
-        Specification specification = GSON.fromJson(queryString, Specification.class);
-        specification.configure(config);
-        return specification;
+    public static Query parse(String queryString, BulletConfig config) {
+        Query query = GSON.fromJson(queryString, Query.class);
+        query.configure(config);
+        return query;
     }
 }
 

@@ -117,7 +117,7 @@ public class ProjectionTest {
     @Test
     public void testValidate() {
         Projection projection = new Projection();
-        Optional<List<Error>> errors = projection.validate();
+        Optional<List<Error>> errors = projection.initialize();
         // currently Projection.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }

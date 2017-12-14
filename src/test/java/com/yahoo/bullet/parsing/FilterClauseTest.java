@@ -6,7 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
-import com.yahoo.bullet.operations.typesystem.Type;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -217,7 +217,7 @@ public class FilterClauseTest {
     @Test
     public void testValidate() {
         FilterClause filterClause = new FilterClause();
-        Optional<List<Error>> errors = filterClause.validate();
+        Optional<List<Error>> errors = filterClause.initialize();
         // currently FilterClause.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }

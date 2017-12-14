@@ -7,7 +7,8 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.operations.FilterOperations;
-import com.yahoo.bullet.operations.typesystem.TypedObject;
+import com.yahoo.bullet.typesystem.TypedObject;
+import com.yahoo.bullet.querying.QueryRunner;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.operations.FilterOperations.FilterType.REGEX_LIKE;
 import static com.yahoo.bullet.operations.FilterOperations.RELATIONAL_OPERATORS;
 
@@ -31,7 +33,7 @@ public class FilterClause extends Clause {
     private List<String> values;
 
     // An optimization to cache the compiled patterns per FilterClause rather than redoing it per record
-    private List<Pattern> patterns;
+    private List comparisons;
 
     /**
      * Default Constructor. GSON recommended.
@@ -49,17 +51,31 @@ public class FilterClause extends Clause {
      * @return true iff this expression is satisfied.
      */
     public boolean check(BulletRecord record) {
-        if (operation == null || values == null || values.isEmpty()) {
+        if (isEmpty(values)) {
             return true;
         }
-        return compare(operation, Specification.extractField(field, record), values);
+        TypedObject typed = new TypedObject(QueryRunner.extractField(field, record));
+        return compare(operation, typed, values);
+    }
+
+    @Override
+    public Optional<List<Error>> initialize() {
+        comparisons = operation != REGEX_LIKE ? values : values.stream().map(FilterClause::safeCompile)
+                                                                        .filter(Objects::nonNull)
+                                                                        .collect(Collectors.toList());
+        return super.initialize();
+    }
+
+    @Override
+    public String toString() {
+        return "{" + super.toString() + ", " + "field: " + field + ", " + "values: " + values + "}";
     }
 
     @SuppressWarnings("unchecked")
     private boolean compare(FilterOperations.FilterType operation, Object value, List<String> values) {
         TypedObject typed = new TypedObject(value);
         return operation == REGEX_LIKE ? RELATIONAL_OPERATORS.get(REGEX_LIKE).compare(typed, getValuesAsPatterns(values)) :
-                                         RELATIONAL_OPERATORS.get(operation).compare(typed, values);
+                RELATIONAL_OPERATORS.get(operation).compare(typed, values);
     }
 
     private static Pattern safeCompile(String value) {
@@ -68,23 +84,5 @@ public class FilterClause extends Clause {
         } catch (PatternSyntaxException pse) {
             return null;
         }
-    }
-
-    private List<Pattern> getValuesAsPatterns(List<String> values) {
-        if (patterns == null) {
-            // Remove all null patterns
-            patterns = values.stream().map(FilterClause::safeCompile).filter(Objects::nonNull).collect(Collectors.toList());
-        }
-        return patterns;
-    }
-
-    @Override
-    public Optional<List<Error>> validate() {
-        return Optional.empty();
-    }
-
-    @Override
-    public String toString() {
-        return "{" + super.toString() + ", " + "field: " + field + ", " + "values: " + values + "}";
     }
 }

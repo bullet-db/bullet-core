@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

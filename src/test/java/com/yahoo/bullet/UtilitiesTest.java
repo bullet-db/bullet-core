@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet;
 
+import com.yahoo.bullet.common.Utilities;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

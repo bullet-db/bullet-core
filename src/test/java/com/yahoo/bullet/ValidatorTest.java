@@ -5,8 +5,10 @@
  */
 package com.yahoo.bullet;
 
-import com.yahoo.bullet.Validator.Entry;
-import com.yahoo.bullet.Validator.Relationship;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.Validator;
+import com.yahoo.bullet.common.Validator.Entry;
+import com.yahoo.bullet.common.Validator.Relationship;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

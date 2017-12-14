@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.operations;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

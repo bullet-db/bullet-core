@@ -6,8 +6,8 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.operations.FilterOperations;
-import com.yahoo.bullet.operations.typesystem.Type;
-import com.yahoo.bullet.operations.typesystem.TypedObject;
+import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

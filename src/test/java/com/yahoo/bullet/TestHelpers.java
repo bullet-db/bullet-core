@@ -7,7 +7,7 @@ package com.yahoo.bullet;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.yahoo.bullet.operations.SerializerDeserializer;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.record.BulletRecord;
 import org.testng.Assert;
 

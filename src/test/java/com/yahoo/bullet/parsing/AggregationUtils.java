@@ -5,13 +5,13 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.operations.AggregationOperations;
 import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
-import com.yahoo.bullet.operations.aggregations.CountDistinct;
-import com.yahoo.bullet.operations.aggregations.Distribution;
-import com.yahoo.bullet.operations.aggregations.TopK;
-import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.aggregations.CountDistinct;
+import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.TopK;
+import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.result.Metadata;
 
 import java.util.ArrayList;

@@ -19,13 +19,13 @@ bullet.query.aggregation.max.size: 512
 bullet.query.aggregation.composite.field.separator: "|"
 
 # The maximum number of records that will be collected in the Filter Bolt till it is emitted - i.e. a micro-batch.
-# Leaving this at 1 emits your raw aggregation records as soon as they are received in the Filter Bolt. This makes
-# your raw aggregation query run snappier if the total number of matched records across the Filter Bolts exceeds
+# Leaving this at 1 emits your raw aggregation records as soon as they are received in the Filter stage. This makes
+# your raw aggregation query run snappier if the total number of matched records across the Filter stage exceeds
 # the number of records your query is looking for but individually each Filter Bolt does not find enough records to
-# satisfy the query. Since the records are emitted immediately, the Join Bolt will terminate your query as soon
-# as the total records are received instead of waiting for the micro-batch size to be reached.
-# If you set this too high (for example, higher than the query size), you will wait the entire duration of the query,
-# and the number of ticks specified in topology.join.bolt.query.tick.timeout.
+# satisfy the query. Since the records are emitted immediately, the Join (combining) stage will terminate your query as
+# soon as the total records are received instead of waiting for the micro-batch size to be reached.
+# If you set this too high (for example, higher than the query size), you could end up waiting the entire duration of
+# the query.
 bullet.query.aggregation.raw.micro.batch.size: 1
 
 # The maximum number of records that will be collected for Raw aggregations. This number should be <= to the
@@ -45,7 +45,7 @@ bullet.query.aggregation.count.distinct.sketch.entries: 16384
 # https://datasketches.github.io/docs/Theta/ThetaPSampling.html
 bullet.query.aggregation.count.distinct.sketch.sampling: 1.0
 
-# This can either be QuickSelect or Alpha (CaSe SeNsiTive). You can leave this at the default.
+# This can either be QuickSelect or Alpha (CaSe SeNsiTivE). You can leave this at the default.
 # Alpha Sketches are 30% more accurate if their estimates are queried directly but since we union them, their accuracy
 # reverts back to the QuickSelect accuracy. Alpha Sketches are also faster when updating.
 # https://datasketches.github.io/docs/Theta/ThetaUpdateSpeed.html

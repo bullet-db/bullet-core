@@ -238,7 +238,7 @@ public class LogicalClauseTest {
     @Test
     public void testValidate() {
         LogicalClause logicalClause = new LogicalClause();
-        Optional<List<Error>> errors = logicalClause.validate();
+        Optional<List<Error>> errors = logicalClause.initialize();
         // currently LogicalClause.normalize() does nothing
         Assert.assertFalse(errors.isPresent());
     }

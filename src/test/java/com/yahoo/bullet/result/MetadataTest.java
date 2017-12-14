@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.result.Metadata.Concept;
 import org.testng.Assert;

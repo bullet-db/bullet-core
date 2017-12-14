@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet;
 
+import com.yahoo.bullet.common.RandomPool;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -6,16 +6,18 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.BulletConfig;
-import com.yahoo.bullet.Utilities;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.Configurable;
+import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
-import com.yahoo.bullet.operations.aggregations.CountDistinct;
-import com.yahoo.bullet.operations.aggregations.Distribution;
-import com.yahoo.bullet.operations.aggregations.GroupAll;
-import com.yahoo.bullet.operations.aggregations.GroupBy;
-import com.yahoo.bullet.operations.aggregations.Raw;
-import com.yahoo.bullet.operations.aggregations.Strategy;
-import com.yahoo.bullet.operations.aggregations.TopK;
+import com.yahoo.bullet.aggregations.CountDistinct;
+import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.GroupAll;
+import com.yahoo.bullet.aggregations.GroupBy;
+import com.yahoo.bullet.aggregations.Raw;
+import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.aggregations.TopK;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +33,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @Getter @Setter
-public class Aggregation implements Configurable, Validatable {
+public class Aggregation implements Configurable, Initializable {
     @Expose
     private Integer size;
     @Expose
@@ -76,12 +78,11 @@ public class Aggregation implements Configurable, Validatable {
     }
 
     @Override
-    public Optional<List<Error>> validate() {
+    public Optional<List<Error>> initialize() {
         if (strategy == null) {
             return Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));
         }
-        List<Error> errors = strategy.initialize();
-        return Utilities.isEmpty(errors) ? Optional.empty() : Optional.of(errors);
+        return strategy.initialize();
     }
 
     /**

@@ -6,7 +6,7 @@
 package com.yahoo.bullet.operations;
 
 import com.google.gson.annotations.SerializedName;
-import com.yahoo.bullet.operations.typesystem.TypedObject;
+import com.yahoo.bullet.typesystem.TypedObject;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.record.BulletRecord;
 
@@ -19,8 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.yahoo.bullet.operations.typesystem.TypedObject.IS_NOT_NULL;
-import static com.yahoo.bullet.operations.typesystem.TypedObject.IS_NOT_UNKNOWN;
+import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
+import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_UNKNOWN;
 import static java.util.Arrays.asList;
 
 public class FilterOperations {

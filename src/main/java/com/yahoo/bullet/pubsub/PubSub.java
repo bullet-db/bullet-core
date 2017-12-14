@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 
 import java.lang.reflect.Constructor;
 import java.util.List;

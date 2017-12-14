@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 
+import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.operations.FilterOperations.LOGICAL_OPERATORS;
 
 @Slf4j @Getter @Setter
@@ -35,15 +36,12 @@ public class LogicalClause extends Clause {
 
     @Override
     public boolean check(BulletRecord record) {
-        if (operation == null || clauses == null || clauses.isEmpty()) {
-            return true;
-        }
-        return LOGICAL_OPERATORS.get(operation).test(record, clauses);
+        return isEmpty(clauses) || LOGICAL_OPERATORS.get(operation).test(record, clauses);
     }
 
     @Override
-    public Optional<List<Error>> validate() {
-        return Optional.empty();
+    public Optional<List<Error>> initialize() {
+        return super.initialize();
     }
 }
 
