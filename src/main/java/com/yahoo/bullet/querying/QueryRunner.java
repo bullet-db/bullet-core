@@ -53,8 +53,16 @@ public class QueryRunner {
         }
     }
 
+    /**
+     * Consume a {@link BulletRecord} for this query. The record may or not be actually incorporated into the query
+     * results. This depends on whether the query can accept more data, if it is expired or not or if the record matches
+     * any query filtering criteria.
+     *
+     * @param record The BulletRecord to consume.
+     * @return A boolean denoting whether the query has reached a batch size.
+     */
     public boolean consume(BulletRecord record) {
-        // If query is expired, not accepting data or does not match filters, don't consume...
+        // If query is expired, not accepting data or does not match the filters, don't consume...
         if (isExpired() || !isAcceptingData() || !filter(record)) {
             return false;
         }
@@ -63,11 +71,11 @@ public class QueryRunner {
     }
 
     /**
-     * Presents the aggregation with a serialized data representation of a prior aggregation.
+     * Presents the query with a serialized data representation of a prior result for the query.
      *
-     * @param data The serialized data that represents a partial aggregation.
+     * @param data The serialized data that represents a partial query result.
      */
-    public boolean combine(byte[] data) {
+    public boolean merge(byte[] data) {
         try {
             query.getAggregation().getStrategy().combine(data);
         } catch (RuntimeException e) {
@@ -78,14 +86,14 @@ public class QueryRunner {
         return !isAcceptingData();
     }
 
-    public boolean combine(QueryRunner query) {
-        return combine(query.getData());
+    public boolean merge(QueryRunner query) {
+        return merge(query.getData());
     }
 
     /**
-     * Get the aggregate matched records so far.
+     * Get the result emitted so far after the last window.
      *
-     * @return The byte[] representation of the serialized aggregate.
+     * @return The byte[] representation of the serialized result.
      */
     public byte[] getData() {
         try {
