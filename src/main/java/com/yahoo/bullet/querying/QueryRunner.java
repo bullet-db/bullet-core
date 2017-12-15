@@ -8,9 +8,9 @@ package com.yahoo.bullet.querying;
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.operations.FilterOperations;
+import com.yahoo.bullet.operations.ProjectionOperation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Error;
-import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.Parser;
 import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.parsing.Projection;
@@ -18,19 +18,12 @@ import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata;
-import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
-import static com.yahoo.bullet.common.Utilities.extractField;
-import static com.yahoo.bullet.common.Utilities.splitField;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.REGEX_LIKE;
-import static com.yahoo.bullet.operations.FilterOperations.RELATIONAL_OPERATORS;
 
 @Slf4j
 public class QueryRunner {
@@ -118,29 +111,7 @@ public class QueryRunner {
             return true;
         }
         // Otherwise short circuit evaluate till the first filter fails. Filters are ANDed.
-        return filters.stream().allMatch(c -> check(c, record));
-    }
-
-    /**
-     * Checks to see if this expression is satisfied.
-     *
-     * @param record The record to check the expression for.
-     * @return true iff this expression is satisfied.
-     */
-    private boolean check(FilterClause clause, BulletRecord record) {
-        FilterOperations.FilterType operation = clause.getOperation();
-        List values = clause.getValues();
-        if (operation == null || values == null || values.isEmpty()) {
-            return true;
-        }
-        return compare(operation, extractField(field, record), values);
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean compare(FilterOperations.FilterType operation, Object value, List<String> values) {
-        TypedObject typed = new TypedObject(value);
-        return operation == REGEX_LIKE ? RELATIONAL_OPERATORS.get(REGEX_LIKE).compare(typed, getValuesAsPatterns(values)) :
-                RELATIONAL_OPERATORS.get(operation).compare(typed, values);
+        return filters.stream().allMatch(c -> FilterOperations.perform(record, c));
     }
 
     /**
@@ -151,44 +122,8 @@ public class QueryRunner {
      */
     private BulletRecord project(BulletRecord record) {
         Projection projection = query.getProjection();
-        BulletRecord projected = projection != null ? project(projection.getFields(), record) : record;
+        BulletRecord projected = projection != null ? ProjectionOperation.project(record, projection) : record;
         return addAdditionalFields(projected);
-    }
-
-    /**
-     * Applies the projection.
-     * @param record The record to project from.
-     * @return The projected record.
-     */
-    private BulletRecord project(Map<String, String> fields, BulletRecord record) {
-        // Returning the record itself if no projections. The record itself should never be modified so it's ok.
-        if (fields == null) {
-            return record;
-        }
-        // More efficient if fields << the fields in the BulletRecord
-        BulletRecord projected = new BulletRecord();
-        for (Map.Entry<String, String> e : fields.entrySet()) {
-            String field = e.getKey();
-            String newName = e.getValue();
-            try {
-                copyInto(projected, newName, record, field);
-            } catch (ClassCastException cce) {
-                log.warn("Skipping copying {} as {} as it is not a field that can be extracted", field, newName);
-            }
-        }
-        return projected;
-    }
-
-    private void copyInto(BulletRecord record, String newName, BulletRecord source, String field) throws ClassCastException {
-        if (field == null) {
-            return;
-        }
-        String[] split = splitField(field);
-        if (split.length > 1) {
-            record.set(newName, source, split[0], split[1]);
-        } else {
-            record.set(newName, source, field);
-        }
     }
 
     /**

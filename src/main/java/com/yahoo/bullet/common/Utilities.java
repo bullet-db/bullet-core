@@ -113,6 +113,17 @@ public class Utilities {
     }
 
     /**
+     * Extracts this field as a {@link TypedObject}.
+     *
+     * @param field The field name to extract.
+     * @param record The {@link BulletRecord} to extract it from.
+     * @return The created TypedObject from the value for the field in the record.
+     */
+    public static TypedObject extractTypedObject(String field, BulletRecord record) {
+        return new TypedObject(extractField(field, record));
+    }
+
+    /**
      * Extracts the field from the given (@link BulletRecord} as a {@link Number}, if possible.
      *
      * @param field The field containing a numeric value to get. It can be "." separated to look inside maps.

@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.operations.FilterOperations.FilterType;
-import com.yahoo.bullet.record.BulletRecord;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,14 +29,6 @@ public abstract class Clause implements Configurable, Initializable {
     public static final String OPERATION_FIELD = "operation";
     public static final Error OPERATION_MISSING =
         makeError("Missing operation field", "You must specify an operation field in all the filters");
-
-    /**
-     * Check this clause against this record. Return true iff the clause is satisfied.
-     *
-     * @param record The {@link BulletRecord} to check this clause against.
-     * @return a boolean denoting if the check failed or passed.
-     */
-    public abstract boolean check(BulletRecord record);
 
     @Override
     public String toString() {
