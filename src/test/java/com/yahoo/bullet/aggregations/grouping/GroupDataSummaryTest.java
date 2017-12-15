@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.MAX;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.MIN;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.MAX;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.MIN;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 

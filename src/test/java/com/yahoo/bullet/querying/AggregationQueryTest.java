@@ -7,7 +7,7 @@ package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.record.BulletRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;

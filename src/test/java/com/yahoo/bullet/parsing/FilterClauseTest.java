@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.operations.FilterOperations.FilterType;
+import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,13 +15,13 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.EQUALS;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.GREATER_EQUALS;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.GREATER_THAN;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.LESS_EQUALS;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.LESS_THAN;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.NOT_EQUALS;
-import static com.yahoo.bullet.operations.FilterOperations.FilterType.REGEX_LIKE;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.GREATER_EQUALS;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.GREATER_THAN;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.LESS_EQUALS;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.LESS_THAN;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.NOT_EQUALS;
+import static com.yahoo.bullet.querying.FilterOperations.FilterType.REGEX_LIKE;
 import static com.yahoo.bullet.parsing.QueryUtils.makeClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;

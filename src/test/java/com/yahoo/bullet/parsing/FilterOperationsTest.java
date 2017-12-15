@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.operations.FilterOperations;
+import com.yahoo.bullet.querying.FilterOperations;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;

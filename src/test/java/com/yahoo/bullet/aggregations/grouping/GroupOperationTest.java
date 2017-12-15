@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.parsing.Error;
 import org.testng.Assert;
 import org.testng.annotations.Test;

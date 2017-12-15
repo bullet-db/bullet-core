@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.memory.Memory;

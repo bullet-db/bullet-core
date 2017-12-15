@@ -6,8 +6,8 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.parsing.Aggregation;
@@ -27,9 +27,9 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.assertContains;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;

@@ -6,8 +6,8 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;

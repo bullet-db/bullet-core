@@ -6,8 +6,8 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
-import com.yahoo.bullet.operations.FilterOperations.FilterType;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
+import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;

@@ -8,7 +8,7 @@ package com.yahoo.bullet.parsing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.FilterOperations.FilterType;
+import com.yahoo.bullet.querying.FilterOperations.FilterType;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =

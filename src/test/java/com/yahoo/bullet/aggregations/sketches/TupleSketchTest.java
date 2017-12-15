@@ -29,9 +29,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
 
 public class TupleSketchTest {
     private static final Set<GroupOperation> OPERATIONS =

@@ -7,9 +7,9 @@ package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.AggregationOperator;
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationOperator;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.yahoo.bullet.common.Utilities.extractFieldAsNumber;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT_FIELD;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT_FIELD;
 
 /**
  * This class represents the results of a GroupOperations. The result is always a {@link Number}, so

@@ -5,9 +5,10 @@
  */
 package com.yahoo.bullet.operations;
 
-import com.yahoo.bullet.operations.AggregationOperations.AggregationOperator;
-import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationOperator;
+import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -1,4 +1,4 @@
-package com.yahoo.bullet.operations;
+package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.record.BulletRecord;
@@ -9,7 +9,7 @@ import java.util.Map;
 import static com.yahoo.bullet.common.Utilities.splitField;
 
 @Slf4j
-public class ProjectionOperation {
+public class ProjectionOperations {
     /**
      * Projects the given {@link BulletRecord} based on the given {@link Projection}.
      *

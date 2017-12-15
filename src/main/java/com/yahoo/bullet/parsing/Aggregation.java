@@ -10,7 +10,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.GroupAll;

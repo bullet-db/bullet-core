@@ -6,8 +6,8 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.GroupAll;
@@ -22,11 +22,11 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.operations.AggregationOperations.AggregationType.COUNT_DISTINCT;
-import static com.yahoo.bullet.operations.AggregationOperations.AggregationType.GROUP;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.COUNT_FIELD;
-import static com.yahoo.bullet.operations.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.COUNT_DISTINCT;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT_FIELD;
+import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
 import static java.util.Arrays.asList;

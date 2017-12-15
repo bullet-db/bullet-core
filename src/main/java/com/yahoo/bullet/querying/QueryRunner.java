@@ -7,8 +7,6 @@ package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.FilterOperations;
-import com.yahoo.bullet.operations.ProjectionOperation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.parsing.Parser;
@@ -64,8 +62,18 @@ public class QueryRunner {
         return isMicroBatch();
     }
 
+    /**
+     * Presents the aggregation with a serialized data representation of a prior aggregation.
+     *
+     * @param data The serialized data that represents a partial aggregation.
+     */
     public boolean combine(byte[] data) {
-        aggregate(data);
+        try {
+            query.getAggregation().getStrategy().combine(data);
+        } catch (RuntimeException e) {
+            log.error("Unable to aggregate {} for query {}", data, this);
+            log.error("Skipping due to", e);
+        }
         // If the query is no longer accepting data, then the Query has been satisfied.
         return !isAcceptingData();
     }
@@ -74,12 +82,35 @@ public class QueryRunner {
         return combine(query.getData());
     }
 
+    /**
+     * Get the aggregate matched records so far.
+     *
+     * @return The byte[] representation of the serialized aggregate.
+     */
     public byte[] getData() {
-        return getSerializedAggregate();
+        try {
+            return query.getAggregation().getStrategy().getSerializedAggregation();
+        } catch (RuntimeException e) {
+            log.error("Unable to get serialized aggregation for query {}", this);
+            log.error("Skipping due to", e);
+            return null;
+        }
     }
 
+    /**
+     * Gets the resulting {@link Clip} of the results so far.
+     *
+     * @return a non-null {@link Clip} representing the aggregated result.
+     */
     public Clip getResult() {
-        Clip result = getAggregate();
+        Clip result;
+        try {
+            result = query.getAggregation().getStrategy().getAggregation();
+        } catch (RuntimeException e) {
+            log.error("Unable to get serialized aggregation for query {}", this);
+            log.error("Skipping due to", e);
+            result = Clip.of(Metadata.of(Error.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
+        }
         lastResultTime = System.currentTimeMillis();
         return result;
     }
@@ -91,11 +122,6 @@ public class QueryRunner {
      */
     public boolean isExpired() {
         return System.currentTimeMillis() > startTime + query.getDuration();
-    }
-
-    @Override
-    public String toString() {
-        return query.toString();
     }
 
     /**
@@ -122,7 +148,7 @@ public class QueryRunner {
      */
     private BulletRecord project(BulletRecord record) {
         Projection projection = query.getProjection();
-        BulletRecord projected = projection != null ? ProjectionOperation.project(record, projection) : record;
+        BulletRecord projected = projection != null ? ProjectionOperations.project(record, projection) : record;
         return addAdditionalFields(projected);
     }
 
@@ -137,50 +163,6 @@ public class QueryRunner {
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
-        }
-    }
-
-    /**
-     * Presents the aggregation with a serialized data representation of a prior aggregation.
-     *
-     * @param data The serialized data that represents a partial aggregation.
-     */
-    private void aggregate(byte[] data) {
-        try {
-            query.getAggregation().getStrategy().combine(data);
-        } catch (RuntimeException e) {
-            log.error("Unable to aggregate {} for query {}", data, this);
-            log.error("Skipping due to", e);
-        }
-    }
-
-    /**
-     * Get the aggregate matched records so far.
-     *
-     * @return The byte[] representation of the serialized aggregate.
-     */
-    private byte[] getSerializedAggregate() {
-        try {
-            return query.getAggregation().getStrategy().getSerializedAggregation();
-        } catch (RuntimeException e) {
-            log.error("Unable to get serialized aggregation for query {}", this);
-            log.error("Skipping due to", e);
-            return null;
-        }
-    }
-
-    /**
-     * Gets the aggregated records {@link Clip}.
-     *
-     * @return a non-null {@link Clip} representing the aggregation.
-     */
-    private Clip getAggregate() {
-        try {
-            return query.getAggregation().getStrategy().getAggregation();
-        } catch (RuntimeException e) {
-            log.error("Unable to get serialized aggregation for query {}", this);
-            log.error("Skipping due to", e);
-            return Clip.of(Metadata.of(Error.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
     }
 
@@ -207,6 +189,11 @@ public class QueryRunner {
             record.setLong(timestampKey, System.currentTimeMillis());
         }
         return record;
+    }
+
+    @Override
+    public String toString() {
+        return query.toString();
     }
 }
 

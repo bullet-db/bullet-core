@@ -6,7 +6,7 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;

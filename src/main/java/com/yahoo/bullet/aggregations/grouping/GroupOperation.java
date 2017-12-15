@@ -6,8 +6,8 @@
 package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.parsing.Error;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
+import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata.Concept;
