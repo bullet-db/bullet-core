@@ -37,16 +37,15 @@ public class Raw implements Strategy {
     private int combined = 0;
 
     /**
-     * Constructor that takes in an {@link Aggregation}. The size of the aggregation is used as a LIMIT
-     * operation.
+     * Constructor that takes in an {@link Aggregation} and a {@link BulletConfig}. The size of the aggregation is used
+     * as a LIMIT operation.
      *
-     * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
+     * @param aggregation The aggregation that specifies how and what this will compute.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public Raw(Aggregation aggregation) {
-        BulletConfig config = aggregation.getConfiguration();
+    public Raw(Aggregation aggregation, BulletConfig config) {
         int maximumSize = config.getAs(BulletConfig.RAW_AGGREGATION_MAX_SIZE, Integer.class);
-
         size = Math.min(aggregation.getSize(), maximumSize);
     }
 

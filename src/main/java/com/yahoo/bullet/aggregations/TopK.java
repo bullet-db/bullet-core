@@ -32,13 +32,14 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     private final String newName;
 
     /**
-     * Constructor that requires an {@link Aggregation}.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public TopK(Aggregation aggregation) {
-        super(aggregation);
+    public TopK(Aggregation aggregation, BulletConfig config) {
+        super(aggregation, config);
 
         String errorConfiguration = config.getAs(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE, String.class);
 

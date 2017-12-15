@@ -87,6 +87,6 @@ public class Query implements Configurable, Initializable {
     @Override
     public String toString() {
         return "{filters: " + filters + ", projection: " + projection + ", aggregation: " + aggregation +
-                ", duration: " + duration + "}";
+               ", duration: " + duration + "}";
     }
 }

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.sketches.ResizeFactor;
 
@@ -14,13 +15,14 @@ import com.yahoo.sketches.ResizeFactor;
  */
 public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy<S> {
     /**
-     * Constructor that requires an {@link Aggregation}.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public KMVStrategy(Aggregation aggregation) {
-        super(aggregation);
+    public KMVStrategy(Aggregation aggregation, BulletConfig config) {
+        super(aggregation, config);
     }
 
     /**

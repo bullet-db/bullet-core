@@ -66,6 +66,11 @@ public class FilterOperations {
         boolean compare(TypedObject object, Stream<T> values);
     }
 
+    // Avoids typing BiPredicate<...>
+    @FunctionalInterface
+    private interface LogicalOperator extends BiPredicate<BulletRecord, Stream<Boolean>> {
+    }
+
     // These comparators WILL satisfy the "vacuous" truth checks. That is if the stream is empty, allMatch and
     // noneMatch will return true; anyMatch will return false. This means that if after failing to cast all values
     // to t's type causing the stream to be empty, the any/all/none matches will behave as above.
@@ -80,10 +85,6 @@ public class FilterOperations {
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-
-    // Avoids typing BiPredicate<...>
-    private interface LogicalOperator extends BiPredicate<BulletRecord, Stream<Boolean>> {
-    }
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
@@ -98,7 +99,6 @@ public class FilterOperations {
         COMPARATORS.put(FilterType.LESS_EQUALS, isNotNullAnd(LE));
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
-
     static final Map<FilterType, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(FilterType.class);
     static {
         LOGICAL_OPERATORS.put(FilterType.AND, AND);
@@ -107,6 +107,8 @@ public class FilterOperations {
     }
 
     private static Stream<TypedObject> cast(TypedObject object, List<String> values) {
+        // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
+        // In the future, we might want to support providing non-String values.
         return values.stream().filter(Objects::nonNull).map(object::typeCast).filter(IS_NOT_UNKNOWN);
     }
 
@@ -114,7 +116,7 @@ public class FilterOperations {
         return (t, s) -> IS_NOT_NULL.test(t) && comparator.compare(t, s);
     }
 
-    private static boolean performComparison(BulletRecord record, FilterClause clause) {
+    private static boolean performRelational(BulletRecord record, FilterClause clause) {
         FilterType operator = clause.getOperation();
         if (isEmpty(clause.getValues())) {
             return true;
@@ -144,9 +146,10 @@ public class FilterOperations {
      */
     public static boolean perform(BulletRecord record, Clause clause) {
         // Rather than define another hierarchy of Clause -> FilterClause, LogicalClause evaluators, we'll eat the
-        // cost of violating polymorphism in this one spot. Do not want processing logic in FilterClause or LogicalClause,
-        // otherwise we could put the perform* methods there.
-        return clause instanceof FilterClause ? performComparison(record, (FilterClause) clause)
+        // cost of violating polymorphism in this one spot.
+        // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
+        // methods in those classes.
+        return clause instanceof FilterClause ? performRelational(record, (FilterClause) clause)
                                               : performLogical(record, (LogicalClause) clause);
     }
 }

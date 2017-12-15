@@ -9,16 +9,7 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
-import com.yahoo.bullet.aggregations.CountDistinct;
-import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.aggregations.GroupAll;
-import com.yahoo.bullet.aggregations.GroupBy;
-import com.yahoo.bullet.aggregations.Raw;
-import com.yahoo.bullet.aggregations.Strategy;
-import com.yahoo.bullet.aggregations.TopK;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,12 +34,6 @@ public class Aggregation implements Configurable, Initializable {
     @Expose
     private Map<String, String> fields;
 
-    @Setter(AccessLevel.NONE)
-    private Strategy strategy;
-
-    // In case any strategies need it.
-    private BulletConfig configuration;
-
     public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
             new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
                                  AggregationType.DISTRIBUTION, AggregationType.TOP_K));
@@ -66,47 +51,18 @@ public class Aggregation implements Configurable, Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        this.configuration = config;
-
         int sizeDefault = config.getAs(BulletConfig.AGGREGATION_DEFAULT_SIZE, Integer.class);
         int sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
 
         // Null or negative, then default, else min of size and max
         size = (size == null || size < 0) ? sizeDefault : Math.min(size, sizeMaximum);
-
-        strategy = findStrategy();
     }
 
     @Override
     public Optional<List<Error>> initialize() {
-        if (strategy == null) {
-            return Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));
-        }
-        return strategy.initialize();
-    }
-
-    /**
-     * Returns a new {@link Strategy} instance that can handle this aggregation.
-     *
-     * @return the created instance of a strategy that can implement the provided AggregationType or null if it cannot.
-     */
-    Strategy findStrategy() {
         // Includes null
-        if (!SUPPORTED_AGGREGATION_TYPES.contains(type)) {
-            return null;
-        }
-        switch (type) {
-            case COUNT_DISTINCT:
-                return new CountDistinct(this);
-            case DISTRIBUTION:
-                return new Distribution(this);
-            case RAW:
-                return new Raw(this);
-            case TOP_K:
-                return new TopK(this);
-        }
-        // If we have any fields -> GroupBy
-        return Utilities.isEmpty(fields) ? new GroupAll(this) : new GroupBy(this);
+        return SUPPORTED_AGGREGATION_TYPES.contains(type) ? Optional.empty() :
+                                                            Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));
     }
 
     @Override

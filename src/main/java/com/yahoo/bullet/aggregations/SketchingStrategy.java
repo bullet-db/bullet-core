@@ -50,10 +50,11 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * The constructor for creating a Sketch based strategy.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this sketch based strategy.
      */
     @SuppressWarnings("unchecked")
-    public SketchingStrategy(Aggregation aggregation) {
-        config = aggregation.getConfiguration();
+    public SketchingStrategy(Aggregation aggregation, BulletConfig config) {
+        this.config = config;
         boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
         metadataKeys = shouldMeta ? (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class) :
                                     Collections.emptyMap();

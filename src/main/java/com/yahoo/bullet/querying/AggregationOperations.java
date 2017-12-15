@@ -6,6 +6,16 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.aggregations.CountDistinct;
+import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.GroupAll;
+import com.yahoo.bullet.aggregations.GroupBy;
+import com.yahoo.bullet.aggregations.Raw;
+import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.aggregations.TopK;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.parsing.Aggregation;
 import lombok.Getter;
 
 import java.util.EnumMap;
@@ -96,5 +106,29 @@ public class AggregationOperations {
         OPERATORS.put(GroupOperationType.MIN, MIN);
         OPERATORS.put(GroupOperationType.MAX, MAX);
         OPERATORS.put(GroupOperationType.AVG, SUM);
+    }
+
+    /**
+     * Returns a new {@link Strategy} instance that can handle this aggregation.
+     *
+     * @param aggregation The non-null, initialized {@link Aggregation} instance whose strategy is required.
+     * @param config The {@link BulletConfig} containing configuration for the strategy.
+     *
+     * @return The created instance of a strategy that can implement the Aggregation.
+     */
+    public static Strategy findStrategy(Aggregation aggregation, BulletConfig config) {
+        switch (aggregation.getType()) {
+            case COUNT_DISTINCT:
+                return new CountDistinct(aggregation, config);
+            case DISTRIBUTION:
+                return new Distribution(aggregation, config);
+            case RAW:
+                return new Raw(aggregation, config);
+            case TOP_K:
+                return new TopK(aggregation, config);
+        }
+
+        // If we have any fields -> GroupBy
+        return Utilities.isEmpty(aggregation.getFields()) ? new GroupAll(aggregation, config) : new GroupBy(aggregation, config);
     }
 }

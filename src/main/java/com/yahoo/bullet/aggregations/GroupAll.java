@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.aggregations;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.aggregations.grouping.GroupData;
@@ -28,11 +29,12 @@ public class GroupAll implements Strategy {
 
     private Set<GroupOperation> operations;
     /**
-     * Constructor that takes in an {@link Aggregation}. Requires the aggregation to have generated its group operations.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
+     * @param config The config that has relevant configs for this strategy. It is unused currently.
      */
-    public GroupAll(Aggregation aggregation) {
+    public GroupAll(Aggregation aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result
         operations = GroupOperation.getOperations(aggregation.getAttributes());
         data = new GroupData(operations);

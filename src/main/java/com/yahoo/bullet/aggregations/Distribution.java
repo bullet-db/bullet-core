@@ -70,13 +70,14 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
             makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
 
     /**
-     * Constructor that requires an {@link Aggregation}.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public Distribution(Aggregation aggregation) {
-        super(aggregation);
+    public Distribution(Aggregation aggregation, BulletConfig config) {
+        super(aggregation, config);
         entries = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_SKETCH_ENTRIES, Integer.class);
         rounding = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, Integer.class);
 

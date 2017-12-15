@@ -35,13 +35,14 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
     private final String newName;
 
     /**
-     * Constructor that requires an {@link Aggregation}.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public CountDistinct(Aggregation aggregation) {
-        super(aggregation);
+    public CountDistinct(Aggregation aggregation, BulletConfig config) {
+        super(aggregation, config);
         Map<String, Object> attributes = aggregation.getAttributes();
 
         ResizeFactor resizeFactor = getResizeFactor(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR);

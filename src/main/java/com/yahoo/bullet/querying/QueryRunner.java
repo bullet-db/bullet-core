@@ -6,7 +6,9 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
+import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.parsing.Parser;
@@ -25,6 +27,8 @@ import java.util.Optional;
 
 @Slf4j
 public class QueryRunner {
+    public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
+
     private Query query;
     @Getter @Setter
     private long startTime;
@@ -33,7 +37,7 @@ public class QueryRunner {
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-    public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
+    private Strategy strategy;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use.
@@ -48,6 +52,12 @@ public class QueryRunner {
         timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
 
         Optional<List<Error>> errors = query.initialize();
+        if (errors.isPresent()) {
+            throw new ParsingException(errors.get());
+        }
+        // Aggregation is guaranteed to not be null and guaranteed to have a proper type
+        strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
+        errors = strategy.initialize();
         if (errors.isPresent()) {
             throw new ParsingException(errors.get());
         }
@@ -77,7 +87,7 @@ public class QueryRunner {
      */
     public boolean merge(byte[] data) {
         try {
-            query.getAggregation().getStrategy().combine(data);
+            strategy.combine(data);
         } catch (RuntimeException e) {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
@@ -97,7 +107,7 @@ public class QueryRunner {
      */
     public byte[] getData() {
         try {
-            return query.getAggregation().getStrategy().getSerializedAggregation();
+            return strategy.getSerializedAggregation();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
             log.error("Skipping due to", e);
@@ -113,7 +123,7 @@ public class QueryRunner {
     public Clip getResult() {
         Clip result;
         try {
-            result = query.getAggregation().getStrategy().getAggregation();
+            result = strategy.getAggregation();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
             log.error("Skipping due to", e);
@@ -167,7 +177,7 @@ public class QueryRunner {
      */
     private void aggregate(BulletRecord record) {
         try {
-            query.getAggregation().getStrategy().consume(record);
+            strategy.consume(record);
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
@@ -180,7 +190,7 @@ public class QueryRunner {
      * @return a boolean denoting whether more data should be presented to this specification.
      */
     private boolean isAcceptingData() {
-        return query.getAggregation().getStrategy().isAcceptingData();
+        return strategy.isAcceptingData();
     }
 
     /**

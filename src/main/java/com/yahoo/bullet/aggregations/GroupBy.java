@@ -39,13 +39,14 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     private final Set<GroupOperation> operations;
 
     /**
-     * Constructor that requires an {@link Aggregation}.
+     * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
      * @param aggregation An {@link Aggregation} with valid fields and attributes for this aggregation type.
+     * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public GroupBy(Aggregation aggregation) {
-        super(aggregation);
+    public GroupBy(Aggregation aggregation, BulletConfig config) {
+        super(aggregation, config);
 
         Map<String, Object> attributes = aggregation.getAttributes();
         operations = GroupOperation.getOperations(attributes);
