@@ -13,8 +13,6 @@ import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.typesystem.Type;
-import com.yahoo.bullet.querying.AggregationQuery;
-import com.yahoo.bullet.querying.FilterQuery;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
