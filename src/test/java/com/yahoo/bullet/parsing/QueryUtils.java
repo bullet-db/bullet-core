@@ -12,6 +12,7 @@ import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.querying.QueryRunner;
 import com.yahoo.bullet.typesystem.Type;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -378,25 +379,13 @@ public class QueryUtils {
         }
     }
 
-    public static AggregationQuery getAggregationQuery(String queryString, Map<String, Object> configuration) {
+    public static QueryRunner getRunningQuery(String input, Map<String, Object> configuration) {
         try {
             BulletConfig config = new BulletConfig();
             configuration.forEach(config::set);
             config.validate();
 
-            return new AggregationQuery(queryString, config);
-        } catch (ParsingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static FilterQuery getFilterQuery(String input, Map<String, Object> configuration) {
-        try {
-            BulletConfig config = new BulletConfig();
-            configuration.forEach(config::set);
-            config.validate();
-
-            return new FilterQuery(input, config);
+            return new QueryRunner(input, config);
         } catch (ParsingException e) {
             throw new RuntimeException(e);
         }

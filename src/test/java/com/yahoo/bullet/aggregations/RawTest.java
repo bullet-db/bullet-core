@@ -41,8 +41,7 @@ public class RawTest {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
         config.set(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE, microBatchSize);
-        aggregation.setConfiguration(config.validate());
-        Raw raw = new Raw(aggregation);
+        Raw raw = new Raw(aggregation, config.validate());
         raw.initialize();
         return raw;
     }

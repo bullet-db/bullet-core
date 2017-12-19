@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
@@ -115,7 +116,9 @@ public class GroupOperationTest {
         list.add(new GroupOperation(GroupOperationType.SUM, null, null));
         list.add(new GroupOperation(GroupOperationType.AVG, null, "foo"));
 
-        List<Error> errors = GroupOperation.checkOperations(list);
+        Optional<List<Error>> optionalErrors = GroupOperation.checkOperations(list);
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<Error> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0),
                             Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperationType.SUM,

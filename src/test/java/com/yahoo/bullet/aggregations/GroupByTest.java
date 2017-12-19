@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -56,9 +57,8 @@ public class GroupByTest {
         if (operations != null) {
             aggregation.setAttributes(makeAttributes(operations));
         }
-        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
 
-        GroupBy by = new GroupBy(aggregation);
+        GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata).validate());
         by.initialize();
         return by;
     }
@@ -107,7 +107,9 @@ public class GroupByTest {
         List<String> fields = asList("fieldA", "fieldB");
         GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(AVG, null, null),
                                       makeGroupOperation(SUM, null, "sum"));
-        List<Error> errors = groupBy.initialize();
+        Optional<List<Error>> optionalErrors = groupBy.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<Error> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
                                                                GroupOperationType.AVG,

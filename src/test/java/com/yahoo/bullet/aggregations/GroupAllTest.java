@@ -5,13 +5,13 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.AggregationUtils;
 import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
+import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,8 +38,7 @@ public class GroupAllTest {
         // Does not matter
         aggregation.setSize(1);
         aggregation.setAttributes(makeAttributes(groupOperations));
-        aggregation.configure(new BulletConfig());
-        GroupAll all = new GroupAll(aggregation);
+        GroupAll all = new GroupAll(aggregation, new BulletConfig());
         all.initialize();
         return all;
     }
@@ -49,7 +49,7 @@ public class GroupAllTest {
                                                                .collect(Collectors.toList());
 
         when(aggregation.getAttributes()).thenReturn(makeAttributes(operations));
-        GroupAll all = new GroupAll(aggregation);
+        GroupAll all = new GroupAll(aggregation, new BulletConfig());
         all.initialize();
         return all;
     }
@@ -61,12 +61,15 @@ public class GroupAllTest {
     @Test
     public void testInitialize() {
         GroupAll groupAll = makeGroupAll(Collections.emptyMap());
-        List<Error> errors = groupAll.initialize();
+        Optional<List<Error>> optionalErrors = groupAll.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<Error> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
 
         groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.AVG, null, null));
-        errors = groupAll.initialize();
+        optionalErrors = groupAll.initialize();
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
                                                               GroupOperationType.AVG,

@@ -17,41 +17,41 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
-import static com.yahoo.bullet.parsing.QueryUtils.getAggregationQuery;
+import static com.yahoo.bullet.parsing.QueryUtils.getRunningQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static java.util.Collections.emptyMap;
 
 public class AggregationQueryTest {
     @Test(expectedExceptions = JsonParseException.class)
     public void testBadJSON() {
-        getAggregationQuery("{", emptyMap());
+        getRunningQuery("{", emptyMap());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullConfig() {
-        getAggregationQuery("{}", null);
+        getRunningQuery("{}", null);
     }
 
     @Test
     public void testQueryAsString() {
-        AggregationQuery query = getAggregationQuery("{}", emptyMap());
+        AggregationQuery query = getRunningQuery("{}", emptyMap());
         Assert.assertEquals(query.toString(), "{}", null);
     }
 
     @Test
     public void testAggregateIsNotNull() {
-        AggregationQuery query = getAggregationQuery("{}", emptyMap());
+        AggregationQuery query = getRunningQuery("{}", emptyMap());
         Assert.assertNotNull(query.getData());
-        query = getAggregationQuery("{'aggregation': {}}", emptyMap());
+        query = getRunningQuery("{'aggregation': {}}", emptyMap());
         Assert.assertNotNull(query.getData());
-        query = getAggregationQuery("{'aggregation': null}", emptyMap());
+        query = getRunningQuery("{'aggregation': null}", emptyMap());
         Assert.assertNotNull(query.getData());
     }
 
     @Test
     public void testCreationTime() {
         long startTime = System.currentTimeMillis();
-        AggregationQuery query = getAggregationQuery("{'aggregation' : {}}", emptyMap());
+        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
         long creationTime = query.getStartTime();
         long endTime = System.currentTimeMillis();
         Assert.assertTrue(creationTime >= startTime && creationTime <= endTime);
@@ -59,7 +59,7 @@ public class AggregationQueryTest {
 
     @Test
     public void testAggregationTime() {
-        AggregationQuery query = getAggregationQuery("{'aggregation' : {}}", emptyMap());
+        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
         long creationTime = query.getStartTime();
         byte[] record = getListBytes(new BulletRecord());
         IntStream.range(0, BulletConfig.DEFAULT_AGGREGATION_SIZE).forEach((x) -> query.consume(record));
@@ -70,7 +70,7 @@ public class AggregationQueryTest {
 
     @Test
     public void testDefaultLimiting() {
-        AggregationQuery query = getAggregationQuery("{'aggregation' : {}}", emptyMap());
+        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
         byte[] record = getListBytes(new BulletRecord());
         IntStream.range(0, BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(x -> Assert.assertFalse(query.consume(record)));
         Assert.assertTrue(query.consume(record));
@@ -79,7 +79,7 @@ public class AggregationQueryTest {
 
     @Test
     public void testCustomLimiting() {
-        AggregationQuery query = getAggregationQuery(makeAggregationQuery(AggregationType.RAW, 10), emptyMap());
+        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 10), emptyMap());
         byte[] record = getListBytes(new BulletRecord());
         IntStream.range(0, 9).forEach(x -> Assert.assertFalse(query.consume(record)));
         Assert.assertTrue(query.consume(record));
@@ -88,7 +88,7 @@ public class AggregationQueryTest {
 
     @Test
     public void testSizeUpperBound() {
-        AggregationQuery query = getAggregationQuery(makeAggregationQuery(AggregationType.RAW, 1000), emptyMap());
+        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 1000), emptyMap());
         byte[] record = getListBytes(new BulletRecord());
         IntStream.range(0, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE - 1).forEach(x -> Assert.assertFalse(query.consume(record)));
         Assert.assertTrue(query.consume(record));
@@ -100,7 +100,7 @@ public class AggregationQueryTest {
         Map<String, Object> config = new HashMap<>();
         config.put(BulletConfig.AGGREGATION_MAX_SIZE, 2000);
         config.put(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 200);
-        AggregationQuery query = getAggregationQuery(makeAggregationQuery(AggregationType.RAW, 1000), config);
+        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 1000), config);
 
         byte[] record = getListBytes(new BulletRecord());
         IntStream.range(0, 199).forEach(x -> Assert.assertFalse(query.consume(record)));

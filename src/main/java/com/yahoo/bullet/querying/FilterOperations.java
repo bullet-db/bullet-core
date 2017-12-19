@@ -55,7 +55,7 @@ public class FilterOperations {
     }
 
     @FunctionalInterface
-    private interface Comparator<T> {
+    public interface Comparator<T> {
         /**
          * Performs the comparison operation on the {@link TypedObject} against a {@link Stream} of values.
          *
@@ -68,7 +68,7 @@ public class FilterOperations {
 
     // Avoids typing BiPredicate<...>
     @FunctionalInterface
-    private interface LogicalOperator extends BiPredicate<BulletRecord, Stream<Boolean>> {
+    public interface LogicalOperator extends BiPredicate<BulletRecord, Stream<Boolean>> {
     }
 
     // These comparators WILL satisfy the "vacuous" truth checks. That is if the stream is empty, allMatch and

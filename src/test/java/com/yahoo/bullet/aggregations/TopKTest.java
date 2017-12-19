@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -51,9 +52,8 @@ public class TopKTest {
         aggregation.setFields(fields);
         aggregation.setAttributes(attributes);
         aggregation.setSize(size);
-        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
 
-        TopK topK = new TopK(aggregation);
+        TopK topK = new TopK(aggregation, addMetadata(configuration, metadata).validate());
         topK.initialize();
         return topK;
     }
@@ -79,13 +79,17 @@ public class TopKTest {
     @Test
     public void testInitialize() {
         TopK topK = makeTopK(null, 32, 10);
-        List<Error> errors = topK.initialize();
+        Optional<List<Error>> optionalErrors = topK.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<Error> errors = optionalErrors.get();
 
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), SketchingStrategy.REQUIRES_FIELD_ERROR);
 
         topK = makeTopK(asList("fieldA", "fieldB"), 32, 10);
-        errors = topK.initialize();
+        optionalErrors = topK.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertNull(errors);
     }
 
