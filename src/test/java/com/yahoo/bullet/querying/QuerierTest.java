@@ -43,10 +43,10 @@ import static org.mockito.Mockito.when;
 
 public class QuerierTest {
     private class FailingStrategy implements Strategy {
-        public int consumptionFailure = 0;
-        public int combiningFailure = 0;
-        public int serializingFailure = 0;
-        public int aggregationFailure = 0;
+        int consumptionFailure = 0;
+        int combiningFailure = 0;
+        int serializingFailure = 0;
+        int aggregationFailure = 0;
 
         @Override
         public void consume(BulletRecord data) {
@@ -75,6 +75,10 @@ public class QuerierTest {
         @Override
         public Optional<List<Error>> initialize() {
             return Optional.empty();
+        }
+
+        @Override
+        public void reset() {
         }
     }
 

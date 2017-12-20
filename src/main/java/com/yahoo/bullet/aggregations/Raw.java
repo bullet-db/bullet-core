@@ -20,8 +20,8 @@ import java.util.Optional;
 /**
  * Implements the LIMIT operation on multiple raw {@link BulletRecord}.
  *
- * A call to {@link #getSerializedAggregation()} or {@link #getAggregation()} will return and remove the current
- * collection of records, which is a {@link List} of {@link BulletRecord}.
+ * A call to {@link #getSerializedAggregation()} or {@link #getAggregation()} will return the current collection of
+ * records, which is a {@link List} of {@link BulletRecord}.
  *
  * A call to {@link #combine(byte[])} with the result of {@link #getSerializedAggregation()} will combine records from
  * the {@link List} till the aggregation size is reached.
@@ -92,11 +92,7 @@ public class Raw implements Strategy {
     }
 
     /**
-     * In the case of a Raw aggregation, serializing means return the serialized {@link List} of
-     * {@link BulletRecord} seen before the last call to this method. Once the data has been serialized, further calls
-     * to obtain it again without calling {@link #consume(BulletRecord)} or {@link #combine(byte[])} will result in
-     * nulls. In other words, the Raw strategy micro-batches and finalizes the aggregation so far when this
-     * method is called.
+     * Returns the serialized {@link List} of {@link BulletRecord} seen before the last call to {@link #reset()}.
      *
      * @return the serialized byte[] representing the {@link List} of {@link BulletRecord} or null if it could not.
      */
@@ -105,9 +101,7 @@ public class Raw implements Strategy {
         if (aggregate.isEmpty()) {
             return null;
         }
-        ArrayList<BulletRecord> batch = aggregate;
-        aggregate = new ArrayList<>();
-        return SerializerDeserializer.toBytes(batch);
+        return SerializerDeserializer.toBytes(aggregate);
     }
 
     /**
