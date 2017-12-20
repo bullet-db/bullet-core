@@ -59,8 +59,8 @@ public class Query implements Configurable, Initializable {
         }
         aggregation.configure(config);
 
-        int durationDefault = config.getAs(BulletConfig.SPECIFICATION_DEFAULT_DURATION, Integer.class);
-        int durationMax = config.getAs(BulletConfig.SPECIFICATION_MAX_DURATION, Integer.class);
+        int durationDefault = config.getAs(BulletConfig.QUERY_DEFAULT_DURATION, Integer.class);
+        int durationMax = config.getAs(BulletConfig.QUERY_MAX_DURATION, Integer.class);
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration < 0) ? durationDefault : Math.min(duration, durationMax);

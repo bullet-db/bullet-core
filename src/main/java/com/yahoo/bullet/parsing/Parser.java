@@ -15,10 +15,9 @@ public class Parser {
             FieldTypeAdapterFactory.of(Clause.class, t -> t.getAsJsonObject().get(Clause.OPERATION_FIELD).getAsString())
                                    .registerSubType(FilterClause.class, FilterType.RELATIONALS)
                                    .registerSubType(LogicalClause.class, FilterType.LOGICALS);
-    private static final Gson GSON = new GsonBuilder()
-                                         .registerTypeAdapterFactory(CLAUSE_FACTORY)
-                                         .excludeFieldsWithoutExposeAnnotation()
-                                         .create();
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
+                                                      .excludeFieldsWithoutExposeAnnotation()
+                                                      .create();
 
     /**
      * Parses a Query out of the query string.

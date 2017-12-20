@@ -8,7 +8,6 @@ package com.yahoo.bullet.querying;
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.parsing.Parser;
@@ -18,38 +17,83 @@ import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Metadata.Concept;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+/**
+ * This manages a {@link Query} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
+ * query, and {@link #merge(byte[])} serialized data from another instance of the running query. It can also merge itself
+ * with another instance of running query using {@link #merge(Querier)}.
+ */
 @Slf4j
-public class QueryRunner {
+public class Querier implements Serializable {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
+    private String id;
+    @Setter(AccessLevel.PACKAGE)
     private Query query;
+
     @Getter @Setter
     private long startTime;
-    private long lastResultTime = 0L;
 
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-    private Strategy strategy;
+
+    // Deliberately not serialized
+    @Setter(AccessLevel.PACKAGE)
+    private transient Strategy strategy;
+
+    private Map<String, String> metadataKeys;
 
     /**
-     * Constructor that takes a String representation of the query and a configuration to use.
+     * Constructor that takes a {@link Query} instance and a configuration to use. This also starts the query.
      *
+     * @param id The query ID.
+     * @param query The query object.
+     * @param config The validated {@link BulletConfig} configuration to use.
+     * @throws ParsingException if there was an issue with setting up the query.
+     */
+    public Querier(String id, Query query, BulletConfig config) throws ParsingException {
+        this.id = id;
+        this.query = query;
+        start(config);
+    }
+
+    /**
+     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
+     * query.
+     *
+     * @param id The query ID.
      * @param queryString The query as a string.
      * @param config The validated {@link BulletConfig} configuration to use.
      * @throws ParsingException if there was an issue.
      */
-    public QueryRunner(String queryString, BulletConfig config) throws JsonParseException, ParsingException {
-        query = Parser.parse(queryString, config);
+    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException, ParsingException {
+        this(id, Parser.parse(queryString, config), config);
+    }
+
+    /**
+     * Starts the query. You must call this method if you have deserialized an instance of this Object from data.
+     *
+     * @param config A {@link BulletConfig} to initialize the query with.
+     * @return This object for chaining.
+     * @throws ParsingException
+     */
+    @SuppressWarnings("unchecked")
+    public Querier start(BulletConfig config) throws ParsingException {
         shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
         timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
+        metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
         Optional<List<Error>> errors = query.initialize();
         if (errors.isPresent()) {
@@ -61,7 +105,10 @@ public class QueryRunner {
         if (errors.isPresent()) {
             throw new ParsingException(errors.get());
         }
+        startTime = System.currentTimeMillis();
+        return this;
     }
+
 
     /**
      * Consume a {@link BulletRecord} for this query. The record may or not be actually incorporated into the query
@@ -73,7 +120,7 @@ public class QueryRunner {
      */
     public boolean consume(BulletRecord record) {
         // If query is expired, not accepting data or does not match the filters, don't consume...
-        if (isExpired() || !isAcceptingData() || !filter(record)) {
+        if (isExpired() || !strategy.isAcceptingData() || !filter(record)) {
             return false;
         }
         aggregate(project(record));
@@ -84,6 +131,7 @@ public class QueryRunner {
      * Presents the query with a serialized data representation of a prior result for the query.
      *
      * @param data The serialized data that represents a partial query result.
+     * @return A boolean denoting whether this instance will not accept any more data.
      */
     public boolean merge(byte[] data) {
         try {
@@ -92,12 +140,19 @@ public class QueryRunner {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
         }
-        // If the query is no longer accepting data, then the Query has been satisfied.
-        return !isAcceptingData();
+        // If the strategy is no longer accepting data, then the Query has been satisfied.
+        return !strategy.isAcceptingData();
     }
 
-    public boolean merge(QueryRunner query) {
-        return merge(query.getData());
+    /**
+     * Merge the data in another instance with this one. This only merges the data or results for the query and not any
+     * metadata about the running query.
+     *
+     * @param querier The other instance to merge into this one.
+     * @return A boolean denoting whether this instance will not accept any more data.
+     */
+    public boolean merge(Querier querier) {
+        return merge(querier.getData());
     }
 
     /**
@@ -118,7 +173,7 @@ public class QueryRunner {
     /**
      * Gets the resulting {@link Clip} of the results so far.
      *
-     * @return a non-null {@link Clip} representing the aggregated result.
+     * @return A non-null {@link Clip} representing the aggregated result.
      */
     public Clip getResult() {
         Clip result;
@@ -129,12 +184,23 @@ public class QueryRunner {
             log.error("Skipping due to", e);
             result = Clip.of(Metadata.of(Error.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
-        lastResultTime = System.currentTimeMillis();
+        result.add(getResultMetadata(id));
         return result;
     }
 
     /**
-     * Returns true iff the query has expired.
+     * Terminate the query and return the final result.
+     *
+     * @return The final non-null {@link Clip} representing the final result.
+     */
+    public Clip finish() {
+        Metadata meta = new Metadata();
+        consumeRegisteredConcept(Concept.QUERY_FINISH_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
+        return getResult().add(meta);
+    }
+
+    /**
+     * Returns true if the query has expired.
      *
      * @return boolean denoting if query has expired.
      */
@@ -142,12 +208,12 @@ public class QueryRunner {
         return System.currentTimeMillis() > startTime + query.getDuration();
     }
 
-    /**
-     * Runs the specification on this record and returns true if this record matched its filters.
-     *
-     * @param record The input record.
-     * @return true if this record matches this specification's filters.
-     */
+    @Override
+    public String toString() {
+        return query.toString();
+    }
+
+
     private boolean filter(BulletRecord record) {
         List<Clause> filters = query.getFilters();
         // Add the record if we have no filters
@@ -158,23 +224,12 @@ public class QueryRunner {
         return filters.stream().allMatch(c -> FilterOperations.perform(record, c));
     }
 
-    /**
-     * Run the specification's projections on the record.
-     *
-     * @param record The input record.
-     * @return The projected record.
-     */
     private BulletRecord project(BulletRecord record) {
         Projection projection = query.getProjection();
         BulletRecord projected = projection != null ? ProjectionOperations.project(record, projection) : record;
         return addAdditionalFields(projected);
     }
 
-    /**
-     * Presents the aggregation with a {@link BulletRecord}.
-     *
-     * @param record The record to insert into the aggregation.
-     */
     private void aggregate(BulletRecord record) {
         try {
             strategy.consume(record);
@@ -184,21 +239,28 @@ public class QueryRunner {
         }
     }
 
-    /**
-     * Checks to see if this specification is accepting more data.
-     *
-     * @return a boolean denoting whether more data should be presented to this specification.
-     */
-    private boolean isAcceptingData() {
-        return strategy.isAcceptingData();
+    private Metadata getResultMetadata(String id) {
+        if (metadataKeys.isEmpty()) {
+            return null;
+        }
+        Metadata meta = new Metadata();
+        consumeRegisteredConcept(Concept.QUERY_ID, (k) -> meta.add(k, id));
+        consumeRegisteredConcept(Concept.QUERY_BODY, (k) -> meta.add(k, query.toString()));
+        consumeRegisteredConcept(Concept.QUERY_RECEIVE_TIME, (k) -> meta.add(k, startTime));
+        consumeRegisteredConcept(Concept.RESULT_EMIT_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
+        return meta;
     }
 
-    /**
-     * Checks to see if this specification has reached a micro-batch size.
-     *
-     * @return a boolean denoting whether the specification has reached a micro-batch size.
-     */
+    private void consumeRegisteredConcept(Concept concept, Consumer<String> action) {
+        // Only consume the concept if we have a key for it: i.e. it was registered
+        String key = metadataKeys.get(concept.getName());
+        if (key != null) {
+            action.accept(key);
+        }
+    }
+
     private boolean isMicroBatch() {
+        // TODO: Windowing
         return true;
     }
 
@@ -207,11 +269,6 @@ public class QueryRunner {
             record.setLong(timestampKey, System.currentTimeMillis());
         }
         return record;
-    }
-
-    @Override
-    public String toString() {
-        return query.toString();
     }
 }
 

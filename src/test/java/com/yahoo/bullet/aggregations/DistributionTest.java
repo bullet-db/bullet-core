@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,9 +62,8 @@ public class DistributionTest {
         aggregation.setFields(Collections.singletonMap(field, field));
         aggregation.setSize(size);
         aggregation.setAttributes(attributes);
-        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
 
-        Distribution distribution = new Distribution(aggregation);
+        Distribution distribution = new Distribution(aggregation, addMetadata(configuration, metadata).validate());
         distribution.initialize();
         return distribution;
     }
@@ -95,24 +95,31 @@ public class DistributionTest {
 
     @Test
     public void testInitialize() {
+        Optional<List<Error>> optionalErrors;
         List<Error> errors;
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig());
-        Distribution distribution = new Distribution(aggregation);
+        Distribution distribution = new Distribution(aggregation, new BulletConfig());
 
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_ONE_FIELD_ERROR);
 
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        distribution = new Distribution(aggregation);
-        errors = distribution.initialize();
+        distribution = new Distribution(aggregation, new BulletConfig());
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_TYPE_ERROR);
 
         aggregation.setAttributes(Collections.singletonMap(Distribution.TYPE, "foo"));
-        errors = distribution.initialize();
+        distribution = new Distribution(aggregation, new BulletConfig());
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_TYPE_ERROR);
 
@@ -120,7 +127,10 @@ public class DistributionTest {
         attributes.put(Distribution.TYPE, DistributionType.CDF.getName());
         attributes.put(Distribution.NUMBER_OF_POINTS, 10L);
         aggregation.setAttributes(attributes);
-        errors = distribution.initialize();
+        distribution = new Distribution(aggregation, new BulletConfig());
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertNull(errors);
     }
 
@@ -128,152 +138,184 @@ public class DistributionTest {
     public void testRangeInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation);
+        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        Optional<List<Error>> optionalErrors;
         List<Error> errors;
 
         // start  < 0
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, -1, 1, 0.5));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // end > 1
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0, 2, 0.1));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // both out of range
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 3, 4, 0.1));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0, 1, 0.2));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
 
         // start null
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, null, 0.5, 0.2, null, null));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // end null
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, 1.0, null, 0.2, null, null));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // increment null
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, 1.0, 2.0, null, null, null));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // end < start
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, 25, -2, 0.5));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, 25, 200, 0.5));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
     }
 
     @Test
     public void testNumberOfPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation);
+        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        Optional<List<Error>> optionalErrors;
         List<Error> errors;
 
         // Null points
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, null, null, null, null, null));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // Negative points
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, -10));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // 0 points
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, 0));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 1));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
     }
 
     @Test
     public void testProvidedPointsInitialization() {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        aggregation.setConfiguration(new BulletConfig());
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation);
+        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        Optional<List<Error>> optionalErrors;
         List<Error> errors;
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, null));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.emptyList()));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.singletonList(2.0)));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.singletonList(1.0)));
-        errors = distribution.initialize();
+        optionalErrors = distribution.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
         Assert.assertNull(errors);
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
 
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, Collections.singletonList(0.4)));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
 
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
-        errors = distribution.initialize();
-        Assert.assertNull(errors);
+        optionalErrors = distribution.initialize();
+        Assert.assertFalse(optionalErrors.isPresent());
     }
 
     @Test

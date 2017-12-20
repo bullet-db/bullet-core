@@ -21,8 +21,8 @@ import java.util.Map;
 @Slf4j
 public class BulletConfig extends Config {
     // Field names
-    public static final String SPECIFICATION_DEFAULT_DURATION = "bullet.query.default.duration";
-    public static final String SPECIFICATION_MAX_DURATION = "bullet.query.max.duration";
+    public static final String QUERY_DEFAULT_DURATION = "bullet.query.default.duration";
+    public static final String QUERY_MAX_DURATION = "bullet.query.max.duration";
     public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
     public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
@@ -58,8 +58,8 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
     // Defaults
-    public static final int DEFAULT_SPECIFICATION_DURATION = 30 * 1000;
-    public static final int DEFAULT_SPECIFICATION_MAX_DURATION = 120 * 1000;
+    public static final int DEFAULT_QUERY_DURATION = 30 * 1000;
+    public static final int DEFAULT_QUERY_MAX_DURATION = 120 * 1000;
     public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
     public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
@@ -88,23 +88,24 @@ public class BulletConfig extends Config {
 
     public static final boolean DEFAULT_RESULT_METADATA_ENABLE = true;
     public static final List<Map<String, String>> DEFAULT_RESULT_METADATA_METRICS =
-        makeMetadata(ImmutablePair.of(Concept.QUERY_ID, "query_id"),
-                     ImmutablePair.of(Concept.QUERY_BODY, "query"),
-                     ImmutablePair.of(Concept.QUERY_CREATION_TIME, "query_receive_time"),
-                     ImmutablePair.of(Concept.QUERY_TERMINATION_TIME, "query_finish_time"),
-                     ImmutablePair.of(Concept.SKETCH_METADATA, "sketches"),
-                     ImmutablePair.of(Concept.ESTIMATED_RESULT, "was_estimated"),
-                     ImmutablePair.of(Concept.STANDARD_DEVIATIONS, "standard_deviations"),
-                     ImmutablePair.of(Concept.FAMILY, "family"),
-                     ImmutablePair.of(Concept.SIZE, "size"),
-                     ImmutablePair.of(Concept.THETA, "theta"),
-                     ImmutablePair.of(Concept.UNIQUES_ESTIMATE, "uniques_estimate"),
-                     ImmutablePair.of(Concept.MINIMUM_VALUE, "minimum_value"),
-                     ImmutablePair.of(Concept.MAXIMUM_VALUE, "maximum_value"),
-                     ImmutablePair.of(Concept.ITEMS_SEEN, "items_seen"),
-                     ImmutablePair.of(Concept.NORMALIZED_RANK_ERROR, "normalized_rank_error"),
-                     ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "maximum_count_error"),
-                     ImmutablePair.of(Concept.ACTIVE_ITEMS, "active_items"));
+        makeMetadata(ImmutablePair.of(Concept.QUERY_ID, "Query ID"),
+                     ImmutablePair.of(Concept.QUERY_BODY, "Query"),
+                     ImmutablePair.of(Concept.QUERY_RECEIVE_TIME, "Query Receive Time"),
+                     ImmutablePair.of(Concept.RESULT_EMIT_TIME, "Result Emit Time"),
+                     ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Query Finish Time"),
+                     ImmutablePair.of(Concept.SKETCH_METADATA, "Sketch"),
+                     ImmutablePair.of(Concept.ESTIMATED_RESULT, "Was Estimated"),
+                     ImmutablePair.of(Concept.STANDARD_DEVIATIONS, "Standard Deviations"),
+                     ImmutablePair.of(Concept.FAMILY, "Family"),
+                     ImmutablePair.of(Concept.SIZE, "Size"),
+                     ImmutablePair.of(Concept.THETA, "Theta"),
+                     ImmutablePair.of(Concept.UNIQUES_ESTIMATE, "Uniques Estimate"),
+                     ImmutablePair.of(Concept.MINIMUM_VALUE, "Minimum Value"),
+                     ImmutablePair.of(Concept.MAXIMUM_VALUE, "Maximum Value"),
+                     ImmutablePair.of(Concept.ITEMS_SEEN, "Items Seen"),
+                     ImmutablePair.of(Concept.NORMALIZED_RANK_ERROR, "Normalized Rank Error"),
+                     ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "Maximum Count Error"),
+                     ImmutablePair.of(Concept.ACTIVE_ITEMS, "Active Items"));
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
@@ -114,12 +115,12 @@ public class BulletConfig extends Config {
     // in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
     static {
-        VALIDATOR.define(SPECIFICATION_DEFAULT_DURATION)
-                 .defaultTo(DEFAULT_SPECIFICATION_DURATION)
+        VALIDATOR.define(QUERY_DEFAULT_DURATION)
+                 .defaultTo(DEFAULT_QUERY_DURATION)
                  .checkIf(Validator::isPositiveInt)
                  .castTo(Validator::asInt);
-        VALIDATOR.define(SPECIFICATION_MAX_DURATION)
-                 .defaultTo(DEFAULT_SPECIFICATION_MAX_DURATION)
+        VALIDATOR.define(QUERY_MAX_DURATION)
+                 .defaultTo(DEFAULT_QUERY_MAX_DURATION)
                  .checkIf(Validator::isPositiveInt)
                  .castTo(Validator::asInt);
         VALIDATOR.define(RECORD_INJECT_TIMESTAMP)
@@ -220,7 +221,7 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);
 
-        VALIDATOR.relate("Max should be >= default", SPECIFICATION_MAX_DURATION, SPECIFICATION_DEFAULT_DURATION)
+        VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
                  .checkIf(Validator::isGreaterOrEqual);

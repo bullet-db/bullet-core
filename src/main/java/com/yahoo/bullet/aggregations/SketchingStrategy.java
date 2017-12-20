@@ -81,6 +81,11 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
         return sketch.getResult(metakey, metadataKeys);
     }
 
+    @Override
+    public void reset() {
+        sketch.reset();
+    }
+
     /**
      * Extracts the fields in a pre-determined order from {@link BulletRecord} as one String with the separator.
      *

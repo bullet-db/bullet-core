@@ -5,7 +5,9 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.result.RecordBox;
+import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 public class UtilitiesTest {
     @Test
@@ -49,7 +53,7 @@ public class UtilitiesTest {
     public void testEmptyMap() {
         Assert.assertTrue(Utilities.isEmpty((Map) null));
         Assert.assertTrue(Utilities.isEmpty(Collections.emptyMap()));
-        Assert.assertFalse(Utilities.isEmpty(Collections.singletonMap("foo", "bar")));
+        Assert.assertFalse(Utilities.isEmpty(singletonMap("foo", "bar")));
     }
 
     @Test
@@ -73,5 +77,34 @@ public class UtilitiesTest {
         Assert.assertEquals(String.valueOf(Utilities.round(1.0000000000001, 6)), "1.0");
         // This might be a valid double representation for 1.45 and then rounding to 1 places gives 1.4 instead of 1.5!
         Assert.assertEquals(String.valueOf(Utilities.round(1.4499999999999, 1)), "1.4");
+    }
+
+
+    @Test
+    public void testExtractField() {
+        BulletRecord record = RecordBox.get().add("field", "foo").add("map_field.foo", "bar")
+                                             .addMap("map_field", Pair.of("foo", "baz"))
+                                             .addList("list_field", singletonMap("foo", "baz"))
+                                             .getRecord();
+
+        Assert.assertNull(Utilities.extractField(null, record));
+        Assert.assertNull(Utilities.extractField("", record));
+        Assert.assertNull(Utilities.extractField("id", record));
+        Assert.assertEquals(Utilities.extractField("map_field.foo", record), "baz");
+        Assert.assertNull(Utilities.extractField("list_field.bar", record));
+    }
+
+    @Test
+    public void testNumericExtraction() {
+        BulletRecord record = RecordBox.get().add("foo", "1.20").add("bar", 42L)
+                                             .addMap("map_field", Pair.of("foo", 21.0))
+                                             .getRecord();
+
+        Assert.assertNull(Utilities.extractFieldAsNumber(null, record));
+        Assert.assertNull(Utilities.extractFieldAsNumber("", record));
+        Assert.assertNull(Utilities.extractFieldAsNumber("id", record));
+        Assert.assertEquals(Utilities.extractFieldAsNumber("foo", record), ((Number) 1.20).doubleValue());
+        Assert.assertEquals(Utilities.extractFieldAsNumber("bar", record), ((Number) 42).longValue());
+        Assert.assertEquals(Utilities.extractFieldAsNumber("map_field.foo", record), ((Number) 21).doubleValue());
     }
 }

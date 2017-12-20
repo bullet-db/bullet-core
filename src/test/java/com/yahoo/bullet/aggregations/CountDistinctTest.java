@@ -35,9 +35,8 @@ public class CountDistinctTest {
         Map<String, String> asMap = makeGroupFields(fields);
         aggregation.setFields(asMap);
         aggregation.setAttributes(attributes);
-        aggregation.setConfiguration(addMetadata(configuration, metadata).validate());
 
-        CountDistinct countDistinct = new CountDistinct(aggregation);
+        CountDistinct countDistinct = new CountDistinct(aggregation, addMetadata(configuration, metadata).validate());
         countDistinct.initialize();
         return countDistinct;
     }
@@ -48,7 +47,7 @@ public class CountDistinctTest {
     }
 
     public static CountDistinct makeCountDistinct(List<String> fields, String newName) {
-        return makeCountDistinct(fields, newName, null);
+        return makeCountDistinct(fields, newName, (Map.Entry<Concept, String>[]) null);
     }
 
     public static CountDistinct makeCountDistinct(List<String> fields) {

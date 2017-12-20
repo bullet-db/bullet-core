@@ -5,9 +5,6 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Config;
-import com.yahoo.bullet.common.Validator;
 import com.yahoo.bullet.result.Metadata;
 import com.yahoo.bullet.result.Metadata.Concept;
 import org.testng.Assert;
@@ -51,25 +48,25 @@ public class BulletConfigTest {
     @Test
     public void testNoFiles() {
         BulletConfig config = new BulletConfig();
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
 
         config = new BulletConfig(null);
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
 
         config = new BulletConfig("");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
     }
 
     @Test
     public void testMissingFile() {
         BulletConfig config = new BulletConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
     }
 
     @Test
     public void testCustomConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
         Assert.assertEquals(config.get(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES), 16384);
     }
@@ -141,12 +138,12 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 10000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
 
         Config another = new BulletConfig(null);
         another.clear();
-        another.set(BulletConfig.SPECIFICATION_MAX_DURATION, 42);
+        another.set(BulletConfig.QUERY_MAX_DURATION, 42);
         config.set("pi", 3.14);
 
         config.merge(another);
@@ -155,7 +152,7 @@ public class BulletConfigTest {
         config.merge(null);
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(BulletConfig.SPECIFICATION_MAX_DURATION), 42);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 42);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
         Assert.assertEquals(config.get("pi"), 3.14);
     }

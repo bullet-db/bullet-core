@@ -125,6 +125,11 @@ public class Raw implements Strategy {
     }
 
     @Override
+    public void reset() {
+        aggregate = new ArrayList<>();
+    }
+
+    @Override
     public Optional<List<Error>> initialize() {
         return Optional.empty();
     }

@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 public class StrategyTest {
     class TestStrategy implements Strategy {
@@ -34,8 +35,12 @@ public class StrategyTest {
         }
 
         @Override
-        public List<Error> initialize() {
-            return null;
+        public Optional<List<Error>> initialize() {
+            return Optional.empty();
+        }
+
+        @Override
+        public void reset() {
         }
     }
 

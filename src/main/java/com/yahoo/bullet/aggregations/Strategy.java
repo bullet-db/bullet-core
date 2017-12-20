@@ -68,5 +68,10 @@ public interface Strategy extends Initializable {
      * @return An {@link List} of {@link Error} that contains errors if validation failed or null if succeeded.
      */
     Optional<List<Error>> initialize();
+
+    /**
+     * Reset the result stored so far.
+     */
+    void reset();
 }
 
