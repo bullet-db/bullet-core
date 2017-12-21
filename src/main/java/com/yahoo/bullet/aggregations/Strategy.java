@@ -9,6 +9,7 @@ import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
+import com.yahoo.bullet.result.Metadata;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,22 @@ public interface Strategy extends Initializable {
      * @return The resulting {@link Clip} representing aggregation and metadata of the data aggregated so far.
      */
     Clip getAggregation();
+
+    /**
+     * Get the Aggregation done so far as a {@link List} of {@link BulletRecord}.
+     *
+     * @return The resulting list of records representing the aggregation results.
+     */
+    List<BulletRecord> getAggregatedRecords();
+
+    /**
+     * Get the {@link Metadata} so far. By default, returns an empty one.
+     *
+     * @return The resulting metadata of the data aggregated so far.
+     */
+    default Metadata getMetadata() {
+        return new Metadata();
+    }
 
     /**
      * {@inheritDoc}

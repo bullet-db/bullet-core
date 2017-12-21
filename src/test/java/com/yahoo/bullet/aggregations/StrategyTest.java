@@ -35,6 +35,11 @@ public class StrategyTest {
         }
 
         @Override
+        public List<BulletRecord> getAggregatedRecords() {
+            return null;
+        }
+
+        @Override
         public Optional<List<Error>> initialize() {
             return Optional.empty();
         }

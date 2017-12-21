@@ -31,7 +31,6 @@ public class BulletConfig extends Config {
     public static final String AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "bullet.query.aggregation.composite.field.separator";
 
     public static final String RAW_AGGREGATION_MAX_SIZE = "bullet.query.aggregation.raw.max.size";
-    public static final String RAW_AGGREGATION_MICRO_BATCH_SIZE = "bullet.query.aggregation.raw.micro.batch.size";
 
     public static final String COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES = "bullet.query.aggregation.count.distinct.sketch.entries";
     public static final String COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING = "bullet.query.aggregation.count.distinct.sketch.sampling";
@@ -68,11 +67,12 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "|";
 
     public static final int DEFAULT_RAW_AGGREGATION_MAX_SIZE = 100;
-    public static final int DEFAULT_RAW_AGGREGATION_MICRO_BATCH_SIZE = 1;
 
+    public static final String QUICKSELECT_SKETCH_FAMILY = "QuickSelect";
+    public static final String ALPHA_SKETCH_FAMILY = "Alpha";
     public static final int DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES = 16384;
     public static final float DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING = 1.0f;
-    public static final String DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY = "Alpha";
+    public static final String DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY = ALPHA_SKETCH_FAMILY;
     public static final int DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR = 8;
 
     public static final int DEFAULT_GROUP_AGGREGATION_SKETCH_ENTRIES = 512;
@@ -146,10 +146,6 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_RAW_AGGREGATION_MAX_SIZE)
                  .checkIf(Validator::isPositiveInt)
                  .castTo(Validator::asInt);
-        VALIDATOR.define(RAW_AGGREGATION_MICRO_BATCH_SIZE)
-                 .defaultTo(DEFAULT_RAW_AGGREGATION_MICRO_BATCH_SIZE)
-                 .checkIf(Validator::isPositiveInt)
-                 .castTo(Validator::asInt);
 
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES)
@@ -162,7 +158,8 @@ public class BulletConfig extends Config {
                  .castTo(Validator::asFloat);
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isString)
+                 .checkIf(Validator.isIn(ALPHA_SKETCH_FAMILY, QUICKSELECT_SKETCH_FAMILY));
         VALIDATOR.define(COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR)
                  .defaultTo(DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR)
                  .checkIf(Validator::isPowerOfTwo)

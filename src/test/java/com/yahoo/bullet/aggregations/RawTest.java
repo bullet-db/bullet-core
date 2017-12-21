@@ -35,28 +35,23 @@ public class RawTest {
         }
     }
 
-    public static Raw makeRaw(int size, int microBatchSize, int maxSize) {
+    private static Raw makeRaw(int size, int maxSize) {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(size);
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
-        config.set(BulletConfig.RAW_AGGREGATION_MICRO_BATCH_SIZE, microBatchSize);
         Raw raw = new Raw(aggregation, config.validate());
         raw.initialize();
         return raw;
     }
 
-    public static Raw makeRaw(int size, int microBatchSize) {
-        return makeRaw(size, microBatchSize, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
-    }
-
-    public static Raw makeRaw(int size) {
+    private static Raw makeRaw(int size) {
         return makeRaw(size, 1);
     }
 
     @Test
     public void testInitialize() {
-        Assert.assertNull(makeRaw(20, 2, 15).initialize());
+        Assert.assertNull(makeRaw(20, 15).initialize());
     }
 
     @Test
@@ -84,7 +79,7 @@ public class RawTest {
     }
 
     @Test
-    public void testWritingBadRecord() throws IOException {
+    public void testWritingBadRecord() {
         BulletRecord mocked = new NoSerDeBulletRecord();
 
         Raw raw = makeRaw(1);
@@ -93,7 +88,7 @@ public class RawTest {
     }
 
     @Test
-    public void testReadingBadSerialization() throws IOException {
+    public void testReadingBadSerialization() {
         Raw raw = makeRaw(1);
         raw.combine(new byte[0]);
 
@@ -101,7 +96,7 @@ public class RawTest {
     }
 
     @Test
-    public void testReadingEmpty() throws IOException {
+    public void testReadingEmpty() {
         Raw raw = makeRaw(1);
         raw.combine(SerializerDeserializer.toBytes(new ArrayList<>()));
         Assert.assertNull(raw.getSerializedAggregation());
@@ -225,7 +220,7 @@ public class RawTest {
 
     @Test
     public void testLimitConfiguredMaximums() {
-        Raw raw = makeRaw(50000, 1, 200);
+        Raw raw = makeRaw(50000, 200);
         List<BulletRecord> records = IntStream.range(0, 300).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
         records.stream().map(TestHelpers::getListBytes).forEach(raw::combine);

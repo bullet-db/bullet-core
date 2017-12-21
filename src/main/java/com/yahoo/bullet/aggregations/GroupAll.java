@@ -14,6 +14,7 @@ import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
+import com.yahoo.bullet.result.Metadata;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -66,6 +67,11 @@ public class GroupAll implements Strategy {
     @Override
     public Clip getAggregation() {
         return Clip.of(data.getMetricsAsBulletRecord());
+    }
+
+    @Override
+    public List<BulletRecord> getAggregatedRecords() {
+        return null;
     }
 
     @Override

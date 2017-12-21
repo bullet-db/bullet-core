@@ -171,6 +171,20 @@ public class Querier implements Serializable {
     }
 
     /**
+     * Returns the {@link List} of {@link BulletRecord} so far. See {@link #getResult()}
+     *
+     * @return
+     */
+    public List<BulletRecord> getRecords() {
+        try {
+            return strategy.getAggregation().getRecords();
+        } catch (RuntimeException e) {
+            log.error("Unable to get serialized result for query {}", this);
+            return null;
+        }
+    }
+
+    /**
      * Gets the resulting {@link Clip} of the results so far.
      *
      * @return A non-null {@link Clip} representing the aggregated result.
@@ -181,7 +195,6 @@ public class Querier implements Serializable {
             result = strategy.getAggregation();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
-            log.error("Skipping due to", e);
             result = Clip.of(Metadata.of(Error.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
         result.add(getResultMetadata(id));
@@ -210,9 +223,8 @@ public class Querier implements Serializable {
 
     @Override
     public String toString() {
-        return query.toString();
+        return String.format("%s : %s", id, query.toString());
     }
-
 
     private boolean filter(BulletRecord record) {
         List<Clause> filters = query.getFilters();

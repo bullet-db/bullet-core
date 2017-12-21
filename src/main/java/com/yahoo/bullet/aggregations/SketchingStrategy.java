@@ -62,7 +62,6 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
 
         fieldsToNames = aggregation.getFields();
         fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());
-
     }
 
     @Override
@@ -82,6 +81,16 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     @Override
+    public List<BulletRecord> getAggregatedRecords() {
+        return sketch.getRecords();
+    }
+
+    @Override
+    public Metadata getMetadata() {
+        return sketch.getMetadata(getMetaKey(), metadataKeys);
+    }
+
+    @Override
     public void reset() {
         sketch.reset();
     }
@@ -92,7 +101,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @param record The non-null record containing data for the fields.
      * @return A string representing the composite field.
      */
-    public String composeField(BulletRecord record) {
+    String composeField(BulletRecord record) {
         return composeField(fields.stream().map(field -> Objects.toString(extractField(field, record))));
     }
 
@@ -102,7 +111,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @param fields The fields to combine.
      * @return A string that represents the fields.
      */
-    public String composeField(Stream<String> fields) {
+    String composeField(Stream<String> fields) {
         return fields.collect(Collectors.joining(separator));
     }
 
@@ -112,7 +121,11 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @param field The composite field to break down.
      * @return A {@link List} of the fields that this field was made of.
      */
-    public List<String> decomposeField(String field) {
+    List<String> decomposeField(String field) {
         return Arrays.asList(field.split(Pattern.quote(separator)));
+    }
+
+    private String getMetaKey() {
+        return metadataKeys.getOrDefault(Metadata.Concept.SKETCH_METADATA.getName(), null);
     }
 }

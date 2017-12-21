@@ -15,6 +15,8 @@ import com.yahoo.sketches.Family;
 import com.yahoo.sketches.frequencies.ErrorType;
 import com.yahoo.sketches.frequencies.ItemsSketch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,15 +78,10 @@ public class FrequentItemsSketch extends Sketch {
     }
 
     @Override
-    public byte[] serialize() {
-        return sketch.toByteArray(SER_DE);
-    }
+    public List<BulletRecord> getRecords() {
+        List<BulletRecord> data = new ArrayList<>();
 
-    @Override
-    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
-        Clip data = super.getResult(metaKey, conceptKeys);
         ItemsSketch.Row<String>[] items = sketch.getFrequentItems(threshold, type);
-
         for (int i = 0; i < items.length && i < maxSize; ++i) {
             ItemsSketch.Row<String> item = items[i];
             BulletRecord record = new BulletRecord();
@@ -92,13 +89,24 @@ public class FrequentItemsSketch extends Sketch {
             record.setLong(COUNT_FIELD, item.getEstimate());
             data.add(record);
         }
-
         return data;
     }
 
     @Override
-    protected Map<String, Object> getMetadata(Map<String, String> conceptKeys) {
-        Map<String, Object> metadata = super.getMetadata(conceptKeys);
+    public byte[] serialize() {
+        return sketch.toByteArray(SER_DE);
+    }
+
+    @Override
+    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
+        Clip data = super.getResult(metaKey, conceptKeys);
+        data.add(getRecords());
+        return data;
+    }
+
+    @Override
+    protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
+        Map<String, Object> metadata = super.addMetadata(conceptKeys);
         addIfNonNull(metadata, conceptKeys.get(Concept.ITEMS_SEEN.getName()), this::getStreamLength);
         addIfNonNull(metadata, conceptKeys.get(Concept.ACTIVE_ITEMS.getName()), this::getItemsStored);
         addIfNonNull(metadata, conceptKeys.get(Concept.MAXIMUM_COUNT_ERROR.getName()), this::getMaximumError);
@@ -108,11 +116,6 @@ public class FrequentItemsSketch extends Sketch {
     @Override
     public void reset() {
         sketch.reset();
-    }
-
-    @Override
-    protected void collect() {
-        // Nothing to do
     }
 
     @Override

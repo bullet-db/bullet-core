@@ -13,7 +13,7 @@ import com.yahoo.sketches.ResizeFactor;
 /**
  * The parent class for {@link SketchingStrategy} that use the KMV type of Sketch - Theta and Tuple.
  */
-public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy<S> {
+abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy<S> {
     /**
      * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
@@ -21,7 +21,7 @@ public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public KMVStrategy(Aggregation aggregation, BulletConfig config) {
+    KMVStrategy(Aggregation aggregation, BulletConfig config) {
         super(aggregation, config);
     }
 
@@ -32,7 +32,7 @@ public abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy
      * @return A {@link ResizeFactor} represented by the integer or {@link ResizeFactor#X8} otherwise.
      */
     @SuppressWarnings("unchecked")
-    public ResizeFactor getResizeFactor(String key) {
+    ResizeFactor getResizeFactor(String key) {
         return getResizeFactor(config.getAs(key, Integer.class));
     }
     /**

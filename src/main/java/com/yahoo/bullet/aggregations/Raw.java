@@ -54,7 +54,6 @@ public class Raw implements Strategy {
         return consumed + combined < size;
     }
 
-
     @Override
     public void consume(BulletRecord data) {
         if (!isAcceptingData() || data == null) {
@@ -105,17 +104,25 @@ public class Raw implements Strategy {
     }
 
     /**
-     * Gets the aggregated records so far since the last call to {@link #getSerializedAggregation()}. As with
-     * {@link #getSerializedAggregation()}, this method resets the aggregated data so far.
+     * Gets the aggregated records so far since the last call to {@link #reset()}. The records have a size that is at
+     * most the maximum specified by the {@link Aggregation}.
      *
-     * @return a {@link Clip} of the combined records so far. The records have a size that is at most the maximum
-     * specified by the {@link Aggregation}.
+     * @return a {@link Clip} of the records so far.
      */
     @Override
     public Clip getAggregation() {
-        List<BulletRecord> aggregation = aggregate;
-        aggregate = new ArrayList<>();
-        return Clip.of(aggregation);
+        return Clip.of(getAggregatedRecords());
+    }
+
+    /**
+     * Gets the aggregated records so far since the last call to {@link #reset()}. The records have a size that is at
+     * most the maximum specified by the {@link Aggregation}.
+     *
+     * @return a {@link List} of the records so far.
+     */
+    @Override
+    public List<BulletRecord> getAggregatedRecords() {
+        return aggregate;
     }
 
     @Override

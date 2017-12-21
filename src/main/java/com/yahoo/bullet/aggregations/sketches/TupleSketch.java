@@ -9,6 +9,7 @@ import com.yahoo.bullet.aggregations.grouping.CachingGroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupDataSummary;
 import com.yahoo.bullet.aggregations.grouping.GroupDataSummaryFactory;
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata.Concept;
 import com.yahoo.memory.NativeMemory;
@@ -21,6 +22,8 @@ import com.yahoo.sketches.tuple.Union;
 import com.yahoo.sketches.tuple.UpdatableSketch;
 import com.yahoo.sketches.tuple.UpdatableSketchBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class TupleSketch extends KMVSketch {
@@ -58,14 +61,21 @@ public class TupleSketch extends KMVSketch {
      */
     public void update(String key, CachingGroupData data) {
         updateSketch.update(key, data);
-        updated = true;
+        super.update();
     }
 
     @Override
     public void union(byte[] serialized) {
         Sketch<GroupDataSummary> deserialized = Sketches.heapifySketch(new NativeMemory(serialized));
         unionSketch.update(deserialized);
-        unioned = true;
+        super.union();
+    }
+
+    @Override
+    public void reset() {
+        unionSketch.reset();
+        updateSketch.reset();
+        super.reset();
     }
 
     @Override
@@ -76,8 +86,16 @@ public class TupleSketch extends KMVSketch {
 
     @Override
     public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
+        collect();
         Clip result = super.getResult(metaKey, conceptKeys);
+        result.add(getRecords());
+        return result;
+    }
 
+    @Override
+    public List<BulletRecord> getRecords() {
+        collect();
+        List<BulletRecord> result = new ArrayList<>();
         SketchIterator<GroupDataSummary> iterator = merged.iterator();
         for (int count = 0; iterator.next() && count < maxSize; count++) {
             GroupData data = iterator.getSummary().getData();
@@ -87,29 +105,30 @@ public class TupleSketch extends KMVSketch {
     }
 
     @Override
-    protected void collect() {
-        if (updated && unioned) {
-            unionSketch.update(updateSketch.compact());
-        }
-        merged = unioned ? unionSketch.getResult() : updateSketch.compact();
-    }
-
-    @Override
-    public void reset() {
-        unioned = false;
-        updated = false;
-        unionSketch.reset();
-        updateSketch.reset();
-    }
-
-    // Metadata
-
-    @Override
-    protected Map<String, Object> getMetadata(Map<String, String> conceptKeys) {
-        Map<String, Object> metadata = super.getMetadata(conceptKeys);
+    protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
+        // The super will call collect()
+        Map<String, Object> metadata = super.addMetadata(conceptKeys);
         addIfNonNull(metadata, conceptKeys.get(Concept.UNIQUES_ESTIMATE.getName()), this::getUniquesEstimate);
         return metadata;
     }
+
+    @Override
+    protected void collectUpdateAndUnionSketch() {
+        unionSketch.update(updateSketch.compact());
+        collectUnionSketch();
+    }
+
+    @Override
+    protected void collectUpdateSketch() {
+        merged = updateSketch.compact();
+    }
+
+    @Override
+    protected void collectUnionSketch() {
+        merged = unionSketch.getResult();
+    }
+
+    // Metadata
 
     @Override
     protected Boolean isEstimationMode() {
@@ -147,7 +166,7 @@ public class TupleSketch extends KMVSketch {
      *
      * @return A Double representing the number of unique values in the Sketch.
      */
-    protected Double getUniquesEstimate() {
+    private Double getUniquesEstimate() {
         return merged.getEstimate();
 
     }

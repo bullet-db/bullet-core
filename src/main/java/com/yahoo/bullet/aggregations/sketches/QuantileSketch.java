@@ -26,7 +26,7 @@ import static com.yahoo.bullet.common.Utilities.round;
 /**
  * Wraps operations for working with a {@link DoublesSketch} - Quantile Sketch.
  */
-public class QuantileSketch extends Sketch {
+public class QuantileSketch extends DualSketch {
     private UpdateDoublesSketch updateSketch;
     private DoublesUnion unionSketch;
     private DoublesSketch merged;
@@ -95,14 +95,14 @@ public class QuantileSketch extends Sketch {
      */
     public void update(double data) {
         updateSketch.update(data);
-        updated = true;
+        super.update();
     }
 
     @Override
     public void union(byte[] serialized) {
         DoublesSketch sketch = DoublesSketch.heapify(new NativeMemory(serialized));
         unionSketch.update(sketch);
-        unioned = true;
+        super.union();
     }
 
     @Override
@@ -112,8 +112,8 @@ public class QuantileSketch extends Sketch {
     }
 
     @Override
-    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
-        Clip data = super.getResult(metaKey, conceptKeys);
+    public List<BulletRecord> getRecords() {
+        collect();
         double[] domain = getDomain();
         double[] range;
         if (type == DistributionType.QUANTILE) {
@@ -123,29 +123,21 @@ public class QuantileSketch extends Sketch {
         } else {
             range = merged.getCDF(domain);
         }
-        data.add(zip(domain, range, type, getNumberOfEntries()));
+        return zip(domain, range, type, getNumberOfEntries());
+    }
+
+    @Override
+    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
+        collect();
+        Clip data = super.getResult(metaKey, conceptKeys);
+        data.add(getRecords());
         return data;
     }
 
     @Override
-    protected void collect() {
-        if (updated && unioned) {
-            unionSketch.update(updateSketch);
-        }
-        merged = unioned ? unionSketch.getResult() : updateSketch.compact();
-    }
-
-    @Override
-    public void reset() {
-        unioned = false;
-        updated = false;
-        updateSketch.reset();
-        unionSketch.reset();
-    }
-
-    @Override
-    protected Map<String, Object> getMetadata(Map<String, String> conceptKeys) {
-        Map<String, Object> metadata = super.getMetadata(conceptKeys);
+    protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
+        collect();
+        Map<String, Object> metadata = super.addMetadata(conceptKeys);
 
         addIfNonNull(metadata, conceptKeys.get(Concept.MINIMUM_VALUE.getName()), this::getMinimum);
         addIfNonNull(metadata, conceptKeys.get(Concept.MAXIMUM_VALUE.getName()), this::getMaximum);
@@ -153,6 +145,22 @@ public class QuantileSketch extends Sketch {
         addIfNonNull(metadata, conceptKeys.get(Concept.NORMALIZED_RANK_ERROR.getName()), this::getNormalizedRankError);
 
         return metadata;
+    }
+
+    @Override
+    protected void collectUpdateAndUnionSketch() {
+        unionSketch.update(updateSketch);
+        collectUnionSketch();
+    }
+
+    @Override
+    protected void collectUpdateSketch() {
+        merged = updateSketch.compact();
+    }
+
+    @Override
+    protected void collectUnionSketch() {
+        merged = unionSketch.getResult();
     }
 
     @Override
