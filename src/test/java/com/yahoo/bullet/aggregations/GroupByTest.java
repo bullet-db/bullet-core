@@ -6,12 +6,13 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata.Concept;
@@ -107,14 +108,14 @@ public class GroupByTest {
         List<String> fields = asList("fieldA", "fieldB");
         GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(AVG, null, null),
                                       makeGroupOperation(SUM, null, "sum"));
-        Optional<List<Error>> optionalErrors = groupBy.initialize();
+        Optional<List<BulletError>> optionalErrors = groupBy.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
+        Assert.assertEquals(errors.get(0), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
                                                                GroupOperationType.AVG,
                                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
-        Assert.assertEquals(errors.get(1), Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
+        Assert.assertEquals(errors.get(1), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
                                                                GroupOperationType.SUM,
                                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
     }

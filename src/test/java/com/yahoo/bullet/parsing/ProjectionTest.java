@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,7 +35,7 @@ public class ProjectionTest {
     @Test
     public void testInitialize() {
         Projection projection = new Projection();
-        Optional<List<Error>> errors = projection.initialize();
+        Optional<List<BulletError>> errors = projection.initialize();
         Assert.assertFalse(errors.isPresent());
     }
 

@@ -7,10 +7,11 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.Utilities.extractFieldAsNumber;
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -55,18 +56,18 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.PMF.getName(), DistributionType.PMF);
         SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.CDF.getName(), DistributionType.CDF);
     }
-    public static final Error REQUIRES_TYPE_ERROR =
+    public static final ParsingError REQUIRES_TYPE_ERROR =
             makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
                       SUPPORTED_DISTRIBUTION_TYPES.keySet().stream().collect(Collectors.joining(", ")));
-    public static final Error REQUIRES_POINTS_ERROR =
+    public static final ParsingError REQUIRES_POINTS_ERROR =
             makeError("The DISTRIBUTION type requires at least one point specified in attributes",
                       "Please add a list of numeric points with points, OR " +
                       "specify a number of equidistant points to generate with numberOfPoints OR " +
                       "specify a range to generate points for with start, end and increment (start < end, increment > 0)");
-    public static final Error REQUIRES_POINTS_PROPER_RANGE =
+    public static final ParsingError REQUIRES_POINTS_PROPER_RANGE =
             makeError(DistributionType.QUANTILE.getName() + " requires points in the proper range",
                       "Please add or generate points: 0 <= point <= 1");
-    public static final Error REQUIRES_ONE_FIELD_ERROR =
+    public static final ParsingError REQUIRES_ONE_FIELD_ERROR =
             makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
 
     /**
@@ -89,7 +90,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         if (Utilities.isEmpty(fields) || fields.size() != 1) {
             return Optional.of(singletonList(REQUIRES_ONE_FIELD_ERROR));
         }

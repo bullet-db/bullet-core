@@ -5,7 +5,8 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -14,12 +15,12 @@ import com.yahoo.bullet.result.Metadata;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 
 public interface Strategy extends Initializable {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
 
-    Error REQUIRES_FIELD_ERROR =
+    ParsingError REQUIRES_FIELD_ERROR =
             makeError("This aggregation type requires at least one field", REQUIRES_FEED_RESOLUTION);
 
     /**
@@ -82,9 +83,9 @@ public interface Strategy extends Initializable {
      *
      * Checks to see if this Strategy is valid. Any other methods may behave unexpectedly unless initialize passes.
      *
-     * @return An {@link List} of {@link Error} that contains errors if validation failed or null if succeeded.
+     * @return An {@link List} of {@link ParsingError} that contains errors if validation failed or null if succeeded.
      */
-    Optional<List<Error>> initialize();
+    Optional<List<BulletError>> initialize();
 
     /**
      * Reset the result stored so far.

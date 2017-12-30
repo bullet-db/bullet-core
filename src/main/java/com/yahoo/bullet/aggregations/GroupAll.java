@@ -5,16 +5,15 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.SerializerDeserializer;
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class GroupAll implements Strategy {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         if (Utilities.isEmpty(operations)) {
             return Optional.of(singletonList(GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR));
         }

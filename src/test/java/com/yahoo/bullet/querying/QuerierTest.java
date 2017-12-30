@@ -1,12 +1,18 @@
+/*
+ *  Copyright 2017, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.FilterClauseTest;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
@@ -85,7 +91,7 @@ public class QuerierTest {
         }
 
         @Override
-        public Optional<List<Error>> initialize() {
+        public Optional<List<BulletError>> initialize() {
             return Optional.empty();
         }
 
@@ -222,7 +228,7 @@ public class QuerierTest {
         Assert.assertEquals(actualMeta.size(), 1);
         Assert.assertNotNull(actualMeta.get(Metadata.ERROR_KEY));
 
-        Error expectedError = Error.makeError("Getting aggregation test failure",
+        ParsingError expectedError = ParsingError.makeError("Getting aggregation test failure",
                                               Querier.AGGREGATION_FAILURE_RESOLUTION);
         Assert.assertEquals(actualMeta.get(Metadata.ERROR_KEY), singletonList(expectedError));
 

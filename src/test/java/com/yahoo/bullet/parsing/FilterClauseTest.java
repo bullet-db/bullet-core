@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,9 +46,9 @@ public class FilterClauseTest {
     @Test
     public void testInitializeNoOperation() {
         FilterClause filterClause = new FilterClause();
-        Optional<List<Error>> optionalErrors = filterClause.initialize();
+        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Clause.OPERATION_MISSING);
     }
@@ -56,7 +57,7 @@ public class FilterClauseTest {
     public void testInitializeWithOperation() {
         FilterClause filterClause = new FilterClause();
         filterClause.setOperation(FilterType.EQUALS);
-        Optional<List<Error>> optionalErrors = filterClause.initialize();
+        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
 
@@ -66,7 +67,7 @@ public class FilterClauseTest {
         filterClause.setOperation(FilterType.REGEX_LIKE);
         filterClause.setValues(singletonList(".g.*"));
         Assert.assertNull(filterClause.getPatterns());
-        Optional<List<Error>> optionalErrors = filterClause.initialize();
+        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
         Assert.assertNotNull(filterClause.getPatterns());
         Assert.assertEquals(filterClause.getPatterns(), singletonList(Pattern.compile(".g.*")));
@@ -78,7 +79,7 @@ public class FilterClauseTest {
         filterClause.setOperation(FilterType.REGEX_LIKE);
         filterClause.setValues(singletonList("*TEST*"));
         Assert.assertNull(filterClause.getPatterns());
-        Optional<List<Error>> optionalErrors = filterClause.initialize();
+        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
         Assert.assertNotNull(filterClause.getPatterns());
         Assert.assertTrue(filterClause.getPatterns().isEmpty());

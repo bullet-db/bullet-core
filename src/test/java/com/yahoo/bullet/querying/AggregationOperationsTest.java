@@ -14,7 +14,6 @@ import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationOperator;
 import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;

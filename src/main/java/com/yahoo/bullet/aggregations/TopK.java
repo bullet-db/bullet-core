@@ -5,11 +5,11 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.aggregations.sketches.FrequentItemsSketch;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.sketches.frequencies.ErrorType;
@@ -58,7 +58,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         return Utilities.isEmpty(fields) ? Optional.of(singletonList(REQUIRES_FIELD_ERROR)) : Optional.empty();
     }
 

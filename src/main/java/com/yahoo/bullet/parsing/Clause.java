@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Collections.singletonList;
 
 @Slf4j @Getter @Setter
@@ -27,7 +28,7 @@ public abstract class Clause implements Configurable, Initializable {
     protected FilterType operation;
 
     public static final String OPERATION_FIELD = "operation";
-    public static final Error OPERATION_MISSING =
+    public static final ParsingError OPERATION_MISSING =
         makeError("Missing operation field", "You must specify an operation field in all the filters");
 
     @Override
@@ -36,7 +37,7 @@ public abstract class Clause implements Configurable, Initializable {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         if (operation == null) {
             return Optional.of(singletonList(OPERATION_MISSING));
         }

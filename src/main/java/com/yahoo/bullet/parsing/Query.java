@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import lombok.AccessLevel;
@@ -67,8 +68,8 @@ public class Query implements Configurable, Initializable {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
-        List<Error> errors = new ArrayList<>();
+    public Optional<List<BulletError>> initialize() {
+        List<BulletError> errors = new ArrayList<>();
         if (filters != null) {
             for (Clause clause : filters) {
                 clause.initialize().ifPresent(errors::addAll);

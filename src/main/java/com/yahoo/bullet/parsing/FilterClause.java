@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.yahoo.bullet.common.BulletError;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class FilterClause extends Clause {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         if (operation == REGEX_LIKE) {
             patterns = values.stream().map(FilterClause::compile).filter(Objects::nonNull).collect(Collectors.toList());
         }

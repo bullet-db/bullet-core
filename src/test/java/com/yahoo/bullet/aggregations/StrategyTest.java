@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import org.testng.Assert;
@@ -40,7 +40,7 @@ public class StrategyTest {
         }
 
         @Override
-        public Optional<List<Error>> initialize() {
+        public Optional<List<BulletError>> initialize() {
             return Optional.empty();
         }
 

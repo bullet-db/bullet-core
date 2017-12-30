@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Arrays.asList;
 
 public class BulletExceptionTest {

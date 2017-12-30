@@ -5,21 +5,20 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.parsing.Error;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
 public class BulletException extends Exception {
-    private List<Error> errors;
+    private List<BulletError> errors;
 
     /**
-     * Creates a BulletException from a {@link List} of {@link Error} objects.
+     * Creates a BulletException from a {@link List} of {@link BulletError} objects.
      *
      * @param errors The errors that this should wrap.
      */
-    public BulletException(List<Error> errors) {
+    public BulletException(List<BulletError> errors) {
         this.errors = errors;
     }
 }

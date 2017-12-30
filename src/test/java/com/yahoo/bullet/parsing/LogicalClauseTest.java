@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -56,16 +57,16 @@ public class LogicalClauseTest {
     @Test
     public void testInitializeWithNoOperation() {
         LogicalClause clause = new LogicalClause();
-        Optional<List<Error>> optionalErrors = clause.initialize();
+        Optional<List<BulletError>> optionalErrors = clause.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.get(0), Clause.OPERATION_MISSING);
     }
     @Test
     public void testInitializeWithOperation() {
         LogicalClause clause = new LogicalClause();
         clause.setOperation(AND);;
-        Optional<List<Error>> errors = clause.initialize();
+        Optional<List<BulletError>> errors = clause.initialize();
         Assert.assertFalse(errors.isPresent());
     }
 }

@@ -5,8 +5,6 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.parsing.Error;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +12,7 @@ public interface Initializable {
     /**
      * Validates and initializes this object.
      *
-     * @return An {@link Optional} {@link List} of {@link Error} in this object or its constituents.
+     * @return An {@link Optional} {@link List} of {@link BulletError} in this object or its constituents.
      */
-    Optional<List<Error>> initialize();
+    Optional<List<BulletError>> initialize();
 }

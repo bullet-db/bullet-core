@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -37,7 +38,7 @@ public class Aggregation implements Configurable, Initializable {
     public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
             new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
                                  AggregationType.DISTRIBUTION, AggregationType.TOP_K));
-    public static final Error TYPE_NOT_SUPPORTED_ERROR =
+    public static final ParsingError TYPE_NOT_SUPPORTED_ERROR =
             makeError("Unknown aggregation type", "Current supported aggregation types are: RAW (or LIMIT), " +
                                                   "GROUP (or DISTINCT), COUNT DISTINCT, DISTRIBUTION, TOP K");
 
@@ -59,7 +60,7 @@ public class Aggregation implements Configurable, Initializable {
     }
 
     @Override
-    public Optional<List<Error>> initialize() {
+    public Optional<List<BulletError>> initialize() {
         // Includes null
         return SUPPORTED_AGGREGATION_TYPES.contains(type) ? Optional.empty() :
                                                             Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));

@@ -8,10 +8,11 @@ package com.yahoo.bullet.querying;
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Parser;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -80,6 +81,7 @@ public class Querier implements Serializable {
      * @param queryString The query as a string.
      * @param config The validated {@link BulletConfig} configuration to use.
      * @throws BulletException if there was an issue.
+     * @throws JsonParseException if there was an issue parsing the query.
      */
     public Querier(String id, String queryString, BulletConfig config) throws JsonParseException, BulletException {
         this(id, Parser.parse(queryString, config), config);
@@ -198,7 +200,7 @@ public class Querier implements Serializable {
             result = strategy.getAggregation();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
-            result = Clip.of(Metadata.of(Error.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
+            result = Clip.of(Metadata.of(ParsingError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
         result.add(getResultMetadata(id));
         return result;
@@ -282,7 +284,7 @@ public class Querier implements Serializable {
     }
 
     private static void instantiate(Initializable initializable) throws BulletException {
-        Optional<List<Error>> errors = initializable.initialize();
+        Optional<List<BulletError>> errors = initializable.initialize();
         if (errors.isPresent()) {
             throw new BulletException(errors.get());
         }

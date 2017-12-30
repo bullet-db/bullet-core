@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import org.testng.Assert;
@@ -139,22 +140,22 @@ public class QueryTest {
     public void testInitialize() {
         Query query = new Query();
         Aggregation mockAggregation = mock(Aggregation.class);
-        Optional<List<Error>> aggregationErrors = Optional.of(asList(Error.of("foo", new ArrayList<>()),
-                                                                     Error.of("bar", new ArrayList<>())));
+        Optional<List<BulletError>> aggregationErrors = Optional.of(asList(new ParsingError("foo", new ArrayList<>()),
+                                                                           new ParsingError("bar", new ArrayList<>())));
         when(mockAggregation.initialize()).thenReturn(aggregationErrors);
         query.setAggregation(mockAggregation);
 
         Clause mockClauseA = mock(Clause.class);
         Clause mockClauseB = mock(Clause.class);
-        when(mockClauseA.initialize()).thenReturn(Optional.of(singletonList(Error.of("baz", new ArrayList<>()))));
-        when(mockClauseB.initialize()).thenReturn(Optional.of(singletonList(Error.of("qux", new ArrayList<>()))));
+        when(mockClauseA.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("baz", new ArrayList<>()))));
+        when(mockClauseB.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("qux", new ArrayList<>()))));
         query.setFilters(asList(mockClauseA, mockClauseB));
 
         Projection mockProjection = mock(Projection.class);
-        when(mockProjection.initialize()).thenReturn(Optional.of(singletonList(Error.of("quux", new ArrayList<>()))));
+        when(mockProjection.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("quux", new ArrayList<>()))));
         query.setProjection(mockProjection);
 
-        Optional<List<Error>> errorList = query.initialize();
+        Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertTrue(errorList.isPresent());
         Assert.assertEquals(errorList.get().size(), 5);
     }
@@ -165,7 +166,7 @@ public class QueryTest {
         query.setProjection(null);
         query.setFilters(null);
         query.setAggregation(null);
-        Optional<List<Error>> errorList = query.initialize();
+        Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertFalse(errorList.isPresent());
     }
 

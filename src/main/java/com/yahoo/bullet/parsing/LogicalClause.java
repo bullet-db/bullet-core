@@ -11,7 +11,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j @Getter @Setter
 public class LogicalClause extends Clause {
@@ -28,11 +27,6 @@ public class LogicalClause extends Clause {
     @Override
     public String toString() {
         return "{" + super.toString() + ", " + "clauses: " + clauses + "}";
-    }
-
-    @Override
-    public Optional<List<Error>> initialize() {
-        return super.initialize();
     }
 }
 

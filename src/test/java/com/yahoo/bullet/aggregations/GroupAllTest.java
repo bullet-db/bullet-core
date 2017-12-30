@@ -7,9 +7,10 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.AggregationUtils;
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
@@ -61,9 +62,9 @@ public class GroupAllTest {
     @Test
     public void testInitialize() {
         GroupAll groupAll = makeGroupAll(Collections.emptyMap());
-        Optional<List<Error>> optionalErrors = groupAll.initialize();
+        Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
 
@@ -71,7 +72,7 @@ public class GroupAllTest {
         optionalErrors = groupAll.initialize();
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
+        Assert.assertEquals(errors.get(0), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
                                                               GroupOperationType.AVG,
                                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
 

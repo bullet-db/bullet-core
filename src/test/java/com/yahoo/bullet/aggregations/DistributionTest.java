@@ -6,9 +6,9 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata.Concept;
@@ -95,8 +95,8 @@ public class DistributionTest {
 
     @Test
     public void testInitialize() {
-        Optional<List<Error>> optionalErrors;
-        List<Error> errors;
+        Optional<List<BulletError>> optionalErrors;
+        List<BulletError> errors;
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
         Distribution distribution = new Distribution(aggregation, new BulletConfig());
@@ -140,8 +140,8 @@ public class DistributionTest {
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation, new BulletConfig());
-        Optional<List<Error>> optionalErrors;
-        List<Error> errors;
+        Optional<List<BulletError>> optionalErrors;
+        List<BulletError> errors;
 
         // start  < 0
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, -1, 1, 0.5));
@@ -217,8 +217,8 @@ public class DistributionTest {
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation, new BulletConfig());
-        Optional<List<Error>> optionalErrors;
-        List<Error> errors;
+        Optional<List<BulletError>> optionalErrors;
+        List<BulletError> errors;
 
         // Null points
         aggregation.setAttributes(makeAttributes(DistributionType.PMF, null, null, null, null, null));
@@ -264,8 +264,8 @@ public class DistributionTest {
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
         Distribution distribution = new Distribution(aggregation, new BulletConfig());
-        Optional<List<Error>> optionalErrors;
-        List<Error> errors;
+        Optional<List<BulletError>> optionalErrors;
+        List<BulletError> errors;
 
         aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
         optionalErrors = distribution.initialize();

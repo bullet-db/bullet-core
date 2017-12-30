@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.common.BulletError;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -95,15 +95,15 @@ public class Metadata {
     }
 
     /**
-     * Add an error to the Metadata.
+     * Add errors to the Metadata.
      *
-     * @param errors Error objects to add.
+     * @param errors {@link BulletError} objects to add.
      * @return This object for chaining.
      */
     @SuppressWarnings("unchecked")
-    public Metadata addErrors(List<Error> errors) {
+    public Metadata addErrors(List<BulletError> errors) {
         Objects.requireNonNull(errors);
-        List<Error> existing = (List<Error>) meta.get(ERROR_KEY);
+        List<BulletError> existing = (List<BulletError>) meta.get(ERROR_KEY);
         if (existing != null) {
             existing.addAll(errors);
         } else {
@@ -115,10 +115,10 @@ public class Metadata {
     /**
      * Static construction of Metadata with some errors.
      *
-     * @param errors A non-null list of Error objects.
+     * @param errors A non-null {@link List} of {@link BulletError} objects.
      * @return The Metadata object with the errors.
      */
-    public static Metadata of(Error... errors) {
+    public static Metadata of(BulletError... errors) {
         Metadata meta = new Metadata();
         meta.addErrors(asList(errors));
         return meta;
@@ -127,10 +127,10 @@ public class Metadata {
     /**
      * Static construction of Metadata with some errors.
      *
-     * @param errors A non-null list of Error objects.
+     * @param errors A non-null list of {@link BulletError} objects.
      * @return The Metadata object with the errors.
      */
-    public static Metadata of(List<Error> errors) {
+    public static Metadata of(List<BulletError> errors) {
         Metadata meta = new Metadata();
         meta.addErrors(errors);
         return meta;

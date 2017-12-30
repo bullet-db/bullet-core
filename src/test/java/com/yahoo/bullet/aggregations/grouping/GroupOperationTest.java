@@ -5,8 +5,9 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
-import com.yahoo.bullet.parsing.Error;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -116,15 +117,15 @@ public class GroupOperationTest {
         list.add(new GroupOperation(GroupOperationType.SUM, null, null));
         list.add(new GroupOperation(GroupOperationType.AVG, null, "foo"));
 
-        Optional<List<Error>> optionalErrors = GroupOperation.checkOperations(list);
+        Optional<List<BulletError>> optionalErrors = GroupOperation.checkOperations(list);
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0),
-                            Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperationType.SUM,
+                            ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperationType.SUM,
                                             GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
         Assert.assertEquals(errors.get(1),
-                            Error.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperationType.AVG,
+                            ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperationType.AVG,
                                             GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
     }
 

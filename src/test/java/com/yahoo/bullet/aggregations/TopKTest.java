@@ -6,9 +6,9 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.querying.AggregationOperations;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Error;
+import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata.Concept;
@@ -79,9 +79,9 @@ public class TopKTest {
     @Test
     public void testInitialize() {
         TopK topK = makeTopK(null, 32, 10);
-        Optional<List<Error>> optionalErrors = topK.initialize();
+        Optional<List<BulletError>> optionalErrors = topK.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
-        List<Error> errors = optionalErrors.get();
+        List<BulletError> errors = optionalErrors.get();
 
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), SketchingStrategy.REQUIRES_FIELD_ERROR);

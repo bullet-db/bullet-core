@@ -5,10 +5,11 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
-import com.yahoo.bullet.parsing.Error;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,7 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Arrays.asList;
 
 /**
@@ -43,7 +44,7 @@ public class GroupOperation implements Serializable {
 
     public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
     public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";
-    public static final Error REQUIRES_FIELD_OR_OPERATION_ERROR =
+    public static final ParsingError REQUIRES_FIELD_OR_OPERATION_ERROR =
             makeError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
     public static final String OPERATIONS = "operations";
@@ -92,10 +93,10 @@ public class GroupOperation implements Serializable {
      * Validates whether the provided {@link Collection} of {@link GroupOperation} is valid.
      *
      * @param operations The non-null operations to normalize.
-     * @return An {@link Optional} {@link List} of {@link Error} if any operations were invalid or null if valid.
+     * @return An {@link Optional} {@link List} of {@link BulletError} if any operations were invalid or null if valid.
      */
-    public static Optional<List<Error>> checkOperations(Collection<GroupOperation> operations) {
-        List<Error> errors = new ArrayList<>();
+    public static Optional<List<BulletError>> checkOperations(Collection<GroupOperation> operations) {
+        List<BulletError> errors = new ArrayList<>();
         for (GroupOperation o : operations) {
             if (o.getField() == null && o.getType() != AggregationOperations.GroupOperationType.COUNT) {
                 errors.add(makeError(GROUP_OPERATION_REQUIRES_FIELD + o.getType(), OPERATION_REQUIRES_FIELD_RESOLUTION));
