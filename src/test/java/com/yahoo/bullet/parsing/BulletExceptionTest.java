@@ -5,16 +5,17 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static com.yahoo.bullet.parsing.Error.makeError;
 import static java.util.Arrays.asList;
 
-public class ParsingExceptionTest {
+public class BulletExceptionTest {
     @Test
     public void testParsingException() {
-        ParsingException pe = new ParsingException(asList(makeError(new NullPointerException()),
+        BulletException pe = new BulletException(asList(makeError(new NullPointerException()),
                                                           makeError(new ArrayIndexOutOfBoundsException())));
         Assert.assertEquals(pe.getErrors().size(), 2);
     }

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
@@ -386,7 +387,7 @@ public class QueryUtils {
             config.validate();
 
             return new Querier("", input, config);
-        } catch (ParsingException e) {
+        } catch (BulletException e) {
             throw new RuntimeException(e);
         }
     }

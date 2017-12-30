@@ -8,16 +8,18 @@ package com.yahoo.bullet.querying;
 import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.parsing.Parser;
-import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata;
 import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.windowing.Scheme;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,22 +50,23 @@ public class Querier implements Serializable {
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-
     // Deliberately not serialized
     @Setter(AccessLevel.PACKAGE)
     private transient Strategy strategy;
+    @Setter(AccessLevel.PACKAGE)
+    private transient Scheme scheme;
 
     private Map<String, String> metadataKeys;
 
     /**
-     * Constructor that takes a {@link Query} instance and a configuration to use. This also starts the query.
+     * Constructor that takes a configured {@link Query} instance and a configuration to use. This also starts the query.
      *
      * @param id The query ID.
      * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws ParsingException if there was an issue with setting up the query.
+     * @throws BulletException if there was an issue with setting up the query.
      */
-    public Querier(String id, Query query, BulletConfig config) throws ParsingException {
+    public Querier(String id, Query query, BulletConfig config) throws BulletException {
         this.id = id;
         this.query = query;
         start(config);
@@ -76,9 +79,9 @@ public class Querier implements Serializable {
      * @param id The query ID.
      * @param queryString The query as a string.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws ParsingException if there was an issue.
+     * @throws BulletException if there was an issue.
      */
-    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException, ParsingException {
+    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException, BulletException {
         this(id, Parser.parse(queryString, config), config);
     }
 
@@ -87,24 +90,23 @@ public class Querier implements Serializable {
      *
      * @param config A {@link BulletConfig} to initialize the query with.
      * @return This object for chaining.
-     * @throws ParsingException
+     * @throws BulletException if there was an issue starting the query.
      */
     @SuppressWarnings("unchecked")
-    public Querier start(BulletConfig config) throws ParsingException {
+    public Querier start(BulletConfig config) throws BulletException {
         shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
         timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
-        Optional<List<Error>> errors = query.initialize();
-        if (errors.isPresent()) {
-            throw new ParsingException(errors.get());
-        }
+        instantiate(query);
+
         // Aggregation is guaranteed to not be null and guaranteed to have a proper type
         strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        errors = strategy.initialize();
-        if (errors.isPresent()) {
-            throw new ParsingException(errors.get());
-        }
+        instantiate(strategy);
+
+        scheme = WindowingOperations.findScheme(query, config);
+        instantiate(scheme);
+
         startTime = System.currentTimeMillis();
         return this;
     }
@@ -124,7 +126,7 @@ public class Querier implements Serializable {
             return false;
         }
         aggregate(project(record));
-        return isMicroBatch();
+        return scheme.isClosed();
     }
 
     /**
@@ -171,9 +173,10 @@ public class Querier implements Serializable {
     }
 
     /**
-     * Returns the {@link List} of {@link BulletRecord} so far. See {@link #getResult()}
+     * Returns the {@link List} of {@link BulletRecord} result so far. See {@link #getResult()} for the full result
+     * with metadata.
      *
-     * @return
+     * @return The records that are part of the result.
      */
     public List<BulletRecord> getRecords() {
         try {
@@ -271,16 +274,18 @@ public class Querier implements Serializable {
         }
     }
 
-    private boolean isMicroBatch() {
-        // TODO: Windowing
-        return true;
-    }
-
     private BulletRecord addAdditionalFields(BulletRecord record) {
         if (shouldInjectTimestamp) {
             record.setLong(timestampKey, System.currentTimeMillis());
         }
         return record;
+    }
+
+    private static void instantiate(Initializable initializable) throws BulletException {
+        Optional<List<Error>> errors = initializable.initialize();
+        if (errors.isPresent()) {
+            throw new BulletException(errors.get());
+        }
     }
 }
 

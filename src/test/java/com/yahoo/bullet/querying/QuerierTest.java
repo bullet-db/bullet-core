@@ -4,9 +4,9 @@ import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.parsing.Error;
 import com.yahoo.bullet.parsing.FilterClauseTest;
-import com.yahoo.bullet.parsing.ParsingException;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
@@ -68,6 +68,18 @@ public class QuerierTest {
 
         @Override
         public Clip getAggregation() {
+            aggregationFailure++;
+            throw new RuntimeException("Getting aggregation test failure");
+        }
+
+        @Override
+        public Metadata getMetadata() {
+            aggregationFailure++;
+            throw new RuntimeException("Getting aggregation test failure");
+        }
+
+        @Override
+        public List<BulletRecord> getAggregatedRecords() {
             aggregationFailure++;
             throw new RuntimeException("Getting aggregation test failure");
         }
@@ -300,8 +312,8 @@ public class QuerierTest {
         }
     }
 
-    @Test(expectedExceptions = ParsingException.class)
-    public void testValidationFail() throws ParsingException {
+    @Test(expectedExceptions = BulletException.class)
+    public void testValidationFail() throws BulletException {
         new FilterQuery("{ 'aggregation': { 'type': null } }", new BulletConfig());
     }
 
