@@ -39,27 +39,28 @@ import static com.yahoo.bullet.common.Closable.areAnyClosed;
  * This manages a {@link Query} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
  * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
  * itself with another instance of running query using {@link #merge(Queryable)}.
+ *
+ * If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
+ * deserialization.
  */
 @Slf4j
 public class Querier implements Serializable, Queryable {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
-    private String id;
     @Setter(AccessLevel.PACKAGE)
     private Query query;
-
-    @Getter @Setter
-    private long startTime;
-
-    private Boolean shouldInjectTimestamp;
-    private String timestampKey;
 
     // TODO: Consider serializing the window in some fashion to save compute on calling start.
     @Setter(AccessLevel.PACKAGE)
     private transient Scheme window;
 
+    private String id;
+    private Boolean shouldInjectTimestamp;
+    private String timestampKey;
     private BulletConfig config;
     private Map<String, String> metaKeys;
+    @Getter @Setter
+    private long startTime;
 
     /**
      * Constructor that takes a configured {@link Query} instance and a configuration to use. This also starts
@@ -148,7 +149,14 @@ public class Querier implements Serializable, Queryable {
         if (areAnyClosed(this, window) || !filter(record)) {
             return;
         }
-        window.consume(project(record));
+
+        BulletRecord projected = project(record);
+        try {
+            window.consume(projected);
+        } catch (RuntimeException e) {
+            log.error("Unable to consume {} for query {}", record, this);
+            log.error("Skipping due to", e);
+        }
     }
 
     /**
@@ -165,7 +173,6 @@ public class Querier implements Serializable, Queryable {
             log.error("Skipping due to", e);
         }
     }
-
 
     /**
      * Get the result emitted so far after the last window.
@@ -241,7 +248,7 @@ public class Querier implements Serializable, Queryable {
      */
     @Override
     public boolean isClosed() {
-        return isExpired() || isWindowClosed();
+        return isWindowClosed() || isExpired();
     }
 
     /**
