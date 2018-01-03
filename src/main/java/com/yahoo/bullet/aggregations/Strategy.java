@@ -6,6 +6,7 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.Closable;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.record.BulletRecord;
@@ -17,20 +18,21 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
 
-public interface Strategy extends Initializable {
+public interface Strategy extends Initializable, Closable {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
 
     ParsingError REQUIRES_FIELD_ERROR =
             makeError("This aggregation type requires at least one field", REQUIRES_FEED_RESOLUTION);
 
     /**
-     * Returns true if more data will be consumed or combined. This method can be used to avoid passing more
-     * data into this Strategy.
+     * Returns false if more data will be not be consumed or combined. This method can be used to avoid passing more
+     * data into this Strategy. By default, returns false unless overridden.
      *
-     * @return A boolean denoting whether the next consumption or combination will occur.
+     * @return A boolean denoting whether the next consumption or combination will not occur.
      */
-    default boolean isAcceptingData() {
-        return true;
+    @Override
+    default boolean isClosed() {
+        return false;
     }
 
     /**

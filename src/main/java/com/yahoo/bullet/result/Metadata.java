@@ -41,7 +41,12 @@ public class Metadata {
         ITEMS_SEEN("Items Seen"),
         NORMALIZED_RANK_ERROR("Normalized Rank Error"),
         MAXIMUM_COUNT_ERROR("Maximum Count Error"),
-        ACTIVE_ITEMS("Active Items");
+        ACTIVE_ITEMS("Active Items"),
+
+        // Windowing metadata
+        WINDOW_METADATA("Window Metadata"),
+        WINDOW_NAME("Window Name"),
+        WINDOW_COUNT("Window Count");
 
         private String name;
 

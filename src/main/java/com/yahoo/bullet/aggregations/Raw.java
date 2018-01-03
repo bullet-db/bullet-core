@@ -50,13 +50,13 @@ public class Raw implements Strategy {
     }
 
     @Override
-    public boolean isAcceptingData() {
-        return consumed + combined < size;
+    public boolean isClosed() {
+        return consumed + combined >= size;
     }
 
     @Override
     public void consume(BulletRecord data) {
-        if (!isAcceptingData() || data == null) {
+        if (isClosed() || data == null) {
             return;
         }
         consumed++;
@@ -72,7 +72,7 @@ public class Raw implements Strategy {
      */
     @Override
     public void combine(byte[] serializedAggregation) {
-        if (!isAcceptingData() || serializedAggregation == null) {
+        if (isClosed() || serializedAggregation == null) {
             return;
         }
         ArrayList<BulletRecord> batch = SerializerDeserializer.fromBytes(serializedAggregation);

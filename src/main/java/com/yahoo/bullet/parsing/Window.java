@@ -14,12 +14,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Getter @Setter @Slf4j
-public class Window implements Configurable, Initializable {
+public class Window implements Serializable, Configurable, Initializable {
     @Expose
     private Map<String, Object> emit;
     @Expose

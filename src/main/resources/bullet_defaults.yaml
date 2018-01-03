@@ -167,6 +167,12 @@ bullet.result.metadata.metrics:
       key: "Maximum Count Error"
     - name: "Active Items"
       key: "Active Items"
+    - name: "Window Metadata"
+      key: "Window"
+    - name: "Window Name"
+      key: "Window Name"
+    - name: "Window Count"
+      key: "Window Count"
 
 # Enables whether each record should have a new key added to it denoting it was projected.
 bullet.record.inject.timestamp.enable: true

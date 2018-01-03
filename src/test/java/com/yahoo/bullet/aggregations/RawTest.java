@@ -59,13 +59,13 @@ public class RawTest {
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
         Raw raw = makeRaw(2);
 
-        Assert.assertTrue(raw.isAcceptingData());
+        Assert.assertFalse(raw.isClosed());
 
         raw.consume(record);
-        Assert.assertTrue(raw.isAcceptingData());
+        Assert.assertFalse(raw.isClosed());
 
         raw.consume(record);
-        Assert.assertFalse(raw.isAcceptingData());
+        Assert.assertTrue(raw.isClosed());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RawTest {
 
         Assert.assertEquals(raw.getSerializedAggregation(), getListBytes(recordB));
 
-        Assert.assertFalse(raw.isAcceptingData());
+        Assert.assertTrue(raw.isClosed());
 
         BulletRecord recordC = RecordBox.get().add("baz", "qux").getRecord();
         // This consumption should not occur
@@ -129,13 +129,13 @@ public class RawTest {
         Raw raw = makeRaw(0);
 
         List<BulletRecord> aggregate = raw.getAggregation().getRecords();
-        Assert.assertFalse(raw.isAcceptingData());
+        Assert.assertTrue(raw.isClosed());
         Assert.assertEquals(aggregate.size(), 0);
 
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
         raw.consume(record);
 
-        Assert.assertFalse(raw.isAcceptingData());
+        Assert.assertTrue(raw.isClosed());
         Assert.assertNull(raw.getSerializedAggregation());
         Assert.assertEquals(raw.getAggregation().getRecords().size(), 0);
     }

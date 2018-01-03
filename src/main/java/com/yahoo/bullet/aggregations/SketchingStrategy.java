@@ -55,9 +55,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     @SuppressWarnings("unchecked")
     public SketchingStrategy(Aggregation aggregation, BulletConfig config) {
         this.config = config;
-        boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
-        metadataKeys = shouldMeta ? (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class) :
-                                    Collections.emptyMap();
+        metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
         separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
 
         fieldsToNames = aggregation.getFields();
@@ -76,8 +74,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
 
     @Override
     public Clip getAggregation() {
-        String metakey = metadataKeys.getOrDefault(Metadata.Concept.SKETCH_METADATA.getName(), null);
-        return sketch.getResult(metakey, metadataKeys);
+        return sketch.getResult(getMetaKey(), metadataKeys);
     }
 
     @Override
@@ -126,6 +123,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     private String getMetaKey() {
-        return metadataKeys.getOrDefault(Metadata.Concept.SKETCH_METADATA.getName(), null);
+        boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
+        return shouldMeta ? metadataKeys.getOrDefault(Metadata.Concept.SKETCH_METADATA.getName(), null) : null;
     }
 }

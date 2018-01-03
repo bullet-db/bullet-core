@@ -13,12 +13,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Slf4j @Getter @Setter
-public class Projection implements Configurable, Initializable {
+public class Projection implements Serializable, Configurable, Initializable {
     /**
      * The map of source field names to their new projected names.
      */

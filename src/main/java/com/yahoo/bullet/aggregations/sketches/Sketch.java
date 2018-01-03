@@ -54,11 +54,11 @@ public abstract class Sketch {
      * asked for.
      *
      * @param metaKey If set to a non-null value, Sketch metadata will be added to the result.
-     * @param conceptKeys If provided, these {@link Concept} will be added to the metadata.
+     * @param conceptKeys If provided, these {@link Concept} names will be added to the metadata.
      * @return A {@link Clip} of the results.
      */
     public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
-        // Subclasses are charge of adding data. We'll just add the metadata.
+        // Subclasses are charge of adding data. We'll just create an empty Clip with the metadata.
         return Clip.of(getMetadata(metaKey, conceptKeys));
     }
 
@@ -66,7 +66,7 @@ public abstract class Sketch {
      * Returns the sketch metadata as a {@link Metadata} object.
      *
      * @param metaKey The key to add the metadata as.
-     * @param conceptKeys If provided, these {@link Concept} will be added to the metadata.
+     * @param conceptKeys If provided, these {@link Concept} names will be added to the metadata.
      * @return The metadata object or an empty one if no metadata was collected.
      */
     public Metadata getMetadata(String metaKey, Map<String, String> conceptKeys) {

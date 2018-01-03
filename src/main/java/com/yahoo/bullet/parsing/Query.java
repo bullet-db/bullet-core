@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import java.util.Optional;
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
  */
 @Getter @Setter(AccessLevel.PACKAGE) @Slf4j
-public class Query implements Configurable, Initializable {
+public class Query implements Serializable, Configurable, Initializable {
     @Expose
     private Projection projection;
     @Expose

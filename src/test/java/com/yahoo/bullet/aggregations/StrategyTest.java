@@ -52,8 +52,8 @@ public class StrategyTest {
     @Test
     public void testDefaultAcceptance() {
         TestStrategy strategy = new TestStrategy();
-        Assert.assertTrue(strategy.isAcceptingData());
+        Assert.assertFalse(strategy.isClosed());
         strategy.consume(new BulletRecord());
-        Assert.assertTrue(strategy.isAcceptingData());
+        Assert.assertFalse(strategy.isClosed());
     }
 }

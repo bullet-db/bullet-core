@@ -10,10 +10,11 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.common.Closable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Parser;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
  * with another instance of running query using {@link #merge(Querier)}.
  */
 @Slf4j
-public class Querier implements Serializable {
+public class Querier implements Serializable, Closable {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
     private String id;
@@ -51,7 +52,8 @@ public class Querier implements Serializable {
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-    // Deliberately not serialized
+    // TODO: Consider serializing the following in some fashion to save compute on calling start.
+    // The Strategy and Schemea are deliberately not serialized.
     @Setter(AccessLevel.PACKAGE)
     private transient Strategy strategy;
     @Setter(AccessLevel.PACKAGE)
@@ -60,7 +62,8 @@ public class Querier implements Serializable {
     private Map<String, String> metadataKeys;
 
     /**
-     * Constructor that takes a configured {@link Query} instance and a configuration to use. This also starts the query.
+     * Constructor that takes a configured {@link Query} instance and a configuration to use. This also starts
+     * executing the query.
      *
      * @param id The query ID.
      * @param query The query object.
@@ -102,10 +105,11 @@ public class Querier implements Serializable {
 
         instantiate(query);
 
-        // Aggregation is guaranteed to not be null and guaranteed to have a proper type
+        // Aggregation is guaranteed to not be null and guaranteed to have a proper type.
         strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
         instantiate(strategy);
 
+        // Windowing Scheme is guaranteed to not be null.
         scheme = WindowingOperations.findScheme(query, config);
         instantiate(scheme);
 
@@ -120,14 +124,15 @@ public class Querier implements Serializable {
      * any query filtering criteria.
      *
      * @param record The BulletRecord to consume.
-     * @return A boolean denoting whether the query has reached a batch size.
+     * @return A boolean denoting whether the query window has closed due to this consumption.
      */
     public boolean consume(BulletRecord record) {
-        // If query is expired, not accepting data or does not match the filters, don't consume...
-        if (isExpired() || !strategy.isAcceptingData() || !filter(record)) {
+        // If query, window or stategy is closed, or does not match the filters, don't consume...
+        if (Closable.isClosed(this, scheme, strategy) || !filter(record)) {
             return false;
         }
         aggregate(project(record));
+        // If our window was closed due to this consumption, return that information back to record provider.
         return scheme.isClosed();
     }
 
@@ -144,8 +149,8 @@ public class Querier implements Serializable {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
         }
-        // If the strategy is no longer accepting data, then the Query has been satisfied.
-        return !strategy.isAcceptingData();
+        // If the window or strategy is closed, then the query has been satisfied.
+        return scheme.isClosed() || strategy.isClosed();
     }
 
     /**
@@ -218,12 +223,22 @@ public class Querier implements Serializable {
     }
 
     /**
-     * Returns true if the query has expired.
+     * Returns true if the query has expired and query is closed.
      *
      * @return boolean denoting if query has expired.
      */
-    public boolean isExpired() {
+    @Override
+    public boolean isClosed() {
         return System.currentTimeMillis() > startTime + query.getDuration();
+    }
+
+    /**
+     * Returns true if the window is currently closed.
+     *
+     * @return A boolean denoting whether this window is currently closed and new data will not be accepted.
+     */
+    public boolean isWindowClosed() {
+        return scheme.isClosed();
     }
 
     @Override
