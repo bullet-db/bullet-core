@@ -59,17 +59,17 @@ public class GroupAll implements Strategy {
     }
 
     @Override
-    public byte[] getSerializedAggregation() {
+    public byte[] getData() {
         return SerializerDeserializer.toBytes(data);
     }
 
     @Override
-    public Clip getAggregation() {
+    public Clip getResult() {
         return Clip.of(data.getMetricsAsBulletRecord());
     }
 
     @Override
-    public List<BulletRecord> getAggregatedRecords() {
+    public List<BulletRecord> getRecords() {
         return null;
     }
 

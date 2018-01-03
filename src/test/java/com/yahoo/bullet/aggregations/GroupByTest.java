@@ -133,7 +133,7 @@ public class GroupByTest {
 
         groupBy.consume(RecordBox.get().getRecord());
 
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         Map<String, Object> meta = aggregate.getMeta().asMap();
@@ -167,7 +167,7 @@ public class GroupByTest {
         IntStream.range(0, 20).forEach(i -> groupBy.consume(recordA));
         groupBy.consume(recordB);
 
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         Map<String, Object> meta = aggregate.getMeta().asMap();
@@ -199,7 +199,7 @@ public class GroupByTest {
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
 
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         Map<String, Object> meta = aggregate.getMeta().asMap();
@@ -231,7 +231,7 @@ public class GroupByTest {
 
         groupBy.consume(recordB);
 
-        byte[] firstSerialized = groupBy.getSerializedAggregation();
+        byte[] firstSerialized = groupBy.getData();
 
         // Remake it
         groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
@@ -243,7 +243,7 @@ public class GroupByTest {
         IntStream.range(0, 30).mapToObj(i -> recordC).forEach(groupBy::consume);
         IntStream.range(0, 10).mapToObj(i -> recordD).forEach(groupBy::consume);
 
-        byte[] secondSerialized = groupBy.getSerializedAggregation();
+        byte[] secondSerialized = groupBy.getData();
 
         groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
                               makeGroupOperation(SUM, "price", "priceSum"));
@@ -251,7 +251,7 @@ public class GroupByTest {
         groupBy.combine(firstSerialized);
         groupBy.combine(secondSerialized);
 
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         List<BulletRecord> records = aggregate.getRecords();
@@ -284,7 +284,7 @@ public class GroupByTest {
         IntStream.range(0, 30).mapToObj(i -> recordA).forEach(groupBy::consume);
         IntStream.range(0, 10).mapToObj(i -> recordB).forEach(groupBy::consume);
 
-        byte[] serialized = groupBy.getSerializedAggregation();
+        byte[] serialized = groupBy.getData();
 
         // Remake it
         groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
@@ -298,7 +298,7 @@ public class GroupByTest {
 
         groupBy.combine(serialized);
 
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         List<BulletRecord> records = aggregate.getRecords();
@@ -325,7 +325,7 @@ public class GroupByTest {
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
-        Clip aggregate = groupBy.getAggregation();
+        Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
 
         List<BulletRecord> records = aggregate.getRecords();

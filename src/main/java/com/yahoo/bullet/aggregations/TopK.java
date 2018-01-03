@@ -68,8 +68,8 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     }
 
     @Override
-    public Clip getAggregation() {
-        Clip result = super.getAggregation();
+    public Clip getResult() {
+        Clip result = super.getResult();
         result.getRecords().forEach(this::splitFields);
         return result;
     }

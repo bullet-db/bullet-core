@@ -5,20 +5,13 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Closable;
+import com.yahoo.bullet.common.Queryable;
 import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Metadata;
-
-import java.util.List;
-import java.util.Optional;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
 
-public interface Strategy extends Initializable, Closable {
+public interface Strategy extends Queryable {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
 
     ParsingError REQUIRES_FIELD_ERROR =
@@ -36,62 +29,13 @@ public interface Strategy extends Initializable, Closable {
     }
 
     /**
-     * Consumes a single {@link BulletRecord} into the aggregation.
-     *
-     * @param data The {@link BulletRecord} to consume.
-     */
-    void consume(BulletRecord data);
-
-    /**
-     * Combines a serialized intermediate aggregation into this aggregation.
-     *
-     * @param serializedAggregation A serialized representation of an aggregation. This must be have been produced by
-     *                              the {@link #getSerializedAggregation()} method.
-     */
-    void combine(byte[] serializedAggregation);
-
-    /**
-     * Serialize the aggregation done so far.
-     *
-     * @return the serialized representation of the aggregation so far.
-     */
-    byte[] getSerializedAggregation();
-
-    /**
-     * Get the Aggregation done so far as a {@link Clip}.
-     *
-     * @return The resulting {@link Clip} representing aggregation and metadata of the data aggregated so far.
-     */
-    Clip getAggregation();
-
-    /**
-     * Get the Aggregation done so far as a {@link List} of {@link BulletRecord}.
-     *
-     * @return The resulting list of records representing the aggregation results.
-     */
-    List<BulletRecord> getAggregatedRecords();
-
-    /**
      * Get the {@link Metadata} so far. By default, returns an empty one.
      *
      * @return The resulting metadata of the data aggregated so far.
      */
+    @Override
     default Metadata getMetadata() {
         return new Metadata();
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Checks to see if this Strategy is valid. Any other methods may behave unexpectedly unless initialize passes.
-     *
-     * @return An {@link List} of {@link ParsingError} that contains errors if validation failed or null if succeeded.
-     */
-    Optional<List<BulletError>> initialize();
-
-    /**
-     * Reset the result stored so far.
-     */
-    void reset();
 }
 

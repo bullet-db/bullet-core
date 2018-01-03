@@ -25,17 +25,17 @@ public class StrategyTest {
         }
 
         @Override
-        public byte[] getSerializedAggregation() {
+        public byte[] getData() {
             return new byte[0];
         }
 
         @Override
-        public Clip getAggregation() {
+        public Clip getResult() {
             return null;
         }
 
         @Override
-        public List<BulletRecord> getAggregatedRecords() {
+        public List<BulletRecord> getRecords() {
             return null;
         }
 

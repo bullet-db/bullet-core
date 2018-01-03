@@ -10,8 +10,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.common.Closable;
-import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.common.Queryable;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Parser;
 import com.yahoo.bullet.parsing.ParsingError;
@@ -28,18 +27,21 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static com.yahoo.bullet.common.Closable.areAnyClosed;
+
 /**
  * This manages a {@link Query} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
- * query, and {@link #merge(byte[])} serialized data from another instance of the running query. It can also merge itself
- * with another instance of running query using {@link #merge(Querier)}.
+ * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
+ * itself with another instance of running query using {@link #merge(Queryable)}.
  */
 @Slf4j
-public class Querier implements Serializable, Closable {
+public class Querier implements Serializable, Queryable {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
     private String id;
@@ -52,14 +54,12 @@ public class Querier implements Serializable, Closable {
     private Boolean shouldInjectTimestamp;
     private String timestampKey;
 
-    // TODO: Consider serializing the following in some fashion to save compute on calling start.
-    // The Strategy and Schemea are deliberately not serialized.
+    // TODO: Consider serializing the window in some fashion to save compute on calling start.
     @Setter(AccessLevel.PACKAGE)
-    private transient Strategy strategy;
-    @Setter(AccessLevel.PACKAGE)
-    private transient Scheme scheme;
+    private transient Scheme window;
 
-    private Map<String, String> metadataKeys;
+    private BulletConfig config;
+    private Map<String, String> metaKeys;
 
     /**
      * Constructor that takes a configured {@link Query} instance and a configuration to use. This also starts
@@ -73,7 +73,8 @@ public class Querier implements Serializable, Closable {
     public Querier(String id, Query query, BulletConfig config) throws BulletException {
         this.id = id;
         this.query = query;
-        start(config);
+        this.config = config;
+        start();
     }
 
     /**
@@ -91,32 +92,48 @@ public class Querier implements Serializable, Closable {
     }
 
     /**
-     * Starts the query. You must call this method if you have deserialized an instance of this Object from data.
+     * Starts the query and throws a {@link BulletException} with any errors if it was not possible to start.
+     * You must call this method if you have deserialized an instance of this object from data.
      *
-     * @param config A {@link BulletConfig} to initialize the query with.
      * @return This object for chaining.
-     * @throws BulletException if there was an issue starting the query.
+     * @throws BulletException if there were issues starting the query.
      */
-    @SuppressWarnings("unchecked")
-    public Querier start(BulletConfig config) throws BulletException {
-        shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
-        timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
-        metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
-
-        instantiate(query);
-
-        // Aggregation is guaranteed to not be null and guaranteed to have a proper type.
-        strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        instantiate(strategy);
-
-        // Windowing Scheme is guaranteed to not be null.
-        scheme = WindowingOperations.findScheme(query, config);
-        instantiate(scheme);
-
-        startTime = System.currentTimeMillis();
+    public Querier start() throws BulletException {
+        Optional<List<BulletError>> errors = initialize();
+        if (errors.isPresent()) {
+            throw new BulletException(errors.get());
+        }
         return this;
     }
 
+    // ****************** Queryable overrides ******************
+
+    /**
+     * Starts the query. You must call this method if you have deserialized an instance of this object from data.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<List<BulletError>> initialize() {
+        shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
+        timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
+        metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
+
+        List<BulletError> errors = new ArrayList<>();
+
+        query.initialize().ifPresent(errors::addAll);
+
+        // Aggregation is guaranteed to not be null and guaranteed to have a proper type.
+        Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
+        strategy.initialize().ifPresent(errors::addAll);
+
+        // Windowing Scheme is guaranteed to not be null.
+        window = WindowingOperations.findScheme(query, strategy, config);
+        window.initialize().ifPresent(errors::addAll);
+
+        startTime = System.currentTimeMillis();
+
+        return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
+    }
 
     /**
      * Consume a {@link BulletRecord} for this query. The record may or not be actually incorporated into the query
@@ -124,54 +141,41 @@ public class Querier implements Serializable, Closable {
      * any query filtering criteria.
      *
      * @param record The BulletRecord to consume.
-     * @return A boolean denoting whether the query window has closed due to this consumption.
      */
-    public boolean consume(BulletRecord record) {
-        // If query, window or stategy is closed, or does not match the filters, don't consume...
-        if (Closable.isClosed(this, scheme, strategy) || !filter(record)) {
-            return false;
+    @Override
+    public void consume(BulletRecord record) {
+        // If query or window is closed, or does not match the filters, don't consume...
+        if (areAnyClosed(this, window) || !filter(record)) {
+            return;
         }
-        aggregate(project(record));
-        // If our window was closed due to this consumption, return that information back to record provider.
-        return scheme.isClosed();
+        window.consume(project(record));
     }
 
     /**
      * Presents the query with a serialized data representation of a prior result for the query.
      *
      * @param data The serialized data that represents a partial query result.
-     * @return A boolean denoting whether this instance will not accept any more data.
      */
-    public boolean merge(byte[] data) {
+    @Override
+    public void combine(byte[] data) {
         try {
-            strategy.combine(data);
+            window.combine(data);
         } catch (RuntimeException e) {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
         }
-        // If the window or strategy is closed, then the query has been satisfied.
-        return scheme.isClosed() || strategy.isClosed();
     }
 
-    /**
-     * Merge the data in another instance with this one. This only merges the data or results for the query and not any
-     * metadata about the running query.
-     *
-     * @param querier The other instance to merge into this one.
-     * @return A boolean denoting whether this instance will not accept any more data.
-     */
-    public boolean merge(Querier querier) {
-        return merge(querier.getData());
-    }
 
     /**
      * Get the result emitted so far after the last window.
      *
      * @return The byte[] representation of the serialized result.
      */
+    @Override
     public byte[] getData() {
         try {
-            return strategy.getSerializedAggregation();
+            return window.getData();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
             log.error("Skipping due to", e);
@@ -185,11 +189,29 @@ public class Querier implements Serializable, Closable {
      *
      * @return The records that are part of the result.
      */
+    @Override
     public List<BulletRecord> getRecords() {
         try {
-            return strategy.getAggregation().getRecords();
+            return window.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the {@link Metadata} of the result so far. See {@link #getResult()} for the full result with the data.
+     *
+     * @return The metadata part of the result.
+     */
+    @Override
+    public Metadata getMetadata() {
+        try {
+            Metadata metadata = window.getMetadata();
+            metadata.merge(getResultMetadata());
+            return metadata;
+        } catch (RuntimeException e) {
+            log.error("Unable to get metadata for query {}", this);
             return null;
         }
     }
@@ -199,16 +221,55 @@ public class Querier implements Serializable, Closable {
      *
      * @return A non-null {@link Clip} representing the aggregated result.
      */
+    @Override
     public Clip getResult() {
         Clip result;
         try {
-            result = strategy.getAggregation();
+            result = window.getResult();
         } catch (RuntimeException e) {
-            log.error("Unable to get serialized aggregation for query {}", this);
+            log.error("Unable to get serialized data for query {}", this);
             result = Clip.of(Metadata.of(ParsingError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
-        result.add(getResultMetadata(id));
+        result.add(getResultMetadata());
         return result;
+    }
+
+    /**
+     * Returns true if the query cannot consume any more data at this time.
+     *
+     * @return boolean denoting if query has expired.
+     */
+    @Override
+    public boolean isClosed() {
+        return isExpired() || isWindowClosed();
+    }
+
+    /**
+     * Resets this object. You must call start or {@link #initialize()} to use it again.
+     */
+    @Override
+    public void reset() {
+        window.reset();
+    }
+
+    // ****************** Public helpers ******************
+
+    /**
+     * Returns true if the query has expired.
+     *
+     * @return A boolean denoting whether the query has expired.
+     */
+    public boolean isExpired() {
+        return System.currentTimeMillis() > startTime + query.getDuration();
+    }
+
+    /**
+     * Returns true if the window is currently closed.
+     *
+     * @return A boolean denoting whether this window is currently closed and new data will not be accepted.
+     */
+    public boolean isWindowClosed() {
+        return window.isClosed();
     }
 
     /**
@@ -222,29 +283,12 @@ public class Querier implements Serializable, Closable {
         return getResult().add(meta);
     }
 
-    /**
-     * Returns true if the query has expired and query is closed.
-     *
-     * @return boolean denoting if query has expired.
-     */
-    @Override
-    public boolean isClosed() {
-        return System.currentTimeMillis() > startTime + query.getDuration();
-    }
-
-    /**
-     * Returns true if the window is currently closed.
-     *
-     * @return A boolean denoting whether this window is currently closed and new data will not be accepted.
-     */
-    public boolean isWindowClosed() {
-        return scheme.isClosed();
-    }
-
     @Override
     public String toString() {
         return String.format("%s : %s", id, query.toString());
     }
+
+    // ****************** Private helpers ******************
 
     private boolean filter(BulletRecord record) {
         List<Clause> filters = query.getFilters();
@@ -262,17 +306,8 @@ public class Querier implements Serializable, Closable {
         return addAdditionalFields(projected);
     }
 
-    private void aggregate(BulletRecord record) {
-        try {
-            strategy.consume(record);
-        } catch (RuntimeException e) {
-            log.error("Unable to consume {} for query {}", record, this);
-            log.error("Skipping due to", e);
-        }
-    }
-
-    private Metadata getResultMetadata(String id) {
-        if (metadataKeys.isEmpty()) {
+    private Metadata getResultMetadata() {
+        if (metaKeys.isEmpty()) {
             return null;
         }
         Metadata meta = new Metadata();
@@ -284,11 +319,7 @@ public class Querier implements Serializable, Closable {
     }
 
     private void consumeRegisteredConcept(Concept concept, Consumer<String> action) {
-        // Only consume the concept if we have a key for it: i.e. it was registered
-        String key = metadataKeys.get(concept.getName());
-        if (key != null) {
-            action.accept(key);
-        }
+        Queryable.consumeRegisteredConcept(concept, metaKeys, action);
     }
 
     private BulletRecord addAdditionalFields(BulletRecord record) {
@@ -297,12 +328,4 @@ public class Querier implements Serializable, Closable {
         }
         return record;
     }
-
-    private static void instantiate(Initializable initializable) throws BulletException {
-        Optional<List<BulletError>> errors = initializable.initialize();
-        if (errors.isPresent()) {
-            throw new BulletException(errors.get());
-        }
-    }
 }
-

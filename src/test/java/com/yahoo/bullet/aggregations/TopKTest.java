@@ -99,7 +99,7 @@ public class TopKTest {
         IntStream.range(0, 996).mapToObj(i -> RecordBox.get().add("A", String.valueOf(i % 3)).add("B", i % 4).getRecord())
                                .forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 5);
@@ -131,7 +131,7 @@ public class TopKTest {
         IntStream.range(0, 20).mapToObj(i -> RecordBox.get().add("A", 108.1).getRecord()).forEach(topK::consume);
         IntStream.range(0, 100).mapToObj(i -> RecordBox.get().add("A", 42L).getRecord()).forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 5);
@@ -155,7 +155,7 @@ public class TopKTest {
                               .forEach(topK::consume);
         IntStream.range(0, 100).mapToObj(i -> RecordBox.get().add("A", 42L).getRecord()).forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
 
         List<BulletRecord> records = result.getRecords();
         Assert.assertEquals(records.size(), 2);
@@ -168,7 +168,7 @@ public class TopKTest {
         IntStream.range(0, 11).mapToObj(i -> RecordBox.get().add("A", "foo").add("B", "bar").getRecord())
                               .forEach(topK::consume);
 
-        result = topK.getAggregation();
+        result = topK.getResult();
 
         records = result.getRecords();
         Assert.assertEquals(records.size(), 3);
@@ -191,7 +191,7 @@ public class TopKTest {
         topK.consume(RecordBox.get().add("A", 0).getRecord());
         topK.consume(RecordBox.get().add("A", 1).getRecord());
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 5);
@@ -236,10 +236,10 @@ public class TopKTest {
         another.consume(RecordBox.get().add("A", 1).getRecord());
 
         TopK union = makeTopK(asList("A", "B"), 64, 4);
-        union.combine(topK.getSerializedAggregation());
-        union.combine(another.getSerializedAggregation());
+        union.combine(topK.getData());
+        union.combine(another.getData());
 
-        Clip result = union.getAggregation();
+        Clip result = union.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 5);
@@ -262,7 +262,7 @@ public class TopKTest {
         TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 32), null, singletonMap("A", "foo"), 16, null);
         IntStream.range(0, 16).mapToObj(i -> RecordBox.get().add("A", i).getRecord()).forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
         Assert.assertNull(result.getMeta().asMap().get("meta"));
 
         List<BulletRecord> records = result.getRecords();
@@ -284,7 +284,7 @@ public class TopKTest {
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
                                         .forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
         Assert.assertNull(result.getMeta().asMap().get("meta"));
 
         List<BulletRecord> records = result.getRecords();
@@ -302,7 +302,7 @@ public class TopKTest {
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
                                         .forEach(another::consume);
 
-        result = another.getAggregation();
+        result = another.getResult();
         Assert.assertNull(result.getMeta().asMap().get("meta"));
 
         records = result.getRecords();
@@ -319,7 +319,7 @@ public class TopKTest {
         IntStream.range(0, 16).mapToObj(i -> RecordBox.get().add("A", i).add("fieldB", 32 - i).getRecord())
                               .forEach(topK::consume);
 
-        Clip result = topK.getAggregation();
+        Clip result = topK.getResult();
         Assert.assertNull(result.getMeta().asMap().get("meta"));
 
         List<BulletRecord> records = result.getRecords();

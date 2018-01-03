@@ -86,8 +86,8 @@ public class GroupAllTest {
     public void testNoRecordCount() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.COUNT, null, null));
 
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add(GroupOperationType.COUNT.getName(), 0L).getRecord();
@@ -98,8 +98,8 @@ public class GroupAllTest {
     public void testNullRecordCount() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.COUNT, null, "count"));
         groupAll.consume(RecordBox.get().add("foo", "bar").getRecord());
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
 
         // We do not expect to send in null records so the count is incremented.
         Assert.assertEquals(aggregate.size(), 1);
@@ -115,8 +115,8 @@ public class GroupAllTest {
 
         IntStream.range(0, 10).forEach(i -> groupAll.consume(someRecord));
 
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add("count", 10).getRecord();
@@ -130,8 +130,8 @@ public class GroupAllTest {
 
         IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
 
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add(GroupOperationType.COUNT.getName(),
@@ -158,12 +158,12 @@ public class GroupAllTest {
         another.consume(RecordBox.get().add("minField", -51.0).addNull("groupField").getRecord());
         another.consume(RecordBox.get().add("minField", 0).add("groupField", 1).getRecord());
         another.consume(RecordBox.get().add("minField", 44.8).add("groupField", -51.44).getRecord());
-        byte[] serialized = another.getSerializedAggregation();
+        byte[] serialized = another.getData();
 
         groupAll.combine(serialized);
 
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
 
         BulletRecord actual = aggregate.get(0);
@@ -181,8 +181,8 @@ public class GroupAllTest {
         // Not a serialized GroupData
         groupAll.combine(String.valueOf(242).getBytes());
 
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
-        List<BulletRecord> aggregate = groupAll.getAggregation().getRecords();
+        Assert.assertNotNull(groupAll.getData());
+        List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         // Unchanged count
@@ -193,104 +193,104 @@ public class GroupAllTest {
     @Test
     public void testMin() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.MIN, "someField", "min"));
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
+        Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         BulletRecord expected = RecordBox.get().addNull("min").getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", -4.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", -8.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", 51.44).getRecord());
         expected = RecordBox.get().add("min", -8.8).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         expected = RecordBox.get().add("min", -8.8).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", -51.44).getRecord());
         expected = RecordBox.get().add("min", -51.44).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
-        Assert.assertEquals(groupAll.getAggregation().getRecords().size(), 1);
+        Assert.assertEquals(groupAll.getResult().getRecords().size(), 1);
     }
 
     @Test
     public void testMax() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.MAX, "someField", "max"));
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
+        Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         BulletRecord expected = RecordBox.get().addNull("max").getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", -4.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", -8.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", 51.44).getRecord());
         expected = RecordBox.get().add("max", 51.44).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         expected = RecordBox.get().add("max", 51.44).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", 88.0).getRecord());
         expected = RecordBox.get().add("max", 88.0).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
-        Assert.assertEquals(groupAll.getAggregation().getRecords().size(), 1);
+        Assert.assertEquals(groupAll.getResult().getRecords().size(), 1);
     }
 
     @Test
     public void testSum() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.SUM, "someField", "sum"));
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
+        Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         BulletRecord expected = RecordBox.get().addNull("sum").getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", -4.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", -8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", 51.44).getRecord());
         expected = RecordBox.get().add("sum", 38.64).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         expected = RecordBox.get().add("sum", 38.64).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", 88.0).getRecord());
         expected = RecordBox.get().add("sum", 126.64).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
-        Assert.assertEquals(groupAll.getAggregation().getRecords().size(), 1);
+        Assert.assertEquals(groupAll.getResult().getRecords().size(), 1);
     }
 
     @Test
     public void testAvg() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperationType.AVG, "someField", "avg"));
-        Assert.assertNotNull(groupAll.getSerializedAggregation());
+        Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         BulletRecord expected = RecordBox.get().addNull("avg").getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", -4.8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", -8).getRecord());
         groupAll.consume(RecordBox.get().add("someField", 51.44).getRecord());
         expected = RecordBox.get().add("avg", 12.88).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
         expected = RecordBox.get().add("avg", 12.88).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
         groupAll.consume(RecordBox.get().add("someField", 88.0).getRecord());
         expected = RecordBox.get().add("avg", 31.66).getRecord();
-        Assert.assertEquals(groupAll.getAggregation().getRecords().get(0), expected);
+        Assert.assertEquals(groupAll.getResult().getRecords().get(0), expected);
 
-        Assert.assertEquals(groupAll.getAggregation().getRecords().size(), 1);
+        Assert.assertEquals(groupAll.getResult().getRecords().size(), 1);
     }
 }

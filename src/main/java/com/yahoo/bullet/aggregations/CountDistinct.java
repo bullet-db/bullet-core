@@ -67,8 +67,8 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
     }
 
     @Override
-    public Clip getAggregation() {
-        Clip result = super.getAggregation();
+    public Clip getResult() {
+        Clip result = super.getResult();
         // One record only
         BulletRecord record = result.getRecords().get(0);
         record.rename(ThetaSketch.COUNT_FIELD, newName);

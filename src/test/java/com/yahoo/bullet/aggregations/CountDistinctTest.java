@@ -103,8 +103,8 @@ public class CountDistinctTest {
     public void testNoRecordCount() {
         CountDistinct countDistinct = makeCountDistinct(asList("field"));
 
-        Assert.assertNotNull(countDistinct.getSerializedAggregation());
-        List<BulletRecord> aggregate = countDistinct.getAggregation().getRecords();
+        Assert.assertNotNull(countDistinct.getData());
+        List<BulletRecord> aggregate = countDistinct.getResult().getRecords();
 
         Assert.assertEquals(aggregate.size(), 1);
 
@@ -120,8 +120,8 @@ public class CountDistinctTest {
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
 
-        Assert.assertNotNull(countDistinct.getSerializedAggregation());
-        List<BulletRecord> aggregate = countDistinct.getAggregation().getRecords();
+        Assert.assertNotNull(countDistinct.getData());
+        List<BulletRecord> aggregate = countDistinct.getResult().getRecords();
 
         Assert.assertEquals(aggregate.size(), 1);
 
@@ -139,8 +139,8 @@ public class CountDistinctTest {
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
 
-        Assert.assertNotNull(countDistinct.getSerializedAggregation());
-        List<BulletRecord> aggregate = countDistinct.getAggregation().getRecords();
+        Assert.assertNotNull(countDistinct.getData());
+        List<BulletRecord> aggregate = countDistinct.getResult().getRecords();
 
         Assert.assertEquals(aggregate.size(), 1);
 
@@ -162,8 +162,8 @@ public class CountDistinctTest {
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
 
-        Assert.assertNotNull(countDistinct.getSerializedAggregation());
-        Clip clip = countDistinct.getAggregation();
+        Assert.assertNotNull(countDistinct.getData());
+        Clip clip = countDistinct.getResult();
 
         Map<String, Object> meta = clip.getMeta().asMap();
         Assert.assertEquals(meta.size(), 1);
@@ -215,7 +215,7 @@ public class CountDistinctTest {
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
 
-        Clip clip = countDistinct.getAggregation();
+        Clip clip = countDistinct.getResult();
 
         Map<String, Object> meta = clip.getMeta().asMap();
         Assert.assertEquals(meta.size(), 1);
@@ -238,7 +238,7 @@ public class CountDistinctTest {
         IntStream.range(0, 512).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
 
-        byte[] firstAggregate = countDistinct.getSerializedAggregation();
+        byte[] firstAggregate = countDistinct.getData();
 
         // Another one
         countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
@@ -246,7 +246,7 @@ public class CountDistinctTest {
         IntStream.range(256, 768).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
 
-        byte[] secondAggregate = countDistinct.getSerializedAggregation();
+        byte[] secondAggregate = countDistinct.getData();
 
         // Final one
         countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"),
@@ -256,7 +256,7 @@ public class CountDistinctTest {
         countDistinct.combine(firstAggregate);
         countDistinct.combine(secondAggregate);
 
-        Clip clip = countDistinct.getAggregation();
+        Clip clip = countDistinct.getResult();
 
         Map<String, Object> meta = clip.getMeta().asMap();
         Assert.assertEquals(meta.size(), 1);
@@ -279,7 +279,7 @@ public class CountDistinctTest {
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
 
-        byte[] aggregate = countDistinct.getSerializedAggregation();
+        byte[] aggregate = countDistinct.getData();
 
         // New one
         countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
@@ -290,7 +290,7 @@ public class CountDistinctTest {
         countDistinct.combine(aggregate);
 
 
-        Clip clip = countDistinct.getAggregation();
+        Clip clip = countDistinct.getResult();
 
         Map<String, Object> meta = clip.getMeta().asMap();
         Assert.assertEquals(meta.size(), 0);
@@ -310,7 +310,7 @@ public class CountDistinctTest {
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i).add("fieldB", 255 - i).getRecord())
                                .forEach(countDistinct::consume);
 
-        Clip clip = countDistinct.getAggregation();
+        Clip clip = countDistinct.getResult();
         Assert.assertEquals(clip.getRecords().size(), 1);
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 256.0).getRecord();
@@ -332,7 +332,7 @@ public class CountDistinctTest {
         countDistinct.consume(second);
         countDistinct.consume(third);
 
-        Clip clip = countDistinct.getAggregation();
+        Clip clip = countDistinct.getResult();
         Assert.assertEquals(clip.getRecords().size(), 1);
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 2.0).getRecord();

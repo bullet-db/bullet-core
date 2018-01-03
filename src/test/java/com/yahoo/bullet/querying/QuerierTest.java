@@ -67,13 +67,13 @@ public class QuerierTest {
         }
 
         @Override
-        public byte[] getSerializedAggregation() {
+        public byte[] getData() {
             serializingFailure++;
             throw new RuntimeException("Serializing aggregation test failure");
         }
 
         @Override
-        public Clip getAggregation() {
+        public Clip getResult() {
             aggregationFailure++;
             throw new RuntimeException("Getting aggregation test failure");
         }
@@ -85,7 +85,7 @@ public class QuerierTest {
         }
 
         @Override
-        public List<BulletRecord> getAggregatedRecords() {
+        public List<BulletRecord> getRecords() {
             aggregationFailure++;
             throw new RuntimeException("Getting aggregation test failure");
         }

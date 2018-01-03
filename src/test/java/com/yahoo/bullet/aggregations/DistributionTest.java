@@ -325,7 +325,7 @@ public class DistributionTest {
         IntStream.range(0, 2000).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
 
@@ -367,7 +367,7 @@ public class DistributionTest {
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);
@@ -397,7 +397,7 @@ public class DistributionTest {
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);
@@ -433,9 +433,9 @@ public class DistributionTest {
                                 .forEach(anotherDistribution::consume);
 
         Distribution union = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
-        union.combine(distribution.getSerializedAggregation());
-        union.combine(anotherDistribution.getSerializedAggregation());
-        Clip result = union.getAggregation();
+        union.combine(distribution.getData());
+        union.combine(anotherDistribution.getData());
+        Clip result = union.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);
@@ -472,7 +472,7 @@ public class DistributionTest {
         IntStream.range(50, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);
@@ -501,7 +501,7 @@ public class DistributionTest {
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);
@@ -527,7 +527,7 @@ public class DistributionTest {
         IntStream.range(0, 10).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
 
-        Clip result = distribution.getAggregation();
+        Clip result = distribution.getResult();
 
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
         Assert.assertEquals(metadata.size(), 7);

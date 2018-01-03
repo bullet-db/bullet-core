@@ -68,17 +68,17 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     @Override
-    public byte[] getSerializedAggregation() {
+    public byte[] getData() {
         return sketch.serialize();
     }
 
     @Override
-    public Clip getAggregation() {
+    public Clip getResult() {
         return sketch.getResult(getMetaKey(), metadataKeys);
     }
 
     @Override
-    public List<BulletRecord> getAggregatedRecords() {
+    public List<BulletRecord> getRecords() {
         return sketch.getRecords();
     }
 

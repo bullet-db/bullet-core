@@ -82,15 +82,15 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     }
 
     @Override
-    public Clip getAggregation() {
-        Clip result = super.getAggregation();
+    public Clip getResult() {
+        Clip result = super.getResult();
         renameFields(result.getRecords());
         return result;
     }
 
     @Override
-    public List<BulletRecord> getAggregatedRecords() {
-        List<BulletRecord> result = super.getAggregatedRecords();
+    public List<BulletRecord> getRecords() {
+        List<BulletRecord> result = super.getRecords();
         renameFields(result);
         return result;
     }

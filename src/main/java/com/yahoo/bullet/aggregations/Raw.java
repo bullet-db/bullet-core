@@ -20,10 +20,10 @@ import java.util.Optional;
 /**
  * Implements the LIMIT operation on multiple raw {@link BulletRecord}.
  *
- * A call to {@link #getSerializedAggregation()} or {@link #getAggregation()} will return the current collection of
+ * A call to {@link #getData()} or {@link #getResult()} will return the current collection of
  * records, which is a {@link List} of {@link BulletRecord}.
  *
- * A call to {@link #combine(byte[])} with the result of {@link #getSerializedAggregation()} will combine records from
+ * A call to {@link #combine(byte[])} with the result of {@link #getData()} will combine records from
  * the {@link List} till the aggregation size is reached.
  *
  * This {@link Strategy} will only consume or combine till the specified aggregation size is reached.
@@ -64,7 +64,7 @@ public class Raw implements Strategy {
     }
 
     /**
-     * Since {@link #getSerializedAggregation()} returns a {@link List} of {@link BulletRecord}, this method consumes
+     * Since {@link #getData()} returns a {@link List} of {@link BulletRecord}, this method consumes
      * that list. If the deserialized List has a size that takes the aggregated records above the aggregation size, only
      * the first X records in the List will be combined till the size is reached.
      *
@@ -96,7 +96,7 @@ public class Raw implements Strategy {
      * @return the serialized byte[] representing the {@link List} of {@link BulletRecord} or null if it could not.
      */
     @Override
-    public byte[] getSerializedAggregation() {
+    public byte[] getData() {
         if (aggregate.isEmpty()) {
             return null;
         }
@@ -110,8 +110,8 @@ public class Raw implements Strategy {
      * @return a {@link Clip} of the records so far.
      */
     @Override
-    public Clip getAggregation() {
-        return Clip.of(getAggregatedRecords());
+    public Clip getResult() {
+        return Clip.of(getRecords());
     }
 
     /**
@@ -121,7 +121,7 @@ public class Raw implements Strategy {
      * @return a {@link List} of the records so far.
      */
     @Override
-    public List<BulletRecord> getAggregatedRecords() {
+    public List<BulletRecord> getRecords() {
         return aggregate;
     }
 
