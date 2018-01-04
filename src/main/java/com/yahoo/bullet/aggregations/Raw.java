@@ -68,14 +68,14 @@ public class Raw implements Strategy {
      * that list. If the deserialized List has a size that takes the aggregated records above the aggregation size, only
      * the first X records in the List will be combined till the size is reached.
      *
-     * @param serializedAggregation A serialized {@link List} of {@link BulletRecord}.
+     * @param data A serialized {@link List} of {@link BulletRecord}.
      */
     @Override
-    public void combine(byte[] serializedAggregation) {
-        if (isClosed() || serializedAggregation == null) {
+    public void combine(byte[] data) {
+        if (isClosed() || data == null) {
             return;
         }
-        ArrayList<BulletRecord> batch = SerializerDeserializer.fromBytes(serializedAggregation);
+        ArrayList<BulletRecord> batch = SerializerDeserializer.fromBytes(data);
         if (batch == null || batch.isEmpty()) {
             return;
         }

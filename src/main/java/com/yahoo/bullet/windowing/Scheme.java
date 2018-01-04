@@ -7,8 +7,7 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Queryable;
-import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.result.Metadata;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +18,7 @@ import java.util.Map;
  * control when the aggregation strategy resets its result etc.
  */
 @Slf4j
-public abstract class Scheme implements Queryable {
+public abstract class Scheme implements Monoidal {
     private Strategy aggregation;
     private BulletConfig config;
     private Map<String, String> metadataKeys;
@@ -65,20 +64,5 @@ public abstract class Scheme implements Queryable {
 
     private String getMetaKey() {
         return metadataKeys.getOrDefault(Metadata.Concept.WINDOW_METADATA.getName(), null);
-    }
-
-    /**
-     * Unconditionally consume a {@link BulletRecord} into the aggregation. Use this method once the windowing
-     * criteria is met.
-     *
-     * @param record The record to consume.
-     */
-    protected void aggregate(BulletRecord record) {
-        try {
-            aggregation.consume(record);
-        } catch (RuntimeException e) {
-            log.error("Unable to consume {} for query {}", record, this);
-            log.error("Skipping due to", e);
-        }
     }
 }

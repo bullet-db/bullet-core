@@ -10,7 +10,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.common.Queryable;
+import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Parser;
 import com.yahoo.bullet.parsing.ParsingError;
@@ -38,13 +38,14 @@ import static com.yahoo.bullet.common.Closable.areAnyClosed;
 /**
  * This manages a {@link Query} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
  * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
- * itself with another instance of running query using {@link #merge(Queryable)}.
+ * itself with another instance of running query using {@link #merge(Monoidal)}. Use {@link #finish()} to retrieve the
+ * final results and terminate the query.
  *
  * If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
  * deserialization.
  */
 @Slf4j
-public class Querier implements Serializable, Queryable {
+public class Querier implements Serializable, Monoidal {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
     @Setter(AccessLevel.PACKAGE)
@@ -93,7 +94,7 @@ public class Querier implements Serializable, Queryable {
     }
 
     /**
-     * Starts the query and throws a {@link BulletException} with any errors if it was not possible to start.
+     * Starts the query and throws a {@link BulletException} with any errors if it was not possible to start the query.
      * You must call this method if you have deserialized an instance of this object from data.
      *
      * @return This object for chaining.
@@ -107,7 +108,7 @@ public class Querier implements Serializable, Queryable {
         return this;
     }
 
-    // ****************** Queryable overrides ******************
+    // ********************************* Monoidal Interface Overrides *********************************
 
     /**
      * Starts the query. You must call this method if you have deserialized an instance of this object from data.
@@ -259,7 +260,7 @@ public class Querier implements Serializable, Queryable {
         window.reset();
     }
 
-    // ****************** Public helpers ******************
+    // ********************************* Public helpers *********************************
 
     /**
      * Returns true if the query has expired.
@@ -295,7 +296,7 @@ public class Querier implements Serializable, Queryable {
         return String.format("%s : %s", id, query.toString());
     }
 
-    // ****************** Private helpers ******************
+    // ********************************* Private helpers *********************************
 
     private boolean filter(BulletRecord record) {
         List<Clause> filters = query.getFilters();
@@ -313,6 +314,13 @@ public class Querier implements Serializable, Queryable {
         return addAdditionalFields(projected);
     }
 
+    private BulletRecord addAdditionalFields(BulletRecord record) {
+        if (shouldInjectTimestamp) {
+            record.setLong(timestampKey, System.currentTimeMillis());
+        }
+        return record;
+    }
+
     private Metadata getResultMetadata() {
         if (metaKeys.isEmpty()) {
             return null;
@@ -326,13 +334,7 @@ public class Querier implements Serializable, Queryable {
     }
 
     private void consumeRegisteredConcept(Concept concept, Consumer<String> action) {
-        Queryable.consumeRegisteredConcept(concept, metaKeys, action);
+        Monoidal.consumeRegisteredConcept(concept, metaKeys, action);
     }
 
-    private BulletRecord addAdditionalFields(BulletRecord record) {
-        if (shouldInjectTimestamp) {
-            record.setLong(timestampKey, System.currentTimeMillis());
-        }
-        return record;
-    }
 }

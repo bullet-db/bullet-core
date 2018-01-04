@@ -20,6 +20,9 @@ import java.util.function.Supplier;
  * this will encapsulate both of them and provide methods to serialize, union and collect results.
  */
 public abstract class Sketch {
+    // While this class could implement Monoidal, it does not need the full breadth of those methods and it would
+    // receiving data as BulletRecord for one off operations, which is cumbersome.
+
     /**
      * Serializes the sketch.
      *

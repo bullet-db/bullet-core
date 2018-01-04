@@ -21,7 +21,7 @@ public class StrategyTest {
         }
 
         @Override
-        public void combine(byte[] serializedAggregation) {
+        public void combine(byte[] data) {
         }
 
         @Override

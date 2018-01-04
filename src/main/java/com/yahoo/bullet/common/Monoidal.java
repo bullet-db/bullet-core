@@ -14,28 +14,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public interface Queryable extends Initializable, Closable {
+/**
+ * This interface captures the associative operations that can be performed within Bullet. The identity is this object
+ * when initially constructed.
+ */
+public interface Monoidal extends Initializable, Closable {
     /**
-     * Consumes a single {@link BulletRecord} into this.
+     * Consumes a single {@link BulletRecord} into this Monoid.
      *
      * @param data The {@link BulletRecord} to consume.
      */
     void consume(BulletRecord data);
 
     /**
-     * Combines a serialized piece of data into this.
+     * Combines a serialized piece of data into this Monoid.
      *
-     * @param serializedAggregation A serialized representation of the data produced by {@link #getData()}.
+     * @param data A serialized representation of the data produced by {@link #getData()}.
      */
-    void combine(byte[] serializedAggregation);
+    void combine(byte[] data);
 
     /**
-     * Combine the data from another instance of the same type of object into this. By default, just unconditionally
-     * calls the {@link Queryable#getData()} method on the object and passes it to {@link #combine(byte[])}.
+     * Combine the data from another instance of the same type of object into this Monoid. By default, just
+     * unconditionally calls the {@link Monoidal#getData()} method on the object and passes it to
+     * {@link #combine(byte[])}.
      *
      * @param other The non-null other object to combine data from.
      */
-    default void merge(Queryable other) {
+    default void merge(Monoidal other) {
         combine(other.getData());
     }
 
@@ -68,7 +73,7 @@ public interface Queryable extends Initializable, Closable {
     Metadata getMetadata();
 
      /**
-     * Reset the data so far.
+     * Reset the data so far and make this the identity element for the Monoid.
      */
     void reset();
 

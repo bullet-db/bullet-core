@@ -63,8 +63,8 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     @Override
-    public void combine(byte[] serializedAggregation) {
-        sketch.union(serializedAggregation);
+    public void combine(byte[] data) {
+        sketch.union(data);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class QuerierTest {
         }
 
         @Override
-        public void combine(byte[] serializedAggregation) {
+        public void combine(byte[] data) {
             combiningFailure++;
             throw new RuntimeException("Combining serialized aggregation test failure");
         }

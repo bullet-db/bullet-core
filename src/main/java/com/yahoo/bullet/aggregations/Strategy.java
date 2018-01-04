@@ -5,13 +5,13 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.Queryable;
+import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.result.Metadata;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
 
-public interface Strategy extends Queryable {
+public interface Strategy extends Monoidal {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
 
     ParsingError REQUIRES_FIELD_ERROR =

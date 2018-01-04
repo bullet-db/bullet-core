@@ -54,8 +54,8 @@ public class GroupAll implements Strategy {
     }
 
     @Override
-    public void combine(byte[] serializedAggregation) {
-        data.combine(serializedAggregation);
+    public void combine(byte[] data) {
+        this.data.combine(data);
     }
 
     @Override
