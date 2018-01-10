@@ -5,16 +5,18 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * This class wraps some common metadata information for KMV Sketches - Theta and Tuple.
  */
 public abstract class KMVSketch extends DualSketch {
-    // Metadata keys for Standard Deviation
+    // Meta keys for Standard Deviation
     public static final String META_STD_DEV_1 = "1";
     public static final String META_STD_DEV_2 = "2";
     public static final String META_STD_DEV_3 = "3";
@@ -51,8 +53,8 @@ public abstract class KMVSketch extends DualSketch {
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         collect();
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys.get(Concept.STANDARD_DEVIATIONS.getName()), this::getStandardDeviations);
-        addIfNonNull(metadata, conceptKeys.get(Concept.THETA.getName()), this::getTheta);
+        addIfNonNull(metadata, conceptKeys, Concept.STANDARD_DEVIATIONS, this::getStandardDeviations);
+        addIfNonNull(metadata, conceptKeys, Concept.THETA, this::getTheta);
         return metadata;
     }
 

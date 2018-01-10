@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Meta;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.SketchesArgumentException;
 import com.yahoo.sketches.frequencies.ErrorType;
@@ -22,12 +22,12 @@ import java.util.stream.IntStream;
 public class FrequentItemsSketchTest {
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
-        ALL_METADATA.put(Metadata.Concept.ESTIMATED_RESULT.getName(), "isEst");
-        ALL_METADATA.put(Metadata.Concept.FAMILY.getName(), "family");
-        ALL_METADATA.put(Metadata.Concept.SIZE.getName(), "size");
-        ALL_METADATA.put(Metadata.Concept.MAXIMUM_COUNT_ERROR.getName(), "error");
-        ALL_METADATA.put(Metadata.Concept.ITEMS_SEEN.getName(), "n");
-        ALL_METADATA.put(Metadata.Concept.ACTIVE_ITEMS.getName(), "actives");
+        ALL_METADATA.put(Meta.Concept.ESTIMATED_RESULT.getName(), "isEst");
+        ALL_METADATA.put(Meta.Concept.FAMILY.getName(), "family");
+        ALL_METADATA.put(Meta.Concept.SIZE.getName(), "size");
+        ALL_METADATA.put(Meta.Concept.MAXIMUM_COUNT_ERROR.getName(), "error");
+        ALL_METADATA.put(Meta.Concept.ITEMS_SEEN.getName(), "n");
+        ALL_METADATA.put(Meta.Concept.ACTIVE_ITEMS.getName(), "actives");
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class, expectedExceptionsMessageRegExp = ".*power of 2.*")

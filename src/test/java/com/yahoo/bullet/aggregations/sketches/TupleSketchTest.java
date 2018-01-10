@@ -11,7 +11,7 @@ import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
@@ -29,9 +29,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 
 public class TupleSketchTest {
     private static final Set<GroupOperation> OPERATIONS =

@@ -7,7 +7,7 @@ package com.yahoo.bullet.result;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,7 +22,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-public class MetadataTest {
+public class MetaTest {
     @SafeVarargs
     public static List<Map<String, String>> asMetadataEntries(Map.Entry<String, String>... pairs) {
         List<Map<String, String>> list = new ArrayList<>();
@@ -49,12 +49,12 @@ public class MetadataTest {
     public void testErrorsAddition() {
         ParsingError errorA = new ParsingError("foo", asList("1", "2"));
         ParsingError errorB = new ParsingError("bar", asList("3", "4"));
-        Metadata meta = Metadata.of(errorA, errorB);
+        Meta meta = Meta.of(errorA, errorB);
 
         Map<String, Object> actual = meta.asMap();
         Assert.assertEquals(actual.size(), 1);
 
-        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Metadata.ERROR_KEY);
+        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Meta.ERROR_KEY);
         Assert.assertEquals(actualErrors.size(), 2);
         Assert.assertEquals(actualErrors.get(0).getError(), "foo");
         Assert.assertEquals(actualErrors.get(0).getResolutions(), asList("1", "2"));
@@ -80,13 +80,13 @@ public class MetadataTest {
     public void testMetadataWithErrors() {
         ParsingError errorA = ParsingError.makeError("foo", "bar");
         ParsingError errorB = ParsingError.makeError("baz", "qux");
-        Metadata meta = Metadata.of(Arrays.asList(errorA, errorB));
+        Meta meta = Meta.of(Arrays.asList(errorA, errorB));
         ParsingError errorC = ParsingError.makeError("norf", "foo");
         meta.addErrors(Collections.singletonList(errorC));
 
         Map<String, Object> actual = meta.asMap();
         Assert.assertEquals(actual.size(), 1);
-        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Metadata.ERROR_KEY);
+        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Meta.ERROR_KEY);
         Assert.assertEquals(actualErrors.size(), 3);
         Assert.assertEquals(actualErrors.get(0).getError(), "foo");
         Assert.assertEquals(actualErrors.get(0).getResolutions(), singletonList("bar"));
@@ -98,13 +98,13 @@ public class MetadataTest {
 
     @Test
     public void testMerging() {
-        Metadata metaA = new Metadata();
+        Meta metaA = new Meta();
         metaA.add("foo", singletonList("bar"));
         metaA.add("bar", 1L);
-        Metadata metaB = new Metadata();
+        Meta metaB = new Meta();
         metaB.add("baz", singletonMap("a", 1));
         metaB.add("bar", 0.3);
-        Metadata metaC = null;
+        Meta metaC = null;
 
         metaA.merge(metaB);
         metaA.merge(metaC);

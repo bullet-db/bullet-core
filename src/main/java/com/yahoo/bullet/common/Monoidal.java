@@ -7,12 +7,9 @@ package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * This interface captures the associative operations that can be performed within Bullet. The identity is this object
@@ -68,27 +65,12 @@ public interface Monoidal extends Initializable, Closable {
     /**
      * Get the metadata only of the data so far.
      *
-     * @return The {@link Metadata} collected so far.
+     * @return The {@link Meta} collected so far.
      */
-    Metadata getMetadata();
+    Meta getMetadata();
 
-     /**
+    /**
      * Reset the data so far and make this the identity element for the Monoid.
      */
     void reset();
-
-    /**
-     * Helper to apply a method for a given {@link Concept} name if provided in the given {@link Map} of keys.
-     *
-     * @param concept The concept to check in the map if present.
-     * @param metadataKeys A map of concept names to their key names.
-     * @param action The action to apply if the concept was provided in the map.
-     */
-    static void consumeRegisteredConcept(Concept concept, Map<String, String> metadataKeys, Consumer<String> action) {
-        // Only consume the concept if we have a key for it: i.e. it was registered
-        String key = metadataKeys.get(concept.getName());
-        if (key != null) {
-            action.accept(key);
-        }
-    }
 }

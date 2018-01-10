@@ -9,10 +9,10 @@ import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
 import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.record.BulletRecord;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +32,29 @@ import static java.util.Collections.singletonList;
  * configured for the sketch, the normalized rank error can be determined and tightly bound.
  */
 public class Distribution extends SketchingStrategy<QuantileSketch> {
+    @Getter
+    public enum DistributionType {
+        QUANTILE("QUANTILE"),
+        PMF("PMF"),
+        CDF("CDF");
+
+        private String name;
+
+        DistributionType(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Checks to see if this String represents this enum.
+         *
+         * @param name The String version of the enum.
+         * @return true if the name represents this enum.
+         */
+        public boolean isMe(String name) {
+            return this.name.equals(name);
+        }
+    }
+
     // Distribution fields
     public static final String TYPE = "type";
     public static final String POINTS = "points";

@@ -6,8 +6,8 @@
 package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.pubsub.PubSub.Context;
-import com.yahoo.bullet.result.Metadata;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta;
+import com.yahoo.bullet.result.Meta.Concept;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,6 +52,8 @@ public class BulletConfig extends Config {
     public static final String RESULT_METADATA_METRICS = "bullet.result.metadata.metrics";
     public static final String RESULT_METADATA_METRICS_CONCEPT_KEY = "name";
     public static final String RESULT_METADATA_METRICS_NAME_KEY = "key";
+
+    public static final String WINDOW_EMIT_EVERY_MIN_MS = "bullet.query.window.emit.every.min.ms";
 
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
@@ -107,12 +109,13 @@ public class BulletConfig extends Config {
                      ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "Maximum Count Error"),
                      ImmutablePair.of(Concept.ACTIVE_ITEMS, "Active Items"));
 
+    public static final int DEFAULT_WINDOW_EMIT_EVERY_MIN_MS = 1000;
+
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
     // Validator definitions for the configs in this class.
-    // It is ok for this to be static since the VALIDATOR itself does not change for different values for fields
-    // in the BulletConfig.
+    // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
@@ -211,6 +214,11 @@ public class BulletConfig extends Config {
                  .checkIf(BulletConfig::isMetadata)
                  .castTo(BulletConfig::mapifyMetadata);
 
+        VALIDATOR.define(WINDOW_EMIT_EVERY_MIN_MS)
+                .defaultTo(DEFAULT_WINDOW_EMIT_EVERY_MIN_MS)
+                .checkIf(Validator::isPositiveInt)
+                .castTo(Validator::asInt);
+
         VALIDATOR.define(PUBSUB_CONTEXT_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CONTEXT_NAME)
                  .checkIf(Validator.isIn(String.class, Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
@@ -227,6 +235,8 @@ public class BulletConfig extends Config {
         VALIDATOR.relate("If metadata is disabled, keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
+        VALIDATOR.relate("Max should be >= min ", QUERY_MAX_DURATION, WINDOW_EMIT_EVERY_MIN_MS)
+                 .checkIf(Validator::isGreaterOrEqual);
     }
 
     // Members
@@ -294,19 +304,19 @@ public class BulletConfig extends Config {
         try {
             for (Map m : (List<Map>) metadata) {
                 if (m.size() != 2) {
-                    log.warn("Metadata should only contain the keys {}, {}. Found {}", RESULT_METADATA_METRICS_CONCEPT_KEY,
+                    log.warn("Meta should only contain the keys {}, {}. Found {}", RESULT_METADATA_METRICS_CONCEPT_KEY,
                              RESULT_METADATA_METRICS_NAME_KEY, m);
                     return false;
                 }
                 String concept = (String) m.get(RESULT_METADATA_METRICS_CONCEPT_KEY);
                 String name = (String) m.get(RESULT_METADATA_METRICS_CONCEPT_KEY);
-                if (!Metadata.KNOWN_CONCEPTS.contains(Concept.from(concept))) {
+                if (!Meta.KNOWN_CONCEPTS.contains(Concept.from(concept))) {
                     log.warn("Unknown metadata concept: {}", concept);
                     return false;
                 }
             }
         } catch (ClassCastException e) {
-            log.warn("Metadata should be a list containing maps of string keys and values. Found {}", metadata);
+            log.warn("Meta should be a list containing maps of string keys and values. Found {}", metadata);
             return false;
         }
         return true;
@@ -336,4 +346,3 @@ public class BulletConfig extends Config {
         return metadataList;
     }
 }
-

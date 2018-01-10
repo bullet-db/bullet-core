@@ -8,7 +8,8 @@ package com.yahoo.bullet.windowing;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.result.Meta;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -19,18 +20,22 @@ import java.util.Map;
  */
 @Slf4j
 public abstract class Scheme implements Monoidal {
-    private Strategy aggregation;
-    private BulletConfig config;
-    private Map<String, String> metadataKeys;
+    protected Strategy aggregation;
+    protected Window window;
+    protected BulletConfig config;
+    protected Map<String, String> metadataKeys;
 
     /**
-     * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.
+     * Creates an instance of this windowing scheme with the provided {@link Strategy}, {@link Window} and
+     * {@link BulletConfig}.
      *
      * @param aggregation The non-null initialized aggregation strategy that this window will operate.
+     * @param window The initialized, configured window to use.
      * @param config The validated config to use.
      */
-    public Scheme(Strategy aggregation, BulletConfig config) {
+    public Scheme(Strategy aggregation, Window window, BulletConfig config) {
         this.aggregation = aggregation;
+        this.window = window;
         this.config = config;
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
     }
@@ -44,25 +49,53 @@ public abstract class Scheme implements Monoidal {
     protected abstract Map<String, Object> getMetadata(Map<String, String> metadataKeys);
 
     /**
-     * Return any {@link Metadata} for this windowing scheme and the {@link Strategy}.
+     * Returns true if this window is closed when operating in partition mode. If this window has been consuming slices
+     * of the data (partitions) instead of the full data, this can be used to determine whether the window could or
+     * needs to emit data to maintain the windowing invariant.
      *
-     * @return A non-null Metadata object.
+     * @return A boolean whether this window is considered closed if it were consuming a slice of the data.
+     */
+    public abstract boolean isPartitionClosed();
+
+    /**
+     * Returns true if this window is closed forever and will never accept anymore data. By default, this is only
+     * true if the underlying {@link Strategy} is closed.
+     *
+     * @return A boolean whether this window is considered closed forever.
+     */
+    public boolean isPermanentlyClosed() {
+        return aggregation.isClosed();
+    }
+
+    /**
+     * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.
+     *
+     * @return A non-null Meta object.
      */
     @Override
-    public Metadata getMetadata() {
-        Metadata metadata = new Metadata();
+    public Meta getMetadata() {
+        Meta meta = new Meta();
         boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
         if (shouldMeta) {
             String key = getMetaKey();
             if (key != null) {
-                metadata.add(key, getMetadata(metadataKeys));
+                meta.add(key, getMetadata(metadataKeys));
             }
-            metadata.merge(aggregation.getMetadata());
+            meta.merge(aggregation.getMetadata());
         }
-        return metadata;
+        return meta;
+    }
+
+    /**
+     * Checks to see if this window cannot accept any data.
+     *
+     * @return A boolean denoting whether data can be accepted for this window.
+     */
+    protected boolean canAcceptData() {
+        return isClosed() || isPermanentlyClosed();
     }
 
     private String getMetaKey() {
-        return metadataKeys.getOrDefault(Metadata.Concept.WINDOW_METADATA.getName(), null);
+        return metadataKeys.getOrDefault(Meta.Concept.WINDOW_METADATA.getName(), null);
     }
 }

@@ -17,9 +17,9 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.COUNT_DISTINCT;
 import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT_FIELD;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
 import static java.util.Arrays.asList;

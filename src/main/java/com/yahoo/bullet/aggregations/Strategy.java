@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Meta;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
 
@@ -29,13 +29,13 @@ public interface Strategy extends Monoidal {
     }
 
     /**
-     * Get the {@link Metadata} so far. By default, returns an empty one.
+     * Get the {@link Meta} so far. By default, returns an empty one.
      *
      * @return The resulting metadata of the data aggregated so far.
      */
     @Override
-    default Metadata getMetadata() {
-        return new Metadata();
+    default Meta getMetadata() {
+        return new Meta();
     }
 }
 

@@ -15,4 +15,18 @@ public interface Initializable {
      * @return An {@link Optional} {@link List} of {@link BulletError} in this object or its constituents.
      */
     Optional<List<BulletError>> initialize();
+
+    /**
+     * Tries to initialize an instance of {@link Initializable} and wraps the errors in a {@link BulletException} if
+     * there were any.
+     *
+     * @param initializable A non-null instance to try and initialize.
+     * @throws BulletException The errors wrapped as an exception if it cannot be initialized.
+     */
+    static void tryInitializing(Initializable initializable) throws BulletException {
+        Optional<List<BulletError>> errors = initializable.initialize();
+        if (errors.isPresent()) {
+            throw new BulletException(errors.get());
+        }
+    }
 }

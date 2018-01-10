@@ -7,9 +7,6 @@ package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.querying.AggregationOperations;
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,12 +14,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
@@ -34,7 +33,54 @@ import static java.util.Arrays.asList;
  */
 @AllArgsConstructor @Getter
 public class GroupOperation implements Serializable {
-    public static final long serialVersionUID = 40039294765462402L;
+    // ************************************************ Definitions ************************************************
+
+    @Getter
+    public enum GroupOperationType {
+        COUNT("COUNT"),
+        SUM("SUM"),
+        MIN("MIN"),
+        MAX("MAX"),
+        AVG("AVG"),
+        // COUNT_FIELD operation is only used internally in conjunction with AVG and won't be returned.
+        COUNT_FIELD("COUNT_FIELD");
+
+        private String name;
+
+        GroupOperationType(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Checks to see if this String represents this enum.
+         *
+         * @param name The String version of the enum.
+         * @return true if the name represents this enum.
+         */
+        public boolean isMe(String name) {
+            return this.name.equalsIgnoreCase(name);
+        }
+    }
+    public interface AggregationOperator extends BiFunction<Number, Number, Number> {
+    }
+
+    // ************************************************ Operations ************************************************
+
+    // If either argument is null, a NullPointerException will be thrown.
+    public static final AggregationOperator MIN = (x, y) -> x.doubleValue() <  y.doubleValue() ? x : y;
+    public static final AggregationOperator MAX = (x, y) -> x.doubleValue() >  y.doubleValue() ? x : y;
+    public static final AggregationOperator SUM = (x, y) -> x.doubleValue() + y.doubleValue();
+    public static final AggregationOperator COUNT = (x, y) -> x.longValue() + y.longValue();
+
+    public static final Map<GroupOperationType, AggregationOperator> OPERATORS = new EnumMap<>(GroupOperationType.class);
+    static {
+        OPERATORS.put(GroupOperationType.COUNT, GroupOperation.COUNT);
+        OPERATORS.put(GroupOperationType.COUNT_FIELD, GroupOperation.COUNT);
+        OPERATORS.put(GroupOperationType.SUM, GroupOperation.SUM);
+        OPERATORS.put(GroupOperationType.MIN, GroupOperation.MIN);
+        OPERATORS.put(GroupOperationType.MAX, GroupOperation.MAX);
+        OPERATORS.put(GroupOperationType.AVG, GroupOperation.SUM);
+    }
 
     public static final Set<GroupOperationType> SUPPORTED_GROUP_OPERATIONS = new HashSet<>(asList(GroupOperationType.COUNT,
                                                                                                   GroupOperationType.AVG,
@@ -42,9 +88,13 @@ public class GroupOperation implements Serializable {
                                                                                                   GroupOperationType.MIN,
                                                                                                   GroupOperationType.SUM));
 
+    // ************************************************ Fields ************************************************
+
+    public static final long serialVersionUID = 40039294765462402L;
+
     public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
     public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";
-    public static final ParsingError REQUIRES_FIELD_OR_OPERATION_ERROR =
+    public static final BulletError REQUIRES_FIELD_OR_OPERATION_ERROR =
             makeError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
     public static final String OPERATIONS = "operations";
@@ -56,6 +106,8 @@ public class GroupOperation implements Serializable {
     private final String field;
     // Ignored purposefully for hashCode and equals
     private final String newName;
+
+    // ************************************************ Methods ************************************************
 
     @Override
     public int hashCode() {
@@ -98,7 +150,7 @@ public class GroupOperation implements Serializable {
     public static Optional<List<BulletError>> checkOperations(Collection<GroupOperation> operations) {
         List<BulletError> errors = new ArrayList<>();
         for (GroupOperation o : operations) {
-            if (o.getField() == null && o.getType() != AggregationOperations.GroupOperationType.COUNT) {
+            if (o.getField() == null && o.getType() != GroupOperationType.COUNT) {
                 errors.add(makeError(GROUP_OPERATION_REQUIRES_FIELD + o.getType(), OPERATION_REQUIRES_FIELD_RESOLUTION));
             }
         }

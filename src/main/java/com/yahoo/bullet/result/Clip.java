@@ -19,7 +19,7 @@ public class Clip implements JSONFormatter {
     public static final String META_KEY = "meta";
     public static final String RECORDS_KEY = "records";
 
-    private Metadata meta = new Metadata();
+    private Meta meta = new Meta();
     private List<BulletRecord> records = new ArrayList<>();
 
     private static Map<String, Object> asMap(BulletRecord record) {
@@ -57,11 +57,11 @@ public class Clip implements JSONFormatter {
     /**
      * Tags additional metadata. Merges any new metadata with existing metadata, if present.
      *
-     * @param meta Any Metadata to add to the Clip. The objects in the Metadata must be
+     * @param meta Any Meta to add to the Clip. The objects in the Meta must be
      *             serializable to JSON with {@link com.google.gson.Gson}.
      * @return This Clip for chaining
      */
-    public Clip add(Metadata meta) {
+    public Clip add(Meta meta) {
         if (meta != null) {
             this.meta.merge(meta);
         }
@@ -99,11 +99,11 @@ public class Clip implements JSONFormatter {
     /**
      * Construct a Clip with the given metadata.
      *
-     * @param meta The Metadata to add. The objects in the Metadata must be serializable to JSON
+     * @param meta The Meta to add. The objects in the Meta must be serializable to JSON
      *             with {@link com.google.gson.Gson}.
      * @return This object for chaining
      */
-    public static Clip of(Metadata meta) {
+    public static Clip of(Meta meta) {
         return new Clip().add(meta);
     }
 }

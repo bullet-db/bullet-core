@@ -26,6 +26,7 @@ public class Parser {
      * @param config Additional configuration for the query.
      *
      * @return The parsed, configured Query.
+     * @throws com.google.gson.JsonParseException if there was an issue parsing the query.
      */
     public static Query parse(String queryString, BulletConfig config) {
         Query query = GSON.fromJson(queryString, Query.class);

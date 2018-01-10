@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,7 @@ import java.util.Optional;
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
  */
 @Getter @Setter(AccessLevel.PACKAGE) @Slf4j
-public class Query implements Serializable, Configurable, Initializable {
+public class Query implements Configurable, Initializable {
     @Expose
     private Projection projection;
     @Expose
@@ -61,6 +60,10 @@ public class Query implements Serializable, Configurable, Initializable {
         }
         aggregation.configure(config);
 
+        if (window != null) {
+            window.configure(config);
+        }
+
         int durationDefault = config.getAs(BulletConfig.QUERY_DEFAULT_DURATION, Integer.class);
         int durationMax = config.getAs(BulletConfig.QUERY_MAX_DURATION, Integer.class);
 
@@ -81,6 +84,9 @@ public class Query implements Serializable, Configurable, Initializable {
         }
         if (aggregation != null) {
             aggregation.initialize().ifPresent(errors::addAll);
+        }
+        if (window != null) {
+            window.initialize().ifPresent(errors::addAll);
         }
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }

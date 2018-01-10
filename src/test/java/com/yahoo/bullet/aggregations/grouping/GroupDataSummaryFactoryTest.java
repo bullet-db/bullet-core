@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.memory.Memory;
@@ -22,7 +21,7 @@ public class GroupDataSummaryFactoryTest {
     private static CachingGroupData sampleSumGroupData(double sum) {
         CachingGroupData data;
         data = new CachingGroupData(singletonMap("fieldA", "bar"),
-                                    singletonMap(new GroupOperation(GroupOperationType.SUM, "fieldB", "sum"), null));
+                                    singletonMap(new GroupOperation(GroupOperation.GroupOperationType.SUM, "fieldB", "sum"), null));
         BulletRecord record = RecordBox.get().add("fieldA", "bar").add("fieldB", sum).getRecord();
         data.setCachedRecord(record);
         return data;

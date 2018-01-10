@@ -19,7 +19,7 @@ public interface Closable {
      * Returns true if any of the provided {@link Closable} objects are closed.
      *
      * @param objects A non-null array of non-null closable objects.
-     * @return A boolean denoting whether any of the objects were closed.gT
+     * @return A boolean denoting whether any of the objects were closed.
      */
     static boolean areAnyClosed(Closable... objects) {
         return Arrays.stream(objects).anyMatch(Closable::isClosed);

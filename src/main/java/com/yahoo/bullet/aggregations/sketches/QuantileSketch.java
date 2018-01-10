@@ -5,10 +5,11 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.quantiles.DoublesSketch;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.yahoo.bullet.common.Utilities.round;
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * Wraps operations for working with a {@link DoublesSketch} - Quantile Sketch.
@@ -116,9 +118,9 @@ public class QuantileSketch extends DualSketch {
         collect();
         double[] domain = getDomain();
         double[] range;
-        if (type == DistributionType.QUANTILE) {
+        if (type == Distribution.DistributionType.QUANTILE) {
             range = merged.getQuantiles(domain);
-        } else if (type == DistributionType.PMF) {
+        } else if (type == Distribution.DistributionType.PMF) {
             range = merged.getPMF(domain);
         } else {
             range = merged.getCDF(domain);
@@ -139,10 +141,10 @@ public class QuantileSketch extends DualSketch {
         collect();
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
 
-        addIfNonNull(metadata, conceptKeys.get(Concept.MINIMUM_VALUE.getName()), this::getMinimum);
-        addIfNonNull(metadata, conceptKeys.get(Concept.MAXIMUM_VALUE.getName()), this::getMaximum);
-        addIfNonNull(metadata, conceptKeys.get(Concept.ITEMS_SEEN.getName()), this::getNumberOfEntries);
-        addIfNonNull(metadata, conceptKeys.get(Concept.NORMALIZED_RANK_ERROR.getName()), this::getNormalizedRankError);
+        addIfNonNull(metadata, conceptKeys, Concept.MINIMUM_VALUE, this::getMinimum);
+        addIfNonNull(metadata, conceptKeys, Concept.MAXIMUM_VALUE, this::getMaximum);
+        addIfNonNull(metadata, conceptKeys, Concept.ITEMS_SEEN, this::getNumberOfEntries);
+        addIfNonNull(metadata, conceptKeys, Concept.NORMALIZED_RANK_ERROR, this::getNormalizedRankError);
 
         return metadata;
     }
@@ -196,7 +198,7 @@ public class QuantileSketch extends DualSketch {
 
     private double[] getDomain() {
         if (numberOfPoints != null) {
-            return type == DistributionType.QUANTILE ? getPoints(QUANTILE_MIN, QUANTILE_MAX, numberOfPoints, rounding) :
+            return type == Distribution.DistributionType.QUANTILE ? getPoints(QUANTILE_MIN, QUANTILE_MAX, numberOfPoints, rounding) :
                                                        getPoints(getMinimum(), getMaximum(), numberOfPoints, rounding);
         }
         return points;

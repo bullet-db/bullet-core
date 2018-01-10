@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.result.Metadata;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta;
+import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -240,7 +240,7 @@ public class BulletConfigTest {
     public void testMetadataConversion() {
         List<Map<String, String>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Metadata.KNOWN_CONCEPTS) {
+        for (Concept concept : Meta.KNOWN_CONCEPTS) {
             Map<String, String> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);

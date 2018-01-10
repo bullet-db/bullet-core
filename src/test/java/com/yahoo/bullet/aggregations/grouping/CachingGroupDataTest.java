@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CachingGroupDataTest {
-    private static final GroupOperation OPERATION = new GroupOperation(GroupOperationType.SUM, "sum", "");
+    private static final GroupOperation OPERATION = new GroupOperation(GroupOperation.GroupOperationType.SUM, "sum", "");
 
     private static Map<String, String> getSampleGroup() {
         Map<String, String> groups = new HashMap<>();
@@ -92,7 +91,7 @@ public class CachingGroupDataTest {
         groups.put("foo", "bar");
 
         Map<GroupOperation, Number> metrics = new HashMap<>();
-        GroupOperation operation = new GroupOperation(GroupOperationType.SUM, "sum", "");
+        GroupOperation operation = new GroupOperation(GroupOperation.GroupOperationType.SUM, "sum", "");
         metrics.put(operation, 20.0);
 
         CachingGroupData original = new CachingGroupData(groups, metrics);

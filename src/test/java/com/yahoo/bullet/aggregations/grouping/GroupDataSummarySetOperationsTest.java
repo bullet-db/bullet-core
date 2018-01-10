@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
@@ -23,8 +22,8 @@ public class GroupDataSummarySetOperationsTest {
         fields.put("fieldB", "bar");
 
         Map<GroupOperation, Number> metrics = new HashMap<>();
-        GroupOperation operationA = new GroupOperation(GroupOperationType.SUM, "fieldC", "sum");
-        GroupOperation operationB = new GroupOperation(GroupOperationType.MIN, "fieldD", "min");
+        GroupOperation operationA = new GroupOperation(GroupOperation.GroupOperationType.SUM, "fieldC", "sum");
+        GroupOperation operationB = new GroupOperation(GroupOperation.GroupOperationType.MIN, "fieldD", "min");
         metrics.put(operationA, sumValue);
         metrics.put(operationB, minValue);
 

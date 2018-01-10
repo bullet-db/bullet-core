@@ -8,13 +8,15 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
+import com.yahoo.bullet.windowing.AdditiveTumbling;
+import com.yahoo.bullet.windowing.Basic;
+import com.yahoo.bullet.windowing.Reactive;
 import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.Tumbling;
 
 public class WindowingOperations {
-    public enum WindowUnit {
-        RECORD, TIME, ALL
-    }
-
     /**
      * Create a windowing {@link Scheme} for this particular {@link Query}.
      *
@@ -24,6 +26,19 @@ public class WindowingOperations {
      * @return A windowing scheme to use for this query.
      */
     public static Scheme findScheme(Query query, Strategy strategy, BulletConfig config) {
-        return null;
+        Window window = query.getWindow();
+
+        // For now, if no window -> Basic, if Raw -> Reactive, if time based, Tumbling or AdditiveTumbling
+        // TODO: Support other windows
+        if (window == null) {
+            return new Basic(strategy, null, config);
+        }
+        Window.Classification type = window.getType();
+        if (query.getAggregation().getType() == AggregationType.RAW) {
+            return new Reactive(strategy, window, config);
+        } else if (type == Window.Classification.TIME_ALL) {
+            return new AdditiveTumbling(strategy, window, config);
+        }
+        return new Tumbling(strategy, window, config);
     }
 }

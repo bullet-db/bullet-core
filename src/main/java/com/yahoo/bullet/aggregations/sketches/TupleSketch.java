@@ -11,7 +11,7 @@ import com.yahoo.bullet.aggregations.grouping.GroupDataSummary;
 import com.yahoo.bullet.aggregations.grouping.GroupDataSummaryFactory;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
@@ -25,6 +25,8 @@ import com.yahoo.sketches.tuple.UpdatableSketchBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 public class TupleSketch extends KMVSketch {
     private UpdatableSketch<CachingGroupData, GroupDataSummary> updateSketch;
@@ -108,7 +110,7 @@ public class TupleSketch extends KMVSketch {
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         // The super will call collect()
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys.get(Concept.UNIQUES_ESTIMATE.getName()), this::getUniquesEstimate);
+        addIfNonNull(metadata, conceptKeys, Concept.UNIQUES_ESTIMATE, this::getUniquesEstimate);
         return metadata;
     }
 
@@ -128,7 +130,7 @@ public class TupleSketch extends KMVSketch {
         merged = unionSketch.getResult();
     }
 
-    // Metadata
+    // Meta
 
     @Override
     protected Boolean isEstimationMode() {

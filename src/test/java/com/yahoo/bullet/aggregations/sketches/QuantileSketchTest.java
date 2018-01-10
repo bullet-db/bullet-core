@@ -5,10 +5,10 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.SketchesArgumentException;
@@ -86,7 +86,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testExactQuantilesWithNumberOfPoints() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.QUANTILE, 11);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.QUANTILE, 11);
 
         // Insert 0, 10, 20 ... 100
         IntStream.range(0, 11).forEach(i -> sketch.update(i * 10.0));
@@ -104,7 +104,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testExactPMFWithNumberOfPoints() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.PMF, 10);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.PMF, 10);
 
         // Insert 0, 1, 2 ... 9 three times
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
@@ -157,7 +157,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testExactCDFWithNumberOfPoints() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.CDF, 10);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.CDF, 10);
 
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
@@ -192,7 +192,7 @@ public class QuantileSketchTest {
     @Test
     public void testExactQuantilesWithProvidedPoints() {
         // Same results as the testExactQuantilesWithNumberOfPoints
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.QUANTILE, makePoints(0.0, 1.0, 0.1));
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.QUANTILE, makePoints(0.0, 1.0, 0.1));
 
         IntStream.range(0, 11).forEach(i -> sketch.update(i * 10.0));
 
@@ -209,7 +209,7 @@ public class QuantileSketchTest {
     @Test
     public void testExactPMFWithProvidedPoints() {
         // Same results as the testExactPMFWithNumberOfPoints
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.PMF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.PMF, makePoints(0.0, 9.0, 1.0));
 
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
@@ -246,7 +246,7 @@ public class QuantileSketchTest {
     @Test
     public void testExactCDFWithProvidedPoints() {
         // Same results as the testExactPMFWithNumberOfPoints
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
 
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
@@ -278,7 +278,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testNoDataQuantileDistribution() {
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.QUANTILE, new double[]{ 0, 0.3, 1 });
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.QUANTILE, new double[]{ 0, 0.3, 1 });
 
         Clip result = sketch.getResult("meta", ALL_METADATA);
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
@@ -304,7 +304,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testNoDataPMFDistribution() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.PMF, 10);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.PMF, 10);
 
         Clip result = sketch.getResult("meta", ALL_METADATA);
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
@@ -332,7 +332,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testNoDataCDFDistribution() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.CDF, 10);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.CDF, 10);
 
         Clip result = sketch.getResult("meta", ALL_METADATA);
         Map<String, Object> metadata = (Map<String, Object>) result.getMeta().asMap().get("meta");
@@ -360,7 +360,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testOnePointDistribution() {
-        QuantileSketch sketch = new QuantileSketch(64, 2, DistributionType.QUANTILE, 1);
+        QuantileSketch sketch = new QuantileSketch(64, 2, Distribution.DistributionType.QUANTILE, 1);
 
         // Insert 10, 20 ... 100
         IntStream.range(1, 11).forEach(i -> sketch.update(i * 10.0));
@@ -372,7 +372,7 @@ public class QuantileSketchTest {
                                                .add(VALUE_FIELD, 10.0).getRecord();
         Assert.assertEquals(actual, expected);
 
-        QuantileSketch anotherSketch = new QuantileSketch(64, DistributionType.QUANTILE, makePoints(1.0));
+        QuantileSketch anotherSketch = new QuantileSketch(64, Distribution.DistributionType.QUANTILE, makePoints(1.0));
         IntStream.range(1, 11).forEach(i -> anotherSketch.update(i * 10.0));
         records = anotherSketch.getResult(null, null).getRecords();
         Assert.assertEquals(records.size(), 1);
@@ -384,7 +384,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testApproximateQuantilesWithNumberOfPoints() {
-        QuantileSketch sketch = new QuantileSketch(32, 2, DistributionType.QUANTILE, 11);
+        QuantileSketch sketch = new QuantileSketch(32, 2, Distribution.DistributionType.QUANTILE, 11);
 
         IntStream.range(1, 101).forEach(i -> sketch.update(i * 0.1));
 
@@ -417,13 +417,13 @@ public class QuantileSketchTest {
 
     @Test
     public void testUnioning() {
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
 
-        QuantileSketch anotherSketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch anotherSketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
 
-        QuantileSketch mergedSketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch mergedSketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
         mergedSketch.union(sketch.serialize());
         mergedSketch.union(anotherSketch.serialize());
 
@@ -454,10 +454,10 @@ public class QuantileSketchTest {
 
     @Test
     public void testResetting() {
-        QuantileSketch sketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
 
-        QuantileSketch anotherSketch = new QuantileSketch(64, DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
+        QuantileSketch anotherSketch = new QuantileSketch(64, Distribution.DistributionType.CDF, makePoints(0.0, 9.0, 1.0));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
 
         sketch.union(anotherSketch.serialize());
@@ -510,7 +510,7 @@ public class QuantileSketchTest {
     public void testZippingBadLength() {
         double[] domain = { -1.0, 0, 4.0 };
         double[] range =  { 0.2, 0.3, 0.5 };
-        QuantileSketch.zip(domain, range, DistributionType.CDF, 30);
+        QuantileSketch.zip(domain, range, Distribution.DistributionType.CDF, 30);
     }
 
     @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
@@ -518,7 +518,7 @@ public class QuantileSketchTest {
         double[] domain = { };
         double[] range = { 0.2, 0.3, 0.5 };
         // This will try to use the first entry in domain
-        QuantileSketch.zip(domain, range, DistributionType.PMF, 30);
+        QuantileSketch.zip(domain, range, Distribution.DistributionType.PMF, 30);
     }
 
     @Test
@@ -526,7 +526,7 @@ public class QuantileSketchTest {
         double[] domain = { };
         double[] range = { 0.2, 0.3, 0.5 };
         // This will use the -inf to +inf range and the first entry in range
-        List<BulletRecord> records = QuantileSketch.zip(domain, range, DistributionType.CDF, 30);
+        List<BulletRecord> records = QuantileSketch.zip(domain, range, Distribution.DistributionType.CDF, 30);
         Assert.assertEquals(records.size(), 1);
         BulletRecord actual = records.get(0);
         BulletRecord expected = RecordBox.get()
@@ -542,7 +542,7 @@ public class QuantileSketchTest {
         double[] domain = { };
         double[] range = { 0.2, 0.3, 0.5 };
         // This will not add anything
-        List<BulletRecord> records = QuantileSketch.zip(domain, range, DistributionType.QUANTILE, 30);
+        List<BulletRecord> records = QuantileSketch.zip(domain, range, Distribution.DistributionType.QUANTILE, 30);
         Assert.assertEquals(records.size(), 0);
     }
 
@@ -551,7 +551,7 @@ public class QuantileSketchTest {
         double[] domain = { -1.0, 0, 4.0 };
         double[] range =  { 0, 0.3, 0.5, 0.2 };
 
-        List<BulletRecord> results = QuantileSketch.zip(domain, range, DistributionType.PMF, 30);
+        List<BulletRecord> results = QuantileSketch.zip(domain, range, Distribution.DistributionType.PMF, 30);
 
         double[] actualRange = results.stream()
                                        .mapToDouble(r -> (Double) r.get(PROBABILITY_FIELD)).toArray();
@@ -564,7 +564,7 @@ public class QuantileSketchTest {
         double[] domain = { 0.0, 0.5, 1.0 };
         double[] values =  { 0, 3.3, 1.5 };
 
-        List<BulletRecord> results = QuantileSketch.zip(domain, values, DistributionType.QUANTILE, 30);
+        List<BulletRecord> results = QuantileSketch.zip(domain, values, Distribution.DistributionType.QUANTILE, 30);
 
         double[] actualValues = results.stream()
                                        .mapToDouble(r -> (Double) r.get(VALUE_FIELD)).toArray();
@@ -574,7 +574,7 @@ public class QuantileSketchTest {
 
     @Test
     public void testRounding() {
-        QuantileSketch sketch = new QuantileSketch(64, 6, DistributionType.CDF, 10);
+        QuantileSketch sketch = new QuantileSketch(64, 6, Distribution.DistributionType.CDF, 10);
 
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
         IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));

@@ -9,13 +9,12 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.querying.AggregationOperations;
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -29,9 +28,9 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.assertContains;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.SUM;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
@@ -113,10 +112,10 @@ public class GroupByTest {
         List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
-                                                               GroupOperationType.AVG,
+                                                               GroupOperation.GroupOperationType.AVG,
                                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
         Assert.assertEquals(errors.get(1), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
-                                                               GroupOperationType.SUM,
+                                                               GroupOperation.GroupOperationType.SUM,
                                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
     }
 

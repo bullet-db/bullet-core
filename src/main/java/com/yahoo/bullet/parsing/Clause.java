@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ import static com.yahoo.bullet.parsing.ParsingError.makeError;
 import static java.util.Collections.singletonList;
 
 @Slf4j @Getter @Setter
-public abstract class Clause implements Serializable, Configurable, Initializable {
+public abstract class Clause implements Configurable, Initializable {
     @Expose
     @SerializedName(OPERATION_FIELD)
     protected FilterType operation;

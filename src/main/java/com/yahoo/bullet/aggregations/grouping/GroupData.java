@@ -7,9 +7,7 @@ package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.querying.AggregationOperations;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationOperator;
-import com.yahoo.bullet.querying.AggregationOperations.GroupOperationType;
+import com.yahoo.bullet.aggregations.grouping.GroupOperation.AggregationOperator;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.yahoo.bullet.common.Utilities.extractFieldAsNumber;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.AVG;
-import static com.yahoo.bullet.querying.AggregationOperations.GroupOperationType.COUNT_FIELD;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 
 /**
  * This class represents the results of a GroupOperations. The result is always a {@link Number}, so
@@ -166,7 +164,7 @@ public class GroupData implements Serializable {
 
     private void consume(Map.Entry<GroupOperation, Number> metric, BulletRecord data) {
         GroupOperation operation = metric.getKey();
-        GroupOperationType type = operation.getType();
+        GroupOperation.GroupOperationType type = operation.getType();
 
         Number casted = 1L;
         switch (type) {
@@ -183,7 +181,7 @@ public class GroupData implements Serializable {
                 casted = casted != null ? 1L : null;
                 break;
         }
-        updateMetric(casted, metric, AggregationOperations.OPERATORS.get(type));
+        updateMetric(casted, metric, GroupOperation.OPERATORS.get(type));
     }
 
     private void combine(Map.Entry<GroupOperation, Number> metric, GroupData otherData) {
@@ -191,18 +189,18 @@ public class GroupData implements Serializable {
         Number value = otherData.metrics.get(metric.getKey());
         switch (operation.getType()) {
             case MIN:
-                updateMetric(value, metric, AggregationOperations.MIN);
+                updateMetric(value, metric, GroupOperation.MIN);
                 break;
             case MAX:
-                updateMetric(value, metric, AggregationOperations.MAX);
+                updateMetric(value, metric, GroupOperation.MAX);
                 break;
             case SUM:
             case AVG:
-                updateMetric(value, metric, AggregationOperations.SUM);
+                updateMetric(value, metric, GroupOperation.SUM);
                 break;
             case COUNT:
             case COUNT_FIELD:
-                updateMetric(value, metric, AggregationOperations.COUNT);
+                updateMetric(value, metric, GroupOperation.COUNT);
                 break;
         }
     }
@@ -249,7 +247,7 @@ public class GroupData implements Serializable {
         if (name != null) {
             return name;
         }
-        GroupOperationType type = operation.getType();
+        GroupOperation.GroupOperationType type = operation.getType();
         String field = operation.getField();
         if (field == null) {
             return type.getName();

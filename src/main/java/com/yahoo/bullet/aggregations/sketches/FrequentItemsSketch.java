@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.ArrayOfItemsSerDe;
 import com.yahoo.sketches.ArrayOfUtf16StringsSerDe;
@@ -18,6 +18,8 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * Wraps a {@link ItemsSketch} of String.
@@ -107,9 +109,9 @@ public class FrequentItemsSketch extends Sketch {
     @Override
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys.get(Concept.ITEMS_SEEN.getName()), this::getStreamLength);
-        addIfNonNull(metadata, conceptKeys.get(Concept.ACTIVE_ITEMS.getName()), this::getItemsStored);
-        addIfNonNull(metadata, conceptKeys.get(Concept.MAXIMUM_COUNT_ERROR.getName()), this::getMaximumError);
+        addIfNonNull(metadata, conceptKeys, Concept.ITEMS_SEEN, this::getStreamLength);
+        addIfNonNull(metadata, conceptKeys, Concept.ACTIVE_ITEMS, this::getItemsStored);
+        addIfNonNull(metadata, conceptKeys, Concept.MAXIMUM_COUNT_ERROR, this::getMaximumError);
         return metadata;
     }
 

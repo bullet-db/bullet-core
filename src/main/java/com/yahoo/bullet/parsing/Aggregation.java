@@ -14,7 +14,6 @@ import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @Getter @Setter
-public class Aggregation implements Serializable, Configurable, Initializable {
+public class Aggregation implements Configurable, Initializable {
     @Expose
     private Integer size;
     @Expose

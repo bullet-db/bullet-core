@@ -19,7 +19,7 @@ import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -79,7 +79,7 @@ public class QuerierTest {
         }
 
         @Override
-        public Metadata getMetadata() {
+        public Meta getMetadata() {
             aggregationFailure++;
             throw new RuntimeException("Getting aggregation test failure");
         }
@@ -226,11 +226,11 @@ public class QuerierTest {
         Map<String, Object> actualMeta = actual.getMeta().asMap();
 
         Assert.assertEquals(actualMeta.size(), 1);
-        Assert.assertNotNull(actualMeta.get(Metadata.ERROR_KEY));
+        Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
 
         ParsingError expectedError = ParsingError.makeError("Getting aggregation test failure",
                                               Querier.AGGREGATION_FAILURE_RESOLUTION);
-        Assert.assertEquals(actualMeta.get(Metadata.ERROR_KEY), singletonList(expectedError));
+        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expectedError));
 
         Assert.assertEquals(failure.consumptionFailure, 1);
         Assert.assertEquals(failure.combiningFailure, 1);

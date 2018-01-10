@@ -7,13 +7,14 @@ package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta;
+import com.yahoo.bullet.result.Meta.Concept;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * This class encapsulates a type of Sketch. Since one type of Sketch is used for updating and another for unioning,
@@ -53,7 +54,7 @@ public abstract class Sketch {
     public abstract void reset();
 
     /**
-     * Gets the result from the data presented to the sketch as a {@link Clip}. Also adds {@link Metadata} if
+     * Gets the result from the data presented to the sketch as a {@link Clip}. Also adds {@link Meta} if
      * asked for.
      *
      * @param metaKey If set to a non-null value, Sketch metadata will be added to the result.
@@ -66,17 +67,17 @@ public abstract class Sketch {
     }
 
     /**
-     * Returns the sketch metadata as a {@link Metadata} object.
+     * Returns the sketch metadata as a {@link Meta} object.
      *
      * @param metaKey The key to add the metadata as.
      * @param conceptKeys If provided, these {@link Concept} names will be added to the metadata.
      * @return The metadata object or an empty one if no metadata was collected.
      */
-    public Metadata getMetadata(String metaKey, Map<String, String> conceptKeys) {
+    public Meta getMetadata(String metaKey, Map<String, String> conceptKeys) {
         if (metaKey == null) {
-            return new Metadata();
+            return new Meta();
         }
-        return new Metadata().add(metaKey, addMetadata(conceptKeys));
+        return new Meta().add(metaKey, addMetadata(conceptKeys));
     }
 
     /**
@@ -87,9 +88,9 @@ public abstract class Sketch {
      */
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         Map<String, Object> metadata = new HashMap<>();
-        addIfNonNull(metadata, conceptKeys.get(Concept.FAMILY.getName()), this::getFamily);
-        addIfNonNull(metadata, conceptKeys.get(Concept.SIZE.getName()), this::getSize);
-        addIfNonNull(metadata, conceptKeys.get(Concept.ESTIMATED_RESULT.getName()), this::isEstimationMode);
+        addIfNonNull(metadata, conceptKeys, Concept.FAMILY, this::getFamily);
+        addIfNonNull(metadata, conceptKeys, Concept.SIZE, this::getSize);
+        addIfNonNull(metadata, conceptKeys, Concept.ESTIMATED_RESULT, this::isEstimationMode);
         return metadata;
     }
 
@@ -113,22 +114,4 @@ public abstract class Sketch {
      * @return An Integer representing the size of the sketch.
      */
     protected abstract Integer getSize();
-
-    /**
-     * Utility function to add a key to the metadata if the key and value are not null.
-     *
-     * @param metadata The non-null {@link Map} representing the metadata.
-     * @param key The key to add if not null.
-     * @param supplier A {@link Supplier} that can produce a value to add to the metadata for the key. If the supplier
-     *                 produces null, it is not added.
-     */
-    static void addIfNonNull(Map<String, Object> metadata, String key, Supplier<Object> supplier) {
-        Object data = null;
-        if (key != null) {
-            data = supplier.get();
-        }
-        if (data != null) {
-            metadata.put(key, data);
-        }
-    }
 }

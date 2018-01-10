@@ -6,13 +6,12 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.querying.AggregationOperations;
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,13 +24,13 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public class AggregationUtils {
-    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Metadata.Concept, String>> metadata) {
+    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Meta.Concept, String>> metadata) {
         if (metadata == null) {
             config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
             return config;
         }
         List<Map<String, String>> metadataList = new ArrayList<>();
-        for (Map.Entry<Metadata.Concept, String> meta : metadata) {
+        for (Map.Entry<Meta.Concept, String> meta : metadata) {
             Map<String, String> entry = new HashMap<>();
             entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, meta.getKey().getName());
             entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, meta.getValue());
@@ -43,7 +42,7 @@ public class AggregationUtils {
     }
 
     @SafeVarargs
-    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Metadata.Concept, String>... metadata) {
+    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Meta.Concept, String>... metadata) {
         return addMetadata(config, metadata == null ? null : Arrays.asList(metadata));
     }
 
@@ -65,7 +64,7 @@ public class AggregationUtils {
         return makeGroupOperation(operation.getType(), operation.getField(), operation.getNewName());
     }
 
-    public static Map<String, String> makeGroupOperation(AggregationOperations.GroupOperationType type, String field, String newName) {
+    public static Map<String, String> makeGroupOperation(GroupOperation.GroupOperationType type, String field, String newName) {
         Map<String, String> map = new HashMap<>();
         if (type != null) {
             map.put(GroupOperation.OPERATION_TYPE, type.getName());

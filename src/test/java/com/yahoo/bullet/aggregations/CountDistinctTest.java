@@ -10,7 +10,7 @@ import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;

@@ -173,12 +173,22 @@ bullet.result.metadata.metrics:
       key: "Window Name"
     - name: "Window Count"
       key: "Window Count"
+    - name: "Window Size"
+      key: "Window Size"
 
 # Enables whether each record should have a new key added to it denoting it was projected.
 bullet.record.inject.timestamp.enable: true
 # This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
 # the record is projected. This is only applicable to RAW queries.
 bullet.record.inject.timestamp.key: "bullet_project_timestamp"
+
+# The smallest window time allowable for emitting in milliseconds
+bullet.query.window.emit.every.min.ms: 1000
+
+# Enable rate limiting based on records per second (rps)
+bullet.query.rate.limit.enable: true
+# Enable rate limiting based on records per second (rps)
+bullet.query.rate.limit.rps.max: 10
 
 ## PubSub default settings
 # This should point to a concrete implementation of PubSub.

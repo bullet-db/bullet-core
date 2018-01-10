@@ -11,7 +11,7 @@ import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.result.Meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +83,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     @Override
-    public Metadata getMetadata() {
+    public Meta getMetadata() {
         return sketch.getMetadata(getMetaKey(), metadataKeys);
     }
 
@@ -124,6 +124,6 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
 
     private String getMetaKey() {
         boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
-        return shouldMeta ? metadataKeys.getOrDefault(Metadata.Concept.SKETCH_METADATA.getName(), null) : null;
+        return shouldMeta ? metadataKeys.getOrDefault(Meta.Concept.SKETCH_METADATA.getName(), null) : null;
     }
 }

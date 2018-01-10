@@ -11,7 +11,7 @@ import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.frequencies.ErrorType;

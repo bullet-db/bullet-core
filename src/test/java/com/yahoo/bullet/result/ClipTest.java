@@ -80,9 +80,9 @@ public class ClipTest {
                                              .add("not_a_number", Double.NaN)
                                              .getRecord();
 
-        Metadata metadata = new Metadata().add("foo", Double.POSITIVE_INFINITY).add("bar", Double.NaN).add("baz", Double.NEGATIVE_INFINITY);
+        Meta meta = new Meta().add("foo", Double.POSITIVE_INFINITY).add("bar", Double.NaN).add("baz", Double.NEGATIVE_INFINITY);
 
-        assertJSONEquals(Clip.of(record).add(metadata).asJSON(),
+        assertJSONEquals(Clip.of(record).add(meta).asJSON(),
                          makeJSON("{'foo': 'Infinity', 'baz': '-Infinity', 'bar': 'NaN'}",
                                  "[{'field': null, 'plus_inf': 'Infinity', 'neg_inf': '-Infinity', 'not_a_number': 'NaN'}]"));
     }
@@ -90,8 +90,8 @@ public class ClipTest {
     @Test
     public void testMetadataAddition() {
         Clip clip = new Clip();
-        clip.add((Metadata) null);
-        clip.add(new Metadata().add("foo", 1.2));
+        clip.add((Meta) null);
+        clip.add(new Meta().add("foo", 1.2));
         assertJSONEquals(clip.asJSON(), makeJSON("{'foo': 1.2}", "[]"));
     }
 }

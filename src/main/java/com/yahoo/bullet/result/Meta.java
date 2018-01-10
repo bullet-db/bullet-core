@@ -13,10 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 
-public class Metadata {
+public class Meta {
     private Map<String, Object> meta = new HashMap<>();
     public static final List<Concept> KNOWN_CONCEPTS = asList(Concept.values());
 
@@ -46,7 +48,8 @@ public class Metadata {
         // Windowing metadata
         WINDOW_METADATA("Window Metadata"),
         WINDOW_NAME("Window Name"),
-        WINDOW_COUNT("Window Count");
+        WINDOW_COUNT("Window Count"),
+        WINDOW_SIZE("Window Size");
 
         private String name;
 
@@ -94,19 +97,19 @@ public class Metadata {
      * @param information An object that represents the information.
      * @return This object for chaining.
      */
-    public Metadata add(String key, Object information) {
+    public Meta add(String key, Object information) {
         meta.put(key, information);
         return this;
     }
 
     /**
-     * Add errors to the Metadata.
+     * Add errors to the Meta.
      *
      * @param errors {@link BulletError} objects to add.
      * @return This object for chaining.
      */
     @SuppressWarnings("unchecked")
-    public Metadata addErrors(List<BulletError> errors) {
+    public Meta addErrors(List<BulletError> errors) {
         Objects.requireNonNull(errors);
         List<BulletError> existing = (List<BulletError>) meta.get(ERROR_KEY);
         if (existing != null) {
@@ -118,39 +121,76 @@ public class Metadata {
     }
 
     /**
-     * Static construction of Metadata with some errors.
+     * Static construction of Meta with some errors.
      *
      * @param errors A non-null {@link List} of {@link BulletError} objects.
-     * @return The Metadata object with the errors.
+     * @return The Meta object with the errors.
      */
-    public static Metadata of(BulletError... errors) {
-        Metadata meta = new Metadata();
+    public static Meta of(BulletError... errors) {
+        Meta meta = new Meta();
         meta.addErrors(asList(errors));
         return meta;
     }
 
     /**
-     * Static construction of Metadata with some errors.
+     * Static construction of Meta with some errors.
      *
      * @param errors A non-null list of {@link BulletError} objects.
-     * @return The Metadata object with the errors.
+     * @return The Meta object with the errors.
      */
-    public static Metadata of(List<BulletError> errors) {
-        Metadata meta = new Metadata();
+    public static Meta of(List<BulletError> errors) {
+        Meta meta = new Meta();
         meta.addErrors(errors);
         return meta;
     }
 
     /**
-     * Merge another Metadata into this Metadata.
+     * Merge another Meta into this Meta.
      *
-     * @param metadata A Metadata to merge.
+     * @param meta A Meta to merge.
      * @return This Object after the merge.
      */
-    public Metadata merge(Metadata metadata) {
-        if (metadata != null) {
-            this.meta.putAll(metadata.asMap());
+    public Meta merge(Meta meta) {
+        if (meta != null) {
+            this.meta.putAll(meta.asMap());
         }
         return this;
+    }
+
+    /**
+     * Utility function to add a concept with a configured name to a map representing metadata if both the name and
+     * and a value for the name produced by a given {@link Supplier} are not null.
+     *
+     * @param meta The non-null {@link Map} representing the metadata.
+     * @param names The non-null {@link Map} of configured {@link Concept} names to key names to use.
+     * @param concept The concept to add
+     * @param supplier A {@link Supplier} that can produce a value to add to the metadata for the concept. If the
+     *                 supplier produces null, it is not added.
+     */
+    public static void addIfNonNull(Map<String, Object> meta, Map<String, String> names, Concept concept,
+                                    Supplier<Object> supplier) {
+        Object data = null;
+        String key = names.get(concept.getName());
+        if (key != null) {
+            data = supplier.get();
+        }
+        if (data != null) {
+            meta.put(key, data);
+        }
+    }
+
+    /**
+     * Utility function to apply a method for a given {@link Concept} name if provided in the given {@link Map} of names.
+     *
+     * @param concept The concept to check in the map if present.
+     * @param names A map of concept names to their key names.
+     * @param action The action to apply if the concept was provided in the map.
+     */
+    public static void consumeRegisteredConcept(Concept concept, Map<String, String> names, Consumer<String> action) {
+        // Only consume the concept if we have a key for it: i.e. it was registered
+        String key = names.get(concept.getName());
+        if (key != null) {
+            action.accept(key);
+        }
     }
 }

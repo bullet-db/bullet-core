@@ -8,10 +8,10 @@ package com.yahoo.bullet.aggregations;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.querying.AggregationOperations.DistributionType;
+import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.Metadata.Concept;
+import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.quantiles.DoublesSketch;
@@ -124,7 +124,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_TYPE_ERROR);
 
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(Distribution.TYPE, DistributionType.CDF.getName());
+        attributes.put(Distribution.TYPE, Distribution.DistributionType.CDF.getName());
         attributes.put(Distribution.NUMBER_OF_POINTS, 10L);
         aggregation.setAttributes(attributes);
         distribution = new Distribution(aggregation, new BulletConfig());
@@ -144,7 +144,7 @@ public class DistributionTest {
         List<BulletError> errors;
 
         // start  < 0
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, -1, 1, 0.5));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, -1, 1, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -153,7 +153,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // end > 1
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0, 2, 0.1));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, 0, 2, 0.1));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -162,7 +162,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // both out of range
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 3, 4, 0.1));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, 3, 4, 0.1));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -170,12 +170,12 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0, 1, 0.2));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, 0, 1, 0.2));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
         // start null
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, null, 0.5, 0.2, null, null));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, null, 0.5, 0.2, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -183,7 +183,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // end null
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, 1.0, null, 0.2, null, null));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, 1.0, null, 0.2, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -191,7 +191,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // increment null
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, 1.0, 2.0, null, null, null));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, 1.0, 2.0, null, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -199,14 +199,14 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // end < start
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, 25, -2, 0.5));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, 25, -2, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, 25, 200, 0.5));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, 25, 200, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
@@ -221,7 +221,7 @@ public class DistributionTest {
         List<BulletError> errors;
 
         // Null points
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, null, null, null, null, null));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, null, null, null, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -229,7 +229,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
         // Negative points
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, -10));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, -10));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -238,7 +238,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
         // 0 points
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 0));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, 0));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -246,14 +246,14 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, 0));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, 0));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, 1));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, 1));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
@@ -267,7 +267,7 @@ public class DistributionTest {
         Optional<List<BulletError>> optionalErrors;
         List<BulletError> errors;
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -275,7 +275,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, null));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -283,7 +283,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.emptyList()));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, Collections.emptyList()));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -291,7 +291,7 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.singletonList(2.0)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, Collections.singletonList(2.0)));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
@@ -299,28 +299,28 @@ public class DistributionTest {
         Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
         Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, Collections.singletonList(1.0)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, Collections.singletonList(1.0)));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertNull(errors);
 
-        aggregation.setAttributes(makeAttributes(DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, Collections.singletonList(0.4)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, Collections.singletonList(0.4)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
-        aggregation.setAttributes(makeAttributes(DistributionType.PMF, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
+        aggregation.setAttributes(makeAttributes(Distribution.DistributionType.PMF, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
 
     @Test
     public void testQuantiles() {
-        Distribution distribution = makeDistribution("field", DistributionType.QUANTILE, 3);
+        Distribution distribution = makeDistribution("field", Distribution.DistributionType.QUANTILE, 3);
 
         IntStream.range(0, 2000).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(distribution::consume);
@@ -362,7 +362,7 @@ public class DistributionTest {
 
     @Test
     public void testPMF() {
-        Distribution distribution = makeDistribution(DistributionType.PMF, asList(5.0, 2.5));
+        Distribution distribution = makeDistribution(Distribution.DistributionType.PMF, asList(5.0, 2.5));
 
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -392,7 +392,7 @@ public class DistributionTest {
 
     @Test
     public void testCDF() {
-        Distribution distribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
+        Distribution distribution = makeDistribution(Distribution.DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -422,17 +422,17 @@ public class DistributionTest {
 
     @Test
     public void testCombining() {
-        Distribution distribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
+        Distribution distribution = makeDistribution(Distribution.DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(0, 25).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                               .forEach(distribution::consume);
 
-        Distribution anotherDistribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
+        Distribution anotherDistribution = makeDistribution(Distribution.DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(50, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(anotherDistribution::consume);
 
-        Distribution union = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
+        Distribution union = makeDistribution(Distribution.DistributionType.CDF, asList(5.0, 2.5));
         union.combine(distribution.getData());
         union.combine(anotherDistribution.getData());
         Clip result = union.getResult();
@@ -460,7 +460,7 @@ public class DistributionTest {
 
     @Test
     public void testCasting() {
-        Distribution distribution = makeDistribution(DistributionType.PMF, Collections.singletonList(50.0));
+        Distribution distribution = makeDistribution(Distribution.DistributionType.PMF, Collections.singletonList(50.0));
 
         IntStream.range(0, 25).mapToObj(String::valueOf).map(s -> RecordBox.get().add("field", s).getRecord())
                               .forEach(distribution::consume);
@@ -495,7 +495,7 @@ public class DistributionTest {
     public void testNegativeSize() {
         // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
         // and aggregation size, which is 1
-        Distribution distribution = makeDistribution(makeConfiguration(-1, 128), makeAttributes(DistributionType.PMF, 10L),
+        Distribution distribution = makeDistribution(makeConfiguration(-1, 128), makeAttributes(Distribution.DistributionType.PMF, 10L),
                                                      "field", 1, ALL_METADATA);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
@@ -522,7 +522,7 @@ public class DistributionTest {
 
     @Test
     public void testRounding() {
-        Distribution distribution = makeDistribution(DistributionType.QUANTILE, 20, 6, 0.0, 1.0, 0.1);
+        Distribution distribution = makeDistribution(Distribution.DistributionType.QUANTILE, 20, 6, 0.0, 1.0, 0.1);
 
         IntStream.range(0, 10).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
