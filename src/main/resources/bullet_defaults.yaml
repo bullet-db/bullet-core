@@ -4,11 +4,8 @@ bullet.query.default.duration: 30000
 # The maximum duration in milliseconds allowed for a query. Anything greater will be clamped to this value.
 bullet.query.max.duration: 120000
 
-# The default number of records that can be aggregated for a query if one has not been specified.
-bullet.query.aggregation.default.size: 1
-
-# The maximum number of records that will be aggregated per query. Anything greater will be clamped to this value.
-bullet.query.aggregation.max.size: 512
+# The maximum number of records that will be aggregated per query per window if size is provided. Anything greater will be clamped to this value.
+bullet.query.aggregation.max.size: 500
 
 # This is the separator that is used when a set of fields has to be considered as a single String.
 # This is relevant when hashing a set of fields (for example, in a GROUP operation) for uniqueness purposes, such
@@ -183,12 +180,12 @@ bullet.record.inject.timestamp.enable: true
 bullet.record.inject.timestamp.key: "bullet_project_timestamp"
 
 # The smallest window time allowable for emitting in milliseconds
-bullet.query.window.emit.every.min.ms: 1000
+bullet.query.window.min.emit.every: 1000
 
-# Enable rate limiting based on records per second (rps)
+# Enable rate limiting. A query that exceeds the configured rate limit will be TERMINATED
 bullet.query.rate.limit.enable: true
-# Enable rate limiting based on records per second (rps)
-bullet.query.rate.limit.rps.max: 10
+bullet.query.rate.limit.max.emit.count: 100
+bullet.query.rate.limit.time.interval: 1000
 
 ## PubSub default settings
 # This should point to a concrete implementation of PubSub.

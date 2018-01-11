@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Arrays.asList;
 
 /**

@@ -54,16 +54,4 @@ public class ParsingError extends BulletError {
         return new ParsingError(GENERIC_JSON_ERROR + ":\n" + queryString + "\n" + message,
                                 singletonList(GENERIC_JSON_RESOLUTION));
     }
-
-    /**
-     * Creates a ParsingError object with the given error message and the resolution.
-     *
-     * @param error The message denoting the error.
-     * @param resolution A resolution message.
-     *
-     * @return An ParsingError representing this cause.
-     */
-    public static ParsingError makeError(String error, String resolution) {
-        return new ParsingError(error, singletonList(resolution));
-    }
 }

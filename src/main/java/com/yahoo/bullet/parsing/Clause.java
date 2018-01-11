@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Collections.singletonList;
 
 @Slf4j @Getter @Setter
@@ -28,7 +28,7 @@ public abstract class Clause implements Configurable, Initializable {
     protected FilterType operation;
 
     public static final String OPERATION_FIELD = "operation";
-    public static final ParsingError OPERATION_MISSING =
+    public static final BulletError OPERATION_MISSING =
         makeError("Missing operation field", "You must specify an operation field in all the filters");
 
     @Override

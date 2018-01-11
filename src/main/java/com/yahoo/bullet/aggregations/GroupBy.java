@@ -59,7 +59,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         // Default at 512 gives a 13.27% error rate at 99.73% confidence (3 SD). Irrelevant since we are using this to
         // mostly cap the number of groups. You can use the Sketch theta to extrapolate the aggregation for all the data.
         int nominalEntries = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_ENTRIES, Integer.class);
-        int size = aggregation.getSize();
+        int size = aggregation.hasNoSize() ? nominalEntries : aggregation.getSize();
 
         sketch = new TupleSketch(resizeFactor, samplingProbability, nominalEntries, size);
     }

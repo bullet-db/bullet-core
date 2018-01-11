@@ -10,7 +10,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Getter;
 
@@ -79,18 +78,18 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.PMF.getName(), DistributionType.PMF);
         SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.CDF.getName(), DistributionType.CDF);
     }
-    public static final ParsingError REQUIRES_TYPE_ERROR =
+    public static final BulletError REQUIRES_TYPE_ERROR =
             makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
                       SUPPORTED_DISTRIBUTION_TYPES.keySet().stream().collect(Collectors.joining(", ")));
-    public static final ParsingError REQUIRES_POINTS_ERROR =
+    public static final BulletError REQUIRES_POINTS_ERROR =
             makeError("The DISTRIBUTION type requires at least one point specified in attributes",
                       "Please add a list of numeric points with points, OR " +
                       "specify a number of equidistant points to generate with numberOfPoints OR " +
                       "specify a range to generate points for with start, end and increment (start < end, increment > 0)");
-    public static final ParsingError REQUIRES_POINTS_PROPER_RANGE =
+    public static final BulletError REQUIRES_POINTS_PROPER_RANGE =
             makeError(DistributionType.QUANTILE.getName() + " requires points in the proper range",
                       "Please add or generate points: 0 <= point <= 1");
-    public static final ParsingError REQUIRES_ONE_FIELD_ERROR =
+    public static final BulletError REQUIRES_ONE_FIELD_ERROR =
             makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
 
     /**
@@ -106,7 +105,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         rounding = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, Integer.class);
 
         int pointLimit = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
-        maxPoints = Math.min(pointLimit, aggregation.getSize());
+        maxPoints = aggregation.hasNoSize() ? pointLimit : Math.min(pointLimit, aggregation.getSize());
         this.aggregation = aggregation;
 
         // The sketch is initialized in initialize!

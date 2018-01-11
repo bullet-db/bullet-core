@@ -12,7 +12,6 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
@@ -21,6 +20,7 @@ import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.windowing.Scheme;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +41,42 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
  * deserialization.
  *
+ * Ideally to implement Bullet, you would parallelize into two stages:
+ *
+ * 1. The Filter stage - this is where you partition and distribute your data across workers. Each worker should have
+ *    a copy of the query so no matter where the data ends up, the query as a whole across all the workers, will see it.
+ * 2. The Join stage - this is where you group the results for all the parallelized outputs in the filter stage for a
+ *    a particular query (using the query ID as an identifier to combine the intermediate outputs).
+ *
+ * Filter Stage Flow
+ *
+ * 1. For each Query message from the PubSub, check to see if it is has a KILL signal.
+ *    If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
+ *    If no, create an instance of {@link Querier} for the query. If any exceptions, ignore them.
+ * 2. For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects.
+ * 3. If {@link #isClosedForPartition()}, use {@link #getData()} to emit the intermediate data to the Join stage for
+ *    the query ID. Then, call {@link #reset()}.
+ * 4. If {@link #isExpired()}, call {@link #getData()} and also remove the {@link Querier}. Can also do this periodically.
+ * 5. Optional: if you are processing record by record (instead of micro-batches) and honoring
+ *    {@link #isClosedForPartition()}, you should check if {@link #isExceedingRateLimit()} is true after calling
+ *    {@link #getData()}. If yes, you should cancel the query and emit a signal to the Join stage to kill the query. You
+ *    can use {@link #getLimiter()} and use {@link RateLimiter#getCurrentRate()} to pass the exceeded rate as well.
+ *
+ * You can also use {@link #haveData()} to check if there is any data to emit if you need.
+ *
+ * Join Stage Flow
+ *
+ * 1. For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions,
+ *    make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
+ * 2. For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
+ *    {@link RateLimitError}. Emit this through the regular PubSub Publisher for results. Also emit a KILL signal
+ *    PubSubMessage to a Publisher for queries so that it is fed back to the Filter stage.
+ * 3.
+ *
+ *
+ * While {@link Querier} is not serializable, you can {@link #merge(Monoidal)} it with other instances if you use
+ * non-native serialization frameworks. This will simply be equivalent to calling {@link #combine(byte[])} on
+ * {@link #getData()}
  */
 @Slf4j
 public class Querier implements Monoidal {
@@ -60,6 +96,10 @@ public class Querier implements Monoidal {
     private boolean shouldInjectTimestamp;
     private String timestampKey;
     private boolean haveData = false;
+
+    // This is counting the number of times we get the data out of the query.
+    @Getter
+    private RateLimiter limiter;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -177,6 +217,7 @@ public class Querier implements Monoidal {
     @Override
     public byte[] getData() {
         try {
+            limiter.increment();
             return window.getData();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
@@ -194,6 +235,7 @@ public class Querier implements Monoidal {
     @Override
     public List<BulletRecord> getRecords() {
         try {
+            limiter.increment();
             return window.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -227,10 +269,11 @@ public class Querier implements Monoidal {
     public Clip getResult() {
         Clip result;
         try {
+            limiter.increment();
             result = window.getResult();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
-            result = Clip.of(Meta.of(ParsingError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
+            result = Clip.of(Meta.of(BulletError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
         result.add(getResultMetadata());
         return result;
@@ -248,7 +291,7 @@ public class Querier implements Monoidal {
 
     /**
      * Resets this object. You should call this if you have called {@link #getResult()} or {@link #getData()} after
-     * verifying whether this is {@link #isClosed()} or {@link #isPartitionClosed()}.
+     * verifying whether this is {@link #isClosed()} or {@link #isClosedForPartition()}.
      */
     @Override
     public void reset() {
@@ -267,7 +310,7 @@ public class Querier implements Monoidal {
      *
      * @return A boolean denoting whether there is data to emit for this query if it was reading part of the data.
      */
-    public boolean isPartitionClosed() {
+    public boolean isClosedForPartition() {
         return window.isPartitionClosed();
     }
 
@@ -288,6 +331,17 @@ public class Querier implements Monoidal {
      */
     public boolean haveData() {
         return haveData;
+    }
+
+    /**
+     * Returns whether this is exceeding the rate limit. It is up to the user to perform any action such as killing the
+     * query if this is
+     *
+     * @return A boolean denoting whether we have exceeded the rate limit.
+     */
+    public boolean isExceedingRateLimit() {
+        // TODO: Check if rate limiting is enabled
+        return limiter.isRateLimited();
     }
 
     /**

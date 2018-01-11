@@ -6,6 +6,7 @@
 package com.yahoo.bullet.result;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
@@ -78,15 +79,15 @@ public class MetaTest {
 
     @Test
     public void testMetadataWithErrors() {
-        ParsingError errorA = ParsingError.makeError("foo", "bar");
-        ParsingError errorB = ParsingError.makeError("baz", "qux");
+        BulletError errorA = BulletError.makeError("foo", "bar");
+        BulletError errorB = BulletError.makeError("baz", "qux");
         Meta meta = Meta.of(Arrays.asList(errorA, errorB));
-        ParsingError errorC = ParsingError.makeError("norf", "foo");
+        BulletError errorC = BulletError.makeError("norf", "foo");
         meta.addErrors(Collections.singletonList(errorC));
 
         Map<String, Object> actual = meta.asMap();
         Assert.assertEquals(actual.size(), 1);
-        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Meta.ERROR_KEY);
+        List<BulletError> actualErrors = (List<BulletError>) actual.get(Meta.ERROR_KEY);
         Assert.assertEquals(actualErrors.size(), 3);
         Assert.assertEquals(actualErrors.get(0).getError(), "foo");
         Assert.assertEquals(actualErrors.get(0).getResolutions(), singletonList("bar"));

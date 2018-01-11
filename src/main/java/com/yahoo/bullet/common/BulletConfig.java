@@ -26,7 +26,6 @@ public class BulletConfig extends Config {
     public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
     public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
-    public static final String AGGREGATION_DEFAULT_SIZE = "bullet.query.aggregation.default.size";
     public static final String AGGREGATION_MAX_SIZE = "bullet.query.aggregation.max.size";
     public static final String AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "bullet.query.aggregation.composite.field.separator";
 
@@ -53,7 +52,11 @@ public class BulletConfig extends Config {
     public static final String RESULT_METADATA_METRICS_CONCEPT_KEY = "name";
     public static final String RESULT_METADATA_METRICS_NAME_KEY = "key";
 
-    public static final String WINDOW_EMIT_EVERY_MIN_MS = "bullet.query.window.emit.every.min.ms";
+    public static final String WINDOW_MIN_EMIT_EVERY = "bullet.query.window.min.emit.every";
+
+    public static final String RATE_LIMIT_ENABLE = "bullet.query.rate.limit.enable";
+    public static final String RATE_LIMIT_MAX_EMIT_COUNT = "bullet.query.rate.limit.max.emit.count";
+    public static final String RATE_LIMIT_TIME_INTERVAL = "bullet.query.rate.limit.time.interval";
 
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
@@ -64,7 +67,6 @@ public class BulletConfig extends Config {
     public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
     public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
-    public static final int DEFAULT_AGGREGATION_SIZE = 1;
     public static final int DEFAULT_AGGREGATION_MAX_SIZE = 512;
     public static final String DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "|";
 
@@ -109,7 +111,11 @@ public class BulletConfig extends Config {
                      ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "Maximum Count Error"),
                      ImmutablePair.of(Concept.ACTIVE_ITEMS, "Active Items"));
 
-    public static final int DEFAULT_WINDOW_EMIT_EVERY_MIN_MS = 1000;
+    public static final int DEFAULT_WINDOW_MIN_EMIT_EVERY = 1000;
+
+    public static final boolean DEFAULT_RATE_LIMIT_ENABLE = true;
+    public static final long DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT = 100;
+    public static final long DEFAULT_RATE_LIMIT_TIME_INTERVAL = 1000;
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
@@ -133,10 +139,6 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP_KEY)
                  .checkIf(Validator::isString);
 
-        VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
-                 .defaultTo(DEFAULT_AGGREGATION_SIZE)
-                 .checkIf(Validator::isPositiveInt)
-                 .castTo(Validator::asInt);
         VALIDATOR.define(AGGREGATION_MAX_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_MAX_SIZE)
                  .checkIf(Validator::isPositiveInt)
@@ -214,8 +216,20 @@ public class BulletConfig extends Config {
                  .checkIf(BulletConfig::isMetadata)
                  .castTo(BulletConfig::mapifyMetadata);
 
-        VALIDATOR.define(WINDOW_EMIT_EVERY_MIN_MS)
-                .defaultTo(DEFAULT_WINDOW_EMIT_EVERY_MIN_MS)
+        VALIDATOR.define(WINDOW_MIN_EMIT_EVERY)
+                .defaultTo(DEFAULT_WINDOW_MIN_EMIT_EVERY)
+                .checkIf(Validator::isPositiveInt)
+                .castTo(Validator::asInt);
+
+        VALIDATOR.define(RATE_LIMIT_ENABLE)
+                .defaultTo(DEFAULT_RATE_LIMIT_ENABLE)
+                .checkIf(Validator::isBoolean);
+        VALIDATOR.define(RATE_LIMIT_MAX_EMIT_COUNT)
+                .defaultTo(DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT)
+                .checkIf(Validator::isPositiveInt)
+                .castTo(Validator::asInt);
+        VALIDATOR.define(RATE_LIMIT_TIME_INTERVAL)
+                .defaultTo(DEFAULT_RATE_LIMIT_TIME_INTERVAL)
                 .checkIf(Validator::isPositiveInt)
                 .castTo(Validator::asInt);
 
@@ -228,14 +242,12 @@ public class BulletConfig extends Config {
 
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
-        VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
-                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("If metadata is enabled, keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataConfigured);
         VALIDATOR.relate("If metadata is disabled, keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
-        VALIDATOR.relate("Max should be >= min ", QUERY_MAX_DURATION, WINDOW_EMIT_EVERY_MIN_MS)
+        VALIDATOR.relate("Max should be >= min ", QUERY_MAX_DURATION, WINDOW_MIN_EMIT_EVERY)
                  .checkIf(Validator::isGreaterOrEqual);
     }
 
@@ -346,3 +358,4 @@ public class BulletConfig extends Config {
         return metadataList;
     }
 }
+

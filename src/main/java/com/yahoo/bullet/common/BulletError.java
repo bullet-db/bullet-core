@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
+
 @Data
 public class BulletError implements JSONFormatter {
     public static final String ERROR_KEY = "error";
@@ -26,5 +28,17 @@ public class BulletError implements JSONFormatter {
         map.put(ERROR_KEY, error);
         map.put(RESOLUTIONS_KEY, resolutions);
         return JSONFormatter.asJSON(map);
+    }
+
+    /**
+     * Creates a BulletError with the given error message and the resolution.
+     *
+     * @param error The message denoting the error.
+     * @param resolution A resolution message.
+     *
+     * @return A BulletError representing this cause.
+     */
+    public static BulletError makeError(String error, String resolution) {
+        return new BulletError(error, singletonList(resolution));
     }
 }

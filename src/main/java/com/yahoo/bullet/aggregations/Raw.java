@@ -46,7 +46,7 @@ public class Raw implements Strategy {
     @SuppressWarnings("unchecked")
     public Raw(Aggregation aggregation, BulletConfig config) {
         int maximumSize = config.getAs(BulletConfig.RAW_AGGREGATION_MAX_SIZE, Integer.class);
-        size = Math.min(aggregation.getSize(), maximumSize);
+        size = aggregation.hasNoSize() ? maximumSize : Math.min(aggregation.getSize(), maximumSize);
     }
 
     @Override

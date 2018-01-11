@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Collections.singletonList;
 
 @Getter @Setter @Slf4j
@@ -66,12 +66,12 @@ public class Window implements Configurable, Initializable {
     public static final String EMIT_EVERY_FIELD = "every";
     public static final String INCLUDE_LAST_FIELD = "last";
 
-    public static final ParsingError ONLY_TIME_EMIT = makeError("The \"type\" field was not found or had bad values",
-                                                                "Please set \"type\" to TIME");
-    public static final ParsingError ONLY_ALL_INCLUDE = makeError("The \"type\" field had bad values.",
-                                                                  "Please set \"type\" to one of: ALL, TIME");
-    public static final ParsingError UNSUPPORTED_LAST = makeError("The \"last\" field was set",
-                                                                  "It is unsupported. It should be removed.");
+    public static final BulletError ONLY_TIME_EMIT = makeError("The \"type\" field was not found or had bad values",
+                                                               "Please set \"type\" to TIME");
+    public static final BulletError ONLY_ALL_INCLUDE = makeError("The \"type\" field had bad values.",
+                                                                 "Please set \"type\" to one of: ALL, TIME");
+    public static final BulletError UNSUPPORTED_LAST = makeError("The \"last\" field was set",
+                                                                 "It is unsupported. It should be removed.");
 
     @Expose
     private Map<String, Object> emit;
@@ -98,7 +98,7 @@ public class Window implements Configurable, Initializable {
         }
         Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
         if (every != null) {
-            int minEmitTime = config.getAs(BulletConfig.WINDOW_EMIT_EVERY_MIN_MS, Integer.class);
+            int minEmitTime = config.getAs(BulletConfig.WINDOW_MIN_EMIT_EVERY, Integer.class);
             // Clamp upward to minimum
             if (every.intValue() < minEmitTime) {
                 emit.put(EMIT_EVERY_FIELD, minEmitTime);

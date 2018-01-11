@@ -172,7 +172,7 @@ public class AggregationTest {
         aggregation.configure(new BulletConfig());
 
         // The bad operation should have been thrown out.
-        Assert.assertEquals(aggregation.initialize(), Optional.<List<ParsingError>>empty());
+        Assert.assertEquals(aggregation.initialize(), Optional.<List<BulletError>>empty());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class AggregationTest {
                 makeGroupOperation(COUNT, "bar", null)));
         aggregation.configure(new BulletConfig());
         // The bad ones should be removed.
-        Assert.assertEquals(aggregation.initialize(), Optional.<List<ParsingError>>empty());
+        Assert.assertEquals(aggregation.initialize(), Optional.<List<BulletError>>empty());
     }
 
     @Test

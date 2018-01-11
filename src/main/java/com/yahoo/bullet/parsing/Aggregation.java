@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -38,7 +38,7 @@ public class Aggregation implements Configurable, Initializable {
     public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
             new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
                                  AggregationType.DISTRIBUTION, AggregationType.TOP_K));
-    public static final ParsingError TYPE_NOT_SUPPORTED_ERROR =
+    public static final BulletError TYPE_NOT_SUPPORTED_ERROR =
             makeError("Unknown aggregation type", "Current supported aggregation types are: RAW (or LIMIT), " +
                                                   "GROUP (or DISTINCT), COUNT DISTINCT, DISTRIBUTION, TOP K");
 
@@ -52,11 +52,10 @@ public class Aggregation implements Configurable, Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        int sizeDefault = config.getAs(BulletConfig.AGGREGATION_DEFAULT_SIZE, Integer.class);
-        int sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
+        Integer sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
 
-        // Null or negative, then default, else min of size and max
-        size = (size == null || size < 0) ? sizeDefault : Math.min(size, sizeMaximum);
+        // Null or negative, then null, else min of size and max
+        size = (size == null || size < 0) ? null : Math.min(size, sizeMaximum);
     }
 
     @Override
@@ -69,5 +68,14 @@ public class Aggregation implements Configurable, Initializable {
     @Override
     public String toString() {
         return "{size: " + size + ", type: " + type + ", fields: " + fields + ", attributes: " + attributes + "}";
+    }
+
+    /**
+     * Check if this aggregation has a size.
+     *
+     * @return A boolean whether this aggregation has no size.
+     */
+    public boolean hasNoSize() {
+        return size == null;
     }
 }

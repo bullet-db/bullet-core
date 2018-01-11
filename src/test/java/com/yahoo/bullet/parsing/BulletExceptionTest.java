@@ -14,9 +14,9 @@ import static java.util.Arrays.asList;
 
 public class BulletExceptionTest {
     @Test
-    public void testParsingException() {
+    public void testWrappingExceptions() {
         BulletException pe = new BulletException(asList(makeError(new NullPointerException()),
-                                                          makeError(new ArrayIndexOutOfBoundsException())));
+                                                        makeError("foo", "bar")));
         Assert.assertEquals(pe.getErrors().size(), 2);
     }
 }

@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.aggregations;
 
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.result.Meta;
 
 import static com.yahoo.bullet.parsing.ParsingError.makeError;
@@ -14,7 +14,7 @@ import static com.yahoo.bullet.parsing.ParsingError.makeError;
 public interface Strategy extends Monoidal {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
 
-    ParsingError REQUIRES_FIELD_ERROR =
+    BulletError REQUIRES_FIELD_ERROR =
             makeError("This aggregation type requires at least one field", REQUIRES_FEED_RESOLUTION);
 
     /**
