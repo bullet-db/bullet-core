@@ -52,10 +52,11 @@ public class Aggregation implements Configurable, Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        Integer sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
+        int sizeDefault = config.getAs(BulletConfig.AGGREGATION_DEFAULT_SIZE, Integer.class);
+        int sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
 
-        // Null or negative, then null, else min of size and max
-        size = (size == null || size < 0) ? null : Math.min(size, sizeMaximum);
+        // Null or not positive, then default, else min of size and max
+        size = (size == null || size <= 0) ? sizeDefault : Math.min(size, sizeMaximum);
     }
 
     @Override
@@ -68,14 +69,5 @@ public class Aggregation implements Configurable, Initializable {
     @Override
     public String toString() {
         return "{size: " + size + ", type: " + type + ", fields: " + fields + ", attributes: " + attributes + "}";
-    }
-
-    /**
-     * Check if this aggregation has a size.
-     *
-     * @return A boolean whether this aggregation has no size.
-     */
-    public boolean hasNoSize() {
-        return size == null;
     }
 }

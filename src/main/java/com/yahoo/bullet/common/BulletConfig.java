@@ -26,6 +26,7 @@ public class BulletConfig extends Config {
     public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
     public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
+    public static final String AGGREGATION_DEFAULT_SIZE = "bullet.query.aggregation.default.size";
     public static final String AGGREGATION_MAX_SIZE = "bullet.query.aggregation.max.size";
     public static final String AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "bullet.query.aggregation.composite.field.separator";
 
@@ -37,6 +38,7 @@ public class BulletConfig extends Config {
     public static final String COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR = "bullet.query.aggregation.count.distinct.sketch.resize.factor";
 
     public static final String GROUP_AGGREGATION_SKETCH_ENTRIES = "bullet.query.aggregation.group.sketch.entries";
+    public static final String GROUP_AGGREGATION_MAX_SIZE = "bullet.query.aggregation.group.max.size";
     public static final String GROUP_AGGREGATION_SKETCH_SAMPLING = "bullet.query.aggregation.group.sketch.sampling";
     public static final String GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR = "bullet.query.aggregation.group.sketch.resize.factor";
 
@@ -62,12 +64,13 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
     // Defaults
-    public static final int DEFAULT_QUERY_DURATION = 30 * 1000;
-    public static final int DEFAULT_QUERY_MAX_DURATION = 120 * 1000;
+    public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
+    public static final long DEFAULT_QUERY_MAX_DURATION = (long) Double.POSITIVE_INFINITY;
     public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
     public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
-    public static final int DEFAULT_AGGREGATION_MAX_SIZE = 512;
+    public static final int DEFAULT_AGGREGATION_SIZE = 500;
+    public static final int DEFAULT_AGGREGATION_MAX_SIZE = 500;
     public static final String DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR = "|";
 
     public static final int DEFAULT_RAW_AGGREGATION_MAX_SIZE = 100;
@@ -80,6 +83,7 @@ public class BulletConfig extends Config {
     public static final int DEFAULT_COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR = 8;
 
     public static final int DEFAULT_GROUP_AGGREGATION_SKETCH_ENTRIES = 512;
+    public static final int DEFAULT_GROUP_AGGREGATION_MAX_SIZE = 500;
     public static final float DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING = 1.0f;
     public static final int DEFAULT_GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR = 8;
 
@@ -115,7 +119,7 @@ public class BulletConfig extends Config {
 
     public static final boolean DEFAULT_RATE_LIMIT_ENABLE = true;
     public static final long DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT = 100;
-    public static final long DEFAULT_RATE_LIMIT_TIME_INTERVAL = 1000;
+    public static final long DEFAULT_RATE_LIMIT_TIME_INTERVAL = 100;
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
@@ -126,12 +130,12 @@ public class BulletConfig extends Config {
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
                  .defaultTo(DEFAULT_QUERY_DURATION)
-                 .checkIf(Validator::isPositiveInt)
-                 .castTo(Validator::asInt);
+                 .checkIf(Validator::isPositive)
+                 .castTo(Validator::asLong);
         VALIDATOR.define(QUERY_MAX_DURATION)
                  .defaultTo(DEFAULT_QUERY_MAX_DURATION)
-                 .checkIf(Validator::isPositiveInt)
-                 .castTo(Validator::asInt);
+                 .checkIf(Validator::isPositive)
+                 .castTo(Validator::asLong);
         VALIDATOR.define(RECORD_INJECT_TIMESTAMP)
                  .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP)
                  .checkIf(Validator::isBoolean);
@@ -175,6 +179,10 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_ENTRIES)
                  .checkIf(Validator::isPowerOfTwo)
                  .castTo(Validator::asInt);
+        VALIDATOR.define(GROUP_AGGREGATION_MAX_SIZE)
+                .defaultTo(DEFAULT_GROUP_AGGREGATION_MAX_SIZE)
+                .checkIf(Validator::isPositiveInt)
+                .castTo(Validator::asInt);
         VALIDATOR.define(GROUP_AGGREGATION_SKETCH_SAMPLING)
                  .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING)
                  .checkIf(Validator::isFloat)
@@ -242,13 +250,19 @@ public class BulletConfig extends Config {
 
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
+        VALIDATOR.relate("Raw max should be <= Aggregation max", AGGREGATION_MAX_SIZE, RAW_AGGREGATION_MAX_SIZE)
+                .checkIf(Validator::isGreaterOrEqual);
+        VALIDATOR.relate("Group max should be <= Aggregation max", AGGREGATION_MAX_SIZE, GROUP_AGGREGATION_MAX_SIZE)
+                .checkIf(Validator::isGreaterOrEqual);
+        VALIDATOR.relate("Distribution points should be <= Aggregation max", AGGREGATION_MAX_SIZE, DISTRIBUTION_AGGREGATION_MAX_POINTS)
+                .checkIf(Validator::isGreaterOrEqual);
+        VALIDATOR.relate("Max duration should be >= min window emit interval", QUERY_MAX_DURATION, WINDOW_MIN_EMIT_EVERY)
+                .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("If metadata is enabled, keys are defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataConfigured);
         VALIDATOR.relate("If metadata is disabled, keys are not defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
-        VALIDATOR.relate("Max should be >= min ", QUERY_MAX_DURATION, WINDOW_MIN_EMIT_EVERY)
-                 .checkIf(Validator::isGreaterOrEqual);
     }
 
     // Members

@@ -250,6 +250,16 @@ public class Validator {
     }
 
     /**
+     * This casts a {@link Number} Object to an {@link Long}.
+     *
+     * @param value The value to cast.
+     * @return The converted Long object.
+     */
+    public static Object asLong(Object value) {
+        return ((Number) value).longValue();
+    }
+
+    /**
      * This casts a {@link Number} Object to an {@link Float}.
      *
      * @param value The value to cast.

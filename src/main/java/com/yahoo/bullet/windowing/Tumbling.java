@@ -15,7 +15,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Collections.singletonList;
 
 public class Tumbling extends Basic {
@@ -49,20 +49,6 @@ public class Tumbling extends Basic {
     }
 
     @Override
-    public void consume(BulletRecord data) {
-        if (canAcceptData()) {
-            super.consume(data);
-        }
-    }
-
-    @Override
-    public void combine(byte[] data) {
-        if (canAcceptData()) {
-            super.combine(data);
-        }
-    }
-
-    @Override
     public void reset() {
         super.reset();
         startedAt = System.currentTimeMillis();
@@ -70,12 +56,12 @@ public class Tumbling extends Basic {
 
     @Override
     public boolean isClosed() {
-        return System.currentTimeMillis() >= startedAt + closeAfter;
+        return super.isClosed() || System.currentTimeMillis() >= startedAt + closeAfter;
     }
 
     @Override
-    public boolean isPartitionClosed() {
-        // For time based windows, isPartitionClosed is the same as isClosed.
+    public boolean isClosedForPartition() {
+        // For tumbling windows, isClosedForPartition is the same as isClosed.
         return isClosed();
     }
 

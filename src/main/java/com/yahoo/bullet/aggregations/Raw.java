@@ -46,7 +46,7 @@ public class Raw implements Strategy {
     @SuppressWarnings("unchecked")
     public Raw(Aggregation aggregation, BulletConfig config) {
         int maximumSize = config.getAs(BulletConfig.RAW_AGGREGATION_MAX_SIZE, Integer.class);
-        size = aggregation.hasNoSize() ? maximumSize : Math.min(aggregation.getSize(), maximumSize);
+        size = Math.min(aggregation.getSize(), maximumSize);
     }
 
     @Override
@@ -128,6 +128,8 @@ public class Raw implements Strategy {
     @Override
     public void reset() {
         aggregate = new ArrayList<>();
+        consumed = 0;
+        combined = 0;
     }
 
     @Override

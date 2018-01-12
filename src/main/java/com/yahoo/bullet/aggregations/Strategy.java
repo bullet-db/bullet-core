@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.result.Meta;
 
-import static com.yahoo.bullet.parsing.ParsingError.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 
 public interface Strategy extends Monoidal {
     String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";

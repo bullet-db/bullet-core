@@ -105,7 +105,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         rounding = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_GENERATED_POINTS_ROUNDING, Integer.class);
 
         int pointLimit = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
-        maxPoints = aggregation.hasNoSize() ? pointLimit : Math.min(pointLimit, aggregation.getSize());
+        maxPoints = Math.min(pointLimit, aggregation.getSize());
         this.aggregation = aggregation;
 
         // The sketch is initialized in initialize!

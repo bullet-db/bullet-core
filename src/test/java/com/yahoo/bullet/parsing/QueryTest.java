@@ -73,17 +73,17 @@ public class QueryTest {
         query.configure(config);
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(-1000);
+        query.setDuration(-1000L);
         query.configure(config);
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(0);
+        query.setDuration(0L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 0);
+        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(1);
+        query.setDuration(1L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 1);
+        Assert.assertEquals(query.getDuration(), (Long) 1L);
 
         query.setDuration(BulletConfig.DEFAULT_QUERY_DURATION);
         query.configure(config);
@@ -93,6 +93,7 @@ public class QueryTest {
         query.configure(config);
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_MAX_DURATION);
 
+        // Overflow
         query.setDuration(BulletConfig.DEFAULT_QUERY_MAX_DURATION * 2);
         query.configure(config);
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_MAX_DURATION);
@@ -109,31 +110,31 @@ public class QueryTest {
 
         query.setDuration(null);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 200);
+        Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(-1000);
+        query.setDuration(-1000L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 200);
+        Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(0);
+        query.setDuration(0L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 0);
+        Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(1);
+        query.setDuration(1L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 1);
+        Assert.assertEquals(query.getDuration(), (Long) 1L);
 
-        query.setDuration(200);
+        query.setDuration(200L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 200);
+        Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(1000);
+        query.setDuration(1000L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 1000);
+        Assert.assertEquals(query.getDuration(), (Long) 1000L);
 
-        query.setDuration(2000);
+        query.setDuration(2000L);
         query.configure(config);
-        Assert.assertEquals(query.getDuration(), (Integer) 1000);
+        Assert.assertEquals(query.getDuration(), (Long) 1000L);
     }
 
     @Test

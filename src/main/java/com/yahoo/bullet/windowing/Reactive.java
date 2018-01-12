@@ -10,7 +10,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Window;
 
 /**
- * This window is just a {@link SlidingRecord} window with a maximum of one record - both {@link #isPartitionClosed()}
+ * This window is just a {@link SlidingRecord} window with a maximum of one record - both {@link #isClosedForPartition()}
  * and {@link #isClosed()} are identical. Using this will make results be emitted as they arrive - making it snappy or
  * reactive.
  */

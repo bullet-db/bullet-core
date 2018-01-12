@@ -9,7 +9,6 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Slf4j @Getter @Setter(AccessLevel.PACKAGE)
+@Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
     /**
      * The map of source field names to their new projected names.

@@ -37,12 +37,25 @@ public abstract class PubSub {
     /**
      * Instantiate a PubSub using parameters from {@link BulletConfig}.
      *
-     * @param config The {@link BulletConfig} containing all required PubSub parameters.
+     * @param config A non-null {@link BulletConfig} containing all required PubSub parameters.
      * @throws PubSubException if the context name is not present or cannot be parsed.
      */
     public PubSub(BulletConfig config) throws PubSubException {
         this.config = config;
         this.context = Context.valueOf(getRequiredConfig(String.class, BulletConfig.PUBSUB_CONTEXT_NAME));
+    }
+
+    /**
+     * Use this method to switch the {@link Context} to another one.
+     *
+     * @param context A different context from the initial one.
+     * @param config The {@link BulletConfig} containing any new required PubSub parameters. This will be merged
+     *               with the existing config. Can be null.
+     * @throws PubSubException if the context switch could not be done.
+     */
+    public void switchContext(Context context, BulletConfig config) throws PubSubException {
+        this.config.merge(config);
+        this.context = context;
     }
 
     /**

@@ -54,7 +54,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
         Number threshold = getThreshold(attributes);
 
         int maxSize = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
-        int size = aggregation.hasNoSize() ? maxMapSize : aggregation.getSize();
+        int size = aggregation.getSize();
         sketch = threshold != null ? new FrequentItemsSketch(errorType, maxMapSize, threshold.longValue(), size) :
                                      new FrequentItemsSketch(errorType, maxMapSize, size);
     }

@@ -52,18 +52,12 @@ public class SlidingRecord extends Basic {
 
     @Override
     public void consume(BulletRecord data) {
-        if (canAcceptData()) {
-            return;
-        }
         super.consume(data);
         recordCount++;
     }
 
     @Override
     public void combine(byte[] data) {
-        if (canAcceptData()) {
-            return;
-        }
         Data wrapped = SerializerDeserializer.fromBytes(data);
         super.combine(wrapped.getData());
         recordCount += wrapped.getCount();
@@ -84,12 +78,12 @@ public class SlidingRecord extends Basic {
 
     @Override
     public boolean isClosed() {
-        return recordCount >= maxCount;
+        return super.isClosed() || recordCount >= maxCount;
     }
 
     @Override
-    public boolean isPartitionClosed() {
-        return recordCount >= 1;
+    public boolean isClosedForPartition() {
+        return super.isClosedForPartition() || recordCount >= 1;
     }
 
     @Override

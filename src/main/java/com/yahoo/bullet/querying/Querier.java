@@ -18,9 +18,9 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
+import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,7 +56,7 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * 2. For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects.
  * 3. If {@link #isClosedForPartition()}, use {@link #getData()} to emit the intermediate data to the Join stage for
  *    the query ID. Then, call {@link #reset()}.
- * 4. If {@link #isExpired()}, call {@link #getData()} and also remove the {@link Querier}. Can also do this periodically.
+ * 4. If {@link #isDone()}, call {@link #getData()} and also remove the {@link Querier}. Can also do this periodically.
  * 5. Optional: if you are processing record by record (instead of micro-batches) and honoring
  *    {@link #isClosedForPartition()}, you should check if {@link #isExceedingRateLimit()} is true after calling
  *    {@link #getData()}. If yes, you should cancel the query and emit a signal to the Join stage to kill the query. You
@@ -82,10 +82,9 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
 public class Querier implements Monoidal {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
+    // For testing convenience
     @Setter(AccessLevel.PACKAGE)
     private Scheme window;
-
-    // For convenience
     @Setter(AccessLevel.PACKAGE)
     private Query query;
 
@@ -93,12 +92,10 @@ public class Querier implements Monoidal {
 
     private BulletConfig config;
     private Map<String, String> metaKeys;
-    private boolean shouldInjectTimestamp;
     private String timestampKey;
     private boolean haveData = false;
 
     // This is counting the number of times we get the data out of the query.
-    @Getter
     private RateLimiter limiter;
 
     /**
@@ -149,9 +146,19 @@ public class Querier implements Monoidal {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<List<BulletError>> initialize() {
-        shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
-        timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
+
+        Boolean shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
+        if (shouldInjectTimestamp) {
+            timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
+        }
+
+        boolean isRateLimited = config.getAs(BulletConfig.RATE_LIMIT_ENABLE, Boolean.class);
+        if (isRateLimited) {
+            int maxEmit = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
+            int timeInterval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
+            limiter = new RateLimiter(maxEmit, timeInterval);
+        }
 
         List<BulletError> errors = new ArrayList<>();
 
@@ -177,8 +184,8 @@ public class Querier implements Monoidal {
      */
     @Override
     public void consume(BulletRecord record) {
-        // Ignore if query is expired, closed, or doesn't match filters. But consume if the window.isPartitionClosed.
-        if (isExpired() || isClosed() || !filter(record)) {
+        // Ignore if query is expired, closed, or doesn't match filters. But consume if the window.isClosedForPartition.
+        if (isDone() || isClosed() || !filter(record)) {
             return;
         }
 
@@ -194,7 +201,7 @@ public class Querier implements Monoidal {
 
     /**
      * Presents the query with a serialized data representation of a prior result for the query. These will be included
-     * into the query results even if the query is {@link #isClosed()} or {@link #isExpired()}.
+     * into the query results even if the query is {@link #isClosed()} or {@link #isDone()}.
      *
      * @param data The serialized data that represents a partial query result.
      */
@@ -311,16 +318,16 @@ public class Querier implements Monoidal {
      * @return A boolean denoting whether there is data to emit for this query if it was reading part of the data.
      */
     public boolean isClosedForPartition() {
-        return window.isPartitionClosed();
+        return window.isClosedForPartition();
     }
 
-    /**
-     * Returns true if the query has expired and will never accept any more data..
+    /*
+     * Returns true if the query has expired and will never accept any more data.
      *
      * @return A boolean denoting whether the query has expired.
      */
-    public boolean isExpired() {
-        return window.isPermanentlyClosed() || timeIsUp();
+    public boolean isDone() {
+        return (isLastWindow() && window.isClosed()) || timeIsUp();
     }
 
     /**
@@ -340,8 +347,19 @@ public class Querier implements Monoidal {
      * @return A boolean denoting whether we have exceeded the rate limit.
      */
     public boolean isExceedingRateLimit() {
-        // TODO: Check if rate limiting is enabled
-        return limiter.isRateLimited();
+        return limiter != null && limiter.isRateLimited();
+    }
+
+    /**
+     * If {@link #isExceedingRateLimit()}, returns a {@link Meta} that contains a {@link RateLimitError}.
+     *
+     * @return A result metadata that contains the rate limit error or null if the rate limit was not exceeded.
+     */
+    public Meta getRateLimitErrorMeta() {
+        if (!isExceedingRateLimit()) {
+            return null;
+        }
+        return new RateLimitError(limiter.getCurrentRate(), config).makeMeta();
     }
 
     /**
@@ -351,6 +369,7 @@ public class Querier implements Monoidal {
      */
     public Clip finish() {
         Meta meta = new Meta();
+        // TODO: Maybe bug?
         addMetadata(Concept.QUERY_FINISH_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
         return getResult().add(meta);
     }
@@ -379,7 +398,7 @@ public class Querier implements Monoidal {
     }
 
     private BulletRecord addAdditionalFields(BulletRecord record) {
-        if (shouldInjectTimestamp) {
+        if (timestampKey != null) {
             record.setLong(timestampKey, System.currentTimeMillis());
         }
         return record;
@@ -403,5 +422,11 @@ public class Querier implements Monoidal {
 
     private boolean timeIsUp() {
         return System.currentTimeMillis() > runningQuery.getStartTime() + query.getDuration();
+    }
+
+    private boolean isLastWindow() {
+        // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
+        // have no queries. In the future, this should be computed using window attributes and duration.
+        return window.getClass().equals(Basic.class);
     }
 }

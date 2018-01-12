@@ -48,11 +48,21 @@ public class Basic extends Scheme {
         return meta;
     }
 
+    /**
+     * This consumes any data fed to it even if it is {@link #isClosed()} or {@link #isClosedForPartition()}.
+     *
+     * @param data The {@link BulletRecord} to consume.
+     */
     @Override
     public void consume(BulletRecord data) {
         aggregation.consume(data);
     }
 
+    /**
+     * This combines any data fed to it even if it is {@link #isClosed()} or {@link #isClosedForPartition()}.
+     *
+     * @param data The {@link BulletRecord} to consume.
+     */
     @Override
     public void combine(byte[] data) {
         aggregation.combine(data);
@@ -81,12 +91,12 @@ public class Basic extends Scheme {
 
     @Override
     public boolean isClosed() {
-        return false;
+        return aggregation.isClosed();
     }
 
     @Override
-    public boolean isPartitionClosed() {
-        return false;
+    public boolean isClosedForPartition() {
+        return aggregation.isClosed();
     }
 
     @Override

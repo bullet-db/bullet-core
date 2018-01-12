@@ -9,6 +9,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Meta;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,9 @@ import java.util.Map;
 
 /**
  * This represents the common parent for all windowing schemes. This wraps the {@link Strategy} since it needs to
- * control when the aggregation strategy resets its result etc.
+ * control when the aggregation strategy resets its result etc. Windowing schemes generally accept
+ * ({@link #consume(BulletRecord)} or {@link #combine(byte[])} data even if they are {@link #isClosed()} or
+ * {@link #isClosedForPartition()}.
  */
 @Slf4j
 public abstract class Scheme implements Monoidal {
@@ -55,17 +58,7 @@ public abstract class Scheme implements Monoidal {
      *
      * @return A boolean whether this window is considered closed if it were consuming a slice of the data.
      */
-    public abstract boolean isPartitionClosed();
-
-    /**
-     * Returns true if this window is closed forever and will never accept anymore data. By default, this is only
-     * true if the underlying {@link Strategy} is closed.
-     *
-     * @return A boolean whether this window is considered closed forever.
-     */
-    public boolean isPermanentlyClosed() {
-        return aggregation.isClosed();
-    }
+    public abstract boolean isClosedForPartition();
 
     /**
      * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.
@@ -84,15 +77,6 @@ public abstract class Scheme implements Monoidal {
             meta.merge(aggregation.getMetadata());
         }
         return meta;
-    }
-
-    /**
-     * Checks to see if this window cannot accept any data.
-     *
-     * @return A boolean denoting whether data can be accepted for this window.
-     */
-    protected boolean canAcceptData() {
-        return isClosed() || isPermanentlyClosed();
     }
 
     private String getMetaKey() {
