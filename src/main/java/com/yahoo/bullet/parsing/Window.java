@@ -141,6 +141,15 @@ public class Window implements Configurable, Initializable {
     }
 
     /**
+     * Returns true if this is a time based window (emits based on time).
+     *
+     * @return A boolean denoting whether this window is a time based window.
+     */
+    public boolean isTimeBased() {
+        return emitType == Unit.TIME;
+    }
+
+    /**
      * Get the classification of the window for the given emit and include types. Exposed for testing.
      *
      * @param emitType The type of the emit.

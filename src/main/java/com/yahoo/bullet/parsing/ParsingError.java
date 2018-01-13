@@ -13,6 +13,8 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 public class ParsingError extends BulletError {
+    private static final long serialVersionUID = 4559080045003878180L;
+
     public static final String GENERIC_JSON_ERROR = "Unable to parse the given JSON";
     public static final String GENERIC_JSON_RESOLUTION = "Please recheck your JSON with a linter or compare " +
                                                          "it against the Bullet query specification";

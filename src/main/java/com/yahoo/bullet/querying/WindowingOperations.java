@@ -28,17 +28,23 @@ public class WindowingOperations {
     public static Scheme findScheme(Query query, Strategy strategy, BulletConfig config) {
         Window window = query.getWindow();
 
-        // For now, if no window -> Basic, if Raw -> Reactive, if time based, Tumbling or AdditiveTumbling
+        // For now, if no window -> Basic, if Raw but not TIME_TIME -> Reactive, if time based, Tumbling or AdditiveTumbling
         // TODO: Support other windows
         if (window == null) {
             return new Basic(strategy, null, config);
         }
         Window.Classification type = window.getType();
         if (query.getAggregation().getType() == AggregationType.RAW) {
-            return new Reactive(strategy, window, config);
-        } else if (type == Window.Classification.TIME_ALL) {
+            // If Raw but we have a window that's anything but TIME_TIME ~> Tumbling/Hopping, force to Reactive
+            if (type != Window.Classification.TIME_TIME) {
+                return new Reactive(strategy, window, config);
+            }
+        }
+        // Raw cannot be Additive
+        if (type == Window.Classification.TIME_ALL) {
             return new AdditiveTumbling(strategy, window, config);
         }
+        // Raw can be Tumbling
         return new Tumbling(strategy, window, config);
     }
 }

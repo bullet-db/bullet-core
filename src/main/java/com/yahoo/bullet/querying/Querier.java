@@ -14,6 +14,7 @@ import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -38,45 +39,217 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * itself with another instance of running query using {@link #merge(Monoidal)}. Use {@link #finish()} to retrieve the
  * final results and terminate the query.
  *
- * If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
- * deserialization.
+ * <p>If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
+ * deserialization.</p>
  *
- * Ideally to implement Bullet, you would parallelize into two stages:
+ * <p>Ideally to implement Bullet, you would parallelize into two stages:</p>
  *
- * 1. The Filter stage - this is where you partition and distribute your data across workers. Each worker should have
- *    a copy of the query so no matter where the data ends up, the query as a whole across all the workers, will see it.
- * 2. The Join stage - this is where you group the results for all the parallelized outputs in the filter stage for a
- *    a particular query (using the query ID as an identifier to combine the intermediate outputs).
+ * <ol>
+ * <li>
+ *  <strong>The Filter Stage</strong> - this is where you partition and distribute your data across workers. Each worker
+ *  should have a copy of the query so no matter where the data ends up, the query as a whole across all the workers,
+ *  will see it.
+ * </li>
+ * <li>
+ * <strong>The Join Stage</strong> - this is where you group the results for all the parallelized outputs in the filter
+ * stage for a particular query (using the query ID as an identifier to combine the intermediate outputs).
+ * </li>
+ * </ol>
  *
- * Filter Stage Flow
+ * <h3>Filter Stage</h3>
  *
- * 1. For each Query message from the PubSub, check to see if it is has a KILL signal.
- *    If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
- *    If no, create an instance of {@link Querier} for the query. If any exceptions, ignore them.
- * 2. For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects.
- * 3. If {@link #isClosedForPartition()}, use {@link #getData()} to emit the intermediate data to the Join stage for
- *    the query ID. Then, call {@link #reset()}.
- * 4. If {@link #isDone()}, call {@link #getData()} and also remove the {@link Querier}. Can also do this periodically.
- * 5. Optional: if you are processing record by record (instead of micro-batches) and honoring
- *    {@link #isClosedForPartition()}, you should check if {@link #isExceedingRateLimit()} is true after calling
- *    {@link #getData()}. If yes, you should cancel the query and emit a signal to the Join stage to kill the query. You
- *    can use {@link #getLimiter()} and use {@link RateLimiter#getCurrentRate()} to pass the exceeded rate as well.
+ * <ol>
+ * <li>
+ *   For each Query message from the PubSub, check to see if it is has a KILL signal.
+ *   If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
+ *   If no, create an instance of {@link Querier} for the query. If any exceptions, ignore them.
+ * </li>
+ * <li>
+ *   For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects
+ *   unless {@link #isDone()}
+ * </li>
+ * <li>
+ *   If {@link #isDone()}, call {@link #getData()} and also remove the {@link Querier}.
+ * </li>
+ * <li>
+ *   If {@link #isClosedForPartition()}, use {@link #getData()} to emit the intermediate data to the Join stage for
+ *   the query ID. Then, call {@link #reset()}.
+ * </li>
+ * <li>
+ *   <em>Optional</em>: if you are processing record by record (instead of micro-batches) and honoring {@link #isClosedForPartition()},
+ *   you should check if {@link #isExceedingRateLimit()} is true after calling {@link #getData()}. If yes, you should
+ *   cancel the query and emit a RateLimitError to the Join stage to kill the query. You can use {@link #getRateLimitError()}
+ *   to get the {@link RateLimitError} to pass to the Join stage.
+ * </li>
+ * <li>
+ *   <em>Optional</em>: If your data volume is very, very small (Heuristic: less than 1 per your 0.1 *
+ *   bullet.query.window.min.emit.every). across your partitions), you should run the {@link #isDone()} and
+ *   {@link #isClosedForPartition()} and do the emits either on a timer or at fixed intervals so that your queries
+ *   are checked for results and maintain their windowing guarantees.
+ * </li>
+ * </ol>
  *
- * You can also use {@link #haveData()} to check if there is any data to emit if you need.
+ * You can also use {@link #haveData()} to check if there is any data to emit if you need. If you do not want to call
+ * {@link #getData()}, you can serialize Querier using non-native serialization frameworks and use {@link #merge(Monoidal)}
+ * in the Join stage to merge them into an empty Querier for the query. This will be equivalent to calling
+ * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #start()} or {@link #initialize()}
+ * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
  *
- * Join Stage Flow
+ * <h4>Pseudo Code</h4>
  *
- * 1. For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions,
- *    make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
- * 2. For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
- *    {@link RateLimitError}. Emit this through the regular PubSub Publisher for results. Also emit a KILL signal
- *    PubSubMessage to a Publisher for queries so that it is fed back to the Filter stage.
- * 3.
+ * <h5>Case 1: Query</h5>
+ *
+ * <pre>
+ * (String id, String queryBody, Metadata metadata) = Query
+ * if (metadata.hasSignal(Signal.KILL))
+ *     remove Querier for id
+ * else
+ *     create new Querier(id, queryBody, config);
+ * </pre>
+ *
+ * <h5>Case 2: BulletRecord record</h5>
+ *
+ * <pre>
+ * for Querier q : queriers:
+ *     if (q.isDone())
+ *         emit(q.getData())
+ *         remove q
+ *     else
+ *         q.consume(record)
+ *         if (q.isClosedForPartition())
+ *             emit(q.getData())
+ *             q.reset()
+ *         if (q.isExceedingRateLimit())
+ *             emit(q.getRateLimitError())
+ *             remove q
+ * </pre>
+ *
+ * <h5>Case 3: Periodically (for very small data volumes)</h5>
+ *
+ * <pre>
+ * for Querier q : queriers:
+ *     if (q.isDone())
+ *         emit(q.getData())
+ *         remove q
+ *     if (q.isClosedForPartition())
+ *         emit(q.getData())
+ *         q.reset()
+ *     if (q.isExceedingRateLimit())
+ *         emit(q.getRateLimitError())
+ *         remove q
+ * </pre>
+ *
+ * <h3>Join Stage</h3>
+ *
+ * <ol>
+ * <li>
+ *   For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions,
+ *   make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
+ * </li>
+ * <li>
+ *   For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
+ *   {@link RateLimitError}. Emit this through the regular PubSub Publisher for results. Also emit a KILL signal
+ *   PubSubMessage to a Publisher for queries so that it is fed back to the Filter stage.
+ * </li>
+ * <li>
+ *   For each (id, byte[]) data from the Filter stage, call {@link #combine(byte[])} for the querier for that id.
+ * </li>
+ * <li>
+ *   If {@link #isDone()}, call {@link #getResult()} to emit the final result and remove the querier.
+ * </li>
+ * <li>
+ *   If {@link #isClosed}, use {@link #getResult()} ()} to emit the intermediate result and call {@link #reset()}
+ * </li>
+ * <li>
+ *   <em>Optional</em>: as with the Filter stage, if the querier {@link #isExceedingRateLimit()}, you can use
+ *   {@link #getRateLimitError()} and then {@link RateLimitError#makeMeta()} to create and emit a
+ *   {@link Clip#add(Meta)}. Make sure to remove the querier and send a KILL signal to a PubSub Publisher for queries
+ *   to feed back the kill status to the Filter stage.
+ * </li>
+ * <li>
+ *   <em>Optional</em>: Similar to the filter stage you should run {@link #isDone()} and {@link #isClosed()} periodically if your
+ *   data volume is too low.
+ * </li>
+ * <li>
+ *   <em>Optional but recommended if you are processing event by event not microbatches</em>: Since data from the Filter stage
+ *   partitions may not arrive at the same time and since the querier may be {@link #isClosed()} at the same time the
+ *   data from the Filter stage partitions arrive, you should not immediately emit {@link #getResult()} if
+ *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You should put it in a buffer
+ *   for a little bit of time while the data arrives if {@link #isClosed()}, then {@link #getResult()} and
+ *   {@link #reset()}. Similarly, for {@link #isDone()}. You should only do this for queries for which
+ *   {@link #isTimeBasedWindow()} is true. For record based windows, you can use {@link #isClosed()} to drive the
+ *   emission of the results.
+ * </li>
+ * </ol>
+ *
+ * <h4>Pseudo Code</h4>
+ *
+ * <h5>Case 1:  Query</h5>
+ * <pre>
+ * (String id, String queryBody, Metadata metadata) = Query
+ * try {
+ *     create new Querier(id, queryBody, config)
+ * catch (BulletException e)
+ *     Clip clip = Clip.of(Meta.of(e.getErrors()));
+ *     emit(clip)
+ * catch (Exception e) {
+ *     Clip clip = Clip.of(Meta.of(asList(BulletError.makeError(e, queryBody)))
+ *     emit(clip)
+ * </pre>
  *
  *
- * While {@link Querier} is not serializable, you can {@link #merge(Monoidal)} it with other instances if you use
- * non-native serialization frameworks. This will simply be equivalent to calling {@link #combine(byte[])} on
- * {@link #getData()}
+ * <h5>Case 2: KILL messages from Filter</h5>
+ *
+ * <pre>
+ * (String id, RateLimitError error) = KILL message
+ *
+ * querier = Querier for id
+ * Clip clip = querier.finish()
+ * clip.add(Meta.of(error))
+ * emit(clip)
+ * queryPubSubPublisher.emit((id, KILL signal))
+ * remove querier
+ * </pre>
+ *
+ * <h5>Case 3: Data message from Filter</h5>
+ *
+ * <pre>
+ * (String id, byte[] data) = Data
+ *
+ * querier = Querier for id
+ * querier.combine(data)
+ * if (querier.isDone())
+ *     Clip clip = querier.finish()
+ *     emit(clip)
+ * else if (querier.isClosed())
+ *     Clip clip = querier.getResult()
+ *     // See note above regarding buffering if querier.isTimeBasedWindow()
+ *     emit(clip)
+ *     querier.reset()
+ *
+ * if (querier.isExceedingRateLimit())
+ *     Clip clip = merge q.finish() with q.getRateLimitError()
+ *     emit(clip)
+ *     queryPubSubPublisher.emit((id, KILL signal))
+ *     remove q
+ * </pre>
+ *
+ * <h5>Case 4: Periodically (for very small data volumes)</h5>
+ *
+ * <pre>
+ * for Querier q : queriers:
+ *     if (q.isDone())
+ *         emit(q.finish())
+ *         remove q
+ *     if (q.isClosed())
+ *         emit(q.getResult())
+ *         q.reset()
+ *     if (q.isExceedingRateLimit())
+ *         Clip clip = merge q.finish() with q.getRateLimitError()
+ *         emit(clip)
+ *         queryPubSubPublisher.emit((id, KILL signal))
+ *         remove q
+ * </pre>
  */
 @Slf4j
 public class Querier implements Monoidal {
@@ -85,6 +258,7 @@ public class Querier implements Monoidal {
     // For testing convenience
     @Setter(AccessLevel.PACKAGE)
     private Scheme window;
+
     @Setter(AccessLevel.PACKAGE)
     private Query query;
 
@@ -96,7 +270,7 @@ public class Querier implements Monoidal {
     private boolean haveData = false;
 
     // This is counting the number of times we get the data out of the query.
-    private RateLimiter limiter;
+    private RateLimiter rateLimit;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -157,7 +331,7 @@ public class Querier implements Monoidal {
         if (isRateLimited) {
             int maxEmit = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
             int timeInterval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
-            limiter = new RateLimiter(maxEmit, timeInterval);
+            rateLimit = new RateLimiter(maxEmit, timeInterval);
         }
 
         List<BulletError> errors = new ArrayList<>();
@@ -224,7 +398,7 @@ public class Querier implements Monoidal {
     @Override
     public byte[] getData() {
         try {
-            limiter.increment();
+            rateLimit.increment();
             return window.getData();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
@@ -242,7 +416,7 @@ public class Querier implements Monoidal {
     @Override
     public List<BulletRecord> getRecords() {
         try {
-            limiter.increment();
+            rateLimit.increment();
             return window.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -276,7 +450,7 @@ public class Querier implements Monoidal {
     public Clip getResult() {
         Clip result;
         try {
-            limiter.increment();
+            rateLimit.increment();
             result = window.getResult();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -347,19 +521,30 @@ public class Querier implements Monoidal {
      * @return A boolean denoting whether we have exceeded the rate limit.
      */
     public boolean isExceedingRateLimit() {
-        return limiter != null && limiter.isRateLimited();
+        return rateLimit != null && rateLimit.isRateLimited();
     }
 
     /**
-     * If {@link #isExceedingRateLimit()}, returns a {@link Meta} that contains a {@link RateLimitError}.
+     * Returns if this query has a time based window.
      *
-     * @return A result metadata that contains the rate limit error or null if the rate limit was not exceeded.
+     * @return A boolean that is true if this is a time based query window.
      */
-    public Meta getRateLimitErrorMeta() {
+    public boolean isTimeBasedWindow() {
+        Window window = query.getWindow();
+        // No window means duration drives the query => it is time based.
+        return window == null || window.isTimeBased();
+    }
+
+    /**
+     * If {@link #isExceedingRateLimit()}, returns a {@link RateLimitError}.
+     *
+     * @return A rate limit error or null if the rate limit was not exceeded.
+     */
+    public RateLimitError getRateLimitError() {
         if (!isExceedingRateLimit()) {
             return null;
         }
-        return new RateLimitError(limiter.getCurrentRate(), config).makeMeta();
+        return new RateLimitError(rateLimit.getCurrentRate(), config);
     }
 
     /**
@@ -369,7 +554,6 @@ public class Querier implements Monoidal {
      */
     public Clip finish() {
         Meta meta = new Meta();
-        // TODO: Maybe bug?
         addMetadata(Concept.QUERY_FINISH_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
         return getResult().add(meta);
     }
@@ -426,7 +610,7 @@ public class Querier implements Monoidal {
 
     private boolean isLastWindow() {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
-        // have no queries. In the future, this should be computed using window attributes and duration.
+        // have no windows. In the future, this should be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
     }
 }

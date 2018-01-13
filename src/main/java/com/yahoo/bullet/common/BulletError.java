@@ -8,6 +8,7 @@ package com.yahoo.bullet.common;
 import com.yahoo.bullet.result.JSONFormatter;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,9 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 
 @Data
-public class BulletError implements JSONFormatter {
+public class BulletError implements JSONFormatter, Serializable {
+    private static final long serialVersionUID = -8557063189698127685L;
+
     public static final String ERROR_KEY = "error";
     public static final String RESOLUTIONS_KEY = "resolutions";
 
