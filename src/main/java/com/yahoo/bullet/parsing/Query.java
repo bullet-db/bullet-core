@@ -10,7 +10,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import java.util.Optional;
 /**
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
  */
-@Getter @Setter(AccessLevel.PACKAGE) @Slf4j
+@Getter @Setter @Slf4j
 public class Query implements Configurable, Initializable {
     @Expose
     private Projection projection;

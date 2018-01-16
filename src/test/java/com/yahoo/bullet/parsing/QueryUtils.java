@@ -379,16 +379,4 @@ public class QueryUtils {
                 return "";
         }
     }
-
-    public static Querier getRunningQuery(String input, Map<String, Object> configuration) {
-        try {
-            BulletConfig config = new BulletConfig();
-            configuration.forEach(config::set);
-            config.validate();
-
-            return new Querier("", input, config);
-        } catch (BulletException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

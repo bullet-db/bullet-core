@@ -22,6 +22,7 @@ import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -259,9 +260,8 @@ public class Querier implements Monoidal {
     @Setter(AccessLevel.PACKAGE)
     private Scheme window;
 
-    @Setter(AccessLevel.PACKAGE)
-    private Query query;
-
+    // For testing convenience
+    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private RunningQuery runningQuery;
 
     private BulletConfig config;
@@ -296,7 +296,6 @@ public class Querier implements Monoidal {
      */
     public Querier(RunningQuery query, BulletConfig config) throws BulletException {
         this.runningQuery = query;
-        this.query = query.getQuery();
         this.config = config;
         start();
     }
@@ -337,6 +336,7 @@ public class Querier implements Monoidal {
         List<BulletError> errors = new ArrayList<>();
 
         runningQuery.initialize().ifPresent(errors::addAll);
+        Query query = this.runningQuery.getQuery();
 
         // Aggregation is guaranteed to not be null and guaranteed to have a proper type.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
@@ -530,7 +530,7 @@ public class Querier implements Monoidal {
      * @return A boolean that is true if this is a time based query window.
      */
     public boolean isTimeBasedWindow() {
-        Window window = query.getWindow();
+        Window window = runningQuery.getQuery().getWindow();
         // No window means duration drives the query => it is time based.
         return window == null || window.isTimeBased();
     }
@@ -560,13 +560,13 @@ public class Querier implements Monoidal {
 
     @Override
     public String toString() {
-        return String.format("%s : %s", runningQuery.getId(), query.toString());
+        return String.format("%s : %s", runningQuery.getId(), runningQuery.getQuery().toString());
     }
 
     // ********************************* Private helpers *********************************
 
     private boolean filter(BulletRecord record) {
-        List<Clause> filters = query.getFilters();
+        List<Clause> filters = runningQuery.getQuery().getFilters();
         // Add the record if we have no filters
         if (filters == null) {
             return true;
@@ -576,7 +576,7 @@ public class Querier implements Monoidal {
     }
 
     private BulletRecord project(BulletRecord record) {
-        Projection projection = query.getProjection();
+        Projection projection = runningQuery.getQuery().getProjection();
         BulletRecord projected = projection != null ? ProjectionOperations.project(record, projection) : record;
         return addAdditionalFields(projected);
     }
@@ -594,7 +594,7 @@ public class Querier implements Monoidal {
         }
         Meta meta = new Meta();
         addMetadata(Concept.QUERY_ID, (k) -> meta.add(k, runningQuery.getId()));
-        addMetadata(Concept.QUERY_BODY, (k) -> meta.add(k, query.toString()));
+        addMetadata(Concept.QUERY_BODY, (k) -> meta.add(k, runningQuery.getQuery().toString()));
         addMetadata(Concept.QUERY_RECEIVE_TIME, (k) -> meta.add(k, runningQuery.getStartTime()));
         addMetadata(Concept.RESULT_EMIT_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
         return meta;
@@ -605,7 +605,7 @@ public class Querier implements Monoidal {
     }
 
     private boolean timeIsUp() {
-        return System.currentTimeMillis() > runningQuery.getStartTime() + query.getDuration();
+        return System.currentTimeMillis() > runningQuery.getStartTime() + runningQuery.getQuery().getDuration();
     }
 
     private boolean isLastWindow() {

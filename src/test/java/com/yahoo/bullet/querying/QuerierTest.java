@@ -15,19 +15,20 @@ import com.yahoo.bullet.parsing.FilterClauseTest;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.windowing.Scheme;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
-import static com.yahoo.bullet.parsing.QueryUtils.getRunningQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
@@ -48,46 +48,55 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class QuerierTest {
-    private class FailingStrategy implements Strategy {
+    private class FailingScheme extends Scheme {
         int consumptionFailure = 0;
         int combiningFailure = 0;
         int serializingFailure = 0;
         int aggregationFailure = 0;
 
+        public FailingScheme(Strategy aggregation, Window window, BulletConfig config) {
+            super(aggregation, window, config);
+        }
+
         @Override
         public void consume(BulletRecord data) {
             consumptionFailure++;
-            throw new RuntimeException("Consuming record test failure");
+            throw new RuntimeException("Consuming failure");
         }
 
         @Override
         public void combine(byte[] data) {
             combiningFailure++;
-            throw new RuntimeException("Combining serialized aggregation test failure");
+            throw new RuntimeException("Combining serialized data failure");
         }
 
         @Override
         public byte[] getData() {
             serializingFailure++;
-            throw new RuntimeException("Serializing aggregation test failure");
+            throw new RuntimeException("Serializing data failure");
         }
 
         @Override
         public Clip getResult() {
             aggregationFailure++;
-            throw new RuntimeException("Getting aggregation test failure");
+            throw new RuntimeException("Getting result failure");
+        }
+
+        @Override
+        protected Map<String, Object> getMetadata(Map<String, String> metadataKeys) {
+            return null;
         }
 
         @Override
         public Meta getMetadata() {
             aggregationFailure++;
-            throw new RuntimeException("Getting aggregation test failure");
+            throw new RuntimeException("Getting metadata failure");
         }
 
         @Override
         public List<BulletRecord> getRecords() {
             aggregationFailure++;
-            throw new RuntimeException("Getting aggregation test failure");
+            throw new RuntimeException("Getting records failure");
         }
 
         @Override
@@ -97,6 +106,16 @@ public class QuerierTest {
 
         @Override
         public void reset() {
+        }
+
+        @Override
+        public boolean isClosed() {
+            return false;
+        }
+
+        @Override
+        public boolean isClosedForPartition() {
+            return false;
         }
     }
 
@@ -112,7 +131,7 @@ public class QuerierTest {
         return singletonMap(BulletConfig.RECORD_INJECT_TIMESTAMP, false);
     }
 
-    public static int size(BulletRecord record) {
+    private static int size(BulletRecord record) {
         int size = 0;
         for (Object ignored : record) {
             size++;
@@ -120,27 +139,76 @@ public class QuerierTest {
         return size;
     }
 
-    @Test
-    public void testDefaults() {
-        Query query = new Query();
-        BulletConfig config = new BulletConfig();
-        config.validate();
-        query.configure(config);
+    private static Querier make(Query query, BulletConfig config) {
+        try {
+            return new Querier(new RunningQuery("", query), config.validate());
+        } catch (BulletException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
-        Assert.assertTrue(query.isAcceptingData());
-        Assert.assertEquals(query.getAggregate().getRecords(), emptyList());
+    private static Querier make(Query query) {
+        BulletConfig config = new BulletConfig();
+        query.configure(config);
+        return make(query, config);
+    }
+
+    private static Querier make(String query, Map<String, Object> configuration) {
+        try {
+            BulletConfig config = new BulletConfig();
+            configuration.forEach(config::set);
+            config.validate();
+
+            return new Querier("", query, config);
+        } catch (BulletException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
-    public void testFiltering() {
-        Query query = new Query();
-        query.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
-        query.configure(new BulletConfig());
+    public void testDefaults() {
+        Querier querier = make(new Query());
 
-        Assert.assertTrue(query.filter(RecordBox.get().add("field", "foo").getRecord()));
-        Assert.assertTrue(query.filter(RecordBox.get().add("field", "bar").getRecord()));
-        Assert.assertFalse(query.filter(RecordBox.get().add("field", "baz").getRecord()));
+        Query query = querier.getRunningQuery().getQuery();
+        Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isExceedingRateLimit());
+        Assert.assertFalse(querier.isDone());
+        Assert.assertEquals(querier.getResult().getRecords(), emptyList());
+    }
+
+    @Test(expectedExceptions = BulletException.class)
+    public void testValidationFail() throws BulletException {
+        new Querier("", "{ 'aggregation': { 'type': null } }", new BulletConfig());
+    }
+
+    @Test(expectedExceptions = JsonParseException.class)
+    public void testBadJSON() {
+        make("{", emptyMap());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testNullConfig() throws BulletException {
+        new Querier("", "{}", null);
+    }
+
+    @Test
+    public void testQueryAsString() {
+        Querier query = make("{}", emptyMap());
+        Assert.assertEquals(query.toString(), "{}", null);
+    }
+
+    @Test
+    public void testTimes() {
+        long startTime = System.currentTimeMillis();
+        Querier querier = make("{'aggregation' : {}}", emptyMap());
+        Map<String, Object> meta = querier.getMetadata().asMap();
+        long creationTime = ((Number) meta.get(Meta.Concept.QUERY_RECEIVE_TIME.getName())).longValue();
+        long resultTime = ((Number) meta.get(Meta.Concept.RESULT_EMIT_TIME.getName())).longValue();
+        long endTime = System.currentTimeMillis();
+        Assert.assertTrue(creationTime >= startTime && creationTime <= endTime);
+        Assert.assertTrue(resultTime >= creationTime && resultTime <= endTime);
     }
 
     @Test
@@ -153,9 +221,16 @@ public class QuerierTest {
         config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         config.validate();
         query.configure(config);
+        Querier querier = make(query, config);
 
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
-        BulletRecord actual = query.project(input);
+        querier.consume(input);
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+
+        List<BulletRecord> records = querier.getRecords();
+        Assert.assertEquals(records.size(), 1);
+        BulletRecord actual = records.get(0);
 
         Long end = System.currentTimeMillis();
 
@@ -180,9 +255,16 @@ public class QuerierTest {
         config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         config.validate();
         query.configure(config);
+        Querier querier = make(query, config);
 
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
-        BulletRecord actual = query.project(input);
+        querier.consume(input);
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+
+        List<BulletRecord> records = querier.getRecords();
+        Assert.assertEquals(records.size(), 1);
+        BulletRecord actual = records.get(0);
 
         Long end = System.currentTimeMillis();
 
@@ -195,30 +277,78 @@ public class QuerierTest {
     }
 
     @Test
-    public void testMeetingDefaultQuery() {
-        Query query = new Query();
-        query.configure(new BulletConfig());
+    public void testMeetingWindowSize() {
+        Querier querier = make(new Query());
 
-        Assert.assertTrue(makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).map(query::filter).allMatch(x -> x));
-        // Check that we only get the default number out
-        makeList(BulletConfig.DEFAULT_AGGREGATION_SIZE + 2).forEach(query::aggregate);
-        Assert.assertEquals((Object) query.getAggregate().getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(querier::consume);
+        Assert.assertFalse(querier.isClosed());
+        makeStream(1).forEach(querier::consume);
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+
+        querier.reset();
+        makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(querier::consume);
+        byte[] dataChunkA = querier.getData();
+        querier.reset();
+        makeStream(2).forEach(querier::consume);
+        byte[] dataChunkB = querier.getData();
+        querier.reset();
+
+        querier.combine(dataChunkA);
+        Assert.assertFalse(querier.isClosed());
+        querier.combine(dataChunkB);
+        Assert.assertTrue(querier.isClosed());
+
+        // We miss one event
+        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
     }
 
     @Test
-    public void testAggregationExceptions() {
-        Aggregation aggregation = mock(Aggregation.class);
-        FailingStrategy failure = new FailingStrategy();
-        when(aggregation.getStrategy()).thenReturn(failure);
-
+    public void testFiltering() {
         Query query = new Query();
-        query.setAggregation(aggregation);
+        query.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        Querier querier = make(query);
 
-        query.aggregate(RecordBox.get().getRecord());
-        query.aggregate(new byte[0]);
+        querier.consume(RecordBox.get().add("field", "foo").getRecord());
+        Assert.assertTrue(querier.isClosedForPartition());
+        querier.reset();
 
-        Assert.assertNull(query.getSerializedAggregate());
-        Clip actual = query.getAggregate();
+        querier.consume(RecordBox.get().add("field", "bar").getRecord());
+        Assert.assertTrue(querier.isClosedForPartition());
+        querier.reset();
+
+        querier.consume(RecordBox.get().add("field", "baz").getRecord());
+        Assert.assertFalse(querier.isClosedForPartition());
+    }
+
+    @Test
+    public void testFilteringProjection() {
+        Querier querier = make(makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
+                                                         FilterType.EQUALS, Pair.of("map_field.id", "mid")),
+                                                                      configWithNoTimestamp());
+        RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
+        querier.consume(boxA.getRecord());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertNull(querier.getData());
+
+        RecordBox boxB = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
+        RecordBox expected = RecordBox.get().add("mid", "23");
+        querier.consume(boxB.getRecord());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertEquals(querier.getData(), getListBytes(expected.getRecord()));
+    }
+
+    @Test
+    public void testExceptionWrapping() {
+        FailingScheme failingScheme = new FailingScheme(null, null, new BulletConfig());
+        Querier querier = make(new Query());
+        querier.setWindow(failingScheme);
+
+        querier.consume(RecordBox.get().getRecord());
+        querier.combine(new byte[0]);
+
+        Assert.assertNull(querier.getData());
+        Clip actual = querier.getResult();
 
         Assert.assertNotNull(actual.getMeta());
         Assert.assertEquals(actual.getRecords().size(), 0);
@@ -228,184 +358,92 @@ public class QuerierTest {
         Assert.assertEquals(actualMeta.size(), 1);
         Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
 
-        ParsingError expectedError = ParsingError.makeError("Getting aggregation test failure",
-                                              Querier.AGGREGATION_FAILURE_RESOLUTION);
-        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expectedError));
+        BulletError expected = BulletError.makeError("Getting window result failure", Querier.AGGREGATION_FAILURE_RESOLUTION);
+        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
 
-        Assert.assertEquals(failure.consumptionFailure, 1);
-        Assert.assertEquals(failure.combiningFailure, 1);
-        Assert.assertEquals(failure.serializingFailure, 1);
-        Assert.assertEquals(failure.aggregationFailure, 1);
+        Assert.assertEquals(failingScheme.consumptionFailure, 1);
+        Assert.assertEquals(failingScheme.combiningFailure, 1);
+        Assert.assertEquals(failingScheme.serializingFailure, 1);
+        Assert.assertEquals(failingScheme.aggregationFailure, 1);
     }
 
     @Test
-    public void testFilteringProjection() {
-        FilterQuery query = getRunningQuery(makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
-                                                                      FilterType.EQUALS, Pair.of("map_field.id", "mid")),
-                                                                      configWithNoTimestamp());
-        RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
-        Assert.assertFalse(query.consume(boxA.getRecord()));
-        Assert.assertNull(query.getData());
-
-        RecordBox boxB = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
-        RecordBox expected = RecordBox.get().add("mid", "23");
-        Assert.assertTrue(query.consume(boxB.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(expected.getRecord()));
-    }
-
-    @Test
-    public void testNoAggregationAttempted() {
-        FilterQuery query = getRunningQuery(makeRawFullQuery("map_field.id", Arrays.asList("1", "23"), FilterType.EQUALS,
-                                                             AggregationType.RAW, BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE,
-                                                             Pair.of("map_field.id", "mid")), configWithNoTimestamp());
-
-        RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
-        RecordBox expectedA = RecordBox.get().add("mid", "23");
-        Assert.assertTrue(query.consume(boxA.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(expectedA.getRecord()));
-
-        RecordBox boxB = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
-        Assert.assertFalse(query.consume(boxB.getRecord()));
-        Assert.assertNull(query.getData());
-
-        RecordBox boxC = RecordBox.get().addMap("map_field", Pair.of("id", "1"));
-        RecordBox expectedC = RecordBox.get().add("mid", "1");
-        Assert.assertTrue(query.consume(boxC.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(expectedC.getRecord()));
-    }
-
-    @Test
-    public void testMaximumEmitted() {
-        FilterQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+    public void testBasicWindowMaximumEmitted() {
+        Querier querier = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
         RecordBox box = RecordBox.get();
-        Assert.assertTrue(query.consume(box.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(box.getRecord()));
-        Assert.assertTrue(query.consume(box.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(box.getRecord()));
-        for (int i = 0; i < 10; ++i) {
-            Assert.assertFalse(query.consume(box.getRecord()));
-            Assert.assertNull(query.getData());
-        }
+
+        querier.consume(box.getRecord());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord()));
+
+        querier.consume(box.getRecord());
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord(), box.getRecord()));
+
+        // Nothing else is consumed because window is closed
+        makeStream(10).forEach(querier::consume);
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord(), box.getRecord()));
     }
 
     @Test
-    public void testMaximumEmittedWithNonMatchingRecords() {
-        FilterQuery query = getRunningQuery(makeRawFullQuery("mid", Arrays.asList("1", "23"), FilterType.EQUALS,
-                                                             AggregationType.RAW, 2, Pair.of("mid", "mid")),
-                                           configWithNoTimestamp());
+    public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
+        Querier querier = make(makeRawFullQuery("mid", Arrays.asList("1", "23"), FilterType.EQUALS, AggregationType.RAW,
+                                                2, Pair.of("mid", "mid")), configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().add("mid", "23");
+
         RecordBox expectedA = RecordBox.get().add("mid", "23");
 
         RecordBox boxB = RecordBox.get().add("mid", "42");
 
-        Assert.assertTrue(query.consume(boxA.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(expectedA.getRecord()));
+        querier.consume(boxA.getRecord());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(expectedA.getRecord()));
 
-        Assert.assertFalse(query.consume(boxB.getRecord()));
-        Assert.assertNull(query.getData());
+        querier.reset();
 
-        Assert.assertFalse(query.consume(boxB.getRecord()));
-        Assert.assertNull(query.getData());
+        querier.consume(boxB.getRecord());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isDone());
+        Assert.assertFalse(querier.haveData());
+        Assert.assertNull(querier.getData());
 
-        Assert.assertTrue(query.consume(boxA.getRecord()));
-        Assert.assertEquals(query.getData(), getListBytes(expectedA.getRecord()));
+        querier.consume(boxA.getRecord());
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(boxA.getRecord(), boxA.getRecord()));
 
-        for (int i = 0; i < 10; ++i) {
-            Assert.assertFalse(query.consume(boxA.getRecord()));
-            Assert.assertNull(query.getData());
-            Assert.assertFalse(query.consume(boxB.getRecord()));
-            Assert.assertNull(query.getData());
-        }
-    }
-
-    @Test(expectedExceptions = BulletException.class)
-    public void testValidationFail() throws BulletException {
-        new FilterQuery("{ 'aggregation': { 'type': null } }", new BulletConfig());
-    }
-
-    @Test(expectedExceptions = JsonParseException.class)
-    public void testBadJSON() {
-        getRunningQuery("{", emptyMap());
-    }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testNullConfig() {
-        getRunningQuery("{}", null);
-    }
-
-    @Test
-    public void testQueryAsString() {
-        AggregationQuery query = getRunningQuery("{}", emptyMap());
-        Assert.assertEquals(query.toString(), "{}", null);
+        // Nothing else is consumed because window is closed
+        makeStream(10).forEach(querier::consume);
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), getListBytes(boxA.getRecord(), boxA.getRecord()));
     }
 
     @Test
     public void testAggregateIsNotNull() {
-        AggregationQuery query = getRunningQuery("{}", emptyMap());
-        Assert.assertNotNull(query.getData());
-        query = getRunningQuery("{'aggregation': {}}", emptyMap());
-        Assert.assertNotNull(query.getData());
-        query = getRunningQuery("{'aggregation': null}", emptyMap());
-        Assert.assertNotNull(query.getData());
-    }
-
-    @Test
-    public void testCreationTime() {
-        long startTime = System.currentTimeMillis();
-        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
-        long creationTime = query.getStartTime();
-        long endTime = System.currentTimeMillis();
-        Assert.assertTrue(creationTime >= startTime && creationTime <= endTime);
-    }
-
-    @Test
-    public void testAggregationTime() {
-        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
-        long creationTime = query.getStartTime();
-        byte[] record = getListBytes(new BulletRecord());
-        IntStream.range(0, BulletConfig.DEFAULT_AGGREGATION_SIZE).forEach((x) -> query.consume(record));
-        Assert.assertEquals(query.getData().getRecords().size(), (int) BulletConfig.DEFAULT_AGGREGATION_SIZE);
-        long lastAggregationTime = query.getLastAggregationTime();
-        Assert.assertTrue(creationTime <= lastAggregationTime);
-    }
-
-    @Test
-    public void testDefaultLimiting() {
-        AggregationQuery query = getRunningQuery("{'aggregation' : {}}", emptyMap());
-        byte[] record = getListBytes(new BulletRecord());
-        IntStream.range(0, BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(x -> Assert.assertFalse(query.consume(record)));
-        Assert.assertTrue(query.consume(record));
-        Assert.assertEquals((Object) query.getData().getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
-    }
-
-    @Test
-    public void testCustomLimiting() {
-        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 10), emptyMap());
-        byte[] record = getListBytes(new BulletRecord());
-        IntStream.range(0, 9).forEach(x -> Assert.assertFalse(query.consume(record)));
-        Assert.assertTrue(query.consume(record));
-        Assert.assertEquals(query.getData().getRecords().size(), 10);
-    }
-
-    @Test
-    public void testSizeUpperBound() {
-        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 1000), emptyMap());
-        byte[] record = getListBytes(new BulletRecord());
-        IntStream.range(0, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE - 1).forEach(x -> Assert.assertFalse(query.consume(record)));
-        Assert.assertTrue(query.consume(record));
-        Assert.assertEquals((Object) query.getData().getRecords().size(), BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
-    }
-
-    @Test
-    public void testConfiguredUpperBound() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(BulletConfig.AGGREGATION_MAX_SIZE, 2000);
-        config.put(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 200);
-        AggregationQuery query = getRunningQuery(makeAggregationQuery(AggregationType.RAW, 1000), config);
-
-        byte[] record = getListBytes(new BulletRecord());
-        IntStream.range(0, 199).forEach(x -> Assert.assertFalse(query.consume(record)));
-        Assert.assertTrue(query.consume(record));
-        Assert.assertEquals(query.getData().getRecords().size(), 200);
+        Querier querier = make("{}", emptyMap());
+        Assert.assertNotNull(querier.getData());
+        querier = make("{'aggregation': {}}", emptyMap());
+        Assert.assertNotNull(querier.getData());
+        querier = make("{'aggregation': null}", emptyMap());
+        Assert.assertNotNull(querier.getData());
     }
 }

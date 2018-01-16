@@ -113,7 +113,7 @@ public class AggregationOperationsTest {
         BulletConfig config = new BulletConfig();
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), Raw.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), Raw.class);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class AggregationOperationsTest {
                                                 GroupOperation.GroupOperationType.COUNT.getName()))));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), GroupAll.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), GroupAll.class);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class AggregationOperationsTest {
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), CountDistinct.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), CountDistinct.class);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class AggregationOperationsTest {
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), GroupBy.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), GroupBy.class);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class AggregationOperationsTest {
                                                 GroupOperation.GroupOperationType.COUNT.getName()))));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), GroupBy.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), GroupBy.class);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class AggregationOperationsTest {
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), Distribution.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), Distribution.class);
     }
 
     @Test
@@ -184,6 +184,6 @@ public class AggregationOperationsTest {
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
-        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config), TopK.class);
+        Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), TopK.class);
     }
 }

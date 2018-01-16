@@ -143,6 +143,10 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP_KEY)
                  .checkIf(Validator::isString);
 
+        VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
+                .defaultTo(DEFAULT_AGGREGATION_SIZE)
+                .checkIf(Validator::isPositiveInt)
+                .castTo(Validator::asInt);
         VALIDATOR.define(AGGREGATION_MAX_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_MAX_SIZE)
                  .checkIf(Validator::isPositiveInt)
@@ -250,6 +254,8 @@ public class BulletConfig extends Config {
 
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
+        VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
+                .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Raw max should be <= Aggregation max", AGGREGATION_MAX_SIZE, RAW_AGGREGATION_MAX_SIZE)
                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Group max should be <= Aggregation max", AGGREGATION_MAX_SIZE, GROUP_AGGREGATION_MAX_SIZE)

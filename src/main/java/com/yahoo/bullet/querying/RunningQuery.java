@@ -25,17 +25,28 @@ public class RunningQuery implements Initializable {
     private final Query query;
 
     /**
-     * Creates an instance of a Query object from the given String version of the query and an id. It does also not
+     * Creates an instance of a Query object from the given String version of the query and an ID. It does also not
      * initialize it.
      *
-     * @param id The String query id.
+     * @param id The String query ID.
      * @param queryString The String version of the query.
      * @param config The configuration to use for the query.
      * @throws com.google.gson.JsonParseException if there were issues parsing the query.
      */
     public RunningQuery(String id, String queryString, BulletConfig config) {
+        this(id, Parser.parse(queryString, config));
+    }
+
+    /**
+     * Creates an instance of this from the given String ID for a query and a configured {@link Query}. It does also not
+     * initialize it.
+     *
+     * @param id The non-null String query ID.
+     * @param query The non-null configured query.
+     */
+    public RunningQuery(String id, Query query) {
         this.id = id;
-        query = Parser.parse(queryString, config);
+        this.query = query;
         startTime = System.currentTimeMillis();
     }
 
