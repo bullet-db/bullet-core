@@ -338,9 +338,11 @@ public class Querier implements Monoidal {
         runningQuery.initialize().ifPresent(errors::addAll);
         Query query = this.runningQuery.getQuery();
 
-        // Aggregation is guaranteed to not be null and guaranteed to have a proper type.
+        // Aggregation is guaranteed to not be null.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        strategy.initialize().ifPresent(errors::addAll);
+        if (strategy != null) {
+            strategy.initialize().ifPresent(errors::addAll);
+        }
 
         // Windowing Scheme is guaranteed to not be null.
         window = WindowingOperations.findScheme(query, strategy, config);
@@ -501,6 +503,7 @@ public class Querier implements Monoidal {
      * @return A boolean denoting whether the query has expired.
      */
     public boolean isDone() {
+        // We're done with the query if this is the last window and it is closed or query has expired
         return (isLastWindow() && window.isClosed()) || timeIsUp();
     }
 
@@ -560,7 +563,7 @@ public class Querier implements Monoidal {
 
     @Override
     public String toString() {
-        return String.format("%s : %s", runningQuery.getId(), runningQuery.getQuery().toString());
+        return runningQuery.toString();
     }
 
     // ********************************* Private helpers *********************************
@@ -605,12 +608,13 @@ public class Querier implements Monoidal {
     }
 
     private boolean timeIsUp() {
-        return System.currentTimeMillis() > runningQuery.getStartTime() + runningQuery.getQuery().getDuration();
+        // Never add to query.getDuration since it can be infinite (Long.MAX_VALUE)
+        return System.currentTimeMillis() - runningQuery.getStartTime() >= runningQuery.getQuery().getDuration();
     }
 
     private boolean isLastWindow() {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
-        // have no windows. In the future, this should be computed using window attributes and duration.
+        // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
     }
 }

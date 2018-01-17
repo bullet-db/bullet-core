@@ -25,6 +25,9 @@ import static java.util.Collections.singletonList;
 
 @Getter @Setter @Slf4j
 public class Window implements Configurable, Initializable {
+
+    public static final int SINGLE_RECORD = 1;
+
     /**
      * Represents the type of the Window Unit for either emit or include.
      */
@@ -66,10 +69,12 @@ public class Window implements Configurable, Initializable {
     public static final String EMIT_EVERY_FIELD = "every";
     public static final String INCLUDE_LAST_FIELD = "last";
 
-    public static final BulletError ONLY_TIME_EMIT = makeError("The \"type\" field was not found or had bad values",
-                                                               "Please set \"type\" to TIME");
+    public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field was not found or had bad values",
+                                                              "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
+    public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values",
+                                                                "Please set \"every\" to 1");
     public static final BulletError ONLY_ALL_INCLUDE = makeError("The \"type\" field had bad values.",
-                                                                 "Please set \"type\" to one of: ALL, TIME");
+                                                                 "Please set \"type\" to one of: \"ALL\", \"TIME\"");
     public static final BulletError UNSUPPORTED_LAST = makeError("The \"last\" field was set",
                                                                  "It is unsupported. It should be removed.");
 
@@ -108,15 +113,19 @@ public class Window implements Configurable, Initializable {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        if (emitType != Unit.TIME) {
-            return Optional.of(singletonList(ONLY_TIME_EMIT));
+        if (emitType == Unit.ALL) {
+            return Optional.of(singletonList(IMPROPER_EMIT));
+        }
+
+        Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
+        if (emitType == Unit.RECORD && every.intValue() != SINGLE_RECORD) {
+            return Optional.of(singletonList(ONLY_ONE_RECORD));
         }
 
         if (includeType == Unit.RECORD) {
             return Optional.of(singletonList(ONLY_ALL_INCLUDE));
         }
-
-        Number last = Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
+        Number last = include == null ? null : Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
         if (last != null) {
             return Optional.of(singletonList(UNSUPPORTED_LAST));
         }
@@ -173,5 +182,10 @@ public class Window implements Configurable, Initializable {
             return Classification.RECORD_ALL;
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "{emit: " + emit + ", include: " + include + "}";
     }
 }

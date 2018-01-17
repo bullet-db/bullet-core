@@ -13,6 +13,7 @@ import com.yahoo.bullet.parsing.Query;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -23,6 +24,7 @@ public class RunningQuery implements Initializable {
     private final String id;
     private final long startTime;
     private final Query query;
+    private String queryString;
 
     /**
      * Creates an instance of a Query object from the given String version of the query and an ID. It does also not
@@ -35,6 +37,7 @@ public class RunningQuery implements Initializable {
      */
     public RunningQuery(String id, String queryString, BulletConfig config) {
         this(id, Parser.parse(queryString, config));
+        this.queryString = queryString;
     }
 
     /**
@@ -53,5 +56,11 @@ public class RunningQuery implements Initializable {
     @Override
     public Optional<List<BulletError>> initialize() {
         return query.initialize();
+    }
+
+    @Override
+    public String toString() {
+        String body = queryString != null ? queryString : query.toString();
+        return String.format("%s : %s", id, body);
     }
 }

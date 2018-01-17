@@ -100,13 +100,12 @@ public class AggregationOperationsTest {
         Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe(Distribution.DistributionType.PMF.getName()));
         Assert.assertTrue(Distribution.DistributionType.QUANTILE.isMe(Distribution.DistributionType.QUANTILE.getName()));
     }
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testUnimplementedStrategies() {
+    @Test
+    public void testNullType() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
         aggregation.setType(null);
         aggregation.configure(config);
-
         Assert.assertNull(AggregationOperations.findStrategy(aggregation, config));
     }
 

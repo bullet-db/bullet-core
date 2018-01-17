@@ -179,18 +179,35 @@ public class QueryTest {
         query.configure(config.validate());
 
         Assert.assertEquals(query.toString(),
-                "{filters: null, projection: null, " +
-                        "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, duration: 30000}");
+                "{" +
+                "filters: null, projection: null, " +
+                "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                "window: null, " +
+                "duration: 30000" +
+                "}");
 
-        query.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
-        Projection projection = new Projection();
-        projection.setFields(singletonMap("field", "bid"));
-        query.setProjection(projection);
+        query.setFilters(singletonList(FilterUtils.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        query.setProjection(ProjectionUtils.makeProjection("field", "bid"));
         query.configure(config);
 
         Assert.assertEquals(query.toString(),
-                            "{filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
+                            "{" +
+                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
                             "projection: {fields: {field=bid}}, " +
-                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, duration: 30000}");
+                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                            "window: null, " +
+                            "duration: 30000" +
+                            "}");
+
+        query.setWindow(WindowUtils.makeTumblingWindow(4000));
+        query.configure(config);
+        Assert.assertEquals(query.toString(),
+                            "{" +
+                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
+                            "projection: {fields: {field=bid}}, " +
+                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                            "window: {emit: {type=TIME, every=4000}, include: null}, " +
+                            "duration: 30000" +
+                            "}");
     }
 }

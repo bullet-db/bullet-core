@@ -6,8 +6,6 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.aggregations.Strategy;
-import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -15,13 +13,11 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.COUNT_DISTINCT;
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
-import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
-import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.COUNT_DISTINCT;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 

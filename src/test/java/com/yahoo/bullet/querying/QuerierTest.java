@@ -10,12 +10,12 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.FilterClauseTest;
-import com.yahoo.bullet.parsing.ParsingError;
+import com.yahoo.bullet.parsing.FilterUtils;
 import com.yahoo.bullet.parsing.Projection;
+import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.parsing.WindowUtils;
 import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.record.BulletRecord;
@@ -37,6 +37,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
+import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
@@ -44,8 +45,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class QuerierTest {
     private class FailingScheme extends Scheme {
@@ -140,8 +139,12 @@ public class QuerierTest {
     }
 
     private static Querier make(Query query, BulletConfig config) {
+        return make("", query, config);
+    }
+
+    private static Querier make(String id, Query query, BulletConfig config) {
         try {
-            return new Querier(new RunningQuery("", query), config.validate());
+            return new Querier(new RunningQuery(id, query), config.validate());
         } catch (BulletException e) {
             throw new RuntimeException(e);
         }
@@ -154,12 +157,16 @@ public class QuerierTest {
     }
 
     private static Querier make(String query, Map<String, Object> configuration) {
+        return make("", query, configuration);
+    }
+
+    private static Querier make(String id, String query, Map<String, Object> configuration) {
         try {
             BulletConfig config = new BulletConfig();
             configuration.forEach(config::set);
             config.validate();
 
-            return new Querier("", query, config);
+            return new Querier(id, query, config);
         } catch (BulletException e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +178,7 @@ public class QuerierTest {
 
         Query query = querier.getRunningQuery().getQuery();
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
-        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertFalse(querier.isDone());
@@ -195,8 +202,15 @@ public class QuerierTest {
 
     @Test
     public void testQueryAsString() {
-        Querier query = make("{}", emptyMap());
-        Assert.assertEquals(query.toString(), "{}", null);
+        Querier querier = make("ahdf3", "{}", emptyMap());
+        Assert.assertEquals(querier.toString(), "ahdf3 : {}");
+
+        BulletConfig config = new BulletConfig().validate();
+        Query query = new Query();
+        query.configure(config);
+        query.initialize();
+        querier = make("ahdf3", query, config);
+        Assert.assertEquals(querier.toString(), "ahdf3 : " + query.toString());
     }
 
     @Test
@@ -217,6 +231,8 @@ public class QuerierTest {
 
         Query query = new Query();
         query.setProjection(null);
+        query.setWindow(WindowUtils.makeReactiveWindow());
+
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         config.validate();
@@ -226,7 +242,7 @@ public class QuerierTest {
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
         querier.consume(input);
         Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isClosed());
+        Assert.assertTrue(querier.isClosed());
 
         List<BulletRecord> records = querier.getRecords();
         Assert.assertEquals(records.size(), 1);
@@ -248,9 +264,9 @@ public class QuerierTest {
         Long start = System.currentTimeMillis();
 
         Query query = new Query();
-        Projection projection = new Projection();
-        projection.setFields(singletonMap("field", "bid"));
-        query.setProjection(projection);
+        query.setProjection(ProjectionUtils.makeProjection("field", "bid"));
+        query.setWindow(WindowUtils.makeReactiveWindow());
+
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
         config.validate();
@@ -260,7 +276,7 @@ public class QuerierTest {
         BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
         querier.consume(input);
         Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isClosed());
+        Assert.assertTrue(querier.isClosed());
 
         List<BulletRecord> records = querier.getRecords();
         Assert.assertEquals(records.size(), 1);
@@ -278,16 +294,16 @@ public class QuerierTest {
 
     @Test
     public void testMeetingWindowSize() {
-        Querier querier = make(new Query());
+        Querier querier = make("{}", emptyMap());
 
-        makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(querier::consume);
+        makeStream(BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE - 1).forEach(querier::consume);
         Assert.assertFalse(querier.isClosed());
         makeStream(1).forEach(querier::consume);
         Assert.assertTrue(querier.isClosed());
-        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
 
         querier.reset();
-        makeStream(BulletConfig.DEFAULT_AGGREGATION_SIZE - 1).forEach(querier::consume);
+        makeStream(BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE - 1).forEach(querier::consume);
         byte[] dataChunkA = querier.getData();
         querier.reset();
         makeStream(2).forEach(querier::consume);
@@ -299,14 +315,15 @@ public class QuerierTest {
         querier.combine(dataChunkB);
         Assert.assertTrue(querier.isClosed());
 
-        // We miss one event
-        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        // We miss one record
+        Assert.assertEquals((Object) querier.getRecords().size(), BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
     }
 
     @Test
     public void testFiltering() {
         Query query = new Query();
-        query.setFilters(singletonList(FilterClauseTest.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        query.setFilters(singletonList(getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        query.setWindow(WindowUtils.makeReactiveWindow());
         Querier querier = make(query);
 
         querier.consume(RecordBox.get().add("field", "foo").getRecord());
@@ -325,7 +342,7 @@ public class QuerierTest {
     public void testFilteringProjection() {
         Querier querier = make(makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
                                                          FilterType.EQUALS, Pair.of("map_field.id", "mid")),
-                                                                      configWithNoTimestamp());
+                                                         configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
         Assert.assertFalse(querier.isClosedForPartition());
@@ -440,10 +457,10 @@ public class QuerierTest {
     @Test
     public void testAggregateIsNotNull() {
         Querier querier = make("{}", emptyMap());
-        Assert.assertNotNull(querier.getData());
+        Assert.assertNotNull(querier.getResult());
         querier = make("{'aggregation': {}}", emptyMap());
-        Assert.assertNotNull(querier.getData());
+        Assert.assertNotNull(querier.getResult());
         querier = make("{'aggregation': null}", emptyMap());
-        Assert.assertNotNull(querier.getData());
+        Assert.assertNotNull(querier.getResult());
     }
 }

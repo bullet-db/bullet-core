@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.yahoo.bullet.parsing.FilterClauseTest.getFieldFilter;
-import static com.yahoo.bullet.parsing.QueryUtils.makeClause;
+import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
+import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static com.yahoo.bullet.querying.FilterOperations.FilterType.AND;
 import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
 import static com.yahoo.bullet.querying.FilterOperations.FilterType.GREATER_EQUALS;

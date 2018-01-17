@@ -37,13 +37,17 @@ public class AggregationOperations {
     /**
      * Returns a new {@link Strategy} instance that can handle this aggregation.
      *
-     * @param aggregation The non-null, initialized {@link Aggregation} instance whose strategy is required.
+     * @param aggregation The non-null, initialized {@link Aggregation} instance.
      * @param config The {@link BulletConfig} containing configuration for the strategy.
      *
      * @return The created instance of a strategy that can implement the Aggregation.
      */
     public static Strategy findStrategy(Aggregation aggregation, BulletConfig config) {
-        switch (aggregation.getType()) {
+        AggregationType type = aggregation.getType();
+        if (type == null) {
+            return null;
+        }
+        switch (type) {
             case COUNT_DISTINCT:
                 return new CountDistinct(aggregation, config);
             case DISTRIBUTION:

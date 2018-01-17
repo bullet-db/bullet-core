@@ -14,21 +14,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static com.yahoo.bullet.parsing.QueryUtils.makeClause;
 import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class FilterClauseTest {
-    public static FilterClause getFieldFilter(String field, FilterType operation, String... values) {
-        return (FilterClause) makeClause(field, values == null ? null : asList(values), operation);
-    }
-
-    public static FilterClause getFieldFilter(FilterType operation, String... values) {
-        return (FilterClause) makeClause("field", values == null ? null : asList(values), operation);
-    }
-
     @Test
     public void testToString() {
         FilterClause filterClause = new FilterClause();

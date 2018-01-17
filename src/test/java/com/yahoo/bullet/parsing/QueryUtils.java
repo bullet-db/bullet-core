@@ -5,15 +5,12 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
-import com.yahoo.bullet.aggregations.Distribution.DistributionType;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
-import com.yahoo.bullet.querying.Querier;
+import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
+import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.typesystem.Type;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -26,9 +23,22 @@ import java.util.stream.Collectors;
 /**.
  * This class deliberately doesn't use GSON to make JSON in order to avoid any GSON specific changes or
  * misconfiguration (new fields added etc.) in the main code and tries to emulate what the parser will get from an
- * external client making an actual call.
+ * externally submitted query.
  */
 public class QueryUtils {
+    @SafeVarargs
+    public static String makeRawWindowQuery(String field, List<String> values, FilterType operation,
+                                            AggregationType aggregation, Integer size, Window.Unit emit,
+                                            Integer emitValue, Window.Unit include, Integer includeValue,
+                                            Pair<String, String>... projections) {
+        return "{" +
+                "'filters' : [" + makeFilter(field, values, operation) + "], " +
+                "'projection' : " + makeProjections(projections) + ", " +
+                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+                "}";
+    }
+
     @SafeVarargs
     public static String makeGroupFilterQuery(String field, List<String> values, FilterType operation,
                                               AggregationType aggregation, Integer size,
@@ -124,6 +134,14 @@ public class QueryUtils {
     @SafeVarargs
     public static String makeProjectionQuery(Pair<String, String>... projections) {
         return "{'projection' : " + makeProjections(projections) + "}";
+    }
+
+    public static String makeAggregationQuery(AggregationType operation, Integer size, Window.Unit emit,
+                                              Integer emitValue, Window.Unit include, Integer includeValue) {
+        return "{" +
+                 "'aggregation' : " + makeSimpleAggregation(size, operation) + ", " +
+                 "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+               "}";
     }
 
     public static String makeAggregationQuery(AggregationType operation, Integer size) {
@@ -308,25 +326,6 @@ public class QueryUtils {
         return makeMap(map.entrySet().toArray(new Pair[0]));
     }
 
-    public static Clause makeClause(FilterType operation, Clause... clauses) {
-        LogicalClause clause = new LogicalClause();
-        clause.setOperation(operation);
-        if (clauses != null) {
-            clause.setClauses(Arrays.asList(clauses));
-        }
-        clause.initialize();
-        return clause;
-    }
-
-    public static Clause makeClause(String field, List<String> values, FilterType operation) {
-        FilterClause clause = new FilterClause();
-        clause.setField(field);
-        clause.setValues(values == null ? Collections.singletonList(Type.NULL_EXPRESSION) : values);
-        clause.setOperation(operation);
-        clause.initialize();
-        return clause;
-    }
-
     // Again, not implementing toString in Clause to not tie the construction of the JSON to the src.
     public static String toString(Clause clause) {
         StringBuilder builder = new StringBuilder();
@@ -338,6 +337,21 @@ public class QueryUtils {
             builder.append(makeFilter(logicalClause.getClauses(), logicalClause.getOperation()));
         }
         return builder.toString();
+    }
+
+    private static String makeWindow(Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
+        return "{" +
+                 "'emit' : " + makeWindowPart(emit, Window.EMIT_EVERY_FIELD, emitValue) + ", " +
+                 "'include' : " + makeWindowPart(include, Window.INCLUDE_LAST_FIELD, includeValue) +
+               "}";
+    }
+
+    private static String makeWindowPart(Window.Unit unit, String key, Integer value) {
+        String window = "{'type' : '" + getUnitFor(unit) + "'";
+        if (unit != Window.Unit.ALL) {
+            window += ", '" + key  + "' : " + value;
+        }
+        return window + "}";
     }
 
     public static String getOperationFor(FilterType operation) {
@@ -377,6 +391,19 @@ public class QueryUtils {
                 return "COUNT DISTINCT";
             case DISTRIBUTION:
                 return "DISTRIBUTION";
+            default:
+                return "";
+        }
+    }
+
+    public static String getUnitFor(Window.Unit unit) {
+        switch (unit) {
+            case RECORD:
+                return "RECORD";
+            case TIME:
+                return "TIME";
+            case ALL:
+                return "ALL";
             default:
                 return "";
         }
