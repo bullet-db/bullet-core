@@ -13,7 +13,11 @@ import java.util.List;
 
 /**
  * This interface captures the associative operations that can be performed within Bullet. The identity is this object
- * when initially constructed.
+ * when initially constructed or when {@link #reset()}. This is a special case of a Monoid that works on
+ * {@link BulletRecord} and allows you to collapse chained combinations of them with {@link #combine(byte[])} or
+ * {@link #merge(Monoidal)}. You can extract the data using {@link #getData()} to use with {@link #combine(byte[])} or
+ * as results to present to the work with {@link #getResult()} or {@link #getRecords()} or {@link #getMetadata()}. Note
+ * that {@link #getMetadata()} might not be strictly monoidal since they may not reset to the identity upon {@link #reset()}.
  */
 public interface Monoidal extends Initializable, Closable {
     /**
@@ -63,14 +67,14 @@ public interface Monoidal extends Initializable, Closable {
     List<BulletRecord> getRecords();
 
     /**
-     * Get the metadata only of the data so far.
+     * Get the metadata only of the data so far. Might not be {@link #reset()}.
      *
      * @return The {@link Meta} collected so far.
      */
     Meta getMetadata();
 
     /**
-     * Reset the data so far and make this the identity element for the Monoid.
+     * Reset the data so far and make this the identity element for the Monoid with respect to inserting data.
      */
     void reset();
 }

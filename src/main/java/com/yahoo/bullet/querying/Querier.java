@@ -495,7 +495,7 @@ public class Querier implements Monoidal {
         return window.isClosedForPartition();
     }
 
-    /*
+    /**
      * Returns true if the query has expired and will never accept any more data.
      *
      * @return A boolean denoting whether the query has expired.

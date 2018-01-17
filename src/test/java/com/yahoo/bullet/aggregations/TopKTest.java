@@ -36,12 +36,12 @@ import static java.util.Collections.singletonMap;
 
 public class TopKTest {
     private static final List<Map.Entry<Concept, String>> ALL_METADATA =
-        asList(Pair.of(Concept.ESTIMATED_RESULT, "isEst"),
-               Pair.of(Concept.FAMILY, "family"),
-               Pair.of(Concept.SIZE, "size"),
-               Pair.of(Concept.MAXIMUM_COUNT_ERROR, "error"),
-               Pair.of(Concept.ITEMS_SEEN, "n"),
-               Pair.of(Concept.ACTIVE_ITEMS, "actives"),
+        asList(Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEst"),
+               Pair.of(Concept.SKETCH_FAMILY, "family"),
+               Pair.of(Concept.SKETCH_SIZE, "size"),
+               Pair.of(Concept.SKETCH_MAXIMUM_COUNT_ERROR, "error"),
+               Pair.of(Concept.SKETCH_ITEMS_SEEN, "n"),
+               Pair.of(Concept.SKETCH_ACTIVE_ITEMS, "actives"),
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
 

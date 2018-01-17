@@ -95,6 +95,7 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_TOP_K_AGGREGATION_SKETCH_ERROR_TYPE = "NFN";
 
     public static final boolean DEFAULT_RESULT_METADATA_ENABLE = true;
+    /** The mapping from Metadata concepts to the keys with which they should logged in the result metadata. */
     public static final List<Map<String, String>> DEFAULT_RESULT_METADATA_METRICS =
         makeMetadata(ImmutablePair.of(Concept.QUERY_ID, "Query ID"),
                      ImmutablePair.of(Concept.QUERY_BODY, "Query"),
@@ -102,18 +103,22 @@ public class BulletConfig extends Config {
                      ImmutablePair.of(Concept.RESULT_EMIT_TIME, "Result Emit Time"),
                      ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Query Finish Time"),
                      ImmutablePair.of(Concept.SKETCH_METADATA, "Sketch"),
-                     ImmutablePair.of(Concept.ESTIMATED_RESULT, "Was Estimated"),
-                     ImmutablePair.of(Concept.STANDARD_DEVIATIONS, "Standard Deviations"),
-                     ImmutablePair.of(Concept.FAMILY, "Family"),
-                     ImmutablePair.of(Concept.SIZE, "Size"),
-                     ImmutablePair.of(Concept.THETA, "Theta"),
-                     ImmutablePair.of(Concept.UNIQUES_ESTIMATE, "Uniques Estimate"),
-                     ImmutablePair.of(Concept.MINIMUM_VALUE, "Minimum Value"),
-                     ImmutablePair.of(Concept.MAXIMUM_VALUE, "Maximum Value"),
-                     ImmutablePair.of(Concept.ITEMS_SEEN, "Items Seen"),
-                     ImmutablePair.of(Concept.NORMALIZED_RANK_ERROR, "Normalized Rank Error"),
-                     ImmutablePair.of(Concept.MAXIMUM_COUNT_ERROR, "Maximum Count Error"),
-                     ImmutablePair.of(Concept.ACTIVE_ITEMS, "Active Items"));
+                     ImmutablePair.of(Concept.SKETCH_ESTIMATED_RESULT, "Was Estimated"),
+                     ImmutablePair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "Standard Deviations"),
+                     ImmutablePair.of(Concept.SKETCH_FAMILY, "Family"),
+                     ImmutablePair.of(Concept.SKETCH_SIZE, "Size"),
+                     ImmutablePair.of(Concept.SKETCH_THETA, "Theta"),
+                     ImmutablePair.of(Concept.SKETCH_UNIQUES_ESTIMATE, "Uniques Estimate"),
+                     ImmutablePair.of(Concept.SKETCH_MINIMUM_VALUE, "Minimum Value"),
+                     ImmutablePair.of(Concept.SKETCH_MAXIMUM_VALUE, "Maximum Value"),
+                     ImmutablePair.of(Concept.SKETCH_ITEMS_SEEN, "Items Seen"),
+                     ImmutablePair.of(Concept.SKETCH_NORMALIZED_RANK_ERROR, "Normalized Rank Error"),
+                     ImmutablePair.of(Concept.SKETCH_MAXIMUM_COUNT_ERROR, "Maximum Count Error"),
+                     ImmutablePair.of(Concept.SKETCH_ACTIVE_ITEMS, "Active Items"),
+                     ImmutablePair.of(Concept.WINDOW_METADATA, "Window"),
+                     ImmutablePair.of(Concept.WINDOW_NAME, "Name"),
+                     ImmutablePair.of(Concept.WINDOW_NUMBER, "Number"),
+                     ImmutablePair.of(Concept.WINDOW_SIZE, "Size"));
 
     public static final int DEFAULT_WINDOW_MIN_EMIT_EVERY = 1000;
 

@@ -42,10 +42,10 @@ import static java.util.Collections.singletonMap;
 public class GroupByTest {
     public static List<Map.Entry<Concept, String>> ALL_METADATA =
             asList(Pair.of(Concept.SKETCH_METADATA, "aggregate_stats"),
-                   Pair.of(Concept.THETA, "theta"),
-                   Pair.of(Concept.ESTIMATED_RESULT, "isEstimate"),
-                   Pair.of(Concept.UNIQUES_ESTIMATE, "uniquesApprox"),
-                   Pair.of(Concept.STANDARD_DEVIATIONS, "stddev"));
+                   Pair.of(Concept.SKETCH_THETA, "theta"),
+                   Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEstimate"),
+                   Pair.of(Concept.SKETCH_UNIQUES_ESTIMATE, "uniquesApprox"),
+                   Pair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "stddev"));
 
     public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
                                       List<Map<String, String>> operations,

@@ -10,7 +10,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.record.BulletRecord;
 
 import java.util.List;
 import java.util.Optional;

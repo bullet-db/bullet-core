@@ -9,9 +9,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Meta;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -19,8 +17,8 @@ import java.util.Map;
 /**
  * This represents the common parent for all windowing schemes. This wraps the {@link Strategy} since it needs to
  * control when the aggregation strategy resets its result etc. Windowing schemes generally accept
- * ({@link #consume(BulletRecord)} or {@link #combine(byte[])} data even if they are {@link #isClosed()} or
- * {@link #isClosedForPartition()}.
+ * data even if they are {@link #isClosed()} or {@link #isClosedForPartition()}. It is up to the user to make sure data
+ * is emitted and the window is reset and feed it data accordingly.
  */
 @Slf4j
 public abstract class Scheme implements Monoidal {

@@ -23,11 +23,11 @@ import java.util.stream.IntStream;
 public class ThetaSketchTest {
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
-        ALL_METADATA.put(Concept.ESTIMATED_RESULT.getName(), "isEst");
-        ALL_METADATA.put(Concept.STANDARD_DEVIATIONS.getName(), "stddev");
-        ALL_METADATA.put(Concept.FAMILY.getName(), "family");
-        ALL_METADATA.put(Concept.SIZE.getName(), "size");
-        ALL_METADATA.put(Concept.THETA.getName(), "theta");
+        ALL_METADATA.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
+        ALL_METADATA.put(Concept.SKETCH_STANDARD_DEVIATIONS.getName(), "stddev");
+        ALL_METADATA.put(Concept.SKETCH_FAMILY.getName(), "family");
+        ALL_METADATA.put(Concept.SKETCH_SIZE.getName(), "size");
+        ALL_METADATA.put(Concept.SKETCH_THETA.getName(), "theta");
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class)
@@ -56,7 +56,7 @@ public class ThetaSketchTest {
         IntStream.range(0, 1024).forEach(i -> sketch.update(String.valueOf(i)));
 
         Map<String, String> metaKeys = new HashMap<>();
-        metaKeys.put(Concept.ESTIMATED_RESULT.getName(), "isEst");
+        metaKeys.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
 
         Clip result = sketch.getResult("meta", metaKeys);
 

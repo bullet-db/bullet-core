@@ -48,26 +48,26 @@ public class BulletConfigTest {
     @Test
     public void testNoFiles() {
         BulletConfig config = new BulletConfig();
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), Long.MAX_VALUE);
 
         config = new BulletConfig(null);
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), Long.MAX_VALUE);
 
         config = new BulletConfig("");
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), Long.MAX_VALUE);
     }
 
     @Test
     public void testMissingFile() {
         BulletConfig config = new BulletConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 120000);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), Long.MAX_VALUE);
     }
 
     @Test
     public void testCustomConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000L);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 500);
         Assert.assertEquals(config.get(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES), 16384);
     }
 
@@ -138,8 +138,8 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 10000L);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 500);
 
         Config another = new BulletConfig(null);
         another.clear();
@@ -153,7 +153,7 @@ public class BulletConfigTest {
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
         Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 42);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 100);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 500);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
 
@@ -262,7 +262,7 @@ public class BulletConfigTest {
     public void testUnknownMetadata() {
         List<Map<String, String>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, String> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);
@@ -293,7 +293,7 @@ public class BulletConfigTest {
     public void testBadMetadata() {
         List<Map<String, Object>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, Object> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);
@@ -324,7 +324,7 @@ public class BulletConfigTest {
     public void testIncompleteMetadata() {
         List<Map<String, String>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.ITEMS_SEEN)) {
+        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, String> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);

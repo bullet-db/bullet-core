@@ -44,7 +44,7 @@ public class Basic extends Scheme {
     protected Map<String, Object> getMetadata(Map<String, String> metadataKeys) {
         Map<String, Object> meta = new HashMap<>();
         addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_NAME, this::name);
-        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_COUNT, this::count);
+        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_NUMBER, this::count);
         return meta;
     }
 

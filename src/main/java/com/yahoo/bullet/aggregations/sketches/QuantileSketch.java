@@ -141,10 +141,10 @@ public class QuantileSketch extends DualSketch {
         collect();
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
 
-        addIfNonNull(metadata, conceptKeys, Concept.MINIMUM_VALUE, this::getMinimum);
-        addIfNonNull(metadata, conceptKeys, Concept.MAXIMUM_VALUE, this::getMaximum);
-        addIfNonNull(metadata, conceptKeys, Concept.ITEMS_SEEN, this::getNumberOfEntries);
-        addIfNonNull(metadata, conceptKeys, Concept.NORMALIZED_RANK_ERROR, this::getNormalizedRankError);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_MINIMUM_VALUE, this::getMinimum);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_MAXIMUM_VALUE, this::getMaximum);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_ITEMS_SEEN, this::getNumberOfEntries);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_NORMALIZED_RANK_ERROR, this::getNormalizedRankError);
 
         return metadata;
     }
@@ -210,7 +210,7 @@ public class QuantileSketch extends DualSketch {
      * Creates a {@link List} of {@link BulletRecord} for each corresponding entry in domain and range. The domain
      * is first converted into range names depending on the type.
      *
-     * @param domain An array of split points of size N > 0.
+     * @param domain An array of split points of size N greater than 0.
      * @param range  An array of values for each range in domain: of size N + 1
      *               if type is not {@link DistributionType#QUANTILE} else N.
      * @param type The {@link DistributionType} to zip for.

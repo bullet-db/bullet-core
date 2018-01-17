@@ -41,12 +41,12 @@ public class TupleSketchTest {
 
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
-        ALL_METADATA.put(Concept.ESTIMATED_RESULT.getName(), "isEst");
-        ALL_METADATA.put(Concept.STANDARD_DEVIATIONS.getName(), "stddev");
-        ALL_METADATA.put(Concept.FAMILY.getName(), "family");
-        ALL_METADATA.put(Concept.SIZE.getName(), "size");
-        ALL_METADATA.put(Concept.UNIQUES_ESTIMATE.getName(), "est");
-        ALL_METADATA.put(Concept.THETA.getName(), "theta");
+        ALL_METADATA.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
+        ALL_METADATA.put(Concept.SKETCH_STANDARD_DEVIATIONS.getName(), "stddev");
+        ALL_METADATA.put(Concept.SKETCH_FAMILY.getName(), "family");
+        ALL_METADATA.put(Concept.SKETCH_SIZE.getName(), "size");
+        ALL_METADATA.put(Concept.SKETCH_UNIQUES_ESTIMATE.getName(), "est");
+        ALL_METADATA.put(Concept.SKETCH_THETA.getName(), "theta");
     }
 
     private CachingGroupData data;

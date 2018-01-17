@@ -44,13 +44,13 @@ public class QuantileSketchTest {
 
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
-        ALL_METADATA.put(Concept.ESTIMATED_RESULT.getName(), "isEst");
-        ALL_METADATA.put(Concept.FAMILY.getName(), "family");
-        ALL_METADATA.put(Concept.SIZE.getName(), "size");
-        ALL_METADATA.put(Concept.NORMALIZED_RANK_ERROR.getName(), "nre");
-        ALL_METADATA.put(Concept.ITEMS_SEEN.getName(), "n");
-        ALL_METADATA.put(Concept.MINIMUM_VALUE.getName(), "min");
-        ALL_METADATA.put(Concept.MAXIMUM_VALUE.getName(), "max");
+        ALL_METADATA.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
+        ALL_METADATA.put(Concept.SKETCH_FAMILY.getName(), "family");
+        ALL_METADATA.put(Concept.SKETCH_SIZE.getName(), "size");
+        ALL_METADATA.put(Concept.SKETCH_NORMALIZED_RANK_ERROR.getName(), "nre");
+        ALL_METADATA.put(Concept.SKETCH_ITEMS_SEEN.getName(), "n");
+        ALL_METADATA.put(Concept.SKETCH_MINIMUM_VALUE.getName(), "min");
+        ALL_METADATA.put(Concept.SKETCH_MAXIMUM_VALUE.getName(), "max");
     }
 
     public static double[] makePoints(double... items) {

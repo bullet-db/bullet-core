@@ -53,8 +53,8 @@ public abstract class KMVSketch extends DualSketch {
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         collect();
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys, Concept.STANDARD_DEVIATIONS, this::getStandardDeviations);
-        addIfNonNull(metadata, conceptKeys, Concept.THETA, this::getTheta);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_STANDARD_DEVIATIONS, this::getStandardDeviations);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_THETA, this::getTheta);
         return metadata;
     }
 

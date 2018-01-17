@@ -88,9 +88,9 @@ public abstract class Sketch {
      */
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         Map<String, Object> metadata = new HashMap<>();
-        addIfNonNull(metadata, conceptKeys, Concept.FAMILY, this::getFamily);
-        addIfNonNull(metadata, conceptKeys, Concept.SIZE, this::getSize);
-        addIfNonNull(metadata, conceptKeys, Concept.ESTIMATED_RESULT, this::isEstimationMode);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_FAMILY, this::getFamily);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_SIZE, this::getSize);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_ESTIMATED_RESULT, this::isEstimationMode);
         return metadata;
     }
 

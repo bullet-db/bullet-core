@@ -109,9 +109,9 @@ public class FrequentItemsSketch extends Sketch {
     @Override
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys, Concept.ITEMS_SEEN, this::getStreamLength);
-        addIfNonNull(metadata, conceptKeys, Concept.ACTIVE_ITEMS, this::getItemsStored);
-        addIfNonNull(metadata, conceptKeys, Concept.MAXIMUM_COUNT_ERROR, this::getMaximumError);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_ITEMS_SEEN, this::getStreamLength);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_ACTIVE_ITEMS, this::getItemsStored);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_MAXIMUM_COUNT_ERROR, this::getMaximumError);
         return metadata;
     }
 

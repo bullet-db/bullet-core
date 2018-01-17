@@ -110,7 +110,7 @@ public class TupleSketch extends KMVSketch {
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
         // The super will call collect()
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
-        addIfNonNull(metadata, conceptKeys, Concept.UNIQUES_ESTIMATE, this::getUniquesEstimate);
+        addIfNonNull(metadata, conceptKeys, Concept.SKETCH_UNIQUES_ESTIMATE, this::getUniquesEstimate);
         return metadata;
     }
 
