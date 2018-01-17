@@ -30,37 +30,48 @@ import java.util.stream.IntStream;
 import static com.yahoo.bullet.TestHelpers.assertContains;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class GroupByTest {
-    public static List<Map.Entry<Concept, String>> ALL_METADATA =
+    private static List<Map.Entry<Concept, String>> ALL_METADATA =
             asList(Pair.of(Concept.SKETCH_METADATA, "aggregate_stats"),
                    Pair.of(Concept.SKETCH_THETA, "theta"),
                    Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEstimate"),
                    Pair.of(Concept.SKETCH_UNIQUES_ESTIMATE, "uniquesApprox"),
                    Pair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "stddev"));
 
-    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
-                                      List<Map<String, String>> operations,
-                                      List<Map.Entry<Concept, String>> metadata) {
+    public static Aggregation makeAggregation(Map<String, String> fields, int size, List<Map<String, String>> operations) {
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(AggregationOperations.AggregationType.GROUP);
+        aggregation.setType(GROUP);
         aggregation.setFields(fields);
         aggregation.setSize(size);
         if (operations != null) {
             aggregation.setAttributes(makeAttributes(operations));
         }
+        return aggregation;
+    }
 
+    public static GroupBy makeGroupBy(BulletConfig configuration, Aggregation aggregation,
+                                      List<Map.Entry<Concept, String>> metadata) {
         GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata).validate());
         by.initialize();
         return by;
+    }
+
+    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
+                                      List<Map<String, String>> operations,
+                                      List<Map.Entry<Concept, String>> metadata) {
+        return makeGroupBy(configuration, makeAggregation(fields, size, operations), metadata);
     }
 
     @SafeVarargs
@@ -103,20 +114,57 @@ public class GroupByTest {
     }
 
     @Test
+    public void testNoField() {
+        GroupBy groupBy = makeGroupBy(emptyMap(), 3, makeGroupOperation(SUM, null, null));
+
+        Optional<List<BulletError>> optionalErrors = groupBy.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.size(), 1);
+        Assert.assertEquals(errors.get(0).getError(), GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + SUM);
+    }
+
+    @Test
+    public void testAttributeOperationsUnknownOperation() {
+        Aggregation aggregation = makeAggregation(emptyMap(), 10, null);
+        aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT, null, "bar"),
+                                                 makeGroupOperation(COUNT_FIELD, "foo", "foo_avg")));
+        GroupBy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
+
+        // The bad operation should have been thrown out.
+        Assert.assertFalse(groupBy.initialize().isPresent());
+    }
+
+    @Test
+    public void testAttributeOperationsDuplicateOperation() {
+        Aggregation aggregation = makeAggregation(emptyMap(), 10, null);
+        aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT, null, null),
+                                                 makeGroupOperation(SUM, "foo", null),
+                                                 makeGroupOperation(COUNT, null, null),
+                                                 makeGroupOperation(SUM, "bar", null),
+                                                 makeGroupOperation(SUM, "foo", null),
+                                                 makeGroupOperation(SUM, "bar", null)));
+        GroupBy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
+        // The bad ones should be removed.
+        Assert.assertFalse(groupBy.initialize().isPresent());
+    }
+
+    @Test
     public void testInitialize() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(AVG, null, null),
-                                      makeGroupOperation(SUM, null, "sum"));
+        GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(AVG, null, null), makeGroupOperation(SUM, null, "sum"));
         Optional<List<BulletError>> optionalErrors = groupBy.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
-                                                               GroupOperation.GroupOperationType.AVG,
-                                                           GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
-        Assert.assertEquals(errors.get(1), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
-                                                               GroupOperation.GroupOperationType.SUM,
-                                                           GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
+        Assert.assertEquals(errors.get(0), BulletError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
+                                                                     GroupOperation.GroupOperationType.AVG,
+                                                                 GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
+        Assert.assertEquals(errors.get(1), BulletError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
+                                                                     GroupOperation.GroupOperationType.SUM,
+                                                                 GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
+        groupBy = makeDistinct(fields, 3);
+        Assert.assertFalse(groupBy.initialize().isPresent());
     }
 
     @Test

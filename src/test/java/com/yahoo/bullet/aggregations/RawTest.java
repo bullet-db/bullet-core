@@ -51,7 +51,7 @@ public class RawTest {
 
     @Test
     public void testInitialize() {
-        Assert.assertNull(makeRaw(20, 15).initialize());
+        Assert.assertFalse(makeRaw(20, 15).initialize().isPresent());
     }
 
     @Test

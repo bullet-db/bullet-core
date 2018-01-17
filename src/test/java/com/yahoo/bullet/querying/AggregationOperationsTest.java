@@ -25,7 +25,10 @@ public class AggregationOperationsTest {
     @Test
     public void testGroupOperationTypeIdentifying() {
         GroupOperation.GroupOperationType count = GroupOperation.GroupOperationType.COUNT;
-        Assert.assertFalse(count.isMe("count"));
+        Assert.assertTrue(count.isMe("count"));
+        Assert.assertTrue(count.isMe("COUNT"));
+        Assert.assertTrue(count.isMe("CoUNt"));
+        Assert.assertFalse(count.isMe("cnt"));
         Assert.assertFalse(count.isMe(null));
         Assert.assertFalse(count.isMe(""));
         Assert.assertFalse(count.isMe(GroupOperation.GroupOperationType.SUM.getName()));

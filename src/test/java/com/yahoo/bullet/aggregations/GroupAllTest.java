@@ -24,21 +24,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GroupAllTest {
-    @SafeVarargs
-    public static GroupAll makeGroupAll(Map<String, String>... groupOperations) {
+    public static Aggregation makeAggregation(Map<String, Object> attributes) {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(AggregationType.GROUP);
         // Does not matter
         aggregation.setSize(1);
-        aggregation.setAttributes(makeAttributes(groupOperations));
-        GroupAll all = new GroupAll(aggregation, new BulletConfig());
+        aggregation.setAttributes(attributes);
+        return aggregation;
+    }
+
+    @SafeVarargs
+    public static GroupAll makeGroupAll(Map<String, String>... groupOperations) {
+        GroupAll all = new GroupAll(makeAggregation(makeAttributes(groupOperations)), new BulletConfig());
         all.initialize();
         return all;
     }
@@ -59,6 +65,41 @@ public class GroupAllTest {
     }
 
     @Test
+    public void testUnsupportedOperation() {
+        GroupAll groupAll = makeGroupAll(makeGroupOperation(COUNT_FIELD, "someField", "myCountField"));
+
+        Optional<List<BulletError>> optionalErrors = groupAll.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.size(), 1);
+        Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
+    }
+
+    @Test
+    public void testAttributeOperationMissing() {
+        Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, null));
+        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
+
+        Optional<List<BulletError>> optionalErrors = groupAll.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.size(), 1);
+        Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
+    }
+
+    @Test
+    public void testAttributeOperationBadFormat() {
+        Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, asList("foo")));
+        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
+
+        Optional<List<BulletError>> optionalErrors = groupAll.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.size(), 1);
+        Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
+    }
+
+    @Test
     public void testInitialize() {
         GroupAll groupAll = makeGroupAll(Collections.emptyMap());
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
@@ -69,6 +110,7 @@ public class GroupAllTest {
 
         groupAll = makeGroupAll(makeGroupOperation(GroupOperation.GroupOperationType.AVG, null, null));
         optionalErrors = groupAll.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD +
@@ -78,7 +120,7 @@ public class GroupAllTest {
         groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null),
                                 new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", null));
 
-        Assert.assertNull(groupAll.initialize());
+        Assert.assertFalse(groupAll.initialize().isPresent());
     }
 
     @Test

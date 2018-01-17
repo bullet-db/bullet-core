@@ -57,17 +57,17 @@ public abstract class DualSketch extends Sketch {
     }
 
     /**
-     * Collect the update sketch and the union sketch into one.
+     * Collect both the update sketch and the union sketch into one.
      */
     protected abstract void collectUpdateAndUnionSketch();
 
     /**
-     * Collect the update sketch for data reading.
+     * Collect just the update sketch for data reading.
      */
     protected abstract void collectUpdateSketch();
 
     /**
-     * Collect the union sketch for data reading.
+     * Collect just the union sketch for data reading.
      */
     protected abstract void collectUnionSketch();
 

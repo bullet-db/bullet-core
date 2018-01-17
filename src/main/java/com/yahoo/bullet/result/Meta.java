@@ -31,7 +31,7 @@ public class Meta {
         QUERY_BODY("Query Body"),
 
         // Sketching metadata
-        SKETCH_METADATA("Sketch"),
+        SKETCH_METADATA("Sketch Metadata"),
         SKETCH_ESTIMATED_RESULT("Sketch Estimated Result"),
         SKETCH_UNIQUES_ESTIMATE("Sketch Uniques Estimate"),
         SKETCH_STANDARD_DEVIATIONS("Sketch Standard Deviations"),
@@ -46,7 +46,7 @@ public class Meta {
         SKETCH_ACTIVE_ITEMS("Sketch Active Items"),
 
         // Windowing metadata
-        WINDOW_METADATA("Window"),
+        WINDOW_METADATA("Window Metadata"),
         WINDOW_NAME("Window Name"),
         WINDOW_NUMBER("Window Number"),
         WINDOW_SIZE("Window Size");

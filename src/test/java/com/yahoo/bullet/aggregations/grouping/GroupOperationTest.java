@@ -5,7 +5,10 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.ParsingError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -19,18 +22,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MAX;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MIN;
+import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
+import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
 
 public class GroupOperationTest {
 
     @Test
     public void testHashCode() {
-        GroupOperation a = new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", "avg1");
-        GroupOperation b = new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", "avg2");
-        GroupOperation c = new GroupOperation(GroupOperation.GroupOperationType.AVG, "bar", "avg1");
-        GroupOperation d = new GroupOperation(GroupOperation.GroupOperationType.COUNT, "foo", "count1");
-        GroupOperation e = new GroupOperation(GroupOperation.GroupOperationType.COUNT, "bar", "count2");
+        GroupOperation a = new GroupOperation(AVG, "foo", "avg1");
+        GroupOperation b = new GroupOperation(AVG, "foo", "avg2");
+        GroupOperation c = new GroupOperation(AVG, "bar", "avg1");
+        GroupOperation d = new GroupOperation(COUNT, "foo", "count1");
+        GroupOperation e = new GroupOperation(COUNT, "bar", "count2");
 
         Assert.assertEquals(a.hashCode(), b.hashCode());
         Assert.assertNotEquals(a.hashCode(), c.hashCode());
@@ -47,7 +57,7 @@ public class GroupOperationTest {
         GroupOperation b = new GroupOperation(null, "foo", "a");
         GroupOperation c = new GroupOperation(null, "bar", "a");
         GroupOperation d = new GroupOperation(null, null, "b");
-        GroupOperation e = new GroupOperation(GroupOperation.GroupOperationType.AVG, null, "avg");
+        GroupOperation e = new GroupOperation(AVG, null, "avg");
 
         Assert.assertNotEquals(a.hashCode(), b.hashCode());
         Assert.assertNotEquals(a.hashCode(), c.hashCode());
@@ -60,10 +70,10 @@ public class GroupOperationTest {
 
     @Test
     public void testEquals() {
-        GroupOperation a = new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", "avg1");
-        GroupOperation b = new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", "avg2");
-        GroupOperation c = new GroupOperation(GroupOperation.GroupOperationType.AVG, "bar", "avg");
-        GroupOperation d = new GroupOperation(GroupOperation.GroupOperationType.COUNT, "foo", "count");
+        GroupOperation a = new GroupOperation(AVG, "foo", "avg1");
+        GroupOperation b = new GroupOperation(AVG, "foo", "avg2");
+        GroupOperation c = new GroupOperation(AVG, "bar", "avg");
+        GroupOperation d = new GroupOperation(COUNT, "foo", "count");
         String e = "foo";
 
         Assert.assertEquals(a, b);
@@ -105,27 +115,27 @@ public class GroupOperationTest {
     public void testCheckingGroupOperations() {
         List<GroupOperation> list = new ArrayList<>();
 
-        Assert.assertNull(GroupOperation.checkOperations(list));
+        Assert.assertFalse(GroupOperation.checkOperations(list).isPresent());
 
-        list.add(new GroupOperation(GroupOperation.GroupOperationType.AVG, "foo", "avg1"));
-        list.add(new GroupOperation(GroupOperation.GroupOperationType.MIN, "foo", null));
-        list.add(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        list.add(new GroupOperation(AVG, "foo", "avg1"));
+        list.add(new GroupOperation(MIN, "foo", null));
+        list.add(new GroupOperation(COUNT, null, null));
 
-        Assert.assertNull(GroupOperation.checkOperations(list));
+        Assert.assertFalse(GroupOperation.checkOperations(list).isPresent());
 
-        list.add(new GroupOperation(GroupOperation.GroupOperationType.SUM, null, null));
-        list.add(new GroupOperation(GroupOperation.GroupOperationType.AVG, null, "foo"));
+        list.add(new GroupOperation(SUM, null, null));
+        list.add(new GroupOperation(AVG, null, "foo"));
 
         Optional<List<BulletError>> optionalErrors = GroupOperation.checkOperations(list);
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
         Assert.assertEquals(errors.get(0),
-                            ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperation.GroupOperationType.SUM,
-                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
+                            BulletError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + SUM,
+                                                  GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
         Assert.assertEquals(errors.get(1),
-                            ParsingError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + GroupOperation.GroupOperationType.AVG,
-                                            GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
+                            BulletError.makeError(GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + AVG,
+                                                  GroupOperation.OPERATION_REQUIRES_FIELD_RESOLUTION));
     }
 
     @Test
@@ -138,20 +148,20 @@ public class GroupOperationTest {
 
         Assert.assertEquals(GroupOperation.getOperations(attributes).size(), 0);
 
-        attributes = makeAttributes(makeGroupOperation(GroupOperation.GroupOperationType.SUM, "foo", null),
-                                    makeGroupOperation(GroupOperation.GroupOperationType.AVG, "bar", "baz"),
-                                    makeGroupOperation(GroupOperation.GroupOperationType.COUNT, null, null),
-                                    makeGroupOperation(GroupOperation.GroupOperationType.MIN, "qux", null),
-                                    makeGroupOperation(GroupOperation.GroupOperationType.MAX, "norf", "quux"));
+        attributes = makeAttributes(makeGroupOperation(SUM, "foo", null),
+                                    makeGroupOperation(AVG, "bar", "baz"),
+                                    makeGroupOperation(COUNT, null, null),
+                                    makeGroupOperation(MIN, "qux", null),
+                                    makeGroupOperation(MAX, "norf", "quux"));
 
 
         Set<GroupOperation> actual = GroupOperation.getOperations(attributes);
 
-        List<GroupOperation> expected = Arrays.asList(new GroupOperation(GroupOperation.GroupOperationType.SUM, "foo", null),
-                                                      new GroupOperation(GroupOperation.GroupOperationType.AVG, "bar", "baz"),
-                                                      new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null),
-                                                      new GroupOperation(GroupOperation.GroupOperationType.MIN, "qux", null),
-                                                      new GroupOperation(GroupOperation.GroupOperationType.MAX, "norf", "quux"));
+        List<GroupOperation> expected = Arrays.asList(new GroupOperation(SUM, "foo", null),
+                                                      new GroupOperation(AVG, "bar", "baz"),
+                                                      new GroupOperation(COUNT, null, null),
+                                                      new GroupOperation(MIN, "qux", null),
+                                                      new GroupOperation(MAX, "norf", "quux"));
 
         Assert.assertEquals(actual.size(), expected.size());
         Assert.assertTrue(actual.containsAll(expected));

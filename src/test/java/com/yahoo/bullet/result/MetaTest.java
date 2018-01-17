@@ -38,12 +38,12 @@ public class MetaTest {
 
     @Test
     public void testConceptFinding() {
-        Assert.assertEquals(Concept.from("Query Creation Time"), Concept.QUERY_RECEIVE_TIME);
-        Assert.assertEquals(Concept.from("Query Identifier"), Concept.QUERY_ID);
+        Assert.assertEquals(Concept.from("Query Receive Time"), Concept.QUERY_RECEIVE_TIME);
+        Assert.assertEquals(Concept.from("Query ID"), Concept.QUERY_ID);
         Assert.assertEquals(Concept.from("Sketch Metadata"), Concept.SKETCH_METADATA);
-        Assert.assertEquals(Concept.from("Standard Deviations"), Concept.SKETCH_STANDARD_DEVIATIONS);
+        Assert.assertEquals(Concept.from("Sketch Standard Deviations"), Concept.SKETCH_STANDARD_DEVIATIONS);
         Assert.assertNull(Concept.from("foo"));
-        Assert.assertNull(Concept.from("standard deviations"));
+        Assert.assertNull(Concept.from("sketch standard deviations"));
     }
 
     @Test

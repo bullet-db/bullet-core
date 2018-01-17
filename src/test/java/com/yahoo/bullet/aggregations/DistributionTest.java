@@ -128,10 +128,7 @@ public class DistributionTest {
         attributes.put(Distribution.NUMBER_OF_POINTS, 10L);
         aggregation.setAttributes(attributes);
         distribution = new Distribution(aggregation, new BulletConfig());
-        optionalErrors = distribution.initialize();
-        Assert.assertTrue(optionalErrors.isPresent());
-        errors = optionalErrors.get();
-        Assert.assertNull(errors);
+        Assert.assertFalse(distribution.initialize().isPresent());
     }
 
     @Test
@@ -301,9 +298,7 @@ public class DistributionTest {
 
         aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, Collections.singletonList(1.0)));
         optionalErrors = distribution.initialize();
-        Assert.assertTrue(optionalErrors.isPresent());
-        errors = optionalErrors.get();
-        Assert.assertNull(errors);
+        Assert.assertFalse(distribution.initialize().isPresent());
 
         aggregation.setAttributes(makeAttributes(Distribution.DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
         optionalErrors = distribution.initialize();

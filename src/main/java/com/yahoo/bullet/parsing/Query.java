@@ -63,8 +63,8 @@ public class Query implements Configurable, Initializable {
             window.configure(config);
         }
 
-        long durationDefault = config.getAs(BulletConfig.QUERY_DEFAULT_DURATION, Integer.class);
-        long durationMax = config.getAs(BulletConfig.QUERY_MAX_DURATION, Integer.class);
+        long durationDefault = config.getAs(BulletConfig.QUERY_DEFAULT_DURATION, Long.class);
+        long durationMax = config.getAs(BulletConfig.QUERY_MAX_DURATION, Long.class);
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration <= 0) ? durationDefault : Math.min(duration, durationMax);

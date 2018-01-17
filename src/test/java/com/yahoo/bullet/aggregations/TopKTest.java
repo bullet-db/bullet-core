@@ -87,10 +87,7 @@ public class TopKTest {
         Assert.assertEquals(errors.get(0), SketchingStrategy.REQUIRES_FIELD_ERROR);
 
         topK = makeTopK(asList("fieldA", "fieldB"), 32, 10);
-        optionalErrors = topK.initialize();
-        Assert.assertTrue(optionalErrors.isPresent());
-        errors = optionalErrors.get();
-        Assert.assertNull(errors);
+        Assert.assertFalse(topK.initialize().isPresent());
     }
 
     @Test

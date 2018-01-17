@@ -108,6 +108,13 @@ public class QuantileSketch extends DualSketch {
     }
 
     @Override
+    public void reset() {
+        unionSketch.reset();
+        updateSketch.reset();
+        super.reset();
+    }
+
+    @Override
     public byte[] serialize() {
         collect();
         return merged.toByteArray();

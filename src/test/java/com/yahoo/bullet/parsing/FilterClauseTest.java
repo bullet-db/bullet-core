@@ -69,8 +69,10 @@ public class FilterClauseTest {
         Assert.assertNull(filterClause.getPatterns());
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
-        Assert.assertNotNull(filterClause.getPatterns());
-        Assert.assertEquals(filterClause.getPatterns(), singletonList(Pattern.compile(".g.*")));
+        List<Pattern> actual = filterClause.getPatterns();
+        Assert.assertNotNull(actual);
+        Assert.assertEquals(actual.size(), 1);
+        Assert.assertEquals(actual.get(0).pattern(), ".g.*");
     }
 
     @Test
