@@ -7,6 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -20,6 +21,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
@@ -28,15 +30,22 @@ import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 
 public class CountDistinctTest {
+    public static Aggregation makeAggregation(Map<String, String> fields, Map<String, Object> attributes) {
+        Aggregation aggregation = new Aggregation();
+        aggregation.setFields(fields);
+        aggregation.setAttributes(attributes);
+        return aggregation;
+    }
+
+    public static CountDistinct makeCountDistinct(BulletConfig configuration, Aggregation aggregation,
+                                                  Map.Entry<Concept, String>... metadata) {
+        return new CountDistinct(aggregation, addMetadata(configuration, metadata).validate());
+    }
+
     @SafeVarargs
     public static CountDistinct makeCountDistinct(BulletConfig configuration, Map<String, Object> attributes,
                                                   List<String> fields, Map.Entry<Concept, String>... metadata) {
-        Aggregation aggregation = new Aggregation();
-        Map<String, String> asMap = makeGroupFields(fields);
-        aggregation.setFields(asMap);
-        aggregation.setAttributes(attributes);
-
-        CountDistinct countDistinct = new CountDistinct(aggregation, addMetadata(configuration, metadata).validate());
+        CountDistinct countDistinct = makeCountDistinct(configuration, makeAggregation(makeGroupFields(fields), attributes), metadata);
         countDistinct.initialize();
         return countDistinct;
     }
@@ -97,6 +106,18 @@ public class CountDistinctTest {
         Assert.assertEquals(CountDistinct.getResizeFactor(3), ResizeFactor.X8);
         Assert.assertEquals(CountDistinct.getResizeFactor(17), ResizeFactor.X8);
         Assert.assertEquals(CountDistinct.getResizeFactor(-10), ResizeFactor.X8);
+    }
+
+    @Test
+    public void testFailValidateOnCountDistinctFieldsMissing() {
+        Aggregation aggregation = makeAggregation(null, null);
+        CountDistinct countDistinct = makeCountDistinct(new BulletConfig(), aggregation, null);
+
+        Optional<List<BulletError>> optionalErrors = countDistinct.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.size(), 1);
+        Assert.assertEquals(errors.get(0), Strategy.REQUIRES_FIELD_ERROR);
     }
 
     @Test

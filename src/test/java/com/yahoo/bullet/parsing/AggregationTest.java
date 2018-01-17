@@ -41,7 +41,7 @@ public class AggregationTest {
 
         aggregation.setSize(0);
         aggregation.configure(config);
-        Assert.assertEquals(aggregation.getSize(), (Integer) 0);
+        Assert.assertEquals((Object) aggregation.getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
         aggregation.setSize(1);
         aggregation.configure(config);
@@ -61,6 +61,8 @@ public class AggregationTest {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.AGGREGATION_DEFAULT_SIZE, 10);
         config.set(BulletConfig.AGGREGATION_MAX_SIZE, 200);
+        // Need to lower or else AGGREGATION_MAX_SIZE will default to DEFAULT_AGGREGATION_MAX_SIZE
+        config.set(BulletConfig.GROUP_AGGREGATION_MAX_SIZE, 200);
         config.validate();
 
         Aggregation aggregation = new Aggregation();
@@ -75,7 +77,7 @@ public class AggregationTest {
 
         aggregation.setSize(0);
         aggregation.configure(config);
-        Assert.assertEquals(aggregation.getSize(), (Integer) 0);
+        Assert.assertEquals(aggregation.getSize(), (Integer) 10);
 
         aggregation.setSize(1);
         aggregation.configure(config);
@@ -98,7 +100,9 @@ public class AggregationTest {
     public void testFailValidateOnNoType() {
         Aggregation aggregation = new Aggregation();
         aggregation.setType(null);
-        List<BulletError> errors = aggregation.initialize().get();
+        Optional<List<BulletError>> optionalErrors = aggregation.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Aggregation.TYPE_NOT_SUPPORTED_ERROR);
     }
@@ -114,45 +118,21 @@ public class AggregationTest {
     }
 
     @Test
-    public void testFailValidateOnCountDistinctFieldsMissing() {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(COUNT_DISTINCT);
-        aggregation.configure(new BulletConfig());
-
-        List<BulletError> errors = aggregation.initialize().get();
-        Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Strategy.REQUIRES_FIELD_ERROR);
-    }
-
-    @Test
-    public void testFailValidateOnGroupFieldsAndOperationsMissing() {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(GROUP);
-        aggregation.configure(new BulletConfig());
-
-        List<BulletError> errors = aggregation.initialize().get();
-        Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR);
-    }
-
-    @Test
     public void testToString() {
         Aggregation aggregation = new Aggregation();
         aggregation.configure(new BulletConfig());
 
-        Assert.assertEquals(aggregation.toString(), "{size: 1, type: RAW, fields: null, attributes: null}");
+        Assert.assertEquals(aggregation.toString(), "{size: 500, type: RAW, fields: null, attributes: null}");
 
         aggregation.setType(COUNT_DISTINCT);
-        Assert.assertEquals(aggregation.toString(), "{size: 1, type: COUNT_DISTINCT, fields: null, attributes: null}");
+        Assert.assertEquals(aggregation.toString(), "{size: 500, type: COUNT_DISTINCT, fields: null, attributes: null}");
 
         aggregation.setFields(singletonMap("field", "newName"));
         Assert.assertEquals(aggregation.toString(),
-                "{size: 1, type: COUNT_DISTINCT, " + "fields: {field=newName}, attributes: null}");
+                "{size: 500, type: COUNT_DISTINCT, " + "fields: {field=newName}, attributes: null}");
 
         aggregation.setAttributes(singletonMap("foo", asList(1, 2, 3)));
         Assert.assertEquals(aggregation.toString(),
-                "{size: 1, type: COUNT_DISTINCT, " + "fields: {field=newName}, attributes: {foo=[1, 2, 3]}}");
+                "{size: 500, type: COUNT_DISTINCT, " + "fields: {field=newName}, attributes: {foo=[1, 2, 3]}}");
     }
-
-
 }

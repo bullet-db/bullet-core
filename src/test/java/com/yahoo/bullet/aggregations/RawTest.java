@@ -46,7 +46,7 @@ public class RawTest {
     }
 
     private static Raw makeRaw(int size) {
-        return makeRaw(size, 1);
+        return makeRaw(size, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class RawTest {
     }
 
     @Test
-    public void testCanAcceptData() {
+    public void testIsClosed() {
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
         Raw raw = makeRaw(2);
 
@@ -114,13 +114,17 @@ public class RawTest {
         BulletRecord recordB = RecordBox.get().add("bar", "baz").getRecord();
         raw.consume(recordB);
 
-        Assert.assertEquals(raw.getData(), getListBytes(recordB));
+        Assert.assertEquals(raw.getData(), getListBytes(recordA, recordB));
 
         Assert.assertTrue(raw.isClosed());
 
         BulletRecord recordC = RecordBox.get().add("baz", "qux").getRecord();
+
         // This consumption should not occur
         raw.consume(recordC);
+        Assert.assertEquals(raw.getData(), getListBytes(recordA, recordB));
+
+        raw.reset();
         Assert.assertNull(raw.getData());
     }
 
