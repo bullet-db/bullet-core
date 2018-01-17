@@ -42,9 +42,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
-    @SafeVarargs
-    private static <T> Stream<TypedObject> make(T... items) {
-        return Arrays.stream(items).map(TypedObject::new);
+    private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
+        return FilterOperations.cast(source, asList(items));
     }
 
     private static Stream<Pattern> makePattern(String... items) {
@@ -67,44 +66,44 @@ public class FilterOperationsTest {
     public void testComparatorUnsupportedType() {
         TypedObject object = new TypedObject(Type.MAP, singletonMap("foo", "bar"));
         // foo cannot be casted to map, so eq will return false (values will be empty)
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo")));
         // foo cannot be casted to map, so neq will return true (values will be empty)
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("foo")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "foo")));
         Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("foo")));
     }
 
     @Test
     public void testOnDoubles() {
         TypedObject object = new TypedObject(Double.valueOf("1.234"));
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("1.234", "4.343", "foo")));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("4.343")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "1.234", "4.343", "foo")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "4.343")));
     }
 
     @Test
     public void testComparatorUncastable() {
         TypedObject object = new TypedObject(Double.valueOf("1.234"));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo")));
     }
 
     @Test
     public void testNulls() {
         TypedObject object = new TypedObject(Type.NULL, null);
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo")));
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("null")));
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("NULL")));
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("Null")));
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make("null")));
-        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make("NULL")));
-        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make("Null")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("foo")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("foo")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "null")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "NULL")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "Null")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make(object, "null")));
+        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make(object, "NULL")));
+        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make(object, "Null")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "foo")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "foo")));
         Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("foo")));
         Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("null")));
         Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("nu.*")));
@@ -113,108 +112,108 @@ public class FilterOperationsTest {
     @Test
     public void testMixedTypes() {
         TypedObject object = new TypedObject(2.34);
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("foo", "2.34")));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo", "3.42")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "foo", "2.34")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo", "3.42")));
 
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("baz", "bar")));
-        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make("baz", "2.34")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "baz", "bar")));
+        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make(object, "baz", "2.34")));
 
-        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make("baz", "2.1")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("baz", "2.34")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("baz", "2.4")));
+        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make(object, "baz", "2.1")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "baz", "2.34")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "baz", "2.4")));
 
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("baz", "2.1")));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("baz", "2.34")));
-        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make("baz", "2.4")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "baz", "2.1")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "baz", "2.34")));
+        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make(object, "baz", "2.4")));
 
-        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make("baz", "2.1")));
-        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make("baz", "2.34")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("baz", "2.4")));
+        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make(object, "baz", "2.1")));
+        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make(object, "baz", "2.34")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "baz", "2.4")));
 
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("baz", "2.1")));
-        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make("baz", "2.34")));
-        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make("baz", "2.4")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "baz", "2.1")));
+        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make(object, "baz", "2.34")));
+        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make(object, "baz", "2.4")));
     }
 
     @Test
     public void testEquality() {
         TypedObject object = new TypedObject("foo");
-        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make("foo", "bar")));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("baz", "bar")));
+        Assert.assertTrue(comparatorFor(EQUALS).compare(object, make(object, "foo", "bar")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "baz", "bar")));
         // Will become a string
         object = new TypedObject(singletonList("foo"));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo", "bar")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo", "bar")));
         // Can't be casted to a list, so the equality check will fail
         object = new TypedObject(Type.LIST, singletonList("foo"));
-        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make("foo", "bar")));
+        Assert.assertFalse(comparatorFor(EQUALS).compare(object, make(object, "foo", "bar")));
     }
 
     @Test
     public void testInEquality() {
         TypedObject object = new TypedObject(1L);
-        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make("1", "2")));
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("2", "3")));
+        Assert.assertFalse(comparatorFor(NOT_EQUALS).compare(object, make(object, "1", "2")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "2", "3")));
         // Will become a string
         object = new TypedObject(singletonList("1"));
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("1", "2")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "1", "2")));
         // Can't be casted to a list, so the inequality check will pass
         object = new TypedObject(Type.LIST, singletonList("foo"));
-        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make("foo", "bar")));
+        Assert.assertTrue(comparatorFor(NOT_EQUALS).compare(object, make(object, "foo", "bar")));
     }
 
     @Test
     public void testGreaterNumeric() {
         TypedObject object = new TypedObject(1L);
-        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make("0", "2")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("1", "2")));
-        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make("0", "3")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("2", "3")));
+        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make(object, "0", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "1", "2")));
+        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make(object, "0", "3")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "2", "3")));
 
         // Will become UNKNOWN
         object = new TypedObject(singletonList("1"));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("1", "2")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("1", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "1", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "1", "2")));
 
         // Will become UNKNOWN
         object = new TypedObject(Type.LIST, singletonList("1"));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("1", "2")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("1", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "1", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "1", "2")));
     }
 
     @Test
     public void testLessNumeric() {
         TypedObject object = new TypedObject(1L);
-        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make("-10", "2")));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("-1", "0")));
-        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make("0", "1")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("-2", "-3")));
+        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make(object, "-10", "2")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "-1", "0")));
+        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make(object, "0", "1")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "-2", "-3")));
 
         // Will become a string
         object = new TypedObject(singletonList("1"));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("1", "2")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("1", "2")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "1", "2")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "1", "2")));
         // Can't be casted to a list, so the less check will fail
         object = new TypedObject(Type.LIST, singletonList("1"));
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("1", "2")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("1", "2")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "1", "2")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "1", "2")));
     }
 
     @Test
     public void testGreaterString() {
         TypedObject object = new TypedObject("foo");
-        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make("bravo", "2")));
-        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make("zulu", "xray")));
-        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make("alpha", "foo")));
-        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make("golf", "november")));
+        Assert.assertTrue(comparatorFor(GREATER_THAN).compare(object, make(object, "bravo", "2")));
+        Assert.assertFalse(comparatorFor(GREATER_THAN).compare(object, make(object, "zulu", "xray")));
+        Assert.assertTrue(comparatorFor(GREATER_EQUALS).compare(object, make(object, "alpha", "foo")));
+        Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "golf", "november")));
     }
 
     @Test
     public void testLessString() {
         TypedObject object = new TypedObject("foo");
-        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make("bravo", "2")));
-        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make("zulu", "xray")));
-        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make("oscar", "foo")));
-        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make("echo", "fi")));
+        Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "bravo", "2")));
+        Assert.assertTrue(comparatorFor(LESS_THAN).compare(object, make(object, "zulu", "xray")));
+        Assert.assertTrue(comparatorFor(LESS_EQUALS).compare(object, make(object, "oscar", "foo")));
+        Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "echo", "fi")));
     }
 
     @Test
@@ -233,6 +232,7 @@ public class FilterOperationsTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testFilterDefaults() {
         FilterClause clause = new FilterClause();
+        clause.setValues(asList("foo", "bar"));
         // Without an operation, it is an error
         FilterOperations.perform(RecordBox.get().getRecord(), clause);
     }
@@ -240,11 +240,6 @@ public class FilterOperationsTest {
     @Test
     public void testFilterDefaultsWithOperation() {
         FilterClause clause = new FilterClause();
-
-        // Without an operation, filter always returns true even with set values
-        clause.setValues(singletonList("a"));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord(), clause));
-
         // With non-empty values, filter always returns true
         clause.setOperation(EQUALS);
         clause.setValues(emptyList());
@@ -408,10 +403,11 @@ public class FilterOperationsTest {
     //***************************************** Logical Clause *********************************************************
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void testLogicalDefaults() {
+    public void testLogicalNoOperation() {
         LogicalClause clause = new LogicalClause();
+        clause.setClauses(asList(makeClause("foo", asList("foo", "bar"), EQUALS),
+                                 makeClause("bar", asList("foo", "bar"), EQUALS)));
         Assert.assertNull(clause.getOperation());
-        Assert.assertNull(clause.getClauses());
         FilterOperations.perform(RecordBox.get().getRecord(), clause);
     }
 

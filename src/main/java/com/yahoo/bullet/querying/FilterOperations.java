@@ -106,7 +106,14 @@ public class FilterOperations {
         LOGICAL_OPERATORS.put(FilterType.NOT, NOT);
     }
 
-    private static Stream<TypedObject> cast(TypedObject object, List<String> values) {
+    /**
+     * Exposed for testing. Cast the values to the type of the object if possible.
+     *
+     * @param object The {@link TypedObject} to cast the values to.
+     * @param values The {@link List} of String values to try and cast to the object.
+     * @return A {@link Stream} of casted {@link TypedObject}.
+     */
+    static Stream<TypedObject> cast(TypedObject object, List<String> values) {
         // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
         // In the future, we might want to support providing non-String values.
         return values.stream().filter(Objects::nonNull).map(object::typeCast).filter(IS_NOT_UNKNOWN);

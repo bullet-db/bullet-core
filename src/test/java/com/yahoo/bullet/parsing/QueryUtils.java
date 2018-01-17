@@ -314,6 +314,7 @@ public class QueryUtils {
         if (clauses != null) {
             clause.setClauses(Arrays.asList(clauses));
         }
+        clause.initialize();
         return clause;
     }
 
@@ -322,6 +323,7 @@ public class QueryUtils {
         clause.setField(field);
         clause.setValues(values == null ? Collections.singletonList(Type.NULL_EXPRESSION) : values);
         clause.setOperation(operation);
+        clause.initialize();
         return clause;
     }
 
