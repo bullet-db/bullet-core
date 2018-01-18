@@ -17,6 +17,7 @@ public class ProjectionUtils {
         return makeProjection(singletonMap(field, newName));
     }
 
+    @SafeVarargs
     public static Projection makeProjection(Pair<String, String>... entries) {
         Map<String, String> fields = new HashMap<>();
         for (Pair<String, String> entry : entries) {

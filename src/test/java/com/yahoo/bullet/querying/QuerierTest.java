@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
+import com.yahoo.bullet.aggregations.Raw;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
@@ -23,6 +24,7 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.SlidingRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -41,6 +43,7 @@ import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
+import static com.yahoo.bullet.parsing.QueryUtils.makeRawWindowQuery;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -375,7 +378,7 @@ public class QuerierTest {
         Assert.assertEquals(actualMeta.size(), 1);
         Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
 
-        BulletError expected = BulletError.makeError("Getting window result failure", Querier.AGGREGATION_FAILURE_RESOLUTION);
+        BulletError expected = BulletError.makeError("Getting result failure", Querier.AGGREGATION_FAILURE_RESOLUTION);
         Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
 
         Assert.assertEquals(failingScheme.consumptionFailure, 1);
@@ -387,11 +390,12 @@ public class QuerierTest {
     @Test
     public void testBasicWindowMaximumEmitted() {
         Querier querier = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+
         RecordBox box = RecordBox.get();
 
         querier.consume(box.getRecord());
         Assert.assertFalse(querier.isClosed());
-        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isDone());
         Assert.assertTrue(querier.haveData());
         Assert.assertEquals(querier.getData(), getListBytes(box.getRecord()));
@@ -418,40 +422,48 @@ public class QuerierTest {
                                                 2, Pair.of("mid", "mid")), configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().add("mid", "23");
 
-        RecordBox expectedA = RecordBox.get().add("mid", "23");
+        byte[] expectedA = getListBytes(RecordBox.get().add("mid", "23").getRecord());
+        byte[] expectedTwiceA = getListBytes(RecordBox.get().add("mid", "23").getRecord(),
+                                             RecordBox.get().add("mid", "23").getRecord());
 
         RecordBox boxB = RecordBox.get().add("mid", "42");
 
         querier.consume(boxA.getRecord());
-        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(expectedA.getRecord()));
+        Assert.assertEquals(querier.getData(), expectedA);
+
+        // Doesn't match
+        querier.consume(boxB.getRecord());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), expectedA);
+
+        querier.consume(boxA.getRecord());
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), expectedTwiceA);
+
+        // Nothing else is consumed because window is closed
+        IntStream.range(0, 10).mapToObj(i -> boxA.getRecord()).forEach(querier::consume);
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isDone());
+        Assert.assertTrue(querier.haveData());
+        Assert.assertEquals(querier.getData(), expectedTwiceA);
 
         querier.reset();
-
-        querier.consume(boxB.getRecord());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.haveData());
         Assert.assertNull(querier.getData());
-
-        querier.consume(boxA.getRecord());
-        Assert.assertTrue(querier.isClosed());
-        Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(boxA.getRecord(), boxA.getRecord()));
-
-        // Nothing else is consumed because window is closed
-        makeStream(10).forEach(querier::consume);
-        Assert.assertTrue(querier.isClosed());
-        Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(boxA.getRecord(), boxA.getRecord()));
     }
 
     @Test

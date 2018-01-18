@@ -454,11 +454,11 @@ public class Querier implements Monoidal {
         try {
             rateLimit.increment();
             result = window.getResult();
+            result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
             result = Clip.of(Meta.of(BulletError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
         }
-        result.add(getResultMetadata());
         return result;
     }
 

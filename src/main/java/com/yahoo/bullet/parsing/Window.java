@@ -73,8 +73,8 @@ public class Window implements Configurable, Initializable {
                                                               "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
     public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values",
                                                                 "Please set \"every\" to 1");
-    public static final BulletError ONLY_ALL_INCLUDE = makeError("The \"type\" field had bad values.",
-                                                                 "Please set \"type\" to one of: \"ALL\", \"TIME\"");
+    public static final BulletError IMPROPER_INCLUDE = makeError("The \"type\" field had bad values.",
+                                                                 "Please set \"type\" to one of: \"ALL\", \"RECORD\"");
     public static final BulletError UNSUPPORTED_LAST = makeError("The \"last\" field was set",
                                                                  "It is unsupported. It should be removed.");
 
@@ -122,12 +122,8 @@ public class Window implements Configurable, Initializable {
             return Optional.of(singletonList(ONLY_ONE_RECORD));
         }
 
-        if (includeType == Unit.RECORD) {
-            return Optional.of(singletonList(ONLY_ALL_INCLUDE));
-        }
-        Number last = include == null ? null : Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
-        if (last != null) {
-            return Optional.of(singletonList(UNSUPPORTED_LAST));
+        if (includeType == Unit.TIME) {
+            return Optional.of(singletonList(IMPROPER_INCLUDE));
         }
         return Optional.empty();
     }

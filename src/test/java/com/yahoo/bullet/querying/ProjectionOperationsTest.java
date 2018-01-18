@@ -6,8 +6,10 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Projection;
+import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -15,6 +17,7 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.yahoo.bullet.parsing.ProjectionUtils.makeProjection;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
@@ -32,8 +35,7 @@ public class ProjectionOperationsTest {
 
     @Test
     public void testProjection() {
-        Projection projection = new Projection();
-        projection.setFields(singletonMap("map_field.foo", "bar"));
+        Projection projection = makeProjection("map_field.foo", "bar");
         RecordBox box = RecordBox.get().addMap("map_field", Pair.of("foo", "baz"));
         BulletRecord actual = ProjectionOperations.project(box.getRecord(), projection);
         BulletRecord expected = RecordBox.get().add("bar", "baz").getRecord();
@@ -42,11 +44,8 @@ public class ProjectionOperationsTest {
 
     @Test
     public void testUnsupportedProjection() {
-        Projection projection = new Projection();
-        Map<String, String> fields = new HashMap<>();
-        fields.put("list_field.1.foo", "bar");
-        fields.put("field", "foo");
-        projection.setFields(fields);
+        Projection projection = makeProjection(ImmutablePair.of("list_field.1.foo", "bar"),
+                                               ImmutablePair.of("field", "foo"));
         BulletRecord record = RecordBox.get().addList("list_field", emptyMap(), singletonMap("foo", "bar"))
                                              .add("field", "123")
                                              .getRecord();
@@ -57,8 +56,7 @@ public class ProjectionOperationsTest {
 
     @Test
     public void testMapList() {
-        Projection projection = new Projection();
-        projection.setFields(singletonMap("list_field", "foo"));
+        Projection projection = makeProjection("list_field", "foo");
 
         BulletRecord record = RecordBox.get().addList("list_field", emptyMap(), singletonMap("foo", "baz")).getRecord();
 
@@ -70,11 +68,8 @@ public class ProjectionOperationsTest {
 
     @Test
     public void testRepeatedProjections() {
-        Projection first = new Projection();
-        first.setFields(singletonMap("field", "id"));
-
-        Projection second = new Projection();
-        second.setFields(singletonMap("map_field.foo", "bar"));
+        Projection first = makeProjection("field", "id");
+        Projection second = makeProjection("map_field.foo", "bar");
 
         RecordBox box = RecordBox.get().add("field", "test").addMap("map_field", Pair.of("foo", "baz"));
 
@@ -97,11 +92,7 @@ public class ProjectionOperationsTest {
 
     @Test
     public void testNullFieldName() {
-        Projection projection = new Projection();
-        Map<String, String> fields = new HashMap<>();
-        fields.put(null, "test");
-        fields.put("map_field.foo", "foo");
-        projection.setFields(fields);
+        Projection projection = makeProjection(ImmutablePair.of(null, "test"), ImmutablePair.of("map_field.foo", "foo"));
 
         BulletRecord record = RecordBox.get().add("field", "test").addMap("map_field", Pair.of("foo", "baz")).getRecord();
 
