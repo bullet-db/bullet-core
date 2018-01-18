@@ -171,6 +171,8 @@ public class TupleSketchTest {
             // A <= 64, so even if count was 1 or 2, this should be < 64
             Assert.assertTrue(averageA < 64.0);
         }
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), actualMeta);
     }
 
     @Test

@@ -153,6 +153,9 @@ public class QuantileSketchTest {
                 }
             }
         }
+
+        Assert.assertEquals(sketch.getRecords(), records);
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -300,6 +303,9 @@ public class QuantileSketchTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(sketch.getRecords(), records);
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -328,6 +334,9 @@ public class QuantileSketchTest {
                                                 .getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(sketch.getRecords(), records);
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -356,6 +365,9 @@ public class QuantileSketchTest {
                                                 .getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(sketch.getRecords(), records);
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -413,6 +425,9 @@ public class QuantileSketchTest {
             // in our case. The NRE * 10 is the epsilon we should use our comparison with high probability.
             assertApproxEquals(value, quantile * 10, error * 10);
         }
+
+        Assert.assertEquals(sketch.getRecords(), records);
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test

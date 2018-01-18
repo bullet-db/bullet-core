@@ -70,6 +70,9 @@ public class FrequentItemsSketchTest {
                 Assert.fail("This should not be a case");
             }
         }
+
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -91,6 +94,9 @@ public class FrequentItemsSketchTest {
             Assert.assertTrue(item > 2 && item < 13);
             Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), Long.valueOf(item));
         }
+
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -119,6 +125,9 @@ public class FrequentItemsSketchTest {
                 Assert.assertTrue(count <= 1 + error);
             }
         }
+
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -156,6 +165,9 @@ public class FrequentItemsSketchTest {
                 Assert.fail("This should not be a case");
             }
         }
+
+        Assert.assertEquals(union.getRecords(), records);
+        Assert.assertEquals(union.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -176,6 +188,9 @@ public class FrequentItemsSketchTest {
         Assert.assertFalse((Boolean) metadata.get("isEst"));
         Assert.assertEquals(result.getRecords().size(), 13);
 
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
+
         sketch.reset();
 
         result = sketch.getResult("meta", ALL_METADATA);
@@ -189,5 +204,8 @@ public class FrequentItemsSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         Assert.assertEquals(records.size(), 0);
+
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", ALL_METADATA).asMap(), result.getMeta().asMap());
     }
 }

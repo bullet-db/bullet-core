@@ -46,4 +46,10 @@ class MockPubSub extends PubSub {
     public List<Publisher> getPublishers(int n) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void switchContext(Context context, BulletConfig config) throws PubSubException {
+        super.switchContext(context, config);
+        mockMessage = getRequiredConfig(String.class, MOCK_MESSAGE_NAME);
+    }
 }

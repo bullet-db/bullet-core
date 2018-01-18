@@ -71,6 +71,9 @@ public class ThetaSketchTest {
         // We better be at least 50% accurate with 512 entries and 1024 uniques
         Assert.assertTrue(actual > 512);
         Assert.assertTrue(actual < 1536);
+
+        Assert.assertEquals(sketch.getRecords(), result.getRecords());
+        Assert.assertEquals(sketch.getMetadata("meta", metaKeys).asMap(), actualMeta);
     }
 
     @Test
@@ -116,6 +119,9 @@ public class ThetaSketchTest {
         Assert.assertTrue(actual <= upperTwoSigma);
         Assert.assertTrue(actual >= lowerThreeSigma);
         Assert.assertTrue(actual <= upperThreeSigma);
+
+        Assert.assertEquals(unionSketch.getRecords(), result.getRecords());
+        Assert.assertEquals(unionSketch.getMetadata("meta", ALL_METADATA).asMap(), actualMeta);
     }
 
     @Test

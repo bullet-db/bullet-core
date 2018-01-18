@@ -183,7 +183,7 @@ public class Meta {
      * Utility function to apply a method for a given {@link Concept} name if provided in the given {@link Map} of names.
      *
      * @param concept The concept to check in the map if present.
-     * @param names A map of concept names to their key names.
+     * @param names A non-null map of concept names to their key names.
      * @param action The action to apply if the concept was provided in the map.
      */
     public static void consumeRegisteredConcept(Concept concept, Map<String, String> names, Consumer<String> action) {

@@ -45,6 +45,19 @@ public class PubSubMessageTest {
     }
 
     @Test
+    public void testWithOnlySignalCreation() {
+        String messageID = getRandomString();
+
+        PubSubMessage message = new PubSubMessage(messageID, Signal.KILL);
+        Assert.assertTrue(messageID.equals(message.getId()));
+        Assert.assertNull(message.getContent());
+        Assert.assertEquals(message.getSequence(), -1);
+        Assert.assertNotNull(message.getMetadata());
+        Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
+        Assert.assertNull(message.getMetadata().getContent());
+    }
+
+    @Test
     public void testWithSignalCreation() {
         String messageID = getRandomString();
         String messageContent = getRandomString();

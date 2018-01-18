@@ -6,13 +6,11 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
-import com.yahoo.bullet.aggregations.Raw;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.parsing.FilterUtils;
-import com.yahoo.bullet.parsing.Projection;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
@@ -24,7 +22,6 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.bullet.windowing.Scheme;
-import com.yahoo.bullet.windowing.SlidingRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,7 +40,6 @@ import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
-import static com.yahoo.bullet.parsing.QueryUtils.makeRawWindowQuery;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -391,21 +387,22 @@ public class QuerierTest {
     public void testBasicWindowMaximumEmitted() {
         Querier querier = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
 
-        RecordBox box = RecordBox.get();
+        byte[] expected = getListBytes(RecordBox.get().getRecord());
+        byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
 
-        querier.consume(box.getRecord());
+        querier.consume(RecordBox.get().getRecord());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord()));
+        Assert.assertEquals(querier.getData(), expected);
 
-        querier.consume(box.getRecord());
+        querier.consume(RecordBox.get().getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord(), box.getRecord()));
+        Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because window is closed
         makeStream(10).forEach(querier::consume);
@@ -413,50 +410,47 @@ public class QuerierTest {
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), getListBytes(box.getRecord(), box.getRecord()));
+        Assert.assertEquals(querier.getData(), expectedTwice);
     }
 
     @Test
     public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
         Querier querier = make(makeRawFullQuery("mid", Arrays.asList("1", "23"), FilterType.EQUALS, AggregationType.RAW,
                                                 2, Pair.of("mid", "mid")), configWithNoTimestamp());
-        RecordBox boxA = RecordBox.get().add("mid", "23");
 
-        byte[] expectedA = getListBytes(RecordBox.get().add("mid", "23").getRecord());
-        byte[] expectedTwiceA = getListBytes(RecordBox.get().add("mid", "23").getRecord(),
-                                             RecordBox.get().add("mid", "23").getRecord());
+        byte[] expected = getListBytes(RecordBox.get().add("mid", "23").getRecord());
+        byte[] expectedTwice = getListBytes(RecordBox.get().add("mid", "23").getRecord(),
+                                            RecordBox.get().add("mid", "23").getRecord());
 
-        RecordBox boxB = RecordBox.get().add("mid", "42");
-
-        querier.consume(boxA.getRecord());
+        querier.consume(RecordBox.get().add("mid", "23").getRecord());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), expectedA);
+        Assert.assertEquals(querier.getData(), expected);
 
         // Doesn't match
-        querier.consume(boxB.getRecord());
+        querier.consume(RecordBox.get().add("mid", "42").getRecord());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), expectedA);
+        Assert.assertEquals(querier.getData(), expected);
 
-        querier.consume(boxA.getRecord());
+        querier.consume(RecordBox.get().add("mid", "23").getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), expectedTwiceA);
+        Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because window is closed
-        IntStream.range(0, 10).mapToObj(i -> boxA.getRecord()).forEach(querier::consume);
+        IntStream.range(0, 10).mapToObj(i -> RecordBox.get().add("mid", "23").getRecord()).forEach(querier::consume);
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
         Assert.assertTrue(querier.haveData());
-        Assert.assertEquals(querier.getData(), expectedTwiceA);
+        Assert.assertEquals(querier.getData(), expectedTwice);
 
         querier.reset();
         Assert.assertFalse(querier.isClosedForPartition());
@@ -474,5 +468,35 @@ public class QuerierTest {
         Assert.assertNotNull(querier.getResult());
         querier = make("{'aggregation': null}", emptyMap());
         Assert.assertNotNull(querier.getResult());
+    }
+
+    @Test
+    public void testMerging() {
+        Querier querierA = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+        Querier querierB = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+
+        byte[] expected = getListBytes(RecordBox.get().getRecord());
+        byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
+
+        querierA.consume(RecordBox.get().getRecord());
+        Assert.assertFalse(querierA.isClosed());
+        Assert.assertFalse(querierA.isClosedForPartition());
+        Assert.assertFalse(querierA.isDone());
+        Assert.assertTrue(querierA.haveData());
+        Assert.assertEquals(querierA.getData(), expected);
+
+        querierB.consume(RecordBox.get().getRecord());
+        Assert.assertFalse(querierB.isClosed());
+        Assert.assertFalse(querierB.isClosedForPartition());
+        Assert.assertFalse(querierB.isDone());
+        Assert.assertTrue(querierB.haveData());
+        Assert.assertEquals(querierB.getData(), expected);
+
+        querierA.merge(querierB);
+        Assert.assertTrue(querierA.isClosed());
+        Assert.assertTrue(querierA.isClosedForPartition());
+        Assert.assertTrue(querierA.isDone());
+        Assert.assertTrue(querierA.haveData());
+        Assert.assertEquals(querierA.getData(), expectedTwice);
     }
 }

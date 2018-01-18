@@ -13,7 +13,6 @@ import com.yahoo.bullet.parsing.Query;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**

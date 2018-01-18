@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -20,22 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class MetaTest {
-    @SafeVarargs
-    public static List<Map<String, String>> asMetadataEntries(Map.Entry<String, String>... pairs) {
-        List<Map<String, String>> list = new ArrayList<>();
-        for (Map.Entry<String, String> pair : pairs) {
-            Map<String, String> map = new HashMap<>();
-            map.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, pair.getKey());
-            map.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, pair.getValue());
-            list.add(map);
-        }
-        return list;
-    }
-
     @Test
     public void testConceptFinding() {
         Assert.assertEquals(Concept.from("Query Receive Time"), Concept.QUERY_RECEIVE_TIME);
@@ -116,5 +104,17 @@ public class MetaTest {
         expected.put("baz", singletonMap("a", 1));
 
         Assert.assertEquals(metaA.asMap(), expected);
+    }
+
+    @Test
+    public void testConsumingRegisteredConcepts() {
+        List<String> names = new ArrayList<>();
+
+        Meta.consumeRegisteredConcept(Concept.QUERY_ID, singletonMap(Concept.QUERY_ID.getName(), "foo"), names::add);
+        Assert.assertEquals(names.size(), 1);
+        Assert.assertEquals(names.get(0), "foo");
+
+        Meta.consumeRegisteredConcept(Concept.QUERY_ID, emptyMap(), names::add);
+        Assert.assertEquals(names.size(), 1);
     }
 }

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
+import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -31,6 +32,7 @@ public abstract class PubSub {
         QUERY_PROCESSING
     }
 
+    @Getter
     protected Context context;
     protected BulletConfig config;
 
@@ -54,8 +56,10 @@ public abstract class PubSub {
      * @throws PubSubException if the context switch could not be done.
      */
     public void switchContext(Context context, BulletConfig config) throws PubSubException {
-        this.config.merge(config);
-        this.context = context;
+        if (this.context != context) {
+            this.config.merge(config);
+            this.context = context;
+        }
     }
 
     /**
