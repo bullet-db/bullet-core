@@ -196,6 +196,9 @@ public class GroupByTest {
         assertContains(records, expectedA);
         assertContains(records, expectedB);
         assertContains(records, expectedC);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 
     @Test
@@ -231,6 +234,9 @@ public class GroupByTest {
 
         assertContains(records, expectedA);
         assertContains(records, expectedB);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 
     @Test
@@ -259,6 +265,9 @@ public class GroupByTest {
             Assert.assertEquals(record.get(COUNT.getName()), 4L);
         }
         Assert.assertEquals(groups.size(), 32);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 
     @Test
@@ -315,6 +324,9 @@ public class GroupByTest {
         assertContains(records, expectedA);
         assertContains(records, expectedB);
         assertContains(records, expectedC);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 
     @Test
@@ -359,6 +371,9 @@ public class GroupByTest {
         assertContains(records, expectedA);
         assertContains(records, expectedB);
         assertContains(records, expectedC);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 
     @Test
@@ -408,5 +423,66 @@ public class GroupByTest {
         Assert.assertTrue(groupEstimate >= lowerThreeSigma);
         Assert.assertTrue(groupEstimate <= upperThreeSigma);
         Assert.assertTrue(groupEstimate <= upperThreeSigma);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
+    }
+
+    @Test
+    public void testResetting() {
+        List<String> fields = asList("fieldA", "fieldB");
+        GroupBy groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
+                                      makeGroupOperation(SUM, "price", "priceSum"));
+
+        BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
+        BulletRecord recordB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar").add("price", 1).getRecord();
+
+        IntStream.range(0, 30).mapToObj(i -> recordA).forEach(groupBy::consume);
+        IntStream.range(0, 10).mapToObj(i -> recordB).forEach(groupBy::consume);
+
+        BulletRecord expectedA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
+                                                .add(COUNT.getName(), 30L).add("priceSum", 90.0).getRecord();
+        BulletRecord expectedB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
+                                                .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+
+        Clip aggregate = groupBy.getResult();
+        Assert.assertNotNull(aggregate);
+        List<BulletRecord> records = aggregate.getRecords();
+        Assert.assertEquals(records.size(), 2);
+
+        assertContains(records, expectedA);
+        assertContains(records, expectedB);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
+
+        groupBy.reset();
+
+        BulletRecord recordC = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
+        BulletRecord recordD = RecordBox.get().addNull("fieldA").addNull("fieldB").add("price", 10).getRecord();
+
+        IntStream.range(0, 10).mapToObj(i -> recordB).forEach(groupBy::consume);
+        IntStream.range(0, 30).mapToObj(i -> recordC).forEach(groupBy::consume);
+        IntStream.range(0, 10).mapToObj(i -> recordD).forEach(groupBy::consume);
+
+
+        aggregate = groupBy.getResult();
+        Assert.assertNotNull(aggregate);
+        records = aggregate.getRecords();
+        Assert.assertEquals(records.size(), 3);
+
+        expectedA = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
+                                   .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+        expectedB = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
+                                   .add(COUNT.getName(), 30L).add("priceSum", 90.0).getRecord();
+        BulletRecord expectedC = RecordBox.get().add("fieldA", "null").add("fieldB", "null")
+                                                .add(COUNT.getName(), 10L).add("priceSum", 100.0).getRecord();
+
+        assertContains(records, expectedA);
+        assertContains(records, expectedB);
+        assertContains(records, expectedC);
+
+        Assert.assertEquals(groupBy.getRecords(), aggregate.getRecords());
+        Assert.assertEquals(groupBy.getMetadata().asMap(), aggregate.getMeta().asMap());
     }
 }

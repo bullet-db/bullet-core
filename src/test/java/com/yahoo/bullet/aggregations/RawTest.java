@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.TestHelpers;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
@@ -14,8 +14,6 @@ import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,16 +23,6 @@ import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static java.util.stream.Collectors.toList;
 
 public class RawTest {
-    private class NoSerDeBulletRecord extends BulletRecord implements Serializable {
-        private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-            throw new IOException("Forced test serialization failure");
-        }
-
-        private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-            throw new IOException("Forced test deserialization failure");
-        }
-    }
-
     private static Raw makeRaw(int size, int maxSize) {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(size);
@@ -157,6 +145,10 @@ public class RawTest {
         Assert.assertEquals(aggregate.size(), 5);
         // We should have all the records
         Assert.assertEquals(aggregate, records);
+
+        // This is the same as the results
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
     }
 
     @Test
@@ -173,6 +165,9 @@ public class RawTest {
         Assert.assertEquals(aggregate.size(), 10);
         // We should have the all records
         Assert.assertEquals(aggregate, records);
+        // This is the same as the results
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
     }
 
 
@@ -190,6 +185,9 @@ public class RawTest {
         Assert.assertEquals(aggregate.size(), 10);
         // We should have the first 10 records
         Assert.assertEquals(aggregate, records.subList(0, 10));
+        // This is the same as the results
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
     }
 
     @Test
@@ -220,6 +218,10 @@ public class RawTest {
                                                .collect(Collectors.toCollection(ArrayList::new));
         expected.add(RecordBox.get().add("i", 0).getRecord());
         Assert.assertEquals(actual, expected);
+
+        // This is the same as the results
+        Assert.assertEquals(raw.getRecords(), expected);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
     }
 
     @Test
@@ -232,5 +234,43 @@ public class RawTest {
         List<BulletRecord> aggregate = raw.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 200);
         Assert.assertEquals(aggregate, records.subList(0, 200));
+
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
+    }
+
+    @Test
+    public void testResetting() {
+        Raw raw = makeRaw(10);
+        List<BulletRecord> records = IntStream.range(0, 10).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
+                                              .collect(toList());
+
+        byte[] batchOfTwo = getListBytes(records.subList(0, 2).toArray(new BulletRecord[2]));
+        byte[] batchOfThree = getListBytes(records.subList(2, 5).toArray(new BulletRecord[3]));
+        byte[] batchOfOne = getListBytes(records.subList(5, 6).toArray(new BulletRecord[1]));
+        byte[] batchOfFour = getListBytes(records.subList(6, 10).toArray(new BulletRecord[4]));
+
+        raw.combine(batchOfTwo);
+        List<BulletRecord> aggregate = raw.getResult().getRecords();
+        Assert.assertEquals(aggregate.size(), 2);
+        Assert.assertEquals(aggregate, records.subList(0, 2));
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
+
+        raw.combine(batchOfThree);
+        aggregate = raw.getResult().getRecords();
+        Assert.assertEquals(aggregate.size(), 5);
+        Assert.assertEquals(aggregate, records.subList(0, 5));
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
+
+        raw.reset();
+        raw.combine(batchOfOne);
+        raw.combine(batchOfFour);
+        aggregate = raw.getResult().getRecords();
+        Assert.assertEquals(aggregate.size(), 5);
+        Assert.assertEquals(aggregate, records.subList(5, 10));
+        Assert.assertEquals(raw.getRecords(), aggregate);
+        Assert.assertEquals(raw.getMetadata().asMap(), raw.getResult().getMeta().asMap());
     }
 }

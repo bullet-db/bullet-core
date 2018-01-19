@@ -149,6 +149,10 @@ public class CountDistinctTest {
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add(CountDistinct.DEFAULT_NEW_NAME, 1000.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), aggregate);
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
+
     }
 
     @Test
@@ -168,6 +172,9 @@ public class CountDistinctTest {
         BulletRecord actual = aggregate.get(0);
         BulletRecord expected = RecordBox.get().add(CountDistinct.DEFAULT_NEW_NAME, 1000.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), aggregate);
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -224,6 +231,9 @@ public class CountDistinctTest {
         Assert.assertTrue(actualEstimate <= upperTwoSigma);
         Assert.assertTrue(actualEstimate >= lowerThreeSigma);
         Assert.assertTrue(actualEstimate <= upperThreeSigma);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -249,6 +259,9 @@ public class CountDistinctTest {
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 1000.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -290,6 +303,9 @@ public class CountDistinctTest {
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 768.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -306,7 +322,7 @@ public class CountDistinctTest {
         countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
 
         IntStream.range(0, 768).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
-                .forEach(countDistinct::consume);
+                 .forEach(countDistinct::consume);
 
         countDistinct.combine(aggregate);
 
@@ -320,6 +336,9 @@ public class CountDistinctTest {
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 768.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -336,6 +355,9 @@ public class CountDistinctTest {
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 256.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 
     @Test
@@ -358,5 +380,42 @@ public class CountDistinctTest {
         BulletRecord actual = clip.getRecords().get(0);
         BulletRecord expected = RecordBox.get().add("myCount", 2.0).getRecord();
         Assert.assertEquals(actual, expected);
+
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
+    }
+
+    @Test
+    public void testResetting() {
+        BulletConfig config = makeConfiguration(4, 1024);
+        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+
+        IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
+                               .forEach(countDistinct::consume);
+
+        Clip clip = countDistinct.getResult();
+        Map<String, Object> meta = clip.getMeta().asMap();
+        Assert.assertEquals(meta.size(), 0);
+        Assert.assertEquals(clip.getRecords().size(), 1);
+        BulletRecord actual = clip.getRecords().get(0);
+        BulletRecord expected = RecordBox.get().add("myCount", 256.0).getRecord();
+        Assert.assertEquals(actual, expected);
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
+
+        countDistinct.reset();
+
+        IntStream.range(0, 15).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
+                 .forEach(countDistinct::consume);
+
+        clip = countDistinct.getResult();
+        meta = clip.getMeta().asMap();
+        Assert.assertEquals(meta.size(), 0);
+        Assert.assertEquals(clip.getRecords().size(), 1);
+        actual = clip.getRecords().get(0);
+        expected = RecordBox.get().add("myCount", 15.0).getRecord();
+        Assert.assertEquals(actual, expected);
+        Assert.assertEquals(countDistinct.getRecords(), clip.getRecords());
+        Assert.assertEquals(countDistinct.getMetadata().asMap(), countDistinct.getMetadata().asMap());
     }
 }

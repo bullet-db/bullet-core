@@ -90,7 +90,7 @@ public class GroupOperation implements Serializable {
 
     // ************************************************ Fields ************************************************
 
-    public static final long serialVersionUID = 40039294765462402L;
+    private static final long serialVersionUID = 40039294765462402L;
 
     public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
     public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";

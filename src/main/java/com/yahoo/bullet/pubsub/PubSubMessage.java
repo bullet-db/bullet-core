@@ -8,6 +8,7 @@ package com.yahoo.bullet.pubsub;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
 import com.yahoo.bullet.result.JSONFormatter;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     private String id;
     private int sequence;
     private String content;
+    @Setter
     private Metadata metadata;
 
     /**

@@ -352,6 +352,9 @@ public class DistributionTest {
         // We insert 0,0.1, ... 199.9. Our median is around 100.0. Our NRE < 1%, so we can be pretty certain the median
         // from the sketch is around this.
         assertApproxEquals(actualMedian, 100.0, 2.0);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -382,6 +385,9 @@ public class DistributionTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -412,6 +418,9 @@ public class DistributionTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -450,6 +459,9 @@ public class DistributionTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(union.getRecords(), records);
+        Assert.assertEquals(union.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -483,6 +495,9 @@ public class DistributionTest {
                                                 .add(PROBABILITY_FIELD, 2.0 / 3).getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -512,6 +527,9 @@ public class DistributionTest {
                                                 .add(PROBABILITY_FIELD, 1.0).getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -534,5 +552,59 @@ public class DistributionTest {
         Set<String> expectedQuantilePoints = new HashSet<>(Arrays.asList("0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6",
                                                                          "0.7", "0.8", "0.9", "1.0"));
         Assert.assertEquals(actualQuantilePoints, expectedQuantilePoints);
+
+        Assert.assertEquals(distribution.getRecords(), result.getRecords());
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
+    }
+
+    @Test
+    public void testResetting() {
+        Distribution distribution = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+
+        IntStream.range(0, 25).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
+                 .forEach(distribution::consume);
+
+        BulletRecord expectedA = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + 2.5 + END_EXCLUSIVE)
+                                                .add(COUNT_FIELD, 25.0)
+                                                .add(PROBABILITY_FIELD, 1.0).getRecord();
+        BulletRecord expectedB = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + 5.0 + END_EXCLUSIVE)
+                                                .add(COUNT_FIELD, 25.0)
+                                                .add(PROBABILITY_FIELD, 1.0).getRecord();
+        BulletRecord expectedC = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + POSITIVE_INFINITY_END)
+                                                .add(COUNT_FIELD, 25.0)
+                                                .add(PROBABILITY_FIELD, 1.0).getRecord();
+
+        Clip result = distribution.getResult();
+        List<BulletRecord> records = result.getRecords();
+        Assert.assertEquals(records.size(), 3);
+        Assert.assertEquals(records.get(0), expectedA);
+        Assert.assertEquals(records.get(1), expectedB);
+        Assert.assertEquals(records.get(2), expectedC);
+        Assert.assertEquals(distribution.getRecords(), records);
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
+
+        distribution.reset();
+
+        IntStream.range(50, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
+                                .forEach(distribution::consume);
+
+        expectedA = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + 2.5 + END_EXCLUSIVE)
+                                   .add(COUNT_FIELD, 0.0)
+                                   .add(PROBABILITY_FIELD, 0.0).getRecord();
+        expectedB = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + 5.0 + END_EXCLUSIVE)
+                                   .add(COUNT_FIELD, 0.0)
+                                   .add(PROBABILITY_FIELD, 0.0).getRecord();
+        expectedC = RecordBox.get().add(RANGE_FIELD, NEGATIVE_INFINITY_START + SEPARATOR + POSITIVE_INFINITY_END)
+                                   .add(COUNT_FIELD, 50.0)
+                                   .add(PROBABILITY_FIELD, 1.0).getRecord();
+
+        result = distribution.getResult();
+        records = result.getRecords();
+        Assert.assertEquals(records.size(), 3);
+        Assert.assertEquals(records.get(0), expectedA);
+        Assert.assertEquals(records.get(1), expectedB);
+        Assert.assertEquals(records.get(2), expectedC);
+        Assert.assertEquals(distribution.getRecords(), records);
+        Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
 }

@@ -118,6 +118,9 @@ public class TopKTest {
             Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 83L);
         }
         Assert.assertEquals(fields.size(), 12);
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -140,6 +143,9 @@ public class TopKTest {
         BulletRecord expectedB = RecordBox.get().add("A", "108.1").add("cnt", 20L).getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -175,6 +181,9 @@ public class TopKTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -219,6 +228,9 @@ public class TopKTest {
         long count = (Long) actual.get(TopK.DEFAULT_NEW_NAME);
         Assert.assertTrue(count >= 1L);
         Assert.assertTrue(count <= 1L + error);
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -251,6 +263,9 @@ public class TopKTest {
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
+
+        Assert.assertEquals(union.getRecords(), records);
+        Assert.assertEquals(union.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -269,6 +284,9 @@ public class TopKTest {
             Assert.assertTrue(fieldA < 16);
             Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
         }
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -292,6 +310,9 @@ public class TopKTest {
             Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
         }
 
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
+
         // Not a power of 2
         TopK another = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 5), null, singletonMap("A", "foo"),
                                 BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null);
@@ -303,6 +324,9 @@ public class TopKTest {
 
         records = result.getRecords();
         Assert.assertEquals(records.size(), uniqueGroups);
+
+        Assert.assertEquals(another.getRecords(), records);
+        Assert.assertEquals(another.getMetadata().asMap(), result.getMeta().asMap());
     }
 
     @Test
@@ -328,5 +352,44 @@ public class TopKTest {
             Assert.assertTrue(fieldB > 16);
             Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
         }
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
+    }
+
+    @Test
+    public void testResetting() {
+        TopK topK = makeTopK(asList("A", "B"), 64, 4);
+        IntStream.range(0, 60).mapToObj(i -> RecordBox.get().add("A", i % 3).getRecord()).forEach(topK::consume);
+
+        BulletRecord expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
+        BulletRecord expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
+        BulletRecord expectedC = RecordBox.get().add("A", "2").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
+
+        Clip result = topK.getResult();
+        List<BulletRecord> records = result.getRecords();
+        Assert.assertEquals(records.get(0), expectedA);
+        Assert.assertEquals(records.get(1), expectedB);
+        Assert.assertEquals(records.get(2), expectedC);
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
+
+        topK.reset();
+
+        topK.consume(RecordBox.get().add("A", 0).getRecord());
+        topK.consume(RecordBox.get().add("A", 0).getRecord());
+        topK.consume(RecordBox.get().add("A", 1).getRecord());
+
+        result = topK.getResult();
+        records = result.getRecords();
+        Assert.assertEquals(records.size(), 2);
+
+        expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 2L).getRecord();
+        expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 1L).getRecord();
+        Assert.assertEquals(records.get(0), expectedA);
+        Assert.assertEquals(records.get(1), expectedB);
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
 }

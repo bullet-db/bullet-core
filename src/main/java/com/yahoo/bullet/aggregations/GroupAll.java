@@ -16,6 +16,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,12 +66,14 @@ public class GroupAll implements Strategy {
 
     @Override
     public Clip getResult() {
-        return Clip.of(data.getMetricsAsBulletRecord());
+        return Clip.of(getRecords());
     }
 
     @Override
     public List<BulletRecord> getRecords() {
-        return null;
+        List<BulletRecord> asList = new ArrayList<>();
+        asList.add(data.getMetricsAsBulletRecord());
+        return asList;
     }
 
     @Override

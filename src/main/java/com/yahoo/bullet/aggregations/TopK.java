@@ -76,6 +76,13 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
         return result;
     }
 
+    @Override
+    public List<BulletRecord> getRecords() {
+        List<BulletRecord> records = super.getRecords();
+        records.forEach(this::splitFields);
+        return records;
+    }
+
     private void splitFields(BulletRecord record) {
         String field = record.getAndRemove(FrequentItemsSketch.ITEM_FIELD).toString();
         List<String> values = decomposeField(field);

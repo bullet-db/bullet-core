@@ -69,10 +69,20 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
     @Override
     public Clip getResult() {
         Clip result = super.getResult();
-        // One record only
-        BulletRecord record = result.getRecords().get(0);
-        record.rename(ThetaSketch.COUNT_FIELD, newName);
+        renameInPlace(result.getRecords());
         return result;
+    }
+
+    @Override
+    public List<BulletRecord> getRecords() {
+        return renameInPlace(super.getRecords());
+    }
+
+    private List<BulletRecord> renameInPlace(List<BulletRecord> records) {
+        // One record only.
+        BulletRecord record = records.get(0);
+        record.rename(ThetaSketch.COUNT_FIELD, newName);
+        return records;
     }
 
     /**
