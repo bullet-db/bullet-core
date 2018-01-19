@@ -10,13 +10,12 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.common.SerializerDeserializer;
+import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -321,7 +320,7 @@ public class QuerierTest {
     @Test
     public void testFiltering() {
         Query query = new Query();
-        query.setFilters(singletonList(getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        query.setFilters(singletonList(getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
         query.setWindow(WindowUtils.makeReactiveWindow());
         Querier querier = make(query);
 
@@ -340,7 +339,7 @@ public class QuerierTest {
     @Test
     public void testFilteringProjection() {
         Querier querier = make(makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
-                                                         FilterType.EQUALS, Pair.of("map_field.id", "mid")),
+                                                         Clause.Operation.EQUALS, Pair.of("map_field.id", "mid")),
                                                          configWithNoTimestamp());
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
@@ -385,7 +384,7 @@ public class QuerierTest {
 
     @Test
     public void testBasicWindowMaximumEmitted() {
-        Querier querier = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+        Querier querier = make(makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -415,7 +414,7 @@ public class QuerierTest {
 
     @Test
     public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
-        Querier querier = make(makeRawFullQuery("mid", Arrays.asList("1", "23"), FilterType.EQUALS, AggregationType.RAW,
+        Querier querier = make(makeRawFullQuery("mid", Arrays.asList("1", "23"), Clause.Operation.EQUALS, Aggregation.Type.RAW,
                                                 2, Pair.of("mid", "mid")), configWithNoTimestamp());
 
         byte[] expected = getListBytes(RecordBox.get().add("mid", "23").getRecord());
@@ -472,8 +471,8 @@ public class QuerierTest {
 
     @Test
     public void testMerging() {
-        Querier querierA = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
-        Querier querierB = make(makeAggregationQuery(AggregationType.RAW, 2), configWithNoTimestamp());
+        Querier querierA = make(makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
+        Querier querierB = make(makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());

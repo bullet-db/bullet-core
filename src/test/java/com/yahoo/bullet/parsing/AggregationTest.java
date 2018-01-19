@@ -16,8 +16,8 @@ import java.util.Optional;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.COUNT_DISTINCT;
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
+import static com.yahoo.bullet.parsing.Aggregation.Type.COUNT_DISTINCT;
+import static com.yahoo.bullet.parsing.Aggregation.Type.GROUP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 

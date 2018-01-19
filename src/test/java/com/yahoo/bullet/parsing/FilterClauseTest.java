@@ -6,7 +6,6 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -47,7 +46,7 @@ public class FilterClauseTest {
     @Test
     public void testInitializeWithOperation() {
         FilterClause filterClause = new FilterClause();
-        filterClause.setOperation(FilterType.EQUALS);
+        filterClause.setOperation(Clause.Operation.EQUALS);
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
@@ -55,7 +54,7 @@ public class FilterClauseTest {
     @Test
     public void testInitializeForPatterns() {
         FilterClause filterClause = new FilterClause();
-        filterClause.setOperation(FilterType.REGEX_LIKE);
+        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
         filterClause.setValues(singletonList(".g.*"));
         Assert.assertNull(filterClause.getPatterns());
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
@@ -69,7 +68,7 @@ public class FilterClauseTest {
     @Test
     public void testInitializeForBadPatterns() {
         FilterClause filterClause = new FilterClause();
-        filterClause.setOperation(FilterType.REGEX_LIKE);
+        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
         filterClause.setValues(singletonList("*TEST*"));
         Assert.assertNull(filterClause.getPatterns());
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();

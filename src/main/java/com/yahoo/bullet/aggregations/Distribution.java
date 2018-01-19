@@ -32,14 +32,14 @@ import static java.util.Collections.singletonList;
  */
 public class Distribution extends SketchingStrategy<QuantileSketch> {
     @Getter
-    public enum DistributionType {
+    public enum Type {
         QUANTILE("QUANTILE"),
         PMF("PMF"),
         CDF("CDF");
 
         private String name;
 
-        DistributionType(String name) {
+        Type(String name) {
             this.name = name;
         }
 
@@ -72,11 +72,11 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     private Aggregation aggregation;
 
     // Validation
-    public static final Map<String, DistributionType> SUPPORTED_DISTRIBUTION_TYPES = new HashMap<>();
+    public static final Map<String, Type> SUPPORTED_DISTRIBUTION_TYPES = new HashMap<>();
     static {
-        SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.QUANTILE.getName(), DistributionType.QUANTILE);
-        SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.PMF.getName(), DistributionType.PMF);
-        SUPPORTED_DISTRIBUTION_TYPES.put(DistributionType.CDF.getName(), DistributionType.CDF);
+        SUPPORTED_DISTRIBUTION_TYPES.put(Type.QUANTILE.getName(), Type.QUANTILE);
+        SUPPORTED_DISTRIBUTION_TYPES.put(Type.PMF.getName(), Type.PMF);
+        SUPPORTED_DISTRIBUTION_TYPES.put(Type.CDF.getName(), Type.CDF);
     }
     public static final BulletError REQUIRES_TYPE_ERROR =
             makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
@@ -87,7 +87,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
                       "specify a number of equidistant points to generate with numberOfPoints OR " +
                       "specify a range to generate points for with start, end and increment (start < end, increment > 0)");
     public static final BulletError REQUIRES_POINTS_PROPER_RANGE =
-            makeError(DistributionType.QUANTILE.getName() + " requires points in the proper range",
+            makeError(Type.QUANTILE.getName() + " requires points in the proper range",
                       "Please add or generate points: 0 <= point <= 1");
     public static final BulletError REQUIRES_ONE_FIELD_ERROR =
             makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
@@ -123,7 +123,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         }
 
         String typeString = Utilities.getCasted(attributes, TYPE, String.class);
-        DistributionType type = SUPPORTED_DISTRIBUTION_TYPES.get(typeString);
+        Type type = SUPPORTED_DISTRIBUTION_TYPES.get(typeString);
         if (type == null) {
             return Optional.of(singletonList(REQUIRES_TYPE_ERROR));
         }
@@ -132,7 +132,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         sketch = getSketch(entries, maxPoints, rounding, type, attributes);
 
         if (sketch == null) {
-            return Optional.of(type == DistributionType.QUANTILE ?
+            return Optional.of(type == Type.QUANTILE ?
                                asList(REQUIRES_POINTS_ERROR, REQUIRES_POINTS_PROPER_RANGE) :
                                singletonList(REQUIRES_POINTS_ERROR));
         }
@@ -152,7 +152,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     }
 
     private static QuantileSketch getSketch(int entries, int maxPoints, int rounding,
-                                            DistributionType type, Map<String, Object> attributes) {
+                                            Type type, Map<String, Object> attributes) {
         int equidistantPoints = getNumberOfEquidistantPoints(attributes);
         if (equidistantPoints > 0) {
             return new QuantileSketch(entries, rounding, type, Math.min(equidistantPoints, maxPoints));
@@ -177,9 +177,9 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         return new QuantileSketch(entries, type, cleanedPoints);
     }
 
-    private static boolean invalidBounds(DistributionType type, double[] points) {
+    private static boolean invalidBounds(Type type, double[] points) {
         // No points or if type is QUANTILE, invalid range if the start < 0 or end > 1
-        return points.length < 1 || (type == DistributionType.QUANTILE && (points[0] < 0.0 ||
+        return points.length < 1 || (type == Type.QUANTILE && (points[0] < 0.0 ||
                                                                            points[points.length - 1] > 1.0));
     }
 

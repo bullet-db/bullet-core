@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.GroupAll;
@@ -18,22 +17,6 @@ import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
 
 public class AggregationOperations {
-    public enum AggregationType {
-        // The alternate value of DISTINCT for GROUP is allowed since having no GROUP operations is implicitly
-        // a DISTINCT
-        @SerializedName(value = "GROUP", alternate = { "DISTINCT" })
-        GROUP,
-        @SerializedName("COUNT DISTINCT")
-        COUNT_DISTINCT,
-        @SerializedName("TOP K")
-        TOP_K,
-        @SerializedName("DISTRIBUTION")
-        DISTRIBUTION,
-        // The alternate value of LIMIT for RAW is allowed to preserve backward compatibility.
-        @SerializedName(value = "RAW", alternate = { "LIMIT" })
-        RAW
-    }
-
     /**
      * Returns a new {@link Strategy} instance that can handle this aggregation.
      *
@@ -43,7 +26,7 @@ public class AggregationOperations {
      * @return The created instance of a strategy that can implement the Aggregation.
      */
     public static Strategy findStrategy(Aggregation aggregation, BulletConfig config) {
-        AggregationType type = aggregation.getType();
+        Aggregation.Type type = aggregation.getType();
         if (type == null) {
             return null;
         }

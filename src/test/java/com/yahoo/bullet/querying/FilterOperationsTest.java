@@ -9,7 +9,6 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.querying.FilterOperations.Comparator;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.bullet.typesystem.Type;
@@ -26,16 +25,16 @@ import java.util.stream.Stream;
 
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.AND;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.GREATER_EQUALS;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.GREATER_THAN;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.LESS_EQUALS;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.LESS_THAN;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.NOT;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.NOT_EQUALS;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.OR;
-import static com.yahoo.bullet.querying.FilterOperations.REGEX_LIKE;
+import static com.yahoo.bullet.parsing.Clause.Operation.AND;
+import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.GREATER_EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.GREATER_THAN;
+import static com.yahoo.bullet.parsing.Clause.Operation.LESS_EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.LESS_THAN;
+import static com.yahoo.bullet.parsing.Clause.Operation.NOT;
+import static com.yahoo.bullet.parsing.Clause.Operation.NOT_EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.OR;
+import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -50,15 +49,15 @@ public class FilterOperationsTest {
         return Arrays.stream(items).map(Pattern::compile);
     }
 
-    private static Comparator<TypedObject> comparatorFor(FilterType operation) {
+    private static Comparator<TypedObject> comparatorFor(Clause.Operation operation) {
         return FilterOperations.COMPARATORS.get(operation);
     }
 
-    private static Clause clause(String field, FilterType operation, String... values) {
+    private static Clause clause(String field, Clause.Operation operation, String... values) {
         return makeClause(field, values == null ? null : asList(values), operation);
     }
 
-    private static LogicalClause clause(FilterType operation, Clause... clauses) {
+    private static LogicalClause clause(Clause.Operation operation, Clause... clauses) {
         return (LogicalClause) makeClause(operation, clauses);
     }
 
@@ -73,7 +72,7 @@ public class FilterOperationsTest {
         Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "foo")));
         Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "foo")));
         Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "foo")));
-        Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("foo")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(object, makePattern("foo")));
     }
 
     @Test
@@ -104,9 +103,9 @@ public class FilterOperationsTest {
         Assert.assertFalse(comparatorFor(LESS_THAN).compare(object, make(object, "foo")));
         Assert.assertFalse(comparatorFor(GREATER_EQUALS).compare(object, make(object, "foo")));
         Assert.assertFalse(comparatorFor(LESS_EQUALS).compare(object, make(object, "foo")));
-        Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("foo")));
-        Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("null")));
-        Assert.assertFalse(REGEX_LIKE.compare(object, makePattern("nu.*")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(object, makePattern("foo")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(object, makePattern("null")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(object, makePattern("nu.*")));
     }
 
     @Test
@@ -219,12 +218,12 @@ public class FilterOperationsTest {
     @Test
     public void testRegexMatching() {
         List<Pattern> pattern = Stream.of(".g.", ".*foo.*").map(Pattern::compile).collect(Collectors.toList());
-        Assert.assertTrue(REGEX_LIKE.compare(new TypedObject("foo"), makePattern(".g.", ".*foo.*")));
-        Assert.assertTrue(REGEX_LIKE.compare(new TypedObject("food"), makePattern(".g.", ".*foo.*")));
-        Assert.assertTrue(REGEX_LIKE.compare(new TypedObject("egg"), makePattern(".g.", ".*foo.*")));
-        Assert.assertFalse(REGEX_LIKE.compare(new TypedObject("g"), makePattern(".g.", ".*foo.*")));
-        Assert.assertFalse(REGEX_LIKE.compare(new TypedObject("fgoo"), makePattern(".g.", ".*foo.*")));
-        Assert.assertFalse(REGEX_LIKE.compare(new TypedObject(Type.NULL, null), makePattern(".g.", ".*foo.*")));
+        Assert.assertTrue(FilterOperations.REGEX_LIKE.compare(new TypedObject("foo"), makePattern(".g.", ".*foo.*")));
+        Assert.assertTrue(FilterOperations.REGEX_LIKE.compare(new TypedObject("food"), makePattern(".g.", ".*foo.*")));
+        Assert.assertTrue(FilterOperations.REGEX_LIKE.compare(new TypedObject("egg"), makePattern(".g.", ".*foo.*")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(new TypedObject("g"), makePattern(".g.", ".*foo.*")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(new TypedObject("fgoo"), makePattern(".g.", ".*foo.*")));
+        Assert.assertFalse(FilterOperations.REGEX_LIKE.compare(new TypedObject(Type.NULL, null), makePattern(".g.", ".*foo.*")));
     }
 
     //***************************************** Filter Clause *********************************************************
@@ -330,7 +329,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testRegexLike() {
-        FilterClause clause = getFieldFilter("id", FilterType.REGEX_LIKE, "1.*2", "[1-5]+0*3");
+        FilterClause clause = getFieldFilter("id", REGEX_LIKE, "1.*2", "[1-5]+0*3");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "1131112").getRecord(), clause));
@@ -340,14 +339,14 @@ public class FilterOperationsTest {
 
     @Test
     public void testRegexLikeNull() {
-        FilterClause clause = getFieldFilter("id", FilterType.REGEX_LIKE, "nu.*");
+        FilterClause clause = getFieldFilter("id", REGEX_LIKE, "nu.*");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "nu").getRecord(), clause));
     }
 
     @Test
     public void testBadRegex() {
-        FilterClause clause = getFieldFilter("id", FilterType.REGEX_LIKE, "*TEST*");
+        FilterClause clause = getFieldFilter("id", REGEX_LIKE, "*TEST*");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "TEST").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "*TEST*").getRecord(), clause));

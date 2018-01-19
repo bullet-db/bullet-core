@@ -12,10 +12,10 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.AND;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.EQUALS;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.NOT;
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.OR;
+import static com.yahoo.bullet.parsing.Clause.Operation.AND;
+import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
+import static com.yahoo.bullet.parsing.Clause.Operation.NOT;
+import static com.yahoo.bullet.parsing.Clause.Operation.OR;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

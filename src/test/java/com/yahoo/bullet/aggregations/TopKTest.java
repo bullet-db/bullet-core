@@ -8,7 +8,6 @@ package com.yahoo.bullet.aggregations;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -48,7 +47,7 @@ public class TopKTest {
     public static TopK makeTopK(BulletConfig configuration, Map<String, Object> attributes,
                                 Map<String, String> fields, int size, List<Map.Entry<Concept, String>> metadata) {
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(AggregationOperations.AggregationType.TOP_K);
+        aggregation.setType(Aggregation.Type.TOP_K);
         aggregation.setFields(fields);
         aggregation.setAttributes(attributes);
         aggregation.setSize(size);

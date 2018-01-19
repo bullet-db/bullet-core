@@ -11,7 +11,6 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.AggregationUtils;
 import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
@@ -35,7 +34,7 @@ import static org.mockito.Mockito.when;
 public class GroupAllTest {
     public static Aggregation makeAggregation(Map<String, Object> attributes) {
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(AggregationType.GROUP);
+        aggregation.setType(Aggregation.Type.GROUP);
         // Does not matter
         aggregation.setSize(1);
         aggregation.setAttributes(attributes);

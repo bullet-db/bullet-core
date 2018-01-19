@@ -9,7 +9,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 

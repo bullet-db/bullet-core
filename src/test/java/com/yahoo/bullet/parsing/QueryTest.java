@@ -7,8 +7,6 @@ package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -18,7 +16,6 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +29,7 @@ public class QueryTest {
         Assert.assertNull(query.getProjection());
         Assert.assertNull(query.getFilters());
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
-        Assert.assertEquals(query.getAggregation().getType(), AggregationType.RAW);
+        Assert.assertEquals(query.getAggregation().getType(), Aggregation.Type.RAW);
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
     }
 
@@ -186,7 +183,7 @@ public class QueryTest {
                 "duration: 30000" +
                 "}");
 
-        query.setFilters(singletonList(FilterUtils.getFieldFilter(FilterType.EQUALS, "foo", "bar")));
+        query.setFilters(singletonList(FilterUtils.getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
         query.setProjection(ProjectionUtils.makeProjection("field", "bid"));
         query.configure(config);
 

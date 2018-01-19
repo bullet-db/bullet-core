@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.querying.FilterOperations.FilterType.REGEX_LIKE;
+import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 
 @Slf4j @Getter @Setter
 public class FilterClause extends Clause {

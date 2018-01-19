@@ -6,7 +6,6 @@
 package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -36,7 +35,7 @@ public class QuantileSketch extends DualSketch {
     private double[] points;
     private Integer numberOfPoints;
     private int rounding;
-    private final DistributionType type;
+    private final Distribution.Type type;
 
     public static final double QUANTILE_MIN = 0.0;
     public static final double QUANTILE_MAX = 1.0;
@@ -57,7 +56,7 @@ public class QuantileSketch extends DualSketch {
     public static final String NEGATIVE_INFINITY_START = START_EXCLUSIVE + NEGATIVE_INFINITY;
     public static final String POSITIVE_INFINITY_END = POSITIVE_INFINITY + END_EXCLUSIVE;
 
-    private QuantileSketch(int k, DistributionType type) {
+    private QuantileSketch(int k, Distribution.Type type) {
         updateSketch = new DoublesSketchBuilder().build(k);
         unionSketch = new DoublesUnionBuilder().setMaxK(k).build();
         this.type = type;
@@ -67,10 +66,10 @@ public class QuantileSketch extends DualSketch {
      * Creates a quantile sketch with the given number of entries getting results with the given points.
      *
      * @param k A number representative of the size of the sketch.
-     * @param type A {@link DistributionType} that determines what the points mean.
+     * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param points An array of points to get the quantiles, PMF and/or CDF for.
      */
-    public QuantileSketch(int k, DistributionType type, double[] points) {
+    public QuantileSketch(int k, Distribution.Type type, double[] points) {
         this(k, type);
         this.points = points;
     }
@@ -81,10 +80,10 @@ public class QuantileSketch extends DualSketch {
      *
      * @param k A number representative of the size of the sketch.
      * @param rounding A number representing how many max decimal places points should have.
-     * @param type A {@link DistributionType} that determines what the points mean.
+     * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param numberOfPoints A positive number of evenly spaced points in the range for the type to get the data for.
      */
-    public QuantileSketch(int k, int rounding, DistributionType type, int numberOfPoints) {
+    public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints) {
         this(k, type);
         this.rounding = Math.abs(rounding);
         this.numberOfPoints = numberOfPoints;
@@ -125,9 +124,9 @@ public class QuantileSketch extends DualSketch {
         collect();
         double[] domain = getDomain();
         double[] range;
-        if (type == Distribution.DistributionType.QUANTILE) {
+        if (type == Distribution.Type.QUANTILE) {
             range = merged.getQuantiles(domain);
-        } else if (type == Distribution.DistributionType.PMF) {
+        } else if (type == Distribution.Type.PMF) {
             range = merged.getPMF(domain);
         } else {
             range = merged.getCDF(domain);
@@ -205,8 +204,8 @@ public class QuantileSketch extends DualSketch {
 
     private double[] getDomain() {
         if (numberOfPoints != null) {
-            return type == Distribution.DistributionType.QUANTILE ? getPoints(QUANTILE_MIN, QUANTILE_MAX, numberOfPoints, rounding) :
-                                                       getPoints(getMinimum(), getMaximum(), numberOfPoints, rounding);
+            return type == Distribution.Type.QUANTILE ? getPoints(QUANTILE_MIN, QUANTILE_MAX, numberOfPoints, rounding) :
+                                                        getPoints(getMinimum(), getMaximum(), numberOfPoints, rounding);
         }
         return points;
     }
@@ -219,12 +218,12 @@ public class QuantileSketch extends DualSketch {
      *
      * @param domain An array of split points of size N greater than 0.
      * @param range  An array of values for each range in domain: of size N + 1
-     *               if type is not {@link DistributionType#QUANTILE} else N.
-     * @param type The {@link DistributionType} to zip for.
-     * @param n A long to scale the value of each range entry by if type is not {@link DistributionType#QUANTILE}.
+     *               if type is not {@link Distribution.Type#QUANTILE} else N.
+     * @param type The {@link Distribution.Type} to zip for.
+     * @param n A long to scale the value of each range entry by if type is not {@link Distribution.Type#QUANTILE}.
      * @return The records that correspond to the data.
      */
-    static List<BulletRecord> zip(double[] domain, double[] range, DistributionType type, long n) {
+    static List<BulletRecord> zip(double[] domain, double[] range, Distribution.Type type, long n) {
         List<BulletRecord> records = null;
         switch (type) {
             case QUANTILE:

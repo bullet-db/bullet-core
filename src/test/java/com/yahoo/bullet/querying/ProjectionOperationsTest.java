@@ -6,16 +6,12 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Projection;
-import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.yahoo.bullet.parsing.ProjectionUtils.makeProjection;
 import static java.util.Collections.emptyMap;

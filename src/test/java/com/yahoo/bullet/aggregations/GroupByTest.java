@@ -7,8 +7,6 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.ParsingError;
-import com.yahoo.bullet.querying.AggregationOperations;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.parsing.Aggregation;
@@ -36,7 +34,7 @@ import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
+import static com.yahoo.bullet.parsing.Aggregation.Type.GROUP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;

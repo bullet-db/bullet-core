@@ -6,11 +6,11 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,18 +26,34 @@ import static java.util.Collections.singletonList;
 
 @Getter @Setter
 public class Aggregation implements Configurable, Initializable {
+    /** Represents the type of the Aggregation. */
+    public enum Type {
+        // The alternate value of DISTINCT for GROUP is allowed since having no GROUP operations is implicitly
+        // a DISTINCT
+        @SerializedName(value = "GROUP", alternate = { "DISTINCT" })
+        GROUP,
+        @SerializedName("COUNT DISTINCT")
+        COUNT_DISTINCT,
+        @SerializedName("TOP K")
+        TOP_K,
+        @SerializedName("DISTRIBUTION")
+        DISTRIBUTION,
+        // The alternate value of LIMIT for RAW is allowed to preserve backward compatibility.
+        @SerializedName(value = "RAW", alternate = { "LIMIT" })
+        RAW
+    }
+
     @Expose
     private Integer size;
     @Expose
-    private AggregationType type;
+    private Type type;
     @Expose
     private Map<String, Object> attributes;
     @Expose
     private Map<String, String> fields;
 
-    public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
-            new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
-                                 AggregationType.DISTRIBUTION, AggregationType.TOP_K));
+    public static final Set<Type> SUPPORTED_AGGREGATION_TYPES =
+            new HashSet<>(asList(Type.GROUP, Type.COUNT_DISTINCT, Type.RAW, Type.DISTRIBUTION, Type.TOP_K));
     public static final BulletError TYPE_NOT_SUPPORTED_ERROR =
             makeError("Unknown aggregation type", "Current supported aggregation types are: RAW (or LIMIT), " +
                                                   "GROUP (or DISTINCT), COUNT DISTINCT, DISTRIBUTION, TOP K");
@@ -46,7 +62,7 @@ public class Aggregation implements Configurable, Initializable {
      * Default constructor. GSON recommended
      */
     public Aggregation() {
-        type = AggregationType.RAW;
+        type = Type.RAW;
     }
 
     @Override

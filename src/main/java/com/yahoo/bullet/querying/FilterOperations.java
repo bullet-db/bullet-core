@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -25,35 +24,8 @@ import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_UNKNOWN;
-import static java.util.Arrays.asList;
 
 public class FilterOperations {
-    public enum FilterType {
-        @SerializedName("==")
-        EQUALS,
-        @SerializedName("!=")
-        NOT_EQUALS,
-        @SerializedName(">")
-        GREATER_THAN,
-        @SerializedName("<")
-        LESS_THAN,
-        @SerializedName(">=")
-        GREATER_EQUALS,
-        @SerializedName("<=")
-        LESS_EQUALS,
-        @SerializedName("RLIKE")
-        REGEX_LIKE,
-        @SerializedName("AND")
-        AND,
-        @SerializedName("OR")
-        OR,
-        @SerializedName("NOT")
-        NOT;
-
-        public static final List<String> LOGICALS = asList("AND", "OR", "NOT");
-        public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE");
-    }
-
     @FunctionalInterface
     public interface Comparator<T> {
         /**
@@ -89,21 +61,21 @@ public class FilterOperations {
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
 
-    static final Map<FilterType, Comparator<TypedObject>> COMPARATORS = new EnumMap<>(FilterType.class);
+    static final Map<Clause.Operation, Comparator<TypedObject>> COMPARATORS = new EnumMap<>(Clause.Operation.class);
     static {
-        COMPARATORS.put(FilterType.EQUALS, EQ);
-        COMPARATORS.put(FilterType.NOT_EQUALS, NE);
-        COMPARATORS.put(FilterType.GREATER_THAN, isNotNullAnd(GT));
-        COMPARATORS.put(FilterType.LESS_THAN, isNotNullAnd(LT));
-        COMPARATORS.put(FilterType.GREATER_EQUALS, isNotNullAnd(GE));
-        COMPARATORS.put(FilterType.LESS_EQUALS, isNotNullAnd(LE));
+        COMPARATORS.put(Clause.Operation.EQUALS, EQ);
+        COMPARATORS.put(Clause.Operation.NOT_EQUALS, NE);
+        COMPARATORS.put(Clause.Operation.GREATER_THAN, isNotNullAnd(GT));
+        COMPARATORS.put(Clause.Operation.LESS_THAN, isNotNullAnd(LT));
+        COMPARATORS.put(Clause.Operation.GREATER_EQUALS, isNotNullAnd(GE));
+        COMPARATORS.put(Clause.Operation.LESS_EQUALS, isNotNullAnd(LE));
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
-    static final Map<FilterType, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(FilterType.class);
+    static final Map<Clause.Operation, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(Clause.Operation.class);
     static {
-        LOGICAL_OPERATORS.put(FilterType.AND, AND);
-        LOGICAL_OPERATORS.put(FilterType.OR, OR);
-        LOGICAL_OPERATORS.put(FilterType.NOT, NOT);
+        LOGICAL_OPERATORS.put(Clause.Operation.AND, AND);
+        LOGICAL_OPERATORS.put(Clause.Operation.OR, OR);
+        LOGICAL_OPERATORS.put(Clause.Operation.NOT, NOT);
     }
 
     /**
@@ -124,12 +96,12 @@ public class FilterOperations {
     }
 
     private static boolean performRelational(BulletRecord record, FilterClause clause) {
-        FilterType operator = clause.getOperation();
+        Clause.Operation operator = clause.getOperation();
         if (isEmpty(clause.getValues())) {
             return true;
         }
         TypedObject object = extractTypedObject(clause.getField(), record);
-        if (operator == FilterType.REGEX_LIKE) {
+        if (operator == Clause.Operation.REGEX_LIKE) {
             return REGEX_LIKE.compare(object, clause.getPatterns().stream());
         }
         return COMPARATORS.get(operator).compare(object, cast(object, clause.getValues()));

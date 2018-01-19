@@ -7,9 +7,9 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.querying.AggregationOperations.AggregationType;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Reactive;
@@ -34,7 +34,7 @@ public class WindowingOperations {
             return new Basic(strategy, null, config);
         }
         Window.Classification type = window.getType();
-        if (query.getAggregation().getType() == AggregationType.RAW) {
+        if (query.getAggregation().getType() == Aggregation.Type.RAW) {
             // If Raw but we have a window that's anything but TIME_TIME ~> Tumbling/Hopping, force to Reactive
             if (type != Window.Classification.TIME_TIME) {
                 return new Reactive(strategy, window, config);

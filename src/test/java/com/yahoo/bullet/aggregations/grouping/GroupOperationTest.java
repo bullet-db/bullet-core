@@ -5,11 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
-import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType;
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.ParsingError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,13 +20,11 @@ import java.util.Set;
 
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
-import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MAX;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MIN;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
-import static com.yahoo.bullet.querying.AggregationOperations.AggregationType.GROUP;
 
 public class GroupOperationTest {
 

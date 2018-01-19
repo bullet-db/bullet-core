@@ -6,7 +6,6 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.aggregations.Distribution.DistributionType;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
@@ -89,7 +88,7 @@ public class AggregationUtils {
         return map;
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, Double start, Double end, Double increment,
+    public static Map<String, Object> makeAttributes(Distribution.Type type, Double start, Double end, Double increment,
                                                      Long numberOfPoints, List<Double> points) {
         Map<String, Object> map = new HashMap<>();
         if (type != null) {
@@ -109,15 +108,15 @@ public class AggregationUtils {
         return map;
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, double start, double end, double increment) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, double start, double end, double increment) {
         return makeAttributes(type, start, end, increment, null, null);
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, long numberOfPoints) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, long numberOfPoints) {
         return makeAttributes(type, null, null, null, numberOfPoints, null);
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, List<Double> points) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, List<Double> points) {
         return makeAttributes(type, null, null, null, null, points);
     }
 

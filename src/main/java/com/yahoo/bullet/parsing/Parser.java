@@ -8,13 +8,12 @@ package com.yahoo.bullet.parsing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.querying.FilterOperations.FilterType;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
             FieldTypeAdapterFactory.of(Clause.class, t -> t.getAsJsonObject().get(Clause.OPERATION_FIELD).getAsString())
-                                   .registerSubType(FilterClause.class, FilterType.RELATIONALS)
-                                   .registerSubType(LogicalClause.class, FilterType.LOGICALS);
+                                   .registerSubType(FilterClause.class, Clause.Operation.RELATIONALS)
+                                   .registerSubType(LogicalClause.class, Clause.Operation.LOGICALS);
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .excludeFieldsWithoutExposeAnnotation()
                                                       .create();

@@ -25,12 +25,7 @@ import static java.util.Collections.singletonList;
 
 @Getter @Setter @Slf4j
 public class Window implements Configurable, Initializable {
-
-    public static final int SINGLE_RECORD = 1;
-
-    /**
-     * Represents the type of the Window Unit for either emit or include.
-     */
+    /** Represents the type of the Window Unit for either emit or include. */
     @Getter
     public enum Unit {
         RECORD("RECORD"), TIME("TIME"), ALL("ALL");
@@ -64,6 +59,8 @@ public class Window implements Configurable, Initializable {
     public enum Classification {
         TIME_TIME, RECORD_RECORD, TIME_RECORD, RECORD_TIME, TIME_ALL, RECORD_ALL
     }
+
+    public static final int SINGLE_RECORD = 1;
 
     public static final String TYPE_FIELD = "type";
     public static final String EMIT_EVERY_FIELD = "every";

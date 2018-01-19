@@ -93,13 +93,14 @@ public class AggregationOperationsTest {
 
     @Test
     public void testDistributionTypeIdentifying() {
-        Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe("quantile"));
-        Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe("foo"));
-        Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe(null));
-        Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe(""));
-        Assert.assertFalse(Distribution.DistributionType.QUANTILE.isMe(Distribution.DistributionType.PMF.getName()));
-        Assert.assertTrue(Distribution.DistributionType.QUANTILE.isMe(Distribution.DistributionType.QUANTILE.getName()));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("quantile"));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("foo"));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(null));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(""));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(Distribution.Type.PMF.getName()));
+        Assert.assertTrue(Distribution.Type.QUANTILE.isMe(Distribution.Type.QUANTILE.getName()));
     }
+
     @Test
     public void testNullType() {
         Aggregation aggregation = new Aggregation();
@@ -122,7 +123,7 @@ public class AggregationOperationsTest {
     public void testGroupAllStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.GROUP);
+        aggregation.setType(Aggregation.Type.GROUP);
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS,
                                   singletonList(singletonMap(GroupOperation.OPERATION_TYPE,
                                                 GroupOperation.GroupOperationType.COUNT.getName()))));
@@ -135,7 +136,7 @@ public class AggregationOperationsTest {
     public void testCountDistinctStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.COUNT_DISTINCT);
+        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
@@ -146,7 +147,7 @@ public class AggregationOperationsTest {
     public void testDistinctStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.GROUP);
+        aggregation.setType(Aggregation.Type.GROUP);
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
@@ -157,7 +158,7 @@ public class AggregationOperationsTest {
     public void testGroupByStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.GROUP);
+        aggregation.setType(Aggregation.Type.GROUP);
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.setAttributes(singletonMap(GroupOperation.OPERATIONS,
                                   singletonList(singletonMap(GroupOperation.OPERATION_TYPE,
@@ -171,7 +172,7 @@ public class AggregationOperationsTest {
     public void testDistributionStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.DISTRIBUTION);
+        aggregation.setType(Aggregation.Type.DISTRIBUTION);
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
@@ -182,7 +183,7 @@ public class AggregationOperationsTest {
     public void testTopKStrategy() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
-        aggregation.setType(AggregationOperations.AggregationType.TOP_K);
+        aggregation.setType(Aggregation.Type.TOP_K);
         aggregation.setFields(singletonMap("field", "foo"));
         aggregation.configure(config);
 
