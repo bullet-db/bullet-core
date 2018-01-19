@@ -61,18 +61,18 @@ public class GroupOperation implements Serializable {
             return this.name.equalsIgnoreCase(name);
         }
     }
-    public interface AggregationOperator extends BiFunction<Number, Number, Number> {
+    public interface GroupOperator extends BiFunction<Number, Number, Number> {
     }
 
     // ************************************************ Operations ************************************************
 
     // If either argument is null, a NullPointerException will be thrown.
-    public static final AggregationOperator MIN = (x, y) -> x.doubleValue() <  y.doubleValue() ? x : y;
-    public static final AggregationOperator MAX = (x, y) -> x.doubleValue() >  y.doubleValue() ? x : y;
-    public static final AggregationOperator SUM = (x, y) -> x.doubleValue() + y.doubleValue();
-    public static final AggregationOperator COUNT = (x, y) -> x.longValue() + y.longValue();
+    public static final GroupOperator MIN = (x, y) -> x.doubleValue() <  y.doubleValue() ? x : y;
+    public static final GroupOperator MAX = (x, y) -> x.doubleValue() >  y.doubleValue() ? x : y;
+    public static final GroupOperator SUM = (x, y) -> x.doubleValue() + y.doubleValue();
+    public static final GroupOperator COUNT = (x, y) -> x.longValue() + y.longValue();
 
-    public static final Map<GroupOperationType, AggregationOperator> OPERATORS = new EnumMap<>(GroupOperationType.class);
+    public static final Map<GroupOperationType, GroupOperator> OPERATORS = new EnumMap<>(GroupOperationType.class);
     static {
         OPERATORS.put(GroupOperationType.COUNT, GroupOperation.COUNT);
         OPERATORS.put(GroupOperationType.COUNT_FIELD, GroupOperation.COUNT);

@@ -27,7 +27,74 @@ import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
 
 public class GroupOperationTest {
+    @Test
+    public void testGroupOperationTypeIdentifying() {
+        GroupOperation.GroupOperationType count = GroupOperation.GroupOperationType.COUNT;
+        Assert.assertTrue(count.isMe("count"));
+        Assert.assertTrue(count.isMe("COUNT"));
+        Assert.assertTrue(count.isMe("CoUNt"));
+        Assert.assertFalse(count.isMe("cnt"));
+        Assert.assertFalse(count.isMe(null));
+        Assert.assertFalse(count.isMe(""));
+        Assert.assertFalse(count.isMe(GroupOperation.GroupOperationType.SUM.getName()));
+        Assert.assertTrue(count.isMe(GroupOperation.GroupOperationType.COUNT.getName()));
+    }
 
+    @Test
+    public void testCustomGroupOperator() {
+        GroupOperation.GroupOperator product = (a, b) -> a != null && b != null ? a.doubleValue() * b.doubleValue() : null;
+        Assert.assertNull(product.apply(6L, null));
+        Assert.assertEquals(product.apply(6L, 2L).longValue(), 12L);
+        Assert.assertEquals(product.apply(6.1, 2L).doubleValue(), 12.2);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testMinUnsupported() {
+        GroupOperation.MIN.apply(null, 2);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testMaxUnsupported() {
+        GroupOperation.MAX.apply(null, 2);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testCountUnsupported() {
+        GroupOperation.COUNT.apply(null, 2);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testSumUnsupported() {
+        GroupOperation.MAX.apply(null, 2);
+    }
+
+    @Test
+    public void testMin() {
+        Assert.assertEquals(GroupOperation.MIN.apply(1, 2).intValue(), 1);
+        Assert.assertEquals(GroupOperation.MIN.apply(2.1, 1.2).doubleValue(), 1.2);
+        Assert.assertEquals(GroupOperation.MIN.apply(1.0, 1.0).doubleValue(), 1.0);
+    }
+
+    @Test
+    public void testMax() {
+        Assert.assertEquals(GroupOperation.MAX.apply(1, 2).intValue(), 2);
+        Assert.assertEquals(GroupOperation.MAX.apply(2.1, 1.2).doubleValue(), 2.1);
+        Assert.assertEquals(GroupOperation.MAX.apply(1.0, 1.0).doubleValue(), 1.0);
+    }
+
+    @Test
+    public void testSum() {
+        Assert.assertEquals(GroupOperation.SUM.apply(1, 2).intValue(), 3);
+        Assert.assertEquals(GroupOperation.SUM.apply(2.1, 1.2).doubleValue(), 3.3);
+        Assert.assertEquals(GroupOperation.SUM.apply(2.0, 41).longValue(), 43L);
+    }
+
+    @Test
+    public void testCount() {
+        Assert.assertEquals(GroupOperation.COUNT.apply(1, 2).intValue(), 3);
+        Assert.assertEquals(GroupOperation.COUNT.apply(2.1, 1.2).doubleValue(), 3.0);
+        Assert.assertEquals(GroupOperation.COUNT.apply(1.0, 41).longValue(), 42L);
+    }
     @Test
     public void testHashCode() {
         GroupOperation a = new GroupOperation(AVG, "foo", "avg1");

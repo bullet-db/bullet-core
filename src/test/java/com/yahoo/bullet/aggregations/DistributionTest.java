@@ -607,4 +607,14 @@ public class DistributionTest {
         Assert.assertEquals(distribution.getRecords(), records);
         Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
     }
+
+    @Test
+    public void testDistributionTypeIdentifying() {
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("quantile"));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("foo"));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(null));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(""));
+        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(Distribution.Type.PMF.getName()));
+        Assert.assertTrue(Distribution.Type.QUANTILE.isMe(Distribution.Type.QUANTILE.getName()));
+    }
 }

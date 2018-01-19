@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.aggregations.grouping.GroupOperation.AggregationOperator;
+import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperator;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -256,10 +256,10 @@ public class GroupData implements Serializable {
     }
 
     /*
-     * This function accepts an AggregationOperator and applies it to the new and current value for the given
+     * This function accepts an GroupOperator and applies it to the new and current value for the given
      * GroupOperation and updates metrics accordingly.
      */
-    private void updateMetric(Number number, Map.Entry<GroupOperation, Number> metric, AggregationOperator operator) {
+    private void updateMetric(Number number, Map.Entry<GroupOperation, Number> metric, GroupOperator operator) {
         if (number == null) {
             return;
         }

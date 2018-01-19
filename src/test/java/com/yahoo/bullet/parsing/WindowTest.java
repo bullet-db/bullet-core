@@ -11,6 +11,11 @@ import org.testng.annotations.Test;
 public class WindowTest {
     @Test
     public void testDefaults() {
-        Assert.assertTrue(true);
+        Window window = new Window();
+        Assert.assertNull(window.getEmit());
+        Assert.assertNull(window.getInclude());
+        Assert.assertNull(window.getType());
+        Assert.assertNull(window.getEmitType());
+        Assert.assertNull(window.getIncludeType());
     }
 }
