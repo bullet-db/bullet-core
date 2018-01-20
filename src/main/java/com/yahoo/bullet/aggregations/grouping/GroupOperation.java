@@ -61,6 +61,7 @@ public class GroupOperation implements Serializable {
             return this.name.equalsIgnoreCase(name);
         }
     }
+
     public interface GroupOperator extends BiFunction<Number, Number, Number> {
     }
 
@@ -82,11 +83,9 @@ public class GroupOperation implements Serializable {
         OPERATORS.put(GroupOperationType.AVG, GroupOperation.SUM);
     }
 
-    public static final Set<GroupOperationType> SUPPORTED_GROUP_OPERATIONS = new HashSet<>(asList(GroupOperationType.COUNT,
-                                                                                                  GroupOperationType.AVG,
-                                                                                                  GroupOperationType.MAX,
-                                                                                                  GroupOperationType.MIN,
-                                                                                                  GroupOperationType.SUM));
+    public static final Set<GroupOperationType> SUPPORTED_GROUP_OPERATIONS =
+            new HashSet<>(asList(GroupOperationType.COUNT, GroupOperationType.AVG, GroupOperationType.MAX,
+                                 GroupOperationType.MIN, GroupOperationType.SUM));
 
     // ************************************************ Fields ************************************************
 

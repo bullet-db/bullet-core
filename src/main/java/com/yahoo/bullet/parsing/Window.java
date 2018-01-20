@@ -68,12 +68,12 @@ public class Window implements Configurable, Initializable {
 
     public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field was not found or had bad values",
                                                               "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
-    public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values",
+    public static final BulletError MISSING_EVERY = makeError("The \"every\" field was missing",
+                                                              "Please set \"every\" to a positive integer");
+    public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values for \"RECORD\"",
                                                                 "Please set \"every\" to 1");
-    public static final BulletError IMPROPER_INCLUDE = makeError("The \"type\" field had bad values.",
-                                                                 "Please set \"type\" to one of: \"ALL\", \"RECORD\"");
-    public static final BulletError UNSUPPORTED_LAST = makeError("The \"last\" field was set",
-                                                                 "It is unsupported. It should be removed.");
+    public static final BulletError IMPROPER_INCLUDE = makeError("The \"include\" field has to match \"emit\" or not be set",
+                                                                 "Please remove \"include\" or match it to \"emit\"");
 
     @Expose
     private Map<String, Object> emit;
@@ -110,27 +110,28 @@ public class Window implements Configurable, Initializable {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        if (emitType == Unit.ALL) {
+        if (emitType == null || emitType == Unit.ALL) {
             return Optional.of(singletonList(IMPROPER_EMIT));
         }
 
         Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
+        if (every == null) {
+            return Optional.of(singletonList(MISSING_EVERY));
+        }
+
         if (emitType == Unit.RECORD && every.intValue() != SINGLE_RECORD) {
             return Optional.of(singletonList(ONLY_ONE_RECORD));
         }
 
-        if (includeType == Unit.TIME) {
+        if (include == null) {
+            return Optional.empty();
+        }
+
+        Number last = Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
+        if (includeType != emitType || last == null || last.intValue() != every.intValue()) {
             return Optional.of(singletonList(IMPROPER_INCLUDE));
         }
         return Optional.empty();
-    }
-
-    private static Unit getUnit(Map<String, Object> map) {
-        if (Utilities.isEmpty(map)) {
-            return null;
-        }
-        String type = Utilities.getCasted(map, TYPE_FIELD, String.class);
-        return SUPPORTED_TYPES.get(type);
     }
 
     /**
@@ -139,26 +140,6 @@ public class Window implements Configurable, Initializable {
      * @return The {@link Classification} of this window.
      */
     public Classification getType() {
-        return classify(emitType, includeType);
-    }
-
-    /**
-     * Returns true if this is a time based window (emits based on time).
-     *
-     * @return A boolean denoting whether this window is a time based window.
-     */
-    public boolean isTimeBased() {
-        return emitType == Unit.TIME;
-    }
-
-    /**
-     * Get the classification of the window for the given emit and include types. Exposed for testing.
-     *
-     * @param emitType The type of the emit.
-     * @param includeType The type of the include.
-     * @return A {@link Classification} for the window.
-     */
-    static Classification classify(Unit emitType, Unit includeType) {
         if (emitType == Unit.TIME) {
             if (includeType == null || includeType == Unit.TIME) {
                 return Classification.TIME_TIME;
@@ -177,8 +158,25 @@ public class Window implements Configurable, Initializable {
         return null;
     }
 
+    /**
+     * Returns true if this is a time based window (emits based on time).
+     *
+     * @return A boolean denoting whether this window is a time based window.
+     */
+    public boolean isTimeBased() {
+        return emitType == Unit.TIME;
+    }
+
     @Override
     public String toString() {
         return "{emit: " + emit + ", include: " + include + "}";
+    }
+
+    private static Unit getUnit(Map<String, Object> map) {
+        if (Utilities.isEmpty(map)) {
+            return null;
+        }
+        String type = Utilities.getCasted(map, TYPE_FIELD, String.class);
+        return SUPPORTED_TYPES.get(type);
     }
 }
