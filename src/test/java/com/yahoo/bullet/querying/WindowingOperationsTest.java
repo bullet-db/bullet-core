@@ -10,6 +10,7 @@ import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
+import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Reactive;
 import com.yahoo.bullet.windowing.Tumbling;
@@ -40,6 +41,20 @@ public class WindowingOperationsTest {
 
     @Test
     public void testAdditiveTumblingWindow() {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        Window window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
+        window.configure(config);
+        query.setWindow(window);
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(Aggregation.Type.GROUP);
+        query.setAggregation(aggregation);
+
+        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), AdditiveTumbling.class);
+    }
+
+    @Test
+    public void testRawAdditiveTumblingForcedToReactive() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
