@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017, Yahoo Inc.
+ *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
@@ -44,7 +44,7 @@ public class WindowingOperations {
         if (type == Window.Classification.TIME_ALL) {
             return new AdditiveTumbling(strategy, window, config);
         }
-        // Raw can be Tumbling
+        // Raw can be Tumbling and all other aggregations default to Tumbling
         return new Tumbling(strategy, window, config);
     }
 }

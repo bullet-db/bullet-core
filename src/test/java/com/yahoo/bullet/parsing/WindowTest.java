@@ -119,7 +119,7 @@ public class WindowTest {
     }
 
     @Test
-    public void testInitialization() {
+    public void testProperInitialization() {
         BulletConfig config = new BulletConfig();
         Window window;
         Optional<List<BulletError>> errors;
@@ -140,11 +140,23 @@ public class WindowTest {
         window = WindowUtils.makeReactiveWindow();
         window.configure(config);
         Assert.assertFalse(window.initialize().isPresent());
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 1, Window.Unit.RECORD, 1);
 
+        window = WindowUtils.makeWindow(Window.Unit.RECORD, 1, Window.Unit.RECORD, 1);
         window.configure(config);
         errors = window.initialize();
         Assert.assertFalse(errors.isPresent());
+
+        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
+        window.configure(config);
+        errors = window.initialize();
+        Assert.assertFalse(errors.isPresent());
+    }
+
+    @Test
+    public void testErrorsInInitialization() {
+        BulletConfig config = new BulletConfig();
+        Window window;
+        Optional<List<BulletError>> errors;
 
         window = new Window();
         window.configure(config);
@@ -175,6 +187,20 @@ public class WindowTest {
         errors = window.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get(), singletonList(Window.ONLY_ONE_RECORD));
+
+        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
+        window.getInclude().put(Window.INCLUDE_LAST_FIELD, 1000);
+        window.configure(config);
+        errors = window.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_LAST));
+
+        window = WindowUtils.makeWindow(Window.Unit.RECORD, 1, Window.Unit.ALL, null);
+        window.getInclude().put(Window.INCLUDE_LAST_FIELD, 10);
+        window.configure(config);
+        errors = window.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_LAST));
 
         window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.TIME, null);
         window.configure(config);

@@ -74,6 +74,8 @@ public class Window implements Configurable, Initializable {
                                                                 "Please set \"every\" to 1");
     public static final BulletError IMPROPER_INCLUDE = makeError("The \"include\" field has to match \"emit\" or not be set",
                                                                  "Please remove \"include\" or match it to \"emit\"");
+    public static final BulletError IMPROPER_LAST = makeError("The \"last\" field should not be set for ALL",
+                                                              "Please remove \"last\"");
 
     @Expose
     private Map<String, Object> emit;
@@ -128,6 +130,13 @@ public class Window implements Configurable, Initializable {
         }
 
         Number last = Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
+        if (includeType == Unit.ALL) {
+            if (last != null) {
+                return Optional.of(singletonList(IMPROPER_LAST));
+            }
+            return Optional.empty();
+        }
+
         if (includeType != emitType || last == null || last.intValue() != every.intValue()) {
             return Optional.of(singletonList(IMPROPER_INCLUDE));
         }
