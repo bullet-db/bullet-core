@@ -54,6 +54,7 @@ public class BulletConfig extends Config {
     public static final String RESULT_METADATA_METRICS_CONCEPT_KEY = "name";
     public static final String RESULT_METADATA_METRICS_NAME_KEY = "key";
 
+    public static final String WINDOW_DISABLE = "bullet.query.window.disable";
     public static final String WINDOW_MIN_EMIT_EVERY = "bullet.query.window.min.emit.every";
 
     public static final String RATE_LIMIT_ENABLE = "bullet.query.rate.limit.enable";
@@ -120,6 +121,7 @@ public class BulletConfig extends Config {
                      ImmutablePair.of(Concept.WINDOW_NUMBER, "Number"),
                      ImmutablePair.of(Concept.WINDOW_SIZE, "Size"));
 
+    public static final boolean DEFAULT_WINDOW_DISABLE = false;
     public static final int DEFAULT_WINDOW_MIN_EMIT_EVERY = 1000;
 
     public static final boolean DEFAULT_RATE_LIMIT_ENABLE = true;
@@ -233,6 +235,9 @@ public class BulletConfig extends Config {
                  .checkIf(BulletConfig::isMetadata)
                  .castTo(BulletConfig::mapifyMetadata);
 
+        VALIDATOR.define(WINDOW_DISABLE)
+                .defaultTo(DEFAULT_WINDOW_DISABLE)
+                .checkIf(Validator::isBoolean);
         VALIDATOR.define(WINDOW_MIN_EMIT_EVERY)
                 .defaultTo(DEFAULT_WINDOW_MIN_EMIT_EVERY)
                 .checkIf(Validator::isPositiveInt)

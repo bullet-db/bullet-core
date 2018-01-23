@@ -59,7 +59,10 @@ public class Query implements Configurable, Initializable {
         }
         aggregation.configure(config);
 
-        if (window != null) {
+        boolean disableWindowing = config.getAs(BulletConfig.WINDOW_DISABLE, Boolean.class);
+        if (disableWindowing) {
+            window = null;
+        } else if (window != null) {
             window.configure(config);
         }
 

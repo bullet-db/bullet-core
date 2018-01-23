@@ -134,6 +134,21 @@ public class QueryTest {
     }
 
     @Test
+    public void testWindowForced() {
+        BulletConfig config = new BulletConfig().validate();
+        Query query = new Query();
+        query.setWindow(WindowUtils.makeReactiveWindow());
+        query.configure(config);
+        Assert.assertNotNull(query.getWindow());
+
+        config.set(BulletConfig.WINDOW_DISABLE, true);
+        config.validate();
+        query.setWindow(WindowUtils.makeReactiveWindow());
+        query.configure(config);
+        Assert.assertNull(query.getWindow());
+    }
+
+    @Test
     public void testInitialize() {
         Query query = new Query();
         Aggregation mockAggregation = mock(Aggregation.class);
