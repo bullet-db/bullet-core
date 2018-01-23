@@ -9,8 +9,14 @@ import lombok.Getter;
 
 /**
  * This class implements a simple rate checking mechanism. It accepts a maximum and a time window in which the maximum
- * should not be exceeded. Call {@link #increment()} for when what this is counting happens and then call
- * {@link #isRateLimited()} to check if the rate limit has been reached.
+ * should not be exceeded. Call {@link #increment()} (or {@link #add(int) if batching }for when what this is counting
+ * happens and then call {@link #isRateLimited()} to check if the rate limit has been reached.
+ *
+ * You should check if the rate is limited at least once per your given time interval. If you check too late, your
+ * counted measure will be <strong>averaged</strong> over the time duration since the last check, which may or may not
+ * cause your rate limit criteria to be violated. This can happen if your increments or adds are bursty so you exceed
+ * the rate limit within your time interval but you neglect to check it for a long enough time interval where the burst
+ * is spread out over bringing the overall rate lower than your configured maximum and yielding a false negative.
  */
 @Getter
 public class RateLimiter {
@@ -28,8 +34,9 @@ public class RateLimiter {
      * Create an instance of this that uses a default time window of {@link #SECOND} ms.
      *
      * @param maximum A positive maximum count that this uses as the upper limit per the time interval.
+     * @throws IllegalArgumentException if the maximum was not positive.
      */
-    public RateLimiter(int maximum) {
+    public RateLimiter(int maximum) throws IllegalArgumentException {
         this(maximum, SECOND);
     }
 
@@ -38,8 +45,9 @@ public class RateLimiter {
      *
      * @param maximum A positive maximum count that is the limit for each time interval.
      * @param timeInterval The rate check will be done only at most once for this positive time interval in milliseconds.
+     * @throws IllegalArgumentException if the maximum or the time interval were not positive.
      */
-    public RateLimiter(int maximum, int timeInterval) {
+    public RateLimiter(int maximum, int timeInterval) throws IllegalArgumentException {
         if (maximum <= 0 || timeInterval <= 0) {
             throw new IllegalArgumentException("Provide positive numbers for maximum and/or timeInterval");
         }
@@ -57,6 +65,19 @@ public class RateLimiter {
     }
 
     /**
+     * Increment the measure that this is counting by the given positive number.
+     *
+     * @param n The number to add to the count.
+     * @throws IllegalArgumentException if the given number was not positive.
+     */
+    public void add(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("Add only positive numbers!");
+        }
+        count += n;
+    }
+
+    /**
      * Checks to see if this is rate limited. The rate is only checked at most once for each time interval. It is
      * therefore possible to exceed the absolute rate limit momentarily.
      *
@@ -64,12 +85,12 @@ public class RateLimiter {
      */
     public boolean isRateLimited() {
         long timeNow = System.currentTimeMillis();
-        // If we are checking too early, do nothing
-        if (Math.abs(timeNow - lastCheckTime) < timeInterval) {
+        // Do nothing if too early
+        if (isTooEarly(timeNow)) {
             return false;
         }
         // It's time to check. Check if the count has exceeded the previous count, save it, update the last fields.
-        boolean rateExceeded = currentRate(timeNow) > absoluteRateLimit;
+        boolean rateExceeded = getCurrentRate(timeNow) > absoluteRateLimit;
         lastCount = count;
         lastCheckTime = timeNow;
         return rateExceeded;
@@ -81,10 +102,15 @@ public class RateLimiter {
      * @return A double representing the current absolute rate (per ms).
      */
     public double getCurrentRate() {
-        return currentRate(System.currentTimeMillis());
+        return getCurrentRate(System.currentTimeMillis());
     }
 
-    private double currentRate(long timeNow) {
+    private boolean isTooEarly(long timeNow) {
+        return Math.abs(timeNow - lastCheckTime) < timeInterval;
+    }
+
+    private double getCurrentRate(long timeNow) {
+        // If denominator is zero, it will be NaN or Infinity
         return (count - lastCount) / (double) (timeNow - lastCheckTime);
     }
 }

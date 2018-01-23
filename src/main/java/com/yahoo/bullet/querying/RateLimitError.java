@@ -16,8 +16,8 @@ import java.util.List;
 public class RateLimitError extends BulletError {
     private static final long serialVersionUID = 5056840730518175058L;
 
-    public static final String ERROR_FORMAT = "Exceeded the maximum rate limit for the query: %f emits per second." +
-                                              "Current rate limit: %f emits per second";
+    public static final String ERROR_FORMAT = "Exceeded the maximum rate limit for the query: %.2f emits per second. " +
+                                              "Current rate limit: %.2f emits per second";
     public static final String NARROW_FILTER = "Try using more filters to reduce the data";
     public static final String TIME_WINDOW = "Try using a time based window instead of a record based window";
     public static final List<String> RESOLUTIONS = Arrays.asList(NARROW_FILTER, TIME_WINDOW);

@@ -18,10 +18,12 @@ import java.util.Optional;
 /**
  * A wrapper for a query.
  */
-@Getter
 public class RunningQuery implements Initializable {
+    @Getter
     private final String id;
+    @Getter
     private final long startTime;
+    @Getter
     private final Query query;
     private String queryString;
 
