@@ -60,18 +60,14 @@ public class Window implements Configurable, Initializable {
         TIME_TIME, RECORD_RECORD, TIME_RECORD, RECORD_TIME, TIME_ALL, RECORD_ALL
     }
 
-    public static final int SINGLE_RECORD = 1;
-
     public static final String TYPE_FIELD = "type";
     public static final String EMIT_EVERY_FIELD = "every";
     public static final String INCLUDE_LAST_FIELD = "last";
 
     public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field was not found or had bad values",
                                                               "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
-    public static final BulletError MISSING_EVERY = makeError("The \"every\" field was missing",
+    public static final BulletError IMPROPER_EVERY = makeError("The \"every\" field was missing or had bad values",
                                                               "Please set \"every\" to a positive integer");
-    public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values for \"RECORD\"",
-                                                                "Please set \"every\" to 1");
     public static final BulletError IMPROPER_INCLUDE = makeError("The \"include\" field has to match \"emit\" or not be set",
                                                                  "Please remove \"include\" or match it to \"emit\"");
     public static final BulletError IMPROPER_LAST = makeError("The \"last\" field should not be set for ALL",
@@ -117,12 +113,8 @@ public class Window implements Configurable, Initializable {
         }
 
         Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
-        if (every == null) {
-            return Optional.of(singletonList(MISSING_EVERY));
-        }
-
-        if (emitType == Unit.RECORD && every.intValue() != SINGLE_RECORD) {
-            return Optional.of(singletonList(ONLY_ONE_RECORD));
+        if (every == null || every.intValue() <= 0) {
+            return Optional.of(singletonList(IMPROPER_EVERY));
         }
 
         if (include == null) {
@@ -136,7 +128,7 @@ public class Window implements Configurable, Initializable {
             }
             return Optional.empty();
         }
-
+        // This is temporary. For now, emit needs to be equal to include. Change when other windows are supported.
         if (includeType != emitType || last == null || last.intValue() != every.intValue()) {
             return Optional.of(singletonList(IMPROPER_INCLUDE));
         }

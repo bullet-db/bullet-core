@@ -26,11 +26,8 @@ public class AggregationOperations {
      * @return The created instance of a strategy that can implement the Aggregation.
      */
     public static Strategy findStrategy(Aggregation aggregation, BulletConfig config) {
-        Aggregation.Type type = aggregation.getType();
-        if (type == null) {
-            return null;
-        }
-        switch (type) {
+        // Guaranteed to be present.
+        switch (aggregation.getType()) {
             case COUNT_DISTINCT:
                 return new CountDistinct(aggregation, config);
             case DISTRIBUTION:

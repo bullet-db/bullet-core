@@ -21,13 +21,13 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class AggregationOperationsTest {
-    @Test
+    @Test(expectedExceptions = NullPointerException.class)
     public void testNullType() {
         Aggregation aggregation = new Aggregation();
         BulletConfig config = new BulletConfig();
         aggregation.setType(null);
         aggregation.configure(config);
-        Assert.assertNull(AggregationOperations.findStrategy(aggregation, config));
+        AggregationOperations.findStrategy(aggregation, config);
     }
 
     @Test

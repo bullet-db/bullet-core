@@ -58,7 +58,7 @@ public class RunningQueryTest {
         Optional<List<BulletError>> errors = runningQuery.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get().size(), 1);
-        Assert.assertEquals(errors.get().get(0), Window.ONLY_ONE_RECORD);
+        Assert.assertEquals(errors.get().get(0), Window.IMPROPER_INCLUDE);
     }
 
     @Test

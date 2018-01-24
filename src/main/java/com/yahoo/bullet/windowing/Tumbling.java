@@ -14,17 +14,12 @@ import com.yahoo.bullet.parsing.Window;
 import java.util.List;
 import java.util.Optional;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
-import static java.util.Collections.singletonList;
-
 public class Tumbling extends Basic {
     public static final String NAME = "Tumbling";
 
     private long startedAt;
     private long closeAfter;
 
-    public static final BulletError MISSING_EVERY = makeError("The \"every\" field was not found or had bad values",
-                                                              "Please set \"every\" in \"emit\" to a proper number");
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.
      *
@@ -38,10 +33,8 @@ public class Tumbling extends Basic {
 
     @Override
     public Optional<List<BulletError>> initialize() {
+        // Window is initialized so every is present and positive.
         Number every = Utilities.getCasted(window.getEmit(), Window.EMIT_EVERY_FIELD, Number.class);
-        if (every == null) {
-            return Optional.of(singletonList(MISSING_EVERY));
-        }
         closeAfter = every.longValue();
         startedAt = System.currentTimeMillis();
         return Optional.empty();

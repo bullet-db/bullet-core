@@ -185,7 +185,7 @@ public class QuerierTest {
 
     @Test(expectedExceptions = BulletException.class)
     public void testValidationFail() throws BulletException {
-        new Querier("", "{ 'aggregation': { 'type': null } }", new BulletConfig());
+        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
     }
 
     @Test(expectedExceptions = JsonParseException.class)

@@ -7,12 +7,15 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.result.Meta;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+
+import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * This represents the common parent for all windowing schemes. This wraps the {@link Strategy} since it needs to

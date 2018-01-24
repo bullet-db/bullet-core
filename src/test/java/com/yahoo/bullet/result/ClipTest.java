@@ -94,4 +94,19 @@ public class ClipTest {
         clip.add(new Meta().add("foo", 1.2));
         assertJSONEquals(clip.asJSON(), makeJSON("{'foo': 1.2}", "[]"));
     }
+
+    @Test
+    public void testClipAddition() {
+        Clip clip = new Clip();
+        clip.add(RecordBox.get().add("foo", "bar").getRecord());
+
+        clip.add((Clip) null);
+        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo': 'bar'}]"));
+
+        clip.add(Clip.of(RecordBox.get().add("foo", "bar").getRecord()));
+        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo': 'bar'}, {'foo': 'bar'}]"));
+
+        clip.add(Clip.of(new Meta().add("baz", "qux")));
+        assertJSONEquals(clip.asJSON(), makeJSON("{'baz': 'qux'}", "[{'foo': 'bar'}, {'foo': 'bar'}]"));
+    }
 }

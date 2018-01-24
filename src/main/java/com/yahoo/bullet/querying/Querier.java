@@ -333,22 +333,25 @@ public class Querier implements Monoidal {
             rateLimit = new RateLimiter(maxEmit, timeInterval);
         }
 
-        List<BulletError> errors = new ArrayList<>();
+        Optional<List<BulletError>> errors;
 
-        runningQuery.initialize().ifPresent(errors::addAll);
-        Query query = this.runningQuery.getQuery();
-
-        // Aggregation is guaranteed to not be null.
-        Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        if (strategy != null) {
-            strategy.initialize().ifPresent(errors::addAll);
+        errors = runningQuery.initialize();
+        if (errors.isPresent()) {
+            return errors;
         }
 
-        // Windowing Scheme is guaranteed to not be null.
-        window = WindowingOperations.findScheme(query, strategy, config);
-        window.initialize().ifPresent(errors::addAll);
+        Query query = this.runningQuery.getQuery();
 
-        return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
+        // Aggregation and Strategy are guaranteed to not be null.
+        Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
+        errors = strategy.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
+
+        // Scheme is guaranteed to not be null.
+        window = WindowingOperations.findScheme(query, strategy, config);
+        return window.initialize();
     }
 
     /**

@@ -7,7 +7,16 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Window;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.yahoo.bullet.common.BulletError.makeError;
+import static com.yahoo.bullet.parsing.Window.EMIT_EVERY_FIELD;
+import static java.util.Collections.singletonList;
 
 /**
  * This window is just a {@link SlidingRecord} window with a maximum of one record - both {@link #isClosedForPartition()}
@@ -15,6 +24,10 @@ import com.yahoo.bullet.parsing.Window;
  * reactive.
  */
 public class Reactive extends SlidingRecord {
+    public static final int SINGLE_RECORD = 1;
+
+    public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values for \"RECORD\"",
+                                                                "Please set \"every\" to 1");
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.
      *
@@ -25,5 +38,15 @@ public class Reactive extends SlidingRecord {
     public Reactive(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
         this.maxCount = 1;
+    }
+
+    @Override
+    public Optional<List<BulletError>> initialize() {
+        // Do super first to initialize maxCount
+        Optional<List<BulletError>> errors = super.initialize();
+        if (maxCount != SINGLE_RECORD) {
+            return Optional.of(singletonList(ONLY_ONE_RECORD));
+        }
+        return errors;
     }
 }

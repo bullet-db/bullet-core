@@ -174,19 +174,19 @@ public class WindowTest {
         window.configure(config);
         errors = window.initialize();
         Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.MISSING_EVERY));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 2000);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.ONLY_ONE_RECORD));
+        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
 
         window = WindowUtils.makeWindow(Window.Unit.RECORD, -1);
         window.configure(config);
         errors = window.initialize();
         Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.ONLY_ONE_RECORD));
+        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
+
+        window = WindowUtils.makeWindow(Window.Unit.RECORD, 0);
+        window.configure(config);
+        errors = window.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
 
         window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
         window.getInclude().put(Window.INCLUDE_LAST_FIELD, 1000);
