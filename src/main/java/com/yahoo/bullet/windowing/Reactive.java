@@ -36,7 +36,6 @@ public class Reactive extends SlidingRecord {
      */
     public Reactive(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
-        this.maxCount = 1;
     }
 
     @Override

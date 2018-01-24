@@ -9,9 +9,9 @@ import com.yahoo.bullet.aggregations.MockStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
-import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
@@ -22,26 +22,22 @@ import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static java.util.Arrays.asList;
 
 public class BasicTest {
-    private class ClosableStrategy extends MockStrategy {
-        @Setter
-        private boolean closed = false;
-
-        @Override
-        public boolean isClosed() {
-            super.isClosed();
-            return closed;
-        }
-    }
-
     private static List<Map.Entry<Meta.Concept, String>> ALL_METADATA =
         asList(Pair.of(Meta.Concept.WINDOW_METADATA, "window_stats"),
                Pair.of(Meta.Concept.WINDOW_NAME, "name"),
                Pair.of(Meta.Concept.WINDOW_NUMBER, "num"));
 
+    private BulletConfig config;
+    private MockStrategy strategy;
+
+    @BeforeMethod
+    private void setup() {
+        config = new BulletConfig().validate();
+        strategy = new MockStrategy();
+    }
+
     @Test
     public void testCreation() {
-        BulletConfig config = new BulletConfig().validate();
-        MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
         Assert.assertNotNull(basic.getMetadata());
         Assert.assertFalse(basic.initialize().isPresent());
@@ -49,10 +45,7 @@ public class BasicTest {
 
     @Test
     public void testAllDataMethodsProxyToStrategy() {
-        BulletConfig config = new BulletConfig();
         addMetadata(config, ALL_METADATA);
-
-        MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
 
         Assert.assertEquals(strategy.getConsumeCalls(), 0);
@@ -93,7 +86,6 @@ public class BasicTest {
 
     @Test
     public void testEverythingClosedOnlyIfStrategyIsClosed() {
-        BulletConfig config = new BulletConfig().validate();
         ClosableStrategy strategy = new ClosableStrategy();
         Basic basic = new Basic(strategy, null, config);
         Assert.assertEquals(strategy.getClosedCalls(), 0);
@@ -113,10 +105,8 @@ public class BasicTest {
 
     @Test
     public void testDisablingMetadataDoesNotGetStrategyMetadata() {
-        BulletConfig config = new BulletConfig();
         // Metadata is disabled so Strategy metadata will not be collected.
         addMetadata(config, (List<Map.Entry<Meta.Concept, String>>) null);
-        MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
 
         Assert.assertEquals(strategy.getMetadataCalls(), 0);
@@ -128,10 +118,8 @@ public class BasicTest {
 
     @Test
     public void testDisablingWindowMetadataDoesGetStrategyMetadata() {
-        BulletConfig config = new BulletConfig();
         // Metadata is enabled but no keys for the window metadata. Strategy metadata will be collected.
         addMetadata(config, Collections.emptyList());
-        MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
 
         Assert.assertEquals(strategy.getMetadataCalls(), 0);
@@ -143,9 +131,7 @@ public class BasicTest {
 
     @Test
     public void testResettingIncrementsWindowCount() {
-        BulletConfig config = new BulletConfig();
         addMetadata(config, ALL_METADATA);
-        MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
 
         Meta meta = basic.getMetadata();
