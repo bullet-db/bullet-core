@@ -75,7 +75,10 @@ public class Basic extends Scheme {
 
     @Override
     public Clip getResult() {
-        return aggregation.getResult();
+        // This has already called aggregation.getMetadata
+        Clip clip = Clip.of(getMetadata());
+        clip.add(aggregation.getRecords());
+        return clip;
     }
 
     @Override

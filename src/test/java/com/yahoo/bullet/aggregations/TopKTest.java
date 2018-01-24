@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
+import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
@@ -52,7 +52,7 @@ public class TopKTest {
         aggregation.setAttributes(attributes);
         aggregation.setSize(size);
 
-        TopK topK = new TopK(aggregation, addMetadata(configuration, metadata).validate());
+        TopK topK = new TopK(aggregation, addMetadata(configuration, metadata));
         topK.initialize();
         return topK;
     }

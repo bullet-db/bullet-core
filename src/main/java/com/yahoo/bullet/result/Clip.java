@@ -49,7 +49,21 @@ public class Clip implements JSONFormatter {
      */
     public Clip add(List<BulletRecord> records) {
         if (records != null) {
-            records.stream().forEach(this::add);
+            records.forEach(this::add);
+        }
+        return this;
+    }
+
+    /**
+     * Adds all the {@link BulletRecord} and the {@link Meta} from the given {@link Clip} to this.
+     *
+     * @param clip The clip to add.
+     * @return This Clip for chaining.
+     */
+    public Clip add(Clip clip) {
+        if (clip != null) {
+            add(clip.getMeta());
+            add(clip.getRecords());
         }
         return this;
     }

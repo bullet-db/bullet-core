@@ -400,7 +400,7 @@ public class Querier implements Monoidal {
     @Override
     public byte[] getData() {
         try {
-            rateLimit.increment();
+            incrementRate();
             return window.getData();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized aggregation for query {}", this);
@@ -418,7 +418,7 @@ public class Querier implements Monoidal {
     @Override
     public List<BulletRecord> getRecords() {
         try {
-            rateLimit.increment();
+            incrementRate();
             return window.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -452,7 +452,7 @@ public class Querier implements Monoidal {
     public Clip getResult() {
         Clip result;
         try {
-            rateLimit.increment();
+            incrementRate();
             result = window.getResult();
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
@@ -617,4 +617,11 @@ public class Querier implements Monoidal {
         // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
     }
+
+    private void incrementRate() {
+        if (rateLimit != null) {
+            rateLimit.increment();
+        }
+    }
+
 }

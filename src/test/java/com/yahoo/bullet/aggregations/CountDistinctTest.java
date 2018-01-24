@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
+import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
@@ -39,7 +39,7 @@ public class CountDistinctTest {
 
     public static CountDistinct makeCountDistinct(BulletConfig configuration, Aggregation aggregation,
                                                   Map.Entry<Concept, String>... metadata) {
-        return new CountDistinct(aggregation, addMetadata(configuration, metadata).validate());
+        return new CountDistinct(aggregation, addMetadata(configuration, metadata));
     }
 
     @SafeVarargs

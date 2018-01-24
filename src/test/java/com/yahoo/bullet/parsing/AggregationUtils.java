@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.TestHelpers;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
@@ -12,7 +13,6 @@ import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.result.Meta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,28 +23,6 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public class AggregationUtils {
-    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Meta.Concept, String>> metadata) {
-        if (metadata == null) {
-            config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
-            return config;
-        }
-        List<Map<String, String>> metadataList = new ArrayList<>();
-        for (Map.Entry<Meta.Concept, String> meta : metadata) {
-            Map<String, String> entry = new HashMap<>();
-            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, meta.getKey().getName());
-            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, meta.getValue());
-            metadataList.add(entry);
-        }
-        config.set(BulletConfig.RESULT_METADATA_METRICS, metadataList);
-        config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
-        return config;
-    }
-
-    @SafeVarargs
-    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Meta.Concept, String>... metadata) {
-        return addMetadata(config, metadata == null ? null : Arrays.asList(metadata));
-    }
-
     public static Map<String, String> makeGroupFields(List<String> fields) {
         if (fields != null) {
             return fields.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));

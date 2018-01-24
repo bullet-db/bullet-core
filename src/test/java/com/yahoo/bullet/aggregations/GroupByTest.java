@@ -30,7 +30,7 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
-import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
+import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
@@ -61,7 +61,7 @@ public class GroupByTest {
 
     public static GroupBy makeGroupBy(BulletConfig configuration, Aggregation aggregation,
                                       List<Map.Entry<Concept, String>> metadata) {
-        GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata).validate());
+        GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata));
         by.initialize();
         return by;
     }

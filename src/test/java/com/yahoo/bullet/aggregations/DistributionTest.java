@@ -40,7 +40,7 @@ import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.RANGE_FIELD;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.SEPARATOR;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.START_INCLUSIVE;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.VALUE_FIELD;
-import static com.yahoo.bullet.parsing.AggregationUtils.addMetadata;
+import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
 import static java.util.Arrays.asList;
 
@@ -62,7 +62,7 @@ public class DistributionTest {
         aggregation.setSize(size);
         aggregation.setAttributes(attributes);
 
-        Distribution distribution = new Distribution(aggregation, addMetadata(configuration, metadata).validate());
+        Distribution distribution = new Distribution(aggregation, addMetadata(configuration, metadata));
         distribution.initialize();
         return distribution;
     }
