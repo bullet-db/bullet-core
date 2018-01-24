@@ -81,12 +81,13 @@ public class Query implements Configurable, Initializable {
                 clause.initialize().ifPresent(errors::addAll);
             }
         }
+
         if (projection != null) {
             projection.initialize().ifPresent(errors::addAll);
         }
-        if (aggregation != null) {
-            aggregation.initialize().ifPresent(errors::addAll);
-        }
+
+        aggregation.initialize().ifPresent(errors::addAll);
+
         if (window != null) {
             window.initialize().ifPresent(errors::addAll);
         }

@@ -26,22 +26,24 @@ public class WindowingOperations {
      * @return A windowing scheme to use for this query.
      */
     public static Scheme findScheme(Query query, Strategy strategy, BulletConfig config) {
+        // TODO: Support other windows
         Window window = query.getWindow();
 
-        // For now, if no window -> Basic, if Raw but not TIME_TIME -> Reactive, if time based, Tumbling or AdditiveTumbling
-        // TODO: Support other windows
+        // No window -> Basic.
         if (window == null) {
             return new Basic(strategy, null, config);
         }
-        Window.Classification type = window.getType();
-        if (query.getAggregation().getType() == Aggregation.Type.RAW) {
-            // If Raw but we have a window that's anything but TIME_TIME ~> Tumbling/Hopping, force to Reactive
-            if (type != Window.Classification.TIME_TIME) {
-                return new Reactive(strategy, window, config);
-            }
+
+        Window.Classification classification = window.getType();
+        Aggregation.Type type = query.getAggregation().getType();
+
+        // If RAW and we have a window that's anything but TIME_TIME, force to Reactive and use a new record by record
+        // window instead of the window in the query.
+        if (type == Aggregation.Type.RAW && classification != Window.Classification.TIME_TIME) {
+            return new Reactive(strategy, Window.oneRecordWindow(config), config);
         }
-        // Raw cannot be Additive
-        if (type == Window.Classification.TIME_ALL) {
+
+        if (classification == Window.Classification.TIME_ALL) {
             return new AdditiveTumbling(strategy, window, config);
         }
         // Raw can be Tumbling and all other aggregations default to Tumbling

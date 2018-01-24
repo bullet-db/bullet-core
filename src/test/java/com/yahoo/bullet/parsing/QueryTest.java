@@ -178,6 +178,7 @@ public class QueryTest {
         query.setProjection(null);
         query.setFilters(null);
         query.setAggregation(null);
+        query.configure(new BulletConfig().validate());
         Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertFalse(errorList.isPresent());
     }

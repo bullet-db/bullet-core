@@ -114,6 +114,7 @@ public class BasicTest {
     @Test
     public void testDisablingMetadataDoesNotGetStrategyMetadata() {
         BulletConfig config = new BulletConfig();
+        // Metadata is disabled so Strategy metadata will not be collected.
         addMetadata(config, (List<Map.Entry<Meta.Concept, String>>) null);
         MockStrategy strategy = new MockStrategy();
         Basic basic = new Basic(strategy, null, config);
@@ -123,6 +124,21 @@ public class BasicTest {
         Assert.assertNotNull(meta);
         Assert.assertTrue(meta.asMap().isEmpty());
         Assert.assertEquals(strategy.getMetadataCalls(), 0);
+    }
+
+    @Test
+    public void testDisablingWindowMetadataDoesGetStrategyMetadata() {
+        BulletConfig config = new BulletConfig();
+        // Metadata is enabled but no keys for the window metadata. Strategy metadata will be collected.
+        addMetadata(config, Collections.emptyList());
+        MockStrategy strategy = new MockStrategy();
+        Basic basic = new Basic(strategy, null, config);
+
+        Assert.assertEquals(strategy.getMetadataCalls(), 0);
+        Meta meta = basic.getMetadata();
+        Assert.assertNotNull(meta);
+        Assert.assertTrue(meta.asMap().isEmpty());
+        Assert.assertEquals(strategy.getMetadataCalls(), 1);
     }
 
     @Test

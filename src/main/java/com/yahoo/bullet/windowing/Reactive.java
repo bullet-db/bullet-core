@@ -8,14 +8,12 @@ package com.yahoo.bullet.windowing;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Window;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
-import static com.yahoo.bullet.parsing.Window.EMIT_EVERY_FIELD;
 import static java.util.Collections.singletonList;
 
 /**
@@ -28,6 +26,7 @@ public class Reactive extends SlidingRecord {
 
     public static final BulletError ONLY_ONE_RECORD = makeError("The \"every\" field had bad values for \"RECORD\"",
                                                                 "Please set \"every\" to 1");
+
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.
      *

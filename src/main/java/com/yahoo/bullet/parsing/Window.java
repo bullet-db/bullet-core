@@ -180,4 +180,20 @@ public class Window implements Configurable, Initializable {
         String type = Utilities.getCasted(map, TYPE_FIELD, String.class);
         return SUPPORTED_TYPES.get(type);
     }
+
+    /**
+     * Creates a window that emits one record per window.
+     *
+     * @param config A validated {@link BulletConfig} to use to configure the window.
+     * @return A configured window object that emits one record in each window.
+     */
+    public static Window oneRecordWindow(BulletConfig config) {
+        Map<String, Object> emit = new HashMap<>();
+        emit.put(Window.TYPE_FIELD, Window.Unit.RECORD.getName());
+        emit.put(Window.EMIT_EVERY_FIELD, 1);
+        Window window = new Window();
+        window.setEmit(emit);
+        window.configure(config);
+        return window;
+    }
 }
