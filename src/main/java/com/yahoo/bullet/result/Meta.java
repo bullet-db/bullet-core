@@ -49,7 +49,9 @@ public class Meta {
         WINDOW_METADATA("Window Metadata"),
         WINDOW_NAME("Window Name"),
         WINDOW_NUMBER("Window Number"),
-        WINDOW_SIZE("Window Size");
+        WINDOW_SIZE("Window Size"),
+        WINDOW_EMIT_TIME("Window Emit Time"),
+        WINDOW_EXPECTED_EMIT_TIME("Window Expected Emit Time");
 
         private String name;
 

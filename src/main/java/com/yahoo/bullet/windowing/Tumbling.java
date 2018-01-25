@@ -10,14 +10,22 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.result.Meta;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 public class Tumbling extends Basic {
     public static final String NAME = "Tumbling";
 
+    @Getter(AccessLevel.PACKAGE)
     private long startedAt;
+    @Getter(AccessLevel.PACKAGE)
     private long closeAfter;
 
     /**
@@ -38,6 +46,13 @@ public class Tumbling extends Basic {
         closeAfter = every.longValue();
         startedAt = System.currentTimeMillis();
         return Optional.empty();
+    }
+
+    @Override
+    protected Map<String, Object> getMetadata(Map<String, String> metadataKeys) {
+        Map<String, Object> meta = super.getMetadata(metadataKeys);
+        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_EXPECTED_EMIT_TIME, () -> this.startedAt + this.closeAfter);
+        return meta;
     }
 
     @Override

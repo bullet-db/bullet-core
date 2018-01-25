@@ -186,6 +186,10 @@ bullet.result.metadata.metrics:
       key: "Number"
     - name: "Window Size"
       key: "Size"
+    - name: "Window Emit Time"
+      key: "Emit Time"
+    - name: "Window Expected Emit Time"
+      key: "Expected Emit Time"
 
 # Enables whether each record should have a new key added to it denoting it was projected.
 bullet.record.inject.timestamp.enable: true

@@ -42,9 +42,12 @@ public class Reactive extends SlidingRecord {
     public Optional<List<BulletError>> initialize() {
         // Do super first to initialize maxCount
         Optional<List<BulletError>> errors = super.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
         if (maxCount != SINGLE_RECORD) {
             return Optional.of(singletonList(ONLY_ONE_RECORD));
         }
-        return errors;
+        return Optional.empty();
     }
 }

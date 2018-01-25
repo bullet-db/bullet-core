@@ -40,12 +40,28 @@ public class Validator {
     public class Entry {
         private String key;
         private Predicate<Object> validation;
+        private Predicate<Object> guard;
         private Object defaultValue;
         private Function<Object, Object> adapter;
 
         private Entry(String key) {
             this.validation = UNARY_IDENTITY;
+            this.guard = UNARY_IDENTITY.negate();
             this.key = key;
+        }
+
+        /**
+         * Add a {@link Predicate} to guard the checks in this entry. This predicate should take the value of the
+         * field and return true if you do not want to run the checks added to the entry. This will also not
+         * default to the provided defaults.
+         *
+         * @param guard The non-null guard to use for this Entry.
+         * @return This Entry for chaining.
+         */
+        public Entry unless(Predicate<Object> guard) {
+            Objects.requireNonNull(guard);
+            this.guard = guard;
+            return this;
         }
 
         /**
@@ -108,6 +124,11 @@ public class Validator {
          */
         void normalize(BulletConfig config) {
             Object value = config.get(key);
+            boolean shouldGuard = guard.test(value);
+            if (shouldGuard) {
+                log.info("Guard satisfied for Key: {}. Using current value: {}", key, value);
+                return;
+            }
             boolean isValid = validation.test(value);
             if (!isValid) {
                 log.warn("Key: {} had an invalid value: {}. Using default: {}", key, value, defaultValue);

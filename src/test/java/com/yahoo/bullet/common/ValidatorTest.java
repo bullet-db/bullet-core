@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -87,6 +88,37 @@ public class ValidatorTest {
         empty.set("foo", "foo");
         entry.normalize(empty);
         Assert.assertEquals(empty.get("foo"), "qux");
+    }
+
+    @Test
+    public void testEntryUnless() {
+        Validator validator = new Validator();
+        // foo should be 1 or 2, defaults 1L and is casted to String UNLESS it is already "1"
+        Entry entry = validator.define("foo")
+                               .checkIf(Validator::isNotNull)
+                               .checkIf(Validator.isIn(1L, 2L))
+                               .defaultTo(1L)
+                               .castTo(Objects::toString)
+                               .unless("1"::equals);
+
+        Assert.assertNull(empty.get("foo"));
+        entry.normalize(empty);
+        Assert.assertEquals(empty.get("foo"), "1");
+
+        empty.set("foo", 1L);
+        entry.normalize(empty);
+        Assert.assertEquals(empty.get("foo"), "1");
+
+        empty.set("foo", 2L);
+        entry.normalize(empty);
+        Assert.assertEquals(empty.get("foo"), "2");
+
+        String original = "1";
+        empty.set("foo", "1");
+        entry.normalize(empty);
+        Assert.assertEquals(empty.get("foo"), "1");
+        // This is the SAME string
+        Assert.assertTrue(empty.get("foo") == original);
     }
 
     @Test

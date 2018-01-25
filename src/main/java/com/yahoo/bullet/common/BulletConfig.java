@@ -119,7 +119,9 @@ public class BulletConfig extends Config {
                      ImmutablePair.of(Concept.WINDOW_METADATA, "Window"),
                      ImmutablePair.of(Concept.WINDOW_NAME, "Name"),
                      ImmutablePair.of(Concept.WINDOW_NUMBER, "Number"),
-                     ImmutablePair.of(Concept.WINDOW_SIZE, "Size"));
+                     ImmutablePair.of(Concept.WINDOW_SIZE, "Size"),
+                     ImmutablePair.of(Concept.WINDOW_EMIT_TIME, "Emit Time"),
+                     ImmutablePair.of(Concept.WINDOW_EXPECTED_EMIT_TIME, "Expected Emit Time"));
 
     public static final boolean DEFAULT_WINDOW_DISABLE = false;
     public static final int DEFAULT_WINDOW_MIN_EMIT_EVERY = 1000;
@@ -151,9 +153,9 @@ public class BulletConfig extends Config {
                  .checkIf(Validator::isString);
 
         VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
-                .defaultTo(DEFAULT_AGGREGATION_SIZE)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_AGGREGATION_SIZE)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(AGGREGATION_MAX_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_MAX_SIZE)
                  .checkIf(Validator::isPositiveInt)
@@ -191,9 +193,9 @@ public class BulletConfig extends Config {
                  .checkIf(Validator::isPowerOfTwo)
                  .castTo(Validator::asInt);
         VALIDATOR.define(GROUP_AGGREGATION_MAX_SIZE)
-                .defaultTo(DEFAULT_GROUP_AGGREGATION_MAX_SIZE)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_GROUP_AGGREGATION_MAX_SIZE)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(GROUP_AGGREGATION_SKETCH_SAMPLING)
                  .defaultTo(DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING)
                  .checkIf(Validator::isFloat)
@@ -233,27 +235,28 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_RESULT_METADATA_METRICS)
                  .checkIf(Validator::isList)
                  .checkIf(BulletConfig::isMetadata)
-                 .castTo(BulletConfig::mapifyMetadata);
+                 .castTo(BulletConfig::mapifyMetadata)
+                 .unless(BulletConfig::alreadySetMetadata);
 
         VALIDATOR.define(WINDOW_DISABLE)
-                .defaultTo(DEFAULT_WINDOW_DISABLE)
-                .checkIf(Validator::isBoolean);
+                 .defaultTo(DEFAULT_WINDOW_DISABLE)
+                 .checkIf(Validator::isBoolean);
         VALIDATOR.define(WINDOW_MIN_EMIT_EVERY)
-                .defaultTo(DEFAULT_WINDOW_MIN_EMIT_EVERY)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_WINDOW_MIN_EMIT_EVERY)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
 
         VALIDATOR.define(RATE_LIMIT_ENABLE)
-                .defaultTo(DEFAULT_RATE_LIMIT_ENABLE)
-                .checkIf(Validator::isBoolean);
+                 .defaultTo(DEFAULT_RATE_LIMIT_ENABLE)
+                 .checkIf(Validator::isBoolean);
         VALIDATOR.define(RATE_LIMIT_MAX_EMIT_COUNT)
-                .defaultTo(DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(RATE_LIMIT_TIME_INTERVAL)
-                .defaultTo(DEFAULT_RATE_LIMIT_TIME_INTERVAL)
-                .checkIf(Validator::isPositiveInt)
-                .castTo(Validator::asInt);
+                 .defaultTo(DEFAULT_RATE_LIMIT_TIME_INTERVAL)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
 
         VALIDATOR.define(PUBSUB_CONTEXT_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CONTEXT_NAME)
@@ -339,6 +342,19 @@ public class BulletConfig extends Config {
                         (String) m.get(RESULT_METADATA_METRICS_NAME_KEY));
         }
         return mapping;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean alreadySetMetadata(Object metadata) {
+        if (metadata == null || !(metadata instanceof Map)) {
+            return false;
+        }
+        try {
+            Map<String, String> casted = (Map<String, String>) metadata;
+            return casted.keySet().stream().allMatch(c -> Meta.KNOWN_CONCEPTS.contains(Concept.from(c)));
+        } catch (ClassCastException e) {
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -31,7 +31,8 @@ public class SlidingRecordTest {
         asList(Pair.of(Meta.Concept.WINDOW_METADATA, "window_stats"),
                Pair.of(Meta.Concept.WINDOW_NAME, "name"),
                Pair.of(Meta.Concept.WINDOW_NUMBER, "num"),
-               Pair.of(Meta.Concept.WINDOW_SIZE, "size"));
+               Pair.of(Meta.Concept.WINDOW_SIZE, "size"),
+               Pair.of(Meta.Concept.WINDOW_EMIT_TIME, "close"));
 
     private Window makeSlidingWindow(int size) {
         Window window = WindowUtils.makeWindow(Window.Unit.RECORD, size);
@@ -180,12 +181,14 @@ public class SlidingRecordTest {
 
         Assert.assertEquals(strategy.getMetadataCalls(), 0);
 
+        long timeNow = System.currentTimeMillis();
         Meta meta = sliding.getMetadata();
         Assert.assertNotNull(meta);
         Map<String, Object> asMap = (Map<String, Object>) meta.asMap().get("window_stats");
         Assert.assertEquals(asMap.get("num"), 1L);
         Assert.assertEquals(asMap.get("name"), SlidingRecord.NAME);
         Assert.assertEquals(asMap.get("size"), 4);
+        Assert.assertTrue(((Long) asMap.get("close")) >= timeNow);
         Assert.assertEquals(strategy.getMetadataCalls(), 1);
 
         sliding.consume(RecordBox.get().getRecord());
@@ -198,6 +201,7 @@ public class SlidingRecordTest {
         Assert.assertEquals(asMap.get("num"), 1L);
         Assert.assertEquals(asMap.get("name"), SlidingRecord.NAME);
         Assert.assertEquals(asMap.get("size"), 5);
+        Assert.assertTrue(((Long) asMap.get("close")) >= timeNow);
         Assert.assertEquals(strategy.getMetadataCalls(), 2);
 
         sliding.reset();
@@ -210,6 +214,7 @@ public class SlidingRecordTest {
         Assert.assertEquals(asMap.get("num"), 2L);
         Assert.assertEquals(asMap.get("name"), SlidingRecord.NAME);
         Assert.assertEquals(asMap.get("size"), 0);
+        Assert.assertTrue(((Long) asMap.get("close")) >= timeNow);
         Assert.assertEquals(strategy.getMetadataCalls(), 3);
 
         sliding.consume(RecordBox.get().getRecord());
@@ -222,6 +227,7 @@ public class SlidingRecordTest {
         Assert.assertEquals(asMap.get("num"), 2L);
         Assert.assertEquals(asMap.get("name"), SlidingRecord.NAME);
         Assert.assertEquals(asMap.get("size"), 1);
+        Assert.assertTrue(((Long) asMap.get("close")) >= timeNow);
         Assert.assertEquals(strategy.getMetadataCalls(), 4);
     }
 }

@@ -351,6 +351,54 @@ public class BulletConfigTest {
     }
 
     @Test
+    public void testMetadataGuard() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, null);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+
+        config.set(BulletConfig.RESULT_METADATA_METRICS, 1L);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+
+        Map<Integer, Integer> bad = new HashMap<>();
+        bad.put(1, 2);
+        config.set(BulletConfig.RESULT_METADATA_METRICS, bad);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.RESULT_METADATA_METRICS), allMetadataAsMap());
+
+        Map<String, String> metadata = new HashMap<>();
+        for (Concept concept : Meta.KNOWN_CONCEPTS) {
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            metadata.put(name, key);
+        }
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        Assert.assertTrue(config.get(BulletConfig.RESULT_METADATA_METRICS) == metadata);
+    }
+
+    @Test
+    public void testIdempotencyOfMetadataValidate() {
+        Map<String, String> metadata = new HashMap<>();
+        for (Concept concept : Meta.KNOWN_CONCEPTS) {
+            String name = concept.getName();
+            String key = concept.getName().substring(0, 3);
+            metadata.put(name, key);
+        }
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadata);
+        config.validate();
+        // It is the same object
+        Assert.assertTrue(config.get(BulletConfig.RESULT_METADATA_METRICS) == metadata);
+
+        // Even if we validate it again and again
+        config.validate();
+        config.validate();
+        Assert.assertTrue(config.get(BulletConfig.RESULT_METADATA_METRICS) == metadata);
+    }
+
+    @Test
     public void testStringification() {
         BulletConfig config = new BulletConfig();
         config.clear();

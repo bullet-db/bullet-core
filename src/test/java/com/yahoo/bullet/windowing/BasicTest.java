@@ -25,7 +25,8 @@ public class BasicTest {
     private static List<Map.Entry<Meta.Concept, String>> ALL_METADATA =
         asList(Pair.of(Meta.Concept.WINDOW_METADATA, "window_stats"),
                Pair.of(Meta.Concept.WINDOW_NAME, "name"),
-               Pair.of(Meta.Concept.WINDOW_NUMBER, "num"));
+               Pair.of(Meta.Concept.WINDOW_NUMBER, "num"),
+               Pair.of(Meta.Concept.WINDOW_EMIT_TIME, "closed"));
 
     private BulletConfig config;
     private MockStrategy strategy;
@@ -64,18 +65,25 @@ public class BasicTest {
         Assert.assertNull(basic.getData());
         Assert.assertEquals(strategy.getDataCalls(), 1);
 
+        long timeNow = System.currentTimeMillis();
         Meta meta = basic.getMetadata();
         Assert.assertNotNull(meta);
         Map<String, Object> asMap = (Map<String, Object>) meta.asMap().get("window_stats");
         Assert.assertEquals(asMap.get("name"), Basic.NAME);
         Assert.assertEquals(asMap.get("num"), 1L);
+        Assert.assertTrue(((Long) asMap.get("closed")) >= timeNow);
         Assert.assertEquals(strategy.getMetadataCalls(), 1);
 
         Assert.assertNull(basic.getRecords());
         Assert.assertEquals(strategy.getRecordCalls(), 1);
 
         Clip clip = basic.getResult();
-        Assert.assertEquals(clip.getMeta().asMap(), meta.asMap());
+        Map<String, Object> expected = (Map<String, Object>) meta.asMap().get("window_stats");
+        Map<String, Object> actual = (Map<String, Object>) clip.getMeta().asMap().get("window_stats");
+        Assert.assertEquals(actual.get("name"), expected.get("name"));
+        Assert.assertEquals(actual.get("num"), expected.get("num"));
+        Assert.assertTrue(((Long) actual.get("closed")) >= timeNow);
+
         Assert.assertEquals(clip.getRecords(), Collections.emptyList());
         // We will not call getResult because we use getMetadata and getRecords
         Assert.assertEquals(strategy.getResultCalls(), 0);

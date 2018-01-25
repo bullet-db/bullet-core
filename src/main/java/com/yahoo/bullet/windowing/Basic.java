@@ -45,6 +45,7 @@ public class Basic extends Scheme {
         Map<String, Object> meta = new HashMap<>();
         addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_NAME, this::name);
         addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_NUMBER, this::count);
+        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_EMIT_TIME, System::currentTimeMillis);
         return meta;
     }
 
