@@ -11,7 +11,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.AggregationUtils;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;

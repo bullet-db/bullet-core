@@ -5,15 +5,11 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.TestHelpers;
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
-import com.yahoo.bullet.result.Meta;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

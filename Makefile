@@ -15,9 +15,6 @@ jar:
 release:
 	    mvn -B release:prepare release:clean
 
-checkstyle:
-	    mvn checkstyle:check -Dcheckstyle.config.location=src/main/resources/checkstyle.xml
-
 coverage:
 	    mvn clean clover2:setup test clover2:aggregate clover2:clover
 
