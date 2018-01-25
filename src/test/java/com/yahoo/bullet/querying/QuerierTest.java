@@ -11,6 +11,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.parsing.AggregationUtils;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;
@@ -193,11 +194,6 @@ public class QuerierTest {
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
-    @Test(expectedExceptions = BulletException.class)
-    public void testValidationFail() throws BulletException {
-        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig().validate());
-    }
-
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullConfig() throws BulletException {
         new Querier("", "{}", null);
@@ -206,6 +202,11 @@ public class QuerierTest {
     @Test(expectedExceptions = JsonParseException.class)
     public void testBadJSON() {
         make("{", new BulletConfig().validate());
+    }
+
+    @Test(expectedExceptions = BulletException.class)
+    public void testMissingAggregationType() throws BulletException {
+        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig().validate());
     }
 
     @Test(expectedExceptions = BulletException.class)
@@ -388,26 +389,32 @@ public class QuerierTest {
         querier.setWindow(failingScheme);
 
         querier.consume(RecordBox.get().getRecord());
+
         querier.combine(new byte[0]);
 
         Assert.assertNull(querier.getData());
-        Clip actual = querier.getResult();
 
+        Assert.assertNull(querier.getRecords());
+
+        Meta meta = querier.getMetadata();
+        Map<String, Object> actualMeta = meta.asMap();
+        Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
+        BulletError expected = BulletError.makeError("Getting metadata failure", Querier.TRY_AGAIN_LATER);
+        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
+
+        Clip actual = querier.getResult();
         Assert.assertNotNull(actual.getMeta());
         Assert.assertEquals(actual.getRecords().size(), 0);
-
-        Map<String, Object> actualMeta = actual.getMeta().asMap();
-
+        actualMeta = actual.getMeta().asMap();
         Assert.assertEquals(actualMeta.size(), 1);
         Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
-
-        BulletError expected = BulletError.makeError("Getting result failure", Querier.AGGREGATION_FAILURE_RESOLUTION);
+        expected = BulletError.makeError("Getting result failure", Querier.TRY_AGAIN_LATER);
         Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
 
         Assert.assertEquals(failingScheme.consumptionFailure, 1);
         Assert.assertEquals(failingScheme.combiningFailure, 1);
         Assert.assertEquals(failingScheme.serializingFailure, 1);
-        Assert.assertEquals(failingScheme.aggregationFailure, 1);
+        Assert.assertEquals(failingScheme.aggregationFailure, 3);
     }
 
     @Test
@@ -528,34 +535,6 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithNonTimeWindowsAreForcedToReactive() {
-        Querier querier = make("{'window': {'emit': {'type': 'RECORD', 'every': 2}}}", emptyMap());
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
-
-        querier.consume(RecordBox.get().getRecord());
-
-        Assert.assertTrue(querier.isClosed());
-        Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertEquals(querier.getWindow().getClass(), Reactive.class);
-    }
-
-    @Test
-    public void testRawQueriesWithTimeWindowsAreNotChanged() {
-        Querier querier = make("{'window': {'emit': {'type': 'TIME', 'every': 20000000}}}", emptyMap());
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertTrue(querier.isTimeBasedWindow());
-
-        querier.consume(RecordBox.get().getRecord());
-
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertEquals(querier.getWindow().getClass(), Tumbling.class);
-    }
-
-    @Test
     public void testRateLimiting() throws Exception {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RATE_LIMIT_ENABLE, true);
@@ -589,5 +568,64 @@ public class QuerierTest {
         IntStream.range(0, 1000).forEach(i -> querier.getRecords());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
+    }
+
+    @Test
+    public void testMetadataDisabled() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
+        // Should clear out the default metadata
+        config.validate();
+
+        Query query = new Query();
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
+        aggregation.setFields(singletonMap("foo", "bar"));
+        query.setAggregation(aggregation);
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
+        query.configure(config);
+        Querier querier = make(query, config);
+
+        querier.consume(RecordBox.get().add("foo", "A").getRecord());
+
+        Assert.assertTrue(querier.getMetadata().asMap().isEmpty());
+    }
+
+    @Test
+    public void testRawQueriesWithNonTimeWindowsAreForcedToReactive() {
+        BulletConfig config = new BulletConfig().validate();
+        Query query = new Query();
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
+        query.configure(config);
+        Querier querier = make(query, config);
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isTimeBasedWindow());
+
+        querier.consume(RecordBox.get().getRecord());
+
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertEquals(querier.getWindow().getClass(), Reactive.class);
+    }
+
+    @Test
+    public void testRawQueriesWithTimeWindowsAreNotChanged() {
+        BulletConfig config = new BulletConfig().validate();
+        Query query = new Query();
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, Integer.MAX_VALUE));
+        query.configure(config);
+        Querier querier = make(query, config);
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isTimeBasedWindow());
+
+        querier.consume(RecordBox.get().getRecord());
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertEquals(querier.getWindow().getClass(), Tumbling.class);
     }
 }

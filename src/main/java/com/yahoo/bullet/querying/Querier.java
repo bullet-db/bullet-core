@@ -253,7 +253,7 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  */
 @Slf4j
 public class Querier implements Monoidal {
-    public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
+    public static final String TRY_AGAIN_LATER = "Please try again later";
 
     // For testing convenience
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
@@ -318,6 +318,7 @@ public class Querier implements Monoidal {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<List<BulletError>> initialize() {
+        // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
         Boolean shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
@@ -435,14 +436,15 @@ public class Querier implements Monoidal {
      */
     @Override
     public Meta getMetadata() {
+        Meta meta;
         try {
-            Meta meta = window.getMetadata();
+            meta = window.getMetadata();
             meta.merge(getResultMetadata());
-            return meta;
         } catch (RuntimeException e) {
             log.error("Unable to get metadata for query {}", this);
-            return null;
+            meta = getErrorMeta(e);
         }
+        return meta;
     }
 
     /**
@@ -459,7 +461,7 @@ public class Querier implements Monoidal {
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
-            result = Clip.of(Meta.of(BulletError.makeError(e.getMessage(), AGGREGATION_FAILURE_RESOLUTION)));
+            result = Clip.of(getErrorMeta(e));
         }
         return result;
     }
@@ -621,6 +623,10 @@ public class Querier implements Monoidal {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
         // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
+    }
+
+    private Meta getErrorMeta(Exception e) {
+        return Meta.of(BulletError.makeError(e.getMessage(), TRY_AGAIN_LATER));
     }
 
     private void incrementRate() {

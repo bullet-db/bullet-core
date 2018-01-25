@@ -64,7 +64,7 @@ public class Window implements Configurable, Initializable {
     public static final String EMIT_EVERY_FIELD = "every";
     public static final String INCLUDE_LAST_FIELD = "last";
 
-    public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field was not found or had bad values",
+    public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field for \"emit\" was missing or had bad values",
                                                               "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
     public static final BulletError IMPROPER_EVERY = makeError("The \"every\" field was missing or had bad values",
                                                               "Please set \"every\" to a positive integer");
