@@ -141,6 +141,7 @@ public class BasicTest {
     public void testResettingIncrementsWindowCount() {
         addMetadata(config, ALL_METADATA);
         Basic basic = new Basic(strategy, null, config);
+        Assert.assertEquals(strategy.getResetCalls(), 0);
 
         Meta meta = basic.getMetadata();
         Assert.assertNotNull(meta);
@@ -149,8 +150,11 @@ public class BasicTest {
         Assert.assertEquals(strategy.getMetadataCalls(), 1);
 
         basic.reset();
+        Assert.assertEquals(strategy.getResetCalls(), 1);
         basic.reset();
+        Assert.assertEquals(strategy.getResetCalls(), 2);
         basic.reset();
+        Assert.assertEquals(strategy.getResetCalls(), 3);
 
         meta = basic.getMetadata();
         Assert.assertNotNull(meta);

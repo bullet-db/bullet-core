@@ -148,6 +148,7 @@ public class SlidingRecordTest {
         Window window = makeSlidingWindow(5);
         SlidingRecord sliding = new SlidingRecord(strategy, window, config);
         Assert.assertFalse(sliding.initialize().isPresent());
+        Assert.assertEquals(strategy.getResetCalls(), 0);
 
         for (int i = 0; i < 4; ++i) {
             sliding.consume(RecordBox.get().getRecord());
@@ -165,6 +166,7 @@ public class SlidingRecordTest {
         Assert.assertFalse(sliding.isClosedForPartition());
 
         Assert.assertEquals(strategy.getConsumeCalls(), 5);
+        Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
     @Test

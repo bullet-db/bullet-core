@@ -56,8 +56,7 @@ public class TumblingTest {
 
     @Test
     public void testCreation() {
-        Window window = makeTumblingWindow(1000);
-        Tumbling tumbling = new Tumbling(strategy, window, config);
+        Tumbling tumbling = make(1000, 1000);
         Assert.assertFalse(tumbling.initialize().isPresent());
     }
 
@@ -66,7 +65,7 @@ public class TumblingTest {
         Tumbling tumbling = make(1000, 5000);
         Assert.assertFalse(tumbling.initialize().isPresent());
         // The window is what controls this so Tumbling has 5000 for the window size
-        Assert.assertEquals(tumbling.getCloseAfter(), 5000L);
+        Assert.assertEquals(tumbling.closeAfter, 5000L);
     }
 
     @Test
@@ -109,8 +108,9 @@ public class TumblingTest {
         long started = System.currentTimeMillis();
         // Change minimum length to 1 ms
         Tumbling tumbling = make(1, 1);
+        Assert.assertEquals(strategy.getResetCalls(), 0);
         Assert.assertFalse(tumbling.initialize().isPresent());
-        long originalStartedAt = tumbling.getStartedAt();
+        long originalStartedAt = tumbling.startedAt;
         Assert.assertTrue(originalStartedAt >= started);
 
         // Sleep to make sure it's 1 ms
@@ -121,10 +121,11 @@ public class TumblingTest {
 
         long resetTime = System.currentTimeMillis();
         tumbling.reset();
-        long newStartedAt = tumbling.getStartedAt();
+        long newStartedAt = tumbling.startedAt;
         Assert.assertTrue(resetTime > started);
         Assert.assertTrue(newStartedAt > originalStartedAt);
         Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
     @Test
@@ -152,5 +153,13 @@ public class TumblingTest {
         Assert.assertTrue(shouldCloseTime >= started);
         Assert.assertTrue(shouldCloseTime <= closedTime);
         Assert.assertEquals(strategy.getMetadataCalls(), 1);
+
+        tumbling.reset();
+        meta = tumbling.getMetadata();
+        Assert.assertNotNull(meta);
+        asMap = (Map<String, Object>) meta.asMap().get("window_stats");
+        Assert.assertEquals(asMap.get("num"), 2L);
+        Assert.assertEquals(asMap.get("name"), AdditiveTumbling.NAME);
+        Assert.assertEquals(strategy.getMetadataCalls(), 2);
     }
 }

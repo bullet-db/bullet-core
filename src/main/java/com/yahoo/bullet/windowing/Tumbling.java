@@ -11,8 +11,6 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.result.Meta;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
@@ -23,10 +21,8 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 public class Tumbling extends Basic {
     public static final String NAME = "Tumbling";
 
-    @Getter(AccessLevel.PACKAGE)
-    private long startedAt;
-    @Getter(AccessLevel.PACKAGE)
-    private long closeAfter;
+    protected long startedAt;
+    protected long closeAfter;
 
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.

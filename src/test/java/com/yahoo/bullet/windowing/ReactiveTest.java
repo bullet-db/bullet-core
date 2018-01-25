@@ -143,6 +143,7 @@ public class ReactiveTest {
         Window window = makeReactiveWindow();
         Reactive reactive = new Reactive(strategy, window, config);
         Assert.assertFalse(reactive.initialize().isPresent());
+        Assert.assertEquals(strategy.getResetCalls(), 0);
 
         reactive.consume(RecordBox.get().getRecord());
         Assert.assertTrue(reactive.isClosed());
@@ -152,6 +153,7 @@ public class ReactiveTest {
         reactive.reset();
         Assert.assertFalse(reactive.isClosed());
         Assert.assertFalse(reactive.isClosedForPartition());
+        Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
     @Test
