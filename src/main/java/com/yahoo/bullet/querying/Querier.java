@@ -256,7 +256,7 @@ public class Querier implements Monoidal {
     public static final String AGGREGATION_FAILURE_RESOLUTION = "Please try again later";
 
     // For testing convenience
-    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private Scheme window;
 
     // For testing convenience
@@ -530,6 +530,19 @@ public class Querier implements Monoidal {
     }
 
     /**
+     * Returns a {@link RateLimitError} if the rate limit had exceeded the rate from a prior call to
+     * {@link #isExceedingRateLimit()}.
+     *
+     * @return A rate limit error or null if the rate limit was not exceeded.
+     */
+    public RateLimitError getRateLimitError() {
+        if (rateLimit == null || !rateLimit.isExceededRate()) {
+            return null;
+        }
+        return new RateLimitError(rateLimit.getCurrentRate(), config);
+    }
+
+    /**
      * Returns if this query has a time based window.
      *
      * @return A boolean that is true if this is a time based query window.
@@ -541,26 +554,16 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * If {@link #isExceedingRateLimit()}, returns a {@link RateLimitError}.
-     *
-     * @return A rate limit error or null if the rate limit was not exceeded.
-     */
-    public RateLimitError getRateLimitError() {
-        if (!isExceedingRateLimit()) {
-            return null;
-        }
-        return new RateLimitError(rateLimit.getCurrentRate(), config);
-    }
-
-    /**
      * Terminate the query and return the final result.
      *
      * @return The final non-null {@link Clip} representing the final result.
      */
     public Clip finish() {
+        Clip result = getResult();
         Meta meta = new Meta();
         addMetadata(Concept.QUERY_FINISH_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
-        return getResult().add(meta);
+        result.add(meta);
+        return result;
     }
 
     @Override

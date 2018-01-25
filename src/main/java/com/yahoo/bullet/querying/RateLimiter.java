@@ -27,6 +27,7 @@ public class RateLimiter {
     private long count = 0;
     private long lastCount = 0;
     private long lastCheckTime;
+    private boolean exceededRate = false;
 
     public static final int SECOND = 1000;
 
@@ -84,16 +85,22 @@ public class RateLimiter {
      * @return A boolean denoting whether the rate limit has been exceeded.
      */
     public boolean isRateLimited() {
+        // Once exceeded, always exceeded.
+        if (exceededRate) {
+            return true;
+        }
         long timeNow = System.currentTimeMillis();
         // Do nothing if too early
         if (isTooEarly(timeNow)) {
             return false;
         }
-        // It's time to check. Check if the count has exceeded the previous count, save it, update the last fields.
-        boolean rateExceeded = getCurrentRate(timeNow) > absoluteRateLimit;
-        lastCount = count;
-        lastCheckTime = timeNow;
-        return rateExceeded;
+        // It's time to check. Check if the count has exceeded the previous count, if so, update the last fields.
+        exceededRate = getCurrentRate(timeNow) > absoluteRateLimit;
+        if (!exceededRate) {
+            lastCount = count;
+            lastCheckTime = timeNow;
+        }
+        return exceededRate;
     }
 
     /**
@@ -105,6 +112,14 @@ public class RateLimiter {
         return getCurrentRate(System.currentTimeMillis());
     }
 
+    /**
+     * Test helper to reset the count.
+     */
+    void resetCounts() {
+        lastCount = 0;
+        count = 0;
+    }
+
     private boolean isTooEarly(long timeNow) {
         return Math.abs(timeNow - lastCheckTime) < timeInterval;
     }
@@ -113,4 +128,5 @@ public class RateLimiter {
         // If denominator is zero, it will be NaN or Infinity
         return (count - lastCount) / (double) (timeNow - lastCheckTime);
     }
+
 }

@@ -23,8 +23,8 @@ public class AdditiveTumbling extends Tumbling {
 
     @Override
     public void reset() {
+        // Don't reset the strategy.
         startedAt = System.currentTimeMillis();
-        // Just don't reset the strategy.
         windowCount++;
     }
 }

@@ -404,4 +404,3 @@ public class BulletConfig extends Config {
         return metadataList;
     }
 }
-

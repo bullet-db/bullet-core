@@ -80,10 +80,38 @@ public class RateLimiterTest {
 
         // Sleep for 1 ms to make sure we are over the time interval
         Thread.sleep(1);
-        // count is now 100 and our sleep should have exceeded the time interval
+        // count is now MAX_VALUE and our sleep should have exceeded the time interval
         Assert.assertTrue(limiter.isRateLimited());
+        Assert.assertTrue(limiter.getCurrentRate() > 10);
 
-        assertRateEquals(limiter, 0.0);
+        // Further calls should all be exceeding rate limit even if rate drops below threshold
+        limiter.resetCounts();
+        Assert.assertTrue(limiter.isRateLimited());
+    }
+
+    @Test
+    public void testExceedingRateLimitDoesNotCauseRatesToBeLost() throws Exception {
+        RateLimiter limiter = new RateLimiter(10, 1);
+
+        Assert.assertEquals(limiter.getMaximum(), 10);
+        Assert.assertEquals(limiter.getTimeInterval(), 1);
+        Assert.assertFalse(limiter.isRateLimited());
+
+        // Force the rate limit being exceeded.
+        limiter.add(Integer.MAX_VALUE);
+
+        // Sleep for 1 ms to make sure we are over the time interval
+        Thread.sleep(1);
+        // count is now MAX_VALUE and our sleep should have exceeded the time interval
+        Assert.assertTrue(limiter.isRateLimited());
+        double initialRate = limiter.getCurrentRate();
+        Assert.assertTrue(initialRate > 10);
+
+        // Sleep for 1 ms to make the time interval increase
+        Thread.sleep(1);
+        double finalRate = limiter.getCurrentRate();
+        Assert.assertTrue(finalRate > 10);
+        Assert.assertTrue(finalRate <= initialRate);
     }
 
     @Test
@@ -102,5 +130,22 @@ public class RateLimiterTest {
 
         limiter.add(Integer.MAX_VALUE);
         Assert.assertFalse(limiter.isRateLimited());
+    }
+
+    @Test
+    public void testRateNotExceededThenExceeded() throws Exception {
+        RateLimiter limiter = new RateLimiter(10, 1);
+        Assert.assertEquals(limiter.getMaximum(), 10);
+        Assert.assertEquals(limiter.getTimeInterval(), 1);
+
+        // Sleep for 1 ms to make sure we are over the time interval
+        Thread.sleep(1);
+
+        Assert.assertFalse(limiter.isRateLimited());
+
+        // Next interval
+        Thread.sleep(1);
+        limiter.add(Integer.MAX_VALUE);
+        Assert.assertTrue(limiter.isRateLimited());
     }
 }

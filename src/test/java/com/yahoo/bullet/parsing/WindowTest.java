@@ -226,4 +226,21 @@ public class WindowTest {
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_INCLUDE));
     }
+
+    @Test
+    public void testOneRecordWindow() {
+        BulletConfig config = new BulletConfig().validate();
+        Window actual = Window.oneRecordWindow(config);
+        Window expected = WindowUtils.makeReactiveWindow();
+        expected.configure(config);
+
+        Assert.assertFalse(expected.initialize().isPresent());
+        Assert.assertFalse(actual.initialize().isPresent());
+
+        Assert.assertEquals(actual.getEmit(), expected.getEmit());
+        Assert.assertEquals(actual.getInclude(), expected.getInclude());
+        Assert.assertEquals(actual.getEmitType(), expected.getEmitType());
+        Assert.assertEquals(actual.getIncludeType(), expected.getIncludeType());
+        Assert.assertEquals(actual.getType(), expected.getType());
+    }
 }

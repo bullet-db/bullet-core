@@ -20,7 +20,9 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.windowing.Reactive;
 import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.Tumbling;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,7 +47,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class QuerierTest {
-    private class FailingScheme extends Scheme {
+    private static class FailingScheme extends Scheme {
         int consumptionFailure = 0;
         int combiningFailure = 0;
         int serializingFailure = 0;
@@ -136,16 +138,27 @@ public class QuerierTest {
         return size;
     }
 
-    private static Querier make(Query query, BulletConfig config) {
-        return make("", query, config);
-    }
-
-    private static Querier make(String id, Query query, BulletConfig config) {
+    private static Querier make(String id, String query, BulletConfig config) {
         try {
-            return new Querier(new RunningQuery(id, query), config.validate());
+            return new Querier(id, query, config);
         } catch (BulletException e) {
             throw new RuntimeException(e);
         }
+    }
+    private static Querier make(String id, Query query, BulletConfig config) {
+        try {
+            return new Querier(new RunningQuery(id, query), config);
+        } catch (BulletException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Querier make(String query, BulletConfig config) {
+        return make("", query, config);
+    }
+
+    private static Querier make(Query query, BulletConfig config) {
+        return make("", query, config);
     }
 
     private static Querier make(Query query) {
@@ -159,15 +172,10 @@ public class QuerierTest {
     }
 
     private static Querier make(String id, String query, Map<String, Object> configuration) {
-        try {
-            BulletConfig config = new BulletConfig();
-            configuration.forEach(config::set);
-            config.validate();
-
-            return new Querier(id, query, config);
-        } catch (BulletException e) {
-            throw new RuntimeException(e);
-        }
+        BulletConfig config = new BulletConfig();
+        configuration.forEach(config::set);
+        config.validate();
+        return make(id, query, config);
     }
 
     @Test
@@ -178,24 +186,31 @@ public class QuerierTest {
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertFalse(querier.isDone());
+        Assert.assertFalse(querier.isExceedingRateLimit());
+        Assert.assertNull(querier.getRateLimitError());
+        Assert.assertTrue(querier.isTimeBasedWindow());
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
     @Test(expectedExceptions = BulletException.class)
     public void testValidationFail() throws BulletException {
-        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
-    }
-
-    @Test(expectedExceptions = JsonParseException.class)
-    public void testBadJSON() {
-        make("{", emptyMap());
+        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig().validate());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullConfig() throws BulletException {
         new Querier("", "{}", null);
+    }
+
+    @Test(expectedExceptions = JsonParseException.class)
+    public void testBadJSON() {
+        make("{", new BulletConfig().validate());
+    }
+
+    @Test(expectedExceptions = BulletException.class)
+    public void testBadAggregation() throws BulletException {
+        new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig().validate());
     }
 
     @Test
@@ -221,6 +236,19 @@ public class QuerierTest {
         long endTime = System.currentTimeMillis();
         Assert.assertTrue(creationTime >= startTime && creationTime <= endTime);
         Assert.assertTrue(resultTime >= creationTime && resultTime <= endTime);
+
+        Clip finalResult = querier.finish();
+        Assert.assertNotNull(finalResult);
+        Assert.assertTrue(finalResult.getRecords().isEmpty());
+
+        meta = finalResult.getMeta().asMap();
+        creationTime = ((Number) meta.get(Meta.Concept.QUERY_RECEIVE_TIME.getName())).longValue();
+        resultTime = ((Number) meta.get(Meta.Concept.RESULT_EMIT_TIME.getName())).longValue();
+        long finishTime = ((Number) meta.get(Meta.Concept.QUERY_FINISH_TIME.getName())).longValue();
+        endTime = System.currentTimeMillis();
+        Assert.assertTrue(creationTime >= startTime && creationTime <= finishTime);
+        Assert.assertTrue(resultTime >= startTime && resultTime <= finishTime);
+        Assert.assertTrue(finishTime <= endTime);
     }
 
     @Test
@@ -497,5 +525,69 @@ public class QuerierTest {
         Assert.assertTrue(querierA.isDone());
         Assert.assertTrue(querierA.haveData());
         Assert.assertEquals(querierA.getData(), expectedTwice);
+    }
+
+    @Test
+    public void testRawQueriesWithNonTimeWindowsAreForcedToReactive() {
+        Querier querier = make("{'window': {'emit': {'type': 'RECORD', 'every': 2}}}", emptyMap());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isTimeBasedWindow());
+
+        querier.consume(RecordBox.get().getRecord());
+
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertEquals(querier.getWindow().getClass(), Reactive.class);
+    }
+
+    @Test
+    public void testRawQueriesWithTimeWindowsAreNotChanged() {
+        Querier querier = make("{'window': {'emit': {'type': 'TIME', 'every': 20000000}}}", emptyMap());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertTrue(querier.isTimeBasedWindow());
+
+        querier.consume(RecordBox.get().getRecord());
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertEquals(querier.getWindow().getClass(), Tumbling.class);
+    }
+
+    @Test
+    public void testRateLimiting() throws Exception {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RATE_LIMIT_ENABLE, true);
+        config.set(BulletConfig.RATE_LIMIT_TIME_INTERVAL, 1);
+        config.set(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, 1);
+        config.validate();
+
+        Querier querier = make("{}", config);
+        Assert.assertFalse(querier.isExceedingRateLimit());
+        Assert.assertNull(querier.getRateLimitError());
+
+
+        IntStream.range(0, 1000).forEach(i -> querier.getRecords());
+
+        // To make sure it's time to check again
+        Thread.sleep(1);
+
+        Assert.assertTrue(querier.isExceedingRateLimit());
+        Assert.assertNotNull(querier.getRateLimitError());
+    }
+
+    @Test
+    public void testRateLimitDisabled() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RATE_LIMIT_ENABLE, false);
+        config.set(BulletConfig.RATE_LIMIT_TIME_INTERVAL, 1);
+        config.set(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, 1);
+        config.validate();
+
+        Querier querier = make("{}", config);
+        IntStream.range(0, 1000).forEach(i -> querier.getRecords());
+        Assert.assertFalse(querier.isExceedingRateLimit());
+        Assert.assertNull(querier.getRateLimitError());
     }
 }
