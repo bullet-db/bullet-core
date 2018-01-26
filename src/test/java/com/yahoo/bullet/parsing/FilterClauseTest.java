@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -34,6 +35,32 @@ public class FilterClauseTest {
     }
 
     @Test
+    public void testConfigureForPatterns() {
+        FilterClause filterClause = new FilterClause();
+        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
+        filterClause.setValues(singletonList(".g.*"));
+        Assert.assertNull(filterClause.getPatterns());
+        filterClause.configure(new BulletConfig());
+        Assert.assertFalse(filterClause.initialize().isPresent());
+        List<Pattern> actual = filterClause.getPatterns();
+        Assert.assertNotNull(actual);
+        Assert.assertEquals(actual.size(), 1);
+        Assert.assertEquals(actual.get(0).pattern(), ".g.*");
+    }
+
+    @Test
+    public void testConfigureForBadPatterns() {
+        FilterClause filterClause = new FilterClause();
+        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
+        filterClause.setValues(singletonList("*TEST*"));
+        Assert.assertNull(filterClause.getPatterns());
+        filterClause.configure(new BulletConfig());
+        Assert.assertFalse(filterClause.initialize().isPresent());
+        Assert.assertNotNull(filterClause.getPatterns());
+        Assert.assertTrue(filterClause.getPatterns().isEmpty());
+    }
+
+    @Test
     public void testInitializeNoOperation() {
         FilterClause filterClause = new FilterClause();
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
@@ -49,32 +76,6 @@ public class FilterClauseTest {
         filterClause.setOperation(Clause.Operation.EQUALS);
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
-    }
-
-    @Test
-    public void testInitializeForPatterns() {
-        FilterClause filterClause = new FilterClause();
-        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
-        filterClause.setValues(singletonList(".g.*"));
-        Assert.assertNull(filterClause.getPatterns());
-        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
-        Assert.assertFalse(optionalErrors.isPresent());
-        List<Pattern> actual = filterClause.getPatterns();
-        Assert.assertNotNull(actual);
-        Assert.assertEquals(actual.size(), 1);
-        Assert.assertEquals(actual.get(0).pattern(), ".g.*");
-    }
-
-    @Test
-    public void testInitializeForBadPatterns() {
-        FilterClause filterClause = new FilterClause();
-        filterClause.setOperation(Clause.Operation.REGEX_LIKE);
-        filterClause.setValues(singletonList("*TEST*"));
-        Assert.assertNull(filterClause.getPatterns());
-        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
-        Assert.assertFalse(optionalErrors.isPresent());
-        Assert.assertNotNull(filterClause.getPatterns());
-        Assert.assertTrue(filterClause.getPatterns().isEmpty());
     }
 
     @Test

@@ -229,7 +229,7 @@ public class WindowTest {
 
     @Test
     public void testOneRecordWindow() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Window actual = Window.oneRecordWindow(config);
         Window expected = WindowUtils.makeReactiveWindow();
         expected.configure(config);

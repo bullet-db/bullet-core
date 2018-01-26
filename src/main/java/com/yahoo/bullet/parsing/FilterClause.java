@@ -6,14 +6,13 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -39,12 +38,12 @@ public class FilterClause extends Clause {
         operation = null;
     }
 
+
     @Override
-    public Optional<List<BulletError>> initialize() {
+    public void configure(BulletConfig configuration) {
         if (operation == REGEX_LIKE) {
             patterns = values.stream().map(FilterClause::compile).filter(Objects::nonNull).collect(Collectors.toList());
         }
-        return super.initialize();
     }
 
     @Override

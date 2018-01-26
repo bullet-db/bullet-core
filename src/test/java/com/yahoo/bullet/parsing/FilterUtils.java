@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.typesystem.Type;
 
 import java.util.Collections;
@@ -27,6 +28,7 @@ public class FilterUtils {
         if (clauses != null) {
             clause.setClauses(asList(clauses));
         }
+        clause.configure(new BulletConfig());
         clause.initialize();
         return clause;
     }
@@ -36,6 +38,7 @@ public class FilterUtils {
         clause.setField(field);
         clause.setValues(values == null ? Collections.singletonList(Type.NULL_EXPRESSION) : values);
         clause.setOperation(operation);
+        clause.configure(new BulletConfig());
         clause.initialize();
         return clause;
     }

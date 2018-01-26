@@ -42,7 +42,7 @@ public class GroupAllTest {
 
     @SafeVarargs
     public static GroupAll makeGroupAll(Map<String, String>... groupOperations) {
-        GroupAll all = new GroupAll(makeAggregation(makeAttributes(groupOperations)), new BulletConfig().validate());
+        GroupAll all = new GroupAll(makeAggregation(makeAttributes(groupOperations)), new BulletConfig());
         all.initialize();
         return all;
     }
@@ -53,7 +53,7 @@ public class GroupAllTest {
                                                                .collect(Collectors.toList());
 
         when(aggregation.getAttributes()).thenReturn(makeAttributes(operations));
-        GroupAll all = new GroupAll(aggregation, new BulletConfig().validate());
+        GroupAll all = new GroupAll(aggregation, new BulletConfig());
         all.initialize();
         return all;
     }

@@ -23,7 +23,7 @@ public class QueryTest {
     @Test
     public void testDefaults() {
         Query query = new Query();
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         query.configure(config);
 
         Assert.assertNull(query.getProjection());
@@ -41,7 +41,7 @@ public class QueryTest {
         Assert.assertNull(query.getFilters());
         // If you had null for aggregation
         Assert.assertNull(query.getAggregation());
-        query.configure(new BulletConfig().validate());
+        query.configure(new BulletConfig());
         Assert.assertNotNull(query.getAggregation());
     }
 
@@ -54,7 +54,7 @@ public class QueryTest {
         query.setAggregation(aggregation);
 
         Assert.assertNull(aggregation.getType());
-        query.configure(new BulletConfig().validate());
+        query.configure(new BulletConfig());
 
         // Query no longer fixes type
         Assert.assertNull(aggregation.getType());
@@ -63,7 +63,7 @@ public class QueryTest {
 
     @Test
     public void testDuration() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
 
         Query query = new Query();
         query.configure(config);
@@ -135,7 +135,7 @@ public class QueryTest {
 
     @Test
     public void testWindowForced() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Query query = new Query();
         query.setWindow(WindowUtils.makeReactiveWindow());
         query.configure(config);
@@ -178,7 +178,7 @@ public class QueryTest {
         query.setProjection(null);
         query.setFilters(null);
         query.setAggregation(null);
-        query.configure(new BulletConfig().validate());
+        query.configure(new BulletConfig());
         Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertFalse(errorList.isPresent());
     }

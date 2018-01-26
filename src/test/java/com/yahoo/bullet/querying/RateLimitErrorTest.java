@@ -21,7 +21,7 @@ import static com.yahoo.bullet.common.BulletConfig.DEFAULT_RATE_LIMIT_TIME_INTER
 public class RateLimitErrorTest {
     @Test
     public void testMetaAndRateConversion() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         RateLimitError error = new RateLimitError(19.34, config);
         Map<String, Object> actual = error.makeMeta().asMap();
         Assert.assertTrue(actual.containsKey(Meta.ERROR_KEY));

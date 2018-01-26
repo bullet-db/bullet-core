@@ -200,17 +200,17 @@ public class QuerierTest {
 
     @Test(expectedExceptions = JsonParseException.class)
     public void testBadJSON() {
-        make("{", new BulletConfig().validate());
+        make("{", new BulletConfig());
     }
 
     @Test(expectedExceptions = BulletException.class)
     public void testMissingAggregationType() throws BulletException {
-        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig().validate());
+        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
     }
 
     @Test(expectedExceptions = BulletException.class)
     public void testBadAggregation() throws BulletException {
-        new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig().validate());
+        new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig());
     }
 
     @Test
@@ -218,7 +218,7 @@ public class QuerierTest {
         Querier querier = make("ahdf3", "{}", emptyMap());
         Assert.assertEquals(querier.toString(), "ahdf3 : {}");
 
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Query query = new Query();
         query.configure(config);
         query.initialize();
@@ -592,7 +592,7 @@ public class QuerierTest {
 
     @Test
     public void testRawQueriesWithNonTimeWindowsAreForcedToReactive() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Query query = new Query();
         query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
         query.configure(config);
@@ -611,7 +611,7 @@ public class QuerierTest {
 
     @Test
     public void testRawQueriesWithTimeWindowsAreNotChanged() {
-        BulletConfig config = new BulletConfig().validate();
+        BulletConfig config = new BulletConfig();
         Query query = new Query();
         query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, Integer.MAX_VALUE));
         query.configure(config);

@@ -33,7 +33,7 @@ public class BasicTest {
 
     @BeforeMethod
     private void setup() {
-        config = new BulletConfig().validate();
+        config = new BulletConfig();
         strategy = new MockStrategy();
     }
 
