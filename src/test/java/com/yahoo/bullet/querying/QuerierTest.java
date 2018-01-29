@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
+import com.yahoo.bullet.aggregations.SketchingStrategy;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
@@ -139,18 +140,21 @@ public class QuerierTest {
     }
 
     private static Querier make(String id, String query, BulletConfig config) {
-        try {
-            return new Querier(id, query, config);
-        } catch (BulletException e) {
-            throw new RuntimeException(e);
+        Querier querier = new Querier(id, query, config);
+        Optional<List<BulletError>> errors = querier.initialize();
+        if (errors.isPresent()) {
+            throw new RuntimeException(errors.toString());
         }
+        return querier;
     }
+
     private static Querier make(String id, Query query, BulletConfig config) {
-        try {
-            return new Querier(new RunningQuery(id, query), config);
-        } catch (BulletException e) {
-            throw new RuntimeException(e);
+        Querier querier = new Querier(new RunningQuery(id, query), config);
+        Optional<List<BulletError>> errors = querier.initialize();
+        if (errors.isPresent()) {
+            throw new RuntimeException(errors.toString());
         }
+        return querier;
     }
 
     private static Querier make(String query, BulletConfig config) {
@@ -194,7 +198,7 @@ public class QuerierTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void testNullConfig() throws BulletException {
+    public void testNullConfig() {
         new Querier("", "{}", null);
     }
 
@@ -203,14 +207,22 @@ public class QuerierTest {
         make("{", new BulletConfig());
     }
 
-    @Test(expectedExceptions = BulletException.class)
-    public void testMissingAggregationType() throws BulletException {
-        new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
+    @Test
+    public void testMissingAggregationType() {
+        Querier querier = new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
+        Optional<List<BulletError>> errors = querier.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().size(), 1);
+        Assert.assertEquals(errors.get().get(0), Aggregation.TYPE_NOT_SUPPORTED_ERROR);
     }
 
-    @Test(expectedExceptions = BulletException.class)
+    @Test
     public void testBadAggregation() throws BulletException {
-        new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig());
+        Querier querier = new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig());
+        Optional<List<BulletError>> errors = querier.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().size(), 1);
+        Assert.assertEquals(errors.get().get(0), SketchingStrategy.REQUIRES_FIELD_ERROR);
     }
 
     @Test

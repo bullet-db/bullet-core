@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
@@ -31,16 +30,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.yahoo.bullet.common.Initializable.tryInitializing;
-
 /**
  * This manages a {@link RunningQuery} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
  * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
  * itself with another instance of running query using {@link #merge(Monoidal)}. Use {@link #finish()} to retrieve the
  * final results and terminate the query.
  *
- * <p>If you serialize this object, you must call {@link #start()} or {@link #initialize()} before using it after
- * deserialization.</p>
+ * <p>After you create this object, you <strong>must call</strong> {@link #initialize()} before using it.</p>
  *
  * <p>Ideally to implement Bullet, you would parallelize into two stages:</p>
  *
@@ -62,7 +58,8 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * <li>
  *   For each Query message from the PubSub, check to see if it is has a KILL signal.
  *   If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
- *   If no, create an instance of {@link Querier} for the query. If any exceptions, ignore them.
+ *   If no, create an instance of {@link Querier} for the query. If any exceptions or errors initializing, throw away
+ *   the querier.
  * </li>
  * <li>
  *   For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects
@@ -92,7 +89,7 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * You can also use {@link #haveData()} to check if there is any data to emit if you need. If you do not want to call
  * {@link #getData()}, you can serialize Querier using non-native serialization frameworks and use {@link #merge(Monoidal)}
  * in the Join stage to merge them into an empty Querier for the query. This will be equivalent to calling
- * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #start()} or {@link #initialize()}
+ * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
  * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
  *
  * <h4>Pseudo Code</h4>
@@ -104,7 +101,7 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * if (metadata.hasSignal(Signal.KILL))
  *     remove Querier for id
  * else
- *     create new Querier(id, queryBody, config);
+ *     create new Querier(id, queryBody, config) and initialize it;
  * </pre>
  *
  * <h5>Case 2: BulletRecord record</h5>
@@ -143,8 +140,8 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  *
  * <ol>
  * <li>
- *   For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions,
- *   make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
+ *   For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions or
+ *   errors initializing it, make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
  * </li>
  * <li>
  *   For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
@@ -189,9 +186,8 @@ import static com.yahoo.bullet.common.Initializable.tryInitializing;
  * (String id, String queryBody, Metadata metadata) = Query
  * try {
  *     create new Querier(id, queryBody, config)
- * catch (BulletException e)
- *     Clip clip = Clip.of(Meta.of(e.getErrors()));
- *     emit(clip)
+ *     initialize it and if errors present:
+ *         emit(Clip.of(Meta.of(errors.get()));
  * catch (Exception e) {
  *     Clip clip = Clip.of(Meta.of(asList(BulletError.makeError(e, queryBody)))
  *     emit(clip)
@@ -278,10 +274,9 @@ public class Querier implements Monoidal {
      * @param id The query ID.
      * @param queryString The query as a string.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws BulletException if there was an issue starting the query.
      * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException, BulletException {
+    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException {
         this(new RunningQuery(id, queryString, config), config);
     }
 
@@ -291,23 +286,10 @@ public class Querier implements Monoidal {
      *
      * @param query The running query.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws BulletException if there was an issue with setting up the query.
      */
-    public Querier(RunningQuery query, BulletConfig config) throws BulletException {
+    public Querier(RunningQuery query, BulletConfig config) {
         this.runningQuery = query;
         this.config = config;
-        start();
-    }
-
-    /**
-     * Starts the query and throws a {@link BulletException} with any errors if it was not possible to start the query.
-     *
-     * @return This object for chaining.
-     * @throws BulletException if there were issues starting the query.
-     */
-    public Querier start() throws BulletException {
-        tryInitializing(this);
-        return this;
     }
 
     // ********************************* Monoidal Interface Overrides *********************************

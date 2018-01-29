@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A wrapper for a query.
+ * A wrapper for a running query.
  */
 public class RunningQuery implements Initializable {
     @Getter
