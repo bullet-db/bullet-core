@@ -56,7 +56,7 @@ import java.util.function.Consumer;
  *
  * <ol>
  * <li>
- *   For each Query message from the PubSub, check to see if it is has a KILL signal.
+ *   For each Query message from the PubSub, check to see if it is has a KILL or COMPLETE signal.
  *   If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
  *   If no, create an instance of {@link Querier} for the query. If any exceptions or errors initializing, throw away
  *   the querier.
@@ -98,7 +98,7 @@ import java.util.function.Consumer;
  *
  * <pre>
  * (String id, String queryBody, Metadata metadata) = Query
- * if (metadata.hasSignal(Signal.KILL))
+ * if (metadata.hasSignal(Signal.KILL) || metadata.hasSignal(Signal.COMPLETE))
  *     remove Querier for id
  * else
  *     create new Querier(id, queryBody, config) and initialize it;
@@ -112,10 +112,10 @@ import java.util.function.Consumer;
  *         emit(q.getData())
  *         remove q
  *     else
- *         q.consume(record)
  *         if (q.isClosedForPartition())
  *             emit(q.getData())
  *             q.reset()
+     *         q.consume(record)
  *         if (q.isExceedingRateLimit())
  *             emit(q.getRateLimitError())
  *             remove q
@@ -152,7 +152,8 @@ import java.util.function.Consumer;
  *   For each (id, byte[]) data from the Filter stage, call {@link #combine(byte[])} for the querier for that id.
  * </li>
  * <li>
- *   If {@link #isDone()}, call {@link #getResult()} to emit the final result and remove the querier.
+ *   If {@link #isDone()}, call {@link #getResult()} to emit the final result and remove the querier. Emit a
+ *   COMPLETE signal to the PubSub Publisher for queries to feed back the complete status to the Filter stage.
  * </li>
  * <li>
  *   If {@link #isClosed}, use {@link #getResult()} ()} to emit the intermediate result and call {@link #reset()}
@@ -217,6 +218,7 @@ import java.util.function.Consumer;
  * if (querier.isDone())
  *     Clip clip = querier.finish()
  *     emit(clip)
+ *     queryPubSubPublisher.emit(
  * else if (querier.isClosed())
  *     Clip clip = querier.getResult()
  *     // See note above regarding buffering if querier.isTimeBasedWindow()
@@ -345,8 +347,8 @@ public class Querier implements Monoidal {
      */
     @Override
     public void consume(BulletRecord record) {
-        // Ignore if query is expired, closed, or doesn't match filters. But consume if the window.isClosedForPartition.
-        if (isDone() || isClosed() || !filter(record)) {
+        // Ignore if query is expired, or doesn't match filters. But consume if the window is closed (partition or otherwise)
+        if (isDone() || !filter(record)) {
             return;
         }
 

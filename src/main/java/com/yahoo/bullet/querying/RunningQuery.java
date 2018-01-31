@@ -25,6 +25,7 @@ public class RunningQuery implements Initializable {
     private final long startTime;
     @Getter
     private final Query query;
+
     private String queryString;
 
     /**
@@ -48,7 +49,7 @@ public class RunningQuery implements Initializable {
      * @param id The non-null String query ID.
      * @param query The non-null configured query.
      */
-    public RunningQuery(String id, Query query) {
+    RunningQuery(String id, Query query) {
         this.id = id;
         this.query = query;
         startTime = System.currentTimeMillis();

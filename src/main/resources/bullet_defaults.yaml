@@ -154,7 +154,7 @@ bullet.result.metadata.metrics:
       key: "Query Finish Time"
     - name: "Sketch Metadata"
       key: "Sketch"
-    - name: "Sketch Estimated"
+    - name: "Sketch Estimated Result"
       key: "Was Estimated"
     - name: "Sketch Standard Deviations"
       key: "Standard Deviations"
