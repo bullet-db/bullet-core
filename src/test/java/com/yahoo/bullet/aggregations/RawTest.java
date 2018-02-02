@@ -107,10 +107,9 @@ public class RawTest {
         Assert.assertTrue(raw.isClosed());
 
         BulletRecord recordC = RecordBox.get().add("baz", "qux").getRecord();
-
-        // This consumption should not occur
+        // If you feed it data, it will still consume
         raw.consume(recordC);
-        Assert.assertEquals(raw.getData(), getListBytes(recordA, recordB));
+        Assert.assertEquals(raw.getData(), getListBytes(recordA, recordB, recordC));
 
         raw.reset();
         Assert.assertNull(raw.getData());
@@ -125,11 +124,12 @@ public class RawTest {
         Assert.assertEquals(aggregate.size(), 0);
 
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
+        // If you feed it data, it will still consume
         raw.consume(record);
 
         Assert.assertTrue(raw.isClosed());
-        Assert.assertNull(raw.getData());
-        Assert.assertEquals(raw.getResult().getRecords().size(), 0);
+        Assert.assertEquals(raw.getData(), getListBytes(record));
+        Assert.assertEquals(raw.getResult().getRecords().size(), 1);
     }
 
     @Test

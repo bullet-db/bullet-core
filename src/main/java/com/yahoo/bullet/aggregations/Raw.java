@@ -56,7 +56,7 @@ public class Raw implements Strategy {
 
     @Override
     public void consume(BulletRecord data) {
-        if (isClosed() || data == null) {
+        if (data == null) {
             return;
         }
         consumed++;
@@ -72,7 +72,7 @@ public class Raw implements Strategy {
      */
     @Override
     public void combine(byte[] data) {
-        if (isClosed() || data == null) {
+        if (data == null) {
             return;
         }
         ArrayList<BulletRecord> batch = SerializerDeserializer.fromBytes(data);
