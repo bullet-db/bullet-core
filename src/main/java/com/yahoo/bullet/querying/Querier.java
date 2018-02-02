@@ -140,8 +140,9 @@ import java.util.function.Consumer;
  *
  * <ol>
  * <li>
- *   For each Query message from the PubSub, create an instance of {@link Querier} for the query. If any exceptions or
- *   errors initializing it, make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
+ *   For each Query message from the PubSub, if it is a KILL signal similar to the Filter stage, kill the query and
+ *   return. Otherwise create an instance of {@link Querier} for the query. If any exceptions or errors initializing it,
+ *   make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
  * </li>
  * <li>
  *   For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
@@ -185,6 +186,9 @@ import java.util.function.Consumer;
  * <h5>Case 1:  Query</h5>
  * <pre>
  * (String id, String queryBody, Metadata metadata) = Query
+ * if (metadata.hasSignal(Signal.KILL))
+ *     remove Querier for id
+ *     return
  * try {
  *     create new Querier(id, queryBody, config)
  *     initialize it and if errors present:
