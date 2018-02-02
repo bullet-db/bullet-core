@@ -38,7 +38,6 @@ public class Query implements Configurable, Initializable {
      * Default constructor. GSON recommended.
      */
     public Query() {
-        filters = null;
         // If no aggregation is provided, the default one is used. Aggregations must be present.
         aggregation = new Aggregation();
     }

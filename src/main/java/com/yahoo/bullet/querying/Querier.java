@@ -86,7 +86,7 @@ import java.util.function.Consumer;
  * </li>
  * </ol>
  *
- * You can also use {@link #haveData()} to check if there is any data to emit if you need. If you do not want to call
+ * You can also use {@link #hasData()} to check if there is any data to emit if you need. If you do not want to call
  * {@link #getData()}, you can serialize Querier using non-native serialization frameworks and use {@link #merge(Monoidal)}
  * in the Join stage to merge them into an empty Querier for the query. This will be equivalent to calling
  * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
@@ -264,7 +264,7 @@ public class Querier implements Monoidal {
     private BulletConfig config;
     private Map<String, String> metaKeys;
     private String timestampKey;
-    private boolean haveData = false;
+    private boolean hasData = false;
 
     // This is counting the number of times we get the data out of the query.
     private RateLimiter rateLimit;
@@ -310,8 +310,8 @@ public class Querier implements Monoidal {
             timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
         }
 
-        boolean isRateLimited = config.getAs(BulletConfig.RATE_LIMIT_ENABLE, Boolean.class);
-        if (isRateLimited) {
+        boolean isRateLimitEnabled = config.getAs(BulletConfig.RATE_LIMIT_ENABLE, Boolean.class);
+        if (isRateLimitEnabled) {
             int maxEmit = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
             int timeInterval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
             rateLimit = new RateLimiter(maxEmit, timeInterval);
@@ -355,7 +355,7 @@ public class Querier implements Monoidal {
         BulletRecord projected = project(record);
         try {
             window.consume(projected);
-            haveData = true;
+            hasData = true;
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
@@ -372,7 +372,7 @@ public class Querier implements Monoidal {
     public void combine(byte[] data) {
         try {
             window.combine(data);
-            haveData = true;
+            hasData = true;
         } catch (RuntimeException e) {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
@@ -467,7 +467,7 @@ public class Querier implements Monoidal {
     @Override
     public void reset() {
         window.reset();
-        haveData = false;
+        hasData = false;
     }
 
     // ********************************* Public helpers *********************************
@@ -501,8 +501,8 @@ public class Querier implements Monoidal {
      *
      * @return A boolean denoting whether we have any data that can be emitted.
      */
-    public boolean haveData() {
-        return haveData;
+    public boolean hasData() {
+        return hasData;
     }
 
     /**

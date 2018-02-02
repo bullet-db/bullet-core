@@ -439,14 +439,14 @@ public class QuerierTest {
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expected);
 
         querier.consume(RecordBox.get().getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because window is closed
@@ -454,7 +454,7 @@ public class QuerierTest {
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expectedTwice);
     }
 
@@ -471,7 +471,7 @@ public class QuerierTest {
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expected);
 
         // Doesn't match
@@ -479,14 +479,14 @@ public class QuerierTest {
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expected);
 
         querier.consume(RecordBox.get().add("mid", "23").getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because window is closed
@@ -494,14 +494,14 @@ public class QuerierTest {
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.haveData());
+        Assert.assertTrue(querier.hasData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         querier.reset();
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertFalse(querier.haveData());
+        Assert.assertFalse(querier.hasData());
         Assert.assertNull(querier.getData());
     }
 
@@ -527,21 +527,21 @@ public class QuerierTest {
         Assert.assertFalse(querierA.isClosed());
         Assert.assertFalse(querierA.isClosedForPartition());
         Assert.assertFalse(querierA.isDone());
-        Assert.assertTrue(querierA.haveData());
+        Assert.assertTrue(querierA.hasData());
         Assert.assertEquals(querierA.getData(), expected);
 
         querierB.consume(RecordBox.get().getRecord());
         Assert.assertFalse(querierB.isClosed());
         Assert.assertFalse(querierB.isClosedForPartition());
         Assert.assertFalse(querierB.isDone());
-        Assert.assertTrue(querierB.haveData());
+        Assert.assertTrue(querierB.hasData());
         Assert.assertEquals(querierB.getData(), expected);
 
         querierA.merge(querierB);
         Assert.assertTrue(querierA.isClosed());
         Assert.assertTrue(querierA.isClosedForPartition());
         Assert.assertTrue(querierA.isDone());
-        Assert.assertTrue(querierA.haveData());
+        Assert.assertTrue(querierA.hasData());
         Assert.assertEquals(querierA.getData(), expectedTwice);
     }
 
