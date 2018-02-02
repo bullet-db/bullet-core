@@ -332,6 +332,12 @@ public class BulletConfig extends Config {
         VALIDATOR.validate(config);
     }
 
+    @Override
+    public void merge(Config other) {
+        super.merge(other);
+        validate(this);
+    }
+
     @SuppressWarnings("unchecked")
     private static Object mapifyMetadata(Object metadata) {
         List<Map> entries = (List<Map>) metadata;

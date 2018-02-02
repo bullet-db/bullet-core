@@ -143,17 +143,26 @@ public class BulletConfigTest {
 
         Config another = new BulletConfig(null);
         another.clear();
-        another.set(BulletConfig.QUERY_MAX_DURATION, 42);
+        another.set(BulletConfig.QUERY_MAX_DURATION, 15000L);
+        // This is a bad setting
+        another.set(BulletConfig.AGGREGATION_MAX_SIZE, -1);
+        // Some other non-Bullet settingb
         config.set("pi", 3.14);
 
         config.merge(another);
 
-        // Test null
-        config.merge(null);
-
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 42);
-        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), 500);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 15000L);
+        // Bad setting gets defaulted.
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE);
+        // Other setting is preserved.
+        Assert.assertEquals(config.get("pi"), 3.14);
+
+        // Test null and verify it is unchanged
+        config.merge(null);
+        Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
+        Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 15000L);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
 
