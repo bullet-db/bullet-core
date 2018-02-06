@@ -70,5 +70,23 @@ public class RunningQueryTest {
         long end = System.currentTimeMillis();
         Assert.assertTrue(runningQuery.getStartTime() >= start);
         Assert.assertTrue(runningQuery.getStartTime() <= end);
+        Assert.assertFalse(runningQuery.isTimedOut());
+    }
+
+    @Test
+    public void testTimingOut() throws Exception {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        query.setAggregation(new Aggregation());
+        query.setDuration(1L);
+        query.configure(config);
+        Assert.assertFalse(query.initialize().isPresent());
+        RunningQuery runningQuery = new RunningQuery("foo", query);
+        Assert.assertFalse(runningQuery.initialize().isPresent());
+
+        // Sleep to make sure it's 1 ms
+        Thread.sleep(1);
+
+        Assert.assertTrue(runningQuery.isTimedOut());
     }
 }

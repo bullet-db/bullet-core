@@ -65,4 +65,15 @@ public class RunningQuery implements Initializable {
         String body = queryString != null ? queryString : query.toString();
         return String.format("%s : %s", id, body);
     }
+
+    /**
+     * Returns true if this running query has timed out. In other words, it returns whether this has been running
+     * longer than the query duraton.
+     *
+     * @return A boolean denoting whether this query has timed out.
+     */
+    public boolean isTimedOut() {
+        // Never add to query.getDuration since it can be infinite (Long.MAX_VALUE)
+        return System.currentTimeMillis() - startTime >= query.getDuration();
+    }
 }

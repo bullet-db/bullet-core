@@ -495,8 +495,8 @@ public class Querier implements Monoidal {
      * @return A boolean denoting whether the query has expired.
      */
     public boolean isDone() {
-        // We're done with the query if this is the last window and it is closed or query has expired
-        return (isLastWindow() && window.isClosed()) || timeIsUp();
+        // We're done with the query if this is the last window and it is closed or query has timed out.
+        return (isLastWindow() && window.isClosed()) || runningQuery.isTimedOut();
     }
 
     /**
@@ -600,11 +600,6 @@ public class Querier implements Monoidal {
 
     private void addMetadata(Concept concept, Consumer<String> action) {
         Meta.consumeRegisteredConcept(concept, metaKeys, action);
-    }
-
-    private boolean timeIsUp() {
-        // Never add to query.getDuration since it can be infinite (Long.MAX_VALUE)
-        return System.currentTimeMillis() - runningQuery.getStartTime() >= runningQuery.getQuery().getDuration();
     }
 
     private boolean isLastWindow() {
