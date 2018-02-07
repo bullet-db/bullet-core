@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.common;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class Validator {
      * conversion using {@link Entry#castTo(Function)}. These are all applied when you call
      * {@link Entry#normalize(BulletConfig)} with a {@link BulletConfig} containing a field that matches the Entry.
      */
-    public class Entry {
+    public static class Entry {
         private String key;
         private Predicate<Object> validation;
         private Predicate<Object> guard;
@@ -48,6 +50,15 @@ public class Validator {
             this.validation = UNARY_IDENTITY;
             this.guard = UNARY_IDENTITY.negate();
             this.key = key;
+        }
+
+        private Entry copy() {
+            Entry entry = new Entry(key);
+            entry.adapter = adapter;
+            entry.defaultValue = defaultValue;
+            entry.validation = validation;
+            entry.guard = guard;
+            return entry;
         }
 
         /**
@@ -148,7 +159,7 @@ public class Validator {
      * {@link BiPredicate} to these fields and provide or use their defined defaults (defined using
      * {@link Entry#defaultTo(Object)}) if the check fails.
      */
-    public class Relationship {
+    public static class Relationship {
         private String keyA;
         private String keyB;
         private String description;
@@ -156,7 +167,7 @@ public class Validator {
         private Object defaultA;
         private Object defaultB;
 
-        private Relationship(String description, String keyA, String keyB) {
+        private Relationship(String description, String keyA, String keyB, Map<String, Entry> entries) {
             this.description = description;
             this.keyA = keyA;
             this.keyB = keyB;
@@ -164,6 +175,14 @@ public class Validator {
             this.defaultA = entries.get(keyA).getDefaultValue();
             this.defaultB = entries.get(keyB).getDefaultValue();
             this.binaryRelation = BINARY_IDENTITY;
+        }
+
+        private Relationship copy(Map<String, Entry> entries) {
+            Relationship relation = new Relationship(description, keyA, keyB, entries);
+            relation.binaryRelation = binaryRelation;
+            relation.defaultA = defaultA;
+            relation.defaultB = defaultB;
+            return relation;
         }
 
         /**
@@ -211,8 +230,25 @@ public class Validator {
         }
     }
 
-    private final Map<String, Entry> entries = new HashMap<>();
-    private final List<Relationship> relations = new ArrayList<>();
+    @Getter(AccessLevel.PACKAGE)
+    private final Map<String, Entry> entries;
+    @Getter(AccessLevel.PACKAGE)
+    private final List<Relationship> relations;
+
+    /**
+     * Default constructor.
+     */
+    public Validator() {
+        entries = new HashMap<>();
+        relations = new ArrayList<>();
+    }
+
+    private Validator(Map<String, Entry> entries, List<Relationship> relations) {
+        // Copy constructor.
+        this();
+        entries.forEach((name, entry) -> this.entries.put(name, entry.copy()));
+        relations.forEach(relation -> this.relations.add(relation.copy(entries)));
+    }
 
     /**
      * Creates an instance of the Entry using the name of the field. This field by default will pass the
@@ -242,7 +278,7 @@ public class Validator {
         Objects.requireNonNull(entries.get(keyA), "You cannot add a relationship for " + keyA + " before defining it");
         Objects.requireNonNull(entries.get(keyB), "You cannot add a relationship for " + keyB + " before defining it");
 
-        Relationship relation = new Relationship(description, keyA, keyB);
+        Relationship relation = new Relationship(description, keyA, keyB, entries);
         relations.add(relation);
         return relation;
     }
@@ -255,7 +291,17 @@ public class Validator {
      */
     public void validate(BulletConfig config) {
         entries.values().forEach(e -> e.normalize(config));
-        relations.stream().forEach(r -> r.normalize(config));
+        relations.forEach(r -> r.normalize(config));
+    }
+
+    /**
+     * Returns a copy of this validator. Note that your various functions that you provided to the your entries
+     * and relationships in the validator are not deep copied.
+     *
+     * @return A copy of this validator with all its defined {@link Entry} and {@link Relationship}.
+     */
+    public Validator copy() {
+        return new Validator(entries, relations);
     }
 
     // Type Adapters

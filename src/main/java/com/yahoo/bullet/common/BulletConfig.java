@@ -288,21 +288,21 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
 
     /**
-     * Constructor that loads specific file augmented with defaults and performs a {@link BulletConfig#validate()}.
+     * Constructor that loads specific file augmented with defaults and validates itself.
      *
      * @param file YAML file to load.
      */
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
-        validate();
+        validate(this);
     }
 
     /**
-     * Constructor that loads just the defaults and performs a {@link BulletConfig#validate()}.
+     * Constructor that loads just the defaults.
      */
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
-        validate();
+        validate(this);
     }
 
     /**
@@ -312,14 +312,24 @@ public class BulletConfig extends Config {
      * are valid.
      *
      * This class defines a validator for all the fields it knows about. If you subclass it and define your own fields,
-     * you should create your own Validator and define entries and relationships that you need to validate. Make sure
-     * to call this method from your override if you wish re-validate the fields defined by this config.
+     * you should {@link #getValidator()} and add entries and relationships that you need to validate. Make sure
+     * to call this method from your override if you wish validate your new definitions.
      *
      * @return This config for chaining.
      */
     public BulletConfig validate() {
         validate(this);
         return this;
+    }
+
+    /**
+     * Returns a copy of the {@link Validator} used by this config. You can use this to extend it with more
+     * {@link Validator.Entry} and {@link Validator.Relationship} items.
+     *
+     * @return A copy of the Validator object used.
+     */
+    public static Validator getValidator() {
+        return VALIDATOR.copy();
     }
 
     /**

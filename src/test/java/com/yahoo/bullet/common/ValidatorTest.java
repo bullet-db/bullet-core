@@ -12,8 +12,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -381,5 +383,95 @@ public class ValidatorTest {
         relation.normalize(empty);
         Assert.assertEquals(empty.get("foo"), "qux");
         Assert.assertEquals(empty.get("bar"), "norf");
+    }
+
+    @Test
+    public void testCopyingPreservesOriginal() {
+        Validator validator = new Validator();
+        Set<Long> whitelist = new HashSet<>();
+
+        validator.define("foo").checkIf(whitelist::contains).defaultTo(0L);
+
+        empty.set("foo", -1L);
+        validator.validate(empty);
+        // Defaults to 0 since -1 is not in the whitelist
+        Assert.assertEquals(empty.get("foo"), 0L);
+
+        // Allow -1 through
+        whitelist.add(-1L);
+
+        empty.set("foo", -1L);
+        validator.validate(empty);
+        Assert.assertEquals(empty.get("foo"), -1L);
+
+        Validator copy = validator.copy();
+
+        empty.set("foo", 10L);
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), 0L);
+
+        empty.set("foo", -1L);
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), -1L);
+
+        // Whitelist 1 and -1
+        whitelist.add(1L);
+
+        // Add a new check to the original Entry
+        Entry original = validator.getEntries().get("foo");
+        original.checkIf((o) -> ((long) o > 0L));
+
+        // Will default since -1 is not > 0
+        empty.set("foo", -1L);
+        validator.validate(empty);
+        Assert.assertEquals(empty.get("foo"), 0L);
+
+        // Will not default since it does not have the same check anymore
+        empty.set("foo", -1L);
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), -1L);
+    }
+
+    @Test
+    public void testCopyingDoesNotDeepCopy() {
+        Validator validator = new Validator();
+        Set<Long> whitelist = new HashSet<>();
+
+        validator.define("foo").checkIf(whitelist::contains).defaultTo(0);
+        validator.define("bar").defaultTo(42);
+
+        Relationship relation = validator.relate("Test", "foo", "bar").checkIf(Validator::isGreaterOrEqual);
+        relation.orElseUse("qux", "norf");
+
+        empty.set("foo", -1L);
+        empty.set("bar", -1.4);
+        validator.validate(empty);
+        // Defaults to 0 since -1 is not in the whitelist
+        Assert.assertEquals(empty.get("foo"), 0);
+        Assert.assertEquals(empty.get("bar"), -1.4);
+
+        // Allow -1 through
+        whitelist.add(-1L);
+
+        empty.set("foo", -1L);
+        empty.set("bar", -1.4);
+        validator.validate(empty);
+        Assert.assertEquals(empty.get("foo"), -1L);
+        Assert.assertEquals(empty.get("bar"), -1.4);
+
+        Validator copy = validator.copy();
+
+        // The copy also has the shallow copy of contains since -1 goes through
+        empty.set("foo", -1L);
+        empty.set("bar", -1.4);
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), -1L);
+        Assert.assertEquals(empty.get("bar"), -1.4);
+
+        // Removing the white
+        whitelist.clear();
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), 0);
+        Assert.assertEquals(empty.get("bar"), -1.4);
     }
 }

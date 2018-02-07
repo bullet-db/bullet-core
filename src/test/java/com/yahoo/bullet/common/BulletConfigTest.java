@@ -31,7 +31,7 @@ public class BulletConfigTest {
     }
 
     private static class CustomConfig extends BulletConfig {
-        private static final Validator CUSTOM = new Validator();
+        private static final Validator CUSTOM = BulletConfig.getValidator();
         static {
             CUSTOM.define("foo").defaultTo(42).checkIf(Validator::isPositiveInt);
             CUSTOM.define("bar").defaultTo(0.4).checkIf(Validator::isPositive);
@@ -39,9 +39,9 @@ public class BulletConfigTest {
         }
 
         @Override
-        public BulletConfig validate() {
+        public CustomConfig validate() {
             CUSTOM.validate(this);
-            return super.validate();
+            return this;
         }
     }
 
@@ -418,7 +418,7 @@ public class BulletConfigTest {
 
     @Test
     public void testCustomConfigValidation() {
-        CustomConfig config = new CustomConfig();
+        CustomConfig config = new CustomConfig().validate();
         Assert.assertEquals(config.get("foo"), 42);
         Assert.assertEquals(config.get("bar"), 0.4);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), BulletConfig.DEFAULT_AGGREGATION_SIZE);
@@ -442,5 +442,10 @@ public class BulletConfigTest {
         // Relationship defaults both
         Assert.assertEquals(config.get("foo"), 42);
         Assert.assertEquals(config.get("bar"), 0.4);
+    }
+
+    @Test
+    public void testValidatorIsACopy() {
+        Assert.assertTrue(BulletConfig.getValidator() != BulletConfig.getValidator());
     }
 }
