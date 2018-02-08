@@ -23,7 +23,7 @@ import java.util.Map;
 public class ThetaSketch extends KMVSketch {
     private UpdateSketch updateSketch;
     private Union unionSketch;
-    private Sketch merged;
+    private Sketch result;
 
     private String family;
 
@@ -64,21 +64,14 @@ public class ThetaSketch extends KMVSketch {
     }
 
     @Override
-    public void reset() {
-        unionSketch.reset();
-        updateSketch.reset();
-        super.reset();
-    }
-
-    @Override
     public byte[] serialize() {
-        collect();
-        return merged.toByteArray();
+        merge();
+        return result.toByteArray();
     }
 
     @Override
     public List<BulletRecord> getRecords() {
-        collect();
+        merge();
         List<BulletRecord> result = new ArrayList<>();
         result.add(getCount());
         return result;
@@ -86,32 +79,49 @@ public class ThetaSketch extends KMVSketch {
 
     @Override
     public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
-        collect();
+        merge();
         Clip data = super.getResult(metaKey, conceptKeys);
         return data.add(getCount());
     }
 
     @Override
-    protected void collectUpdateAndUnionSketch() {
+    public void reset() {
+        result = null;
+        updateSketch.reset();
+        unionSketch.reset();
+        super.reset();
+    }
+
+    @Override
+    protected void mergeBothSketches() {
         unionSketch.update(updateSketch.compact(false, null));
-        collectUnionSketch();
+        updateSketch.reset();
+        mergeUnionSketch();
     }
 
     @Override
-    protected void collectUpdateSketch() {
-        merged = updateSketch.compact(false, null);
+    protected void mergeUpdateSketch() {
+        result = updateSketch.compact(false, null);
+        updateSketch.reset();
     }
 
     @Override
-    protected void collectUnionSketch() {
-        merged = unionSketch.getResult(false, null);
+    protected void mergeUnionSketch() {
+        result = unionSketch.getResult(false, null);
+        unionSketch.reset();
+    }
+
+    @Override
+    protected boolean unionedExistingResults() {
+        unionSketch.update(result);
+        return result != null;
     }
 
     // Metadata
 
     @Override
     protected Boolean isEstimationMode() {
-        return merged.isEstimationMode();
+        return result.isEstimationMode();
     }
 
     @Override
@@ -121,26 +131,26 @@ public class ThetaSketch extends KMVSketch {
 
     @Override
     protected Integer getSize() {
-        return merged.getCurrentBytes(true);
+        return result.getCurrentBytes(true);
     }
 
     @Override
     protected Double getTheta() {
-        return merged.getTheta();
+        return result.getTheta();
     }
 
     @Override
     protected Double getLowerBound(int standardDeviation) {
-        return merged.getLowerBound(standardDeviation);
+        return result.getLowerBound(standardDeviation);
     }
 
     @Override
     protected Double getUpperBound(int standardDeviation) {
-        return merged.getUpperBound(standardDeviation);
+        return result.getUpperBound(standardDeviation);
     }
 
     private BulletRecord getCount() {
-        double count = merged.getEstimate();
+        double count = result.getEstimate();
         BulletRecord record = new BulletRecord();
         record.setDouble(COUNT_FIELD, count);
         return record;

@@ -225,7 +225,6 @@ public class TupleSketchTest {
         sketch.update(addToData("bar", 0.2, data), data);
 
         TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16);
-        // 8 copies of 0 - 15 fieldA
         sketch.update(addToData("bar", 0.2, data), data);
         sketch.update(addToData("baz", 0.2, data), data);
         sketch.update(addToData("qux", 0.2, data), data);
@@ -258,5 +257,82 @@ public class TupleSketchTest {
 
         TestHelpers.assertContains(actuals, expectedA);
         TestHelpers.assertContains(actuals, expectedB);
+    }
+
+    @Test
+    public void testFetchingDataWithoutResettingAndInsertingMoreData() {
+        data = new CachingGroupData(null, new HashMap<>());
+
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16);
+        sketch.update(addToData("foo", 0.0, data), data);
+        sketch.update(addToData("bar", 0.2, data), data);
+
+        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16);
+        sketch.update(addToData("bar", 0.2, data), data);
+        sketch.update(addToData("baz", 0.2, data), data);
+        sketch.update(addToData("qux", 0.2, data), data);
+
+        sketch.union(anotherSketch.serialize());
+
+        List<BulletRecord> actuals = sketch.getResult(null, null).getRecords();
+
+        Assert.assertEquals(actuals.size(), 4);
+        BulletRecord expectedA = RecordBox.get().add("A", "foo").add("B", "0.0").getRecord();
+        BulletRecord expectedB = RecordBox.get().add("A", "bar").add("B", "0.2").getRecord();
+        BulletRecord expectedC = RecordBox.get().add("A", "baz").add("B", "0.2").getRecord();
+        BulletRecord expectedD = RecordBox.get().add("A", "qux").add("B", "0.2").getRecord();
+
+        TestHelpers.assertContains(actuals, expectedA);
+        TestHelpers.assertContains(actuals, expectedB);
+        TestHelpers.assertContains(actuals, expectedC);
+        TestHelpers.assertContains(actuals, expectedD);
+
+        sketch.update(addToData("foo", 0.0, data), data);
+        sketch.update(addToData("bar", 0.2, data), data);
+        sketch.update(addToData("baz", 0.1, data), data);
+
+        actuals = sketch.getResult(null, null).getRecords();
+
+        Assert.assertEquals(actuals.size(), 5);
+        expectedA = RecordBox.get().add("A", "foo").add("B", "0.0").getRecord();
+        expectedB = RecordBox.get().add("A", "bar").add("B", "0.2").getRecord();
+        expectedC = RecordBox.get().add("A", "baz").add("B", "0.2").getRecord();
+        expectedD = RecordBox.get().add("A", "qux").add("B", "0.2").getRecord();
+        BulletRecord expectedE = RecordBox.get().add("A", "baz").add("B", "0.1").getRecord();
+
+        TestHelpers.assertContains(actuals, expectedA);
+        TestHelpers.assertContains(actuals, expectedB);
+        TestHelpers.assertContains(actuals, expectedC);
+        TestHelpers.assertContains(actuals, expectedD);
+        TestHelpers.assertContains(actuals, expectedE);
+
+        sketch.update(addToData("qux", 10.0, data), data);
+
+        actuals = sketch.getResult(null, null).getRecords();
+
+        Assert.assertEquals(actuals.size(), 6);
+        expectedA = RecordBox.get().add("A", "foo").add("B", "0.0").getRecord();
+        expectedB = RecordBox.get().add("A", "bar").add("B", "0.2").getRecord();
+        expectedC = RecordBox.get().add("A", "baz").add("B", "0.2").getRecord();
+        expectedD = RecordBox.get().add("A", "qux").add("B", "0.2").getRecord();
+        expectedE = RecordBox.get().add("A", "baz").add("B", "0.1").getRecord();
+        BulletRecord expectedF = RecordBox.get().add("A", "qux").add("B", "10.0").getRecord();
+
+        TestHelpers.assertContains(actuals, expectedA);
+        TestHelpers.assertContains(actuals, expectedB);
+        TestHelpers.assertContains(actuals, expectedC);
+        TestHelpers.assertContains(actuals, expectedD);
+        TestHelpers.assertContains(actuals, expectedE);
+        TestHelpers.assertContains(actuals, expectedF);
+
+        // Do it again and make sure getResult is idempotent if new data was not added
+        actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 6);
+        TestHelpers.assertContains(actuals, expectedA);
+        TestHelpers.assertContains(actuals, expectedB);
+        TestHelpers.assertContains(actuals, expectedC);
+        TestHelpers.assertContains(actuals, expectedD);
+        TestHelpers.assertContains(actuals, expectedE);
+        TestHelpers.assertContains(actuals, expectedF);
     }
 }

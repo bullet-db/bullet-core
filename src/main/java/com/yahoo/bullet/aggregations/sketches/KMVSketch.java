@@ -24,34 +24,36 @@ public abstract class KMVSketch extends DualSketch {
     public static final String META_STD_DEV_LB = "lowerBound";
 
     /**
-     * Gets the theta value for this sketch after the last collect. Only applicable after {@link #collect()}.
+     * Gets the theta value for this sketch after the last createResult. Only applicable after {@link #merge()}.
      *
      * @return A Double value that is the theta for this sketch.
-     * @throws NullPointerException if collect had not been called.
+     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getTheta();
 
     /**
-     * Gets the lower bound at this standard deviation after the last collect. Only applicable after {@link #collect()}.
+     * Gets the lower bound at this standard deviation after the last createResult. Only applicable after
+     * {@link #merge()}.
      *
      * @param standardDeviation The standard deviation.
      * @return A Double representing the maximum value at this standard deviation.
-     * @throws NullPointerException if collect had not been called.
+     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getLowerBound(int standardDeviation);
 
     /**
-     * Gets the uppper bound at this standard deviation after the last collect. Only applicable after {@link #collect()}.
+     * Gets the uppper bound at this standard deviation after the last createResult. Only applicable after
+     * {@link #merge()}.
      *
      * @param standardDeviation The standard deviation.
      * @return A Double representing the minimum value at this standard deviation.
-     * @throws NullPointerException if collect had not been called.
+     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getUpperBound(int standardDeviation);
 
     @Override
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
-        collect();
+        merge();
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
         addIfNonNull(metadata, conceptKeys, Concept.SKETCH_STANDARD_DEVIATIONS, this::getStandardDeviations);
         addIfNonNull(metadata, conceptKeys, Concept.SKETCH_THETA, this::getTheta);

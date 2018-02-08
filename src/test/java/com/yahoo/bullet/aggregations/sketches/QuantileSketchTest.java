@@ -521,6 +521,61 @@ public class QuantileSketchTest {
         }
     }
 
+    @Test
+    public void testFetchingDataWithoutResettingAndInsertingMoreData() {
+        QuantileSketch sketch = new QuantileSketch(64, Distribution.Type.CDF, makePoints(0.0, 9.0, 1.0));
+        IntStream.range(0, 30).forEach(i -> sketch.update(i % 10));
+
+        QuantileSketch anotherSketch = new QuantileSketch(64, Distribution.Type.CDF, makePoints(0.0, 9.0, 1.0));
+        IntStream.range(0, 30).forEach(i -> sketch.update(i % 3));
+
+        sketch.union(anotherSketch.serialize());
+
+        Clip result = sketch.getResult(null, null);
+
+        List<BulletRecord> records = result.getRecords();
+        for (BulletRecord record : records) {
+            String range = (String) record.get(RANGE_FIELD);
+            double count = (Double) record.get(COUNT_FIELD);
+            String rangeEnd = getEnd(range);
+
+            if (rangeEnd.equals(POSITIVE_INFINITY)) {
+                Assert.assertEquals(count, 60.0);
+            } else {
+                double end = Double.valueOf(rangeEnd);
+                if (end <= 3.0) {
+                    Assert.assertEquals(count, end * 13.0);
+                } else {
+                    Assert.assertEquals(count, 39.0 + (end - 3) * 3.0);
+                }
+            }
+        }
+
+        sketch.update(1.0);
+
+        result = sketch.getResult(null, null);
+
+        records = result.getRecords();
+        for (BulletRecord record : records) {
+            String range = (String) record.get(RANGE_FIELD);
+            double count = (Double) record.get(COUNT_FIELD);
+            String rangeEnd = getEnd(range);
+
+            if (rangeEnd.equals(POSITIVE_INFINITY)) {
+                Assert.assertEquals(count, 61.0);
+            } else {
+                double end = Double.valueOf(rangeEnd);
+                if (end <= 1.0) {
+                    Assert.assertEquals(count, end * 13.0);
+                } else if (end <= 3.0) {
+                    Assert.assertEquals(count, (end * 13.0) + 1);
+                } else {
+                    Assert.assertEquals(count, 40.0 + (end - 3) * 3.0);
+                }
+            }
+        }
+    }
+
     @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
     public void testZippingBadLength() {
         double[] domain = { -1.0, 0, 4.0 };

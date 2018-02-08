@@ -18,7 +18,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * This class encapsulates a type of Sketch. Since one type of Sketch is used for updating and another for unioning,
- * this will encapsulate both of them and provide methods to serialize, union and collect results.
+ * this will encapsulate both of them and provide methods to serialize, union and createResult results.
  */
 public abstract class Sketch {
     // While this class could implement Monoidal, it does not need the full breadth of those methods and it would need to be

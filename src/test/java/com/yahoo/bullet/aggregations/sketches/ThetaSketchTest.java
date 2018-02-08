@@ -157,4 +157,52 @@ public class ThetaSketchTest {
         actual = actuals.get(0);
         Assert.assertEquals(actual, expected);
     }
+
+    @Test
+    public void testFetchingDataWithoutResettingAndInsertingMoreData() {
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        sketch.update("foo");
+        sketch.update("bar");
+        sketch.update("baz");
+
+        List<BulletRecord> actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 1);
+        BulletRecord expected = RecordBox.get().add(ThetaSketch.COUNT_FIELD, 3.0).getRecord();
+        BulletRecord actual = actuals.get(0);
+        Assert.assertEquals(actual, expected);
+
+        sketch.update("baz");
+        sketch.update("qux");
+        sketch.update("norf");
+
+        actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 1);
+        expected = RecordBox.get().add(ThetaSketch.COUNT_FIELD, 5.0).getRecord();
+        actual = actuals.get(0);
+        Assert.assertEquals(actual, expected);
+
+        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        IntStream.range(0, 41).forEach(i -> anotherSketch.update(String.valueOf(i)));
+        sketch.union(anotherSketch.serialize());
+
+        actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 1);
+        expected = RecordBox.get().add(ThetaSketch.COUNT_FIELD, 46.0).getRecord();
+        actual = actuals.get(0);
+        Assert.assertEquals(actual, expected);
+
+        sketch.union(anotherSketch.serialize());
+        actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 1);
+        expected = RecordBox.get().add(ThetaSketch.COUNT_FIELD, 46.0).getRecord();
+        actual = actuals.get(0);
+        Assert.assertEquals(actual, expected);
+
+        // Do it again and make sure getResult is idempotent if new data was not added
+        actuals = sketch.getResult(null, null).getRecords();
+        Assert.assertEquals(actuals.size(), 1);
+        expected = RecordBox.get().add(ThetaSketch.COUNT_FIELD, 46.0).getRecord();
+        actual = actuals.get(0);
+        Assert.assertEquals(actual, expected);
+    }
 }

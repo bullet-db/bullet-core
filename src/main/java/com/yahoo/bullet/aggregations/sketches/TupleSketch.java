@@ -31,10 +31,9 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 public class TupleSketch extends KMVSketch {
     private UpdatableSketch<CachingGroupData, GroupDataSummary> updateSketch;
     private Union<GroupDataSummary> unionSketch;
-    private Sketch<GroupDataSummary> merged;
+    private Sketch<GroupDataSummary> result;
 
     private final int maxSize;
-
     /**
      * Initialize a tuple sketch for summarizing group data.
      *
@@ -74,31 +73,16 @@ public class TupleSketch extends KMVSketch {
     }
 
     @Override
-    public void reset() {
-        unionSketch.reset();
-        updateSketch.reset();
-        super.reset();
-    }
-
-    @Override
     public byte[] serialize() {
-        collect();
-        return merged.toByteArray();
-    }
-
-    @Override
-    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
-        collect();
-        Clip result = super.getResult(metaKey, conceptKeys);
-        result.add(getRecords());
-        return result;
+        merge();
+        return result.toByteArray();
     }
 
     @Override
     public List<BulletRecord> getRecords() {
-        collect();
+        merge();
         List<BulletRecord> result = new ArrayList<>();
-        SketchIterator<GroupDataSummary> iterator = merged.iterator();
+        SketchIterator<GroupDataSummary> iterator = this.result.iterator();
         for (int count = 0; iterator.next() && count < maxSize; count++) {
             GroupData data = iterator.getSummary().getData();
             result.add(data.getAsBulletRecord());
@@ -107,34 +91,59 @@ public class TupleSketch extends KMVSketch {
     }
 
     @Override
+    public Clip getResult(String metaKey, Map<String, String> conceptKeys) {
+        merge();
+        Clip result = super.getResult(metaKey, conceptKeys);
+        result.add(getRecords());
+        return result;
+    }
+
+    @Override
+    public void reset() {
+        result = null;
+        updateSketch.reset();
+        unionSketch.reset();
+        super.reset();
+    }
+
+    @Override
+    protected void mergeBothSketches() {
+        unionSketch.update(updateSketch.compact());
+        updateSketch.reset();
+        mergeUnionSketch();
+    }
+
+    @Override
+    protected void mergeUpdateSketch() {
+        result = updateSketch.compact();
+        updateSketch.reset();
+    }
+
+    @Override
+    protected void mergeUnionSketch() {
+        result = unionSketch.getResult();
+        unionSketch.reset();
+    }
+
+    @Override
+    protected boolean unionedExistingResults() {
+        unionSketch.update(result);
+        return result != null;
+    }
+
+    @Override
     protected Map<String, Object> addMetadata(Map<String, String> conceptKeys) {
-        // The super will call collect()
+        // The super will call merge()
         Map<String, Object> metadata = super.addMetadata(conceptKeys);
         addIfNonNull(metadata, conceptKeys, Concept.SKETCH_UNIQUES_ESTIMATE, this::getUniquesEstimate);
         return metadata;
-    }
-
-    @Override
-    protected void collectUpdateAndUnionSketch() {
-        unionSketch.update(updateSketch.compact());
-        collectUnionSketch();
-    }
-
-    @Override
-    protected void collectUpdateSketch() {
-        merged = updateSketch.compact();
-    }
-
-    @Override
-    protected void collectUnionSketch() {
-        merged = unionSketch.getResult();
     }
 
     // Meta
 
     @Override
     protected Boolean isEstimationMode() {
-        return merged.isEstimationMode();
+        return result.isEstimationMode();
     }
 
     @Override
@@ -150,26 +159,26 @@ public class TupleSketch extends KMVSketch {
 
     @Override
     protected Double getTheta() {
-        return merged.getTheta();
+        return result.getTheta();
     }
 
     @Override
     protected Double getLowerBound(int standardDeviation) {
-        return merged.getLowerBound(standardDeviation);
+        return result.getLowerBound(standardDeviation);
     }
 
     @Override
     protected Double getUpperBound(int standardDeviation) {
-        return merged.getUpperBound(standardDeviation);
+        return result.getUpperBound(standardDeviation);
     }
 
     /**
-     * Returns the estimate of the uniques in the Sketch. Only applicable after {@link #collect()}.
+     * Returns the estimate of the uniques in the Sketch. Only applicable after {@link #merge()}.
      *
      * @return A Double representing the number of unique values in the Sketch.
      */
     private Double getUniquesEstimate() {
-        return merged.getEstimate();
+        return result.getEstimate();
 
     }
 }

@@ -8,21 +8,21 @@ package com.yahoo.bullet.aggregations.sketches;
 /**
  * This class wraps sketches that need a separate sketch for update and union operations. It manages the metadata
  * relating to managing the common operations relating to managing dual sketches. All sketches inheriting this must
- * call {@link #update()} and {@link #union()} when performing the respective operations. It must also call
- * {@link #collect()} before performing any operations that change data in the sketch such as getting metadata or
+ * call {@link #update()}, {@link #union()} and {@link #reset} when performing the respective operations. It must also
+ * call {@link #merge()} before performing any operations that change data in the sketch such as getting metadata or
  * results or resetting.
  */
 public abstract class DualSketch extends Sketch {
     private boolean updated = false;
     private boolean unioned = false;
-    private boolean collected = false;
+    private boolean mustMerge = true;
 
     /**
      * This method must be called after an update operation.
      */
     protected void update() {
         updated = true;
-        collected = false;
+        mustMerge = true;
     }
 
     /**
@@ -30,56 +30,70 @@ public abstract class DualSketch extends Sketch {
      */
     protected void union() {
         unioned = true;
-        collected = false;
+        mustMerge = true;
     }
 
     /**
      * This method must be called before getting any kind of data out of the sketch. This calls the appropriate driver
-     * methods to tell a subclass whether it needs to collect its two sketches ({@link #collectUpdateAndUnionSketch()},
-     * or collect its union sketch ({@link #collectUnionSketch()} or just the update sketch ({@link #collectUpdateSketch()}.
+     * methods to tell a subclass whether it needs to merge its two sketches ({@link #mergeBothSketches()},
+     * or merge its union sketch ({@link #mergeUnionSketch()} or just the update sketch ({@link #mergeUpdateSketch()}.
+     * It will also ask to add any existing merged results back into the union sketch ({@link #unionedExistingResults()}). _
      *
      * This method is idempotent and will not recollect till a data changing operation has been performed, such as an
      * update, union or a reset. This is why you must call the appropriate methods ({@link #update()}, {@link #union()},
      * {@link #reset()}) defined in this class when performing those operations.
      */
-    protected void collect() {
-        if (collected) {
+    protected void merge() {
+        if (!mustMerge) {
             return;
         }
-        if (unioned && updated) {
-            collectUpdateAndUnionSketch();
-        } else if (unioned) {
-            collectUnionSketch();
-        } else {
-            collectUpdateSketch();
+        if (unionedExistingResults()) {
+            // Force unioned to be true so that the union sketch with the result is merged
+            unioned = true;
         }
-        collected = true;
+        if (unioned && updated) {
+            mergeBothSketches();
+        } else if (unioned) {
+            mergeUnionSketch();
+        } else {
+            mergeUpdateSketch();
+        }
+        mustMerge = false;
     }
 
     /**
-     * Collect both the update sketch and the union sketch into one.
+     * Merge and reset both the update sketch and the union sketch into the result.
      */
-    protected abstract void collectUpdateAndUnionSketch();
+    protected abstract void mergeBothSketches();
 
     /**
-     * Collect just the update sketch for data reading.
+     * Merge and reset just the update sketch into the result.
      */
-    protected abstract void collectUpdateSketch();
+    protected abstract void mergeUpdateSketch();
 
     /**
-     * Collect just the union sketch for data reading.
+     * Merge and reset just the union sketch into the result.
      */
-    protected abstract void collectUnionSketch();
+    protected abstract void mergeUnionSketch();
+
+    /**
+     * Merge the existing result into the union sketch if needed and return a boolean if the union was done.
+     *
+     * @return A boolean denoting whether the union was done.
+     */
+    protected abstract boolean unionedExistingResults();
 
     /**
      * {@inheritDoc}
      *
-     * Call this after your reset operations to reset the metadata relating to storing two sketches.
+     * Call this after your reset operations to reset the metadata relating to storing two sketches. You should
+     * reset or remove all your sketches here.
      */
     @Override
     public void reset() {
         updated = false;
         unioned = false;
-        collected = false;
+        // If reset, must merge again since old merged result is thrown away and recreated.
+        mustMerge = true;
     }
 }
