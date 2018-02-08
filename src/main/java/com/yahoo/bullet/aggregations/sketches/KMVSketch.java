@@ -27,7 +27,6 @@ public abstract class KMVSketch extends DualSketch {
      * Gets the theta value for this sketch after the last createResult. Only applicable after {@link #merge()}.
      *
      * @return A Double value that is the theta for this sketch.
-     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getTheta();
 
@@ -37,7 +36,6 @@ public abstract class KMVSketch extends DualSketch {
      *
      * @param standardDeviation The standard deviation.
      * @return A Double representing the maximum value at this standard deviation.
-     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getLowerBound(int standardDeviation);
 
@@ -47,7 +45,6 @@ public abstract class KMVSketch extends DualSketch {
      *
      * @param standardDeviation The standard deviation.
      * @return A Double representing the minimum value at this standard deviation.
-     * @throws NullPointerException if createResult had not been called.
      */
     protected abstract Double getUpperBound(int standardDeviation);
 
