@@ -29,7 +29,15 @@ public class WindowingOperations {
         // TODO: Support other windows
         Window window = query.getWindow();
 
-        // No window -> Basic.
+        /*
+         * The windows we support at the moment:
+         * 1. No window -> Basic
+         * 2. If Raw:
+         *    a) Any window that is not Tumbling -> Reactive (Sliding Window of size 1)
+         *    b) Tumbling -> Tumbling
+         * 3. Window is emit type TIME and include type ALL -> Additive Tumbling
+         * 4. All other windows -> Tumbling (RAW can be Tumbling too)
+         */
         if (window == null) {
             return new Basic(strategy, null, config);
         }

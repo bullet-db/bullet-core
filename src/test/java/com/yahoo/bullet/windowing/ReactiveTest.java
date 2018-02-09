@@ -82,7 +82,7 @@ public class ReactiveTest {
     }
 
     @Test
-    public void testClosedOnStrategyClosed() {
+    public void testNotClosedOnStrategyClosed() {
         Window window = makeReactiveWindow();
         ClosableStrategy strategy = new ClosableStrategy();
         SlidingRecord sliding = new SlidingRecord(strategy, window, config);
@@ -91,8 +91,8 @@ public class ReactiveTest {
         Assert.assertFalse(sliding.isClosed());
         Assert.assertFalse(sliding.isClosedForPartition());
         strategy.setClosed(true);
-        Assert.assertTrue(sliding.isClosed());
-        Assert.assertTrue(sliding.isClosedForPartition());
+        Assert.assertFalse(sliding.isClosed());
+        Assert.assertFalse(sliding.isClosedForPartition());
     }
 
     @Test

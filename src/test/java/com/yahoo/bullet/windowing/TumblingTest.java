@@ -69,7 +69,7 @@ public class TumblingTest {
     }
 
     @Test
-    public void testClosedOnStrategyClosed() {
+    public void testNotClosedOnStrategyClosed() {
         Window window = makeTumblingWindow(Integer.MAX_VALUE);
         ClosableStrategy strategy = new ClosableStrategy();
         Tumbling tumbling = new Tumbling(strategy, window, config);
@@ -78,8 +78,8 @@ public class TumblingTest {
         Assert.assertFalse(tumbling.isClosed());
         Assert.assertFalse(tumbling.isClosedForPartition());
         strategy.setClosed(true);
-        Assert.assertTrue(tumbling.isClosed());
-        Assert.assertTrue(tumbling.isClosedForPartition());
+        Assert.assertFalse(tumbling.isClosed());
+        Assert.assertFalse(tumbling.isClosedForPartition());
     }
 
     @Test

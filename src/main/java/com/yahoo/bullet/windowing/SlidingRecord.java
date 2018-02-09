@@ -97,12 +97,12 @@ public class SlidingRecord extends Basic {
 
     @Override
     public boolean isClosed() {
-        return super.isClosed() || recordCount >= maxCount;
+        return recordCount >= maxCount;
     }
 
     @Override
     public boolean isClosedForPartition() {
-        return super.isClosedForPartition() || recordCount >= 1;
+        return recordCount >= 1;
     }
 
     @Override

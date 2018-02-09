@@ -69,7 +69,7 @@ public class AdditiveTumblingTest {
     }
 
     @Test
-    public void testClosedOnStrategyClosed() {
+    public void testNotClosedOnStrategyClosed() {
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, Integer.MAX_VALUE, Window.Unit.ALL, null);
         ClosableStrategy strategy = new ClosableStrategy();
         AdditiveTumbling additiveTumbling = new AdditiveTumbling(strategy, window, config);
@@ -78,8 +78,8 @@ public class AdditiveTumblingTest {
         Assert.assertFalse(additiveTumbling.isClosed());
         Assert.assertFalse(additiveTumbling.isClosedForPartition());
         strategy.setClosed(true);
-        Assert.assertTrue(additiveTumbling.isClosed());
-        Assert.assertTrue(additiveTumbling.isClosedForPartition());
+        Assert.assertFalse(additiveTumbling.isClosed());
+        Assert.assertFalse(additiveTumbling.isClosedForPartition());
     }
 
     @Test

@@ -455,7 +455,8 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns true if the query cannot consume any more data at this time.
+     * Returns true if the query window is closed and you should emit the result at this time. If you have partitioned
+     * the data, use {@link #isClosedForPartition()}.
      *
      * @return boolean denoting if query has expired.
      */

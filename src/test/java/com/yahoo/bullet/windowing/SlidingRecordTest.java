@@ -69,7 +69,7 @@ public class SlidingRecordTest {
     }
 
     @Test
-    public void testClosedOnStrategyClosed() {
+    public void testNotClosedOnStrategyClosed() {
         Window window = makeSlidingWindow(5);
         ClosableStrategy strategy = new ClosableStrategy();
         SlidingRecord sliding = new SlidingRecord(strategy, window, config);
@@ -78,8 +78,8 @@ public class SlidingRecordTest {
         Assert.assertFalse(sliding.isClosed());
         Assert.assertFalse(sliding.isClosedForPartition());
         strategy.setClosed(true);
-        Assert.assertTrue(sliding.isClosed());
-        Assert.assertTrue(sliding.isClosedForPartition());
+        Assert.assertFalse(sliding.isClosed());
+        Assert.assertFalse(sliding.isClosedForPartition());
     }
 
     @Test

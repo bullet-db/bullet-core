@@ -56,7 +56,10 @@ public class Raw implements Strategy {
 
     @Override
     public void consume(BulletRecord data) {
-        if (data == null) {
+        // Since Raw is the only strategy that can close and is really a special case, it should check before
+        // consumption. Otherwise, Windows will need to expose the fact that the aggregation should not be fed more data
+        // in order to prevent Raw from accidentally consuming/combining till only the Window is closed.
+        if (data == null || isClosed()) {
             return;
         }
         consumed++;
@@ -72,7 +75,8 @@ public class Raw implements Strategy {
      */
     @Override
     public void combine(byte[] data) {
-        if (data == null) {
+        // See the comment in consume on why the check for isClosed.
+        if (data == null || isClosed()) {
             return;
         }
         ArrayList<BulletRecord> batch = SerializerDeserializer.fromBytes(data);

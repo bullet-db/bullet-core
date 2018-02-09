@@ -59,7 +59,7 @@ public class Tumbling extends Basic {
 
     @Override
     public boolean isClosed() {
-        return super.isClosed() || System.currentTimeMillis() >= startedAt + closeAfter;
+        return System.currentTimeMillis() >= startedAt + closeAfter;
     }
 
     @Override
