@@ -62,16 +62,20 @@ public class Window implements Configurable, Initializable {
 
     public static final String TYPE_FIELD = "type";
     public static final String EMIT_EVERY_FIELD = "every";
-    public static final String INCLUDE_LAST_FIELD = "last";
+    public static final String INCLUDE_FIRST_FIELD = "first";
 
-    public static final BulletError IMPROPER_EMIT = makeError("The \"type\" field for \"emit\" was missing or had bad values",
-                                                              "Please set \"type\" to one of: \"TIME\" or \"RECORD\"");
-    public static final BulletError IMPROPER_EVERY = makeError("The \"every\" field was missing or had bad values",
-                                                              "Please set \"every\" to a positive integer");
-    public static final BulletError IMPROPER_INCLUDE = makeError("The \"include\" field has to match \"emit\" or not be set",
-                                                                 "Please remove \"include\" or match it to \"emit\"");
-    public static final BulletError IMPROPER_LAST = makeError("The \"last\" field should not be set for ALL",
-                                                              "Please remove \"last\"");
+    public static final BulletError IMPROPER_EMIT = makeError("The emit type was missing or had bad values",
+                                                              "Please set type to one of: \"TIME\" or \"RECORD\"");
+    public static final BulletError IMPROPER_EVERY = makeError("The every field was missing or had bad values",
+                                                              "Please set every to a positive integer");
+    public static final BulletError IMPROPER_INCLUDE = makeError("The include field has to match emit or not be set",
+                                                                 "Please remove include or match it to emit");
+    public static final BulletError IMPROPER_FIRST = makeError("The first field should not be set for \"ALL\"",
+                                                              "Please remove the first field");
+    public static final BulletError NOT_ONE_RECORD_EMIT = makeError("The emit type was \"RECORD\" but every was not 1",
+                                                                    "Please set every to 1 or change the emit type");
+    public static final BulletError NO_RECORD_ALL = makeError("The emit type was \"RECORD\" and include type was \"ALL\"",
+                                                              "Please set emit type to \"TIME\" or match include to emit");
 
     @Expose
     private Map<String, Object> emit;
@@ -116,20 +120,26 @@ public class Window implements Configurable, Initializable {
         if (every == null || every.intValue() <= 0) {
             return Optional.of(singletonList(IMPROPER_EVERY));
         }
+        if (emitType == Unit.RECORD && every.intValue() != 1) {
+            return Optional.of(singletonList(NOT_ONE_RECORD_EMIT));
+        }
 
         if (include == null) {
             return Optional.empty();
         }
 
-        Number last = Utilities.getCasted(include, INCLUDE_LAST_FIELD, Number.class);
+        Number first = Utilities.getCasted(include, INCLUDE_FIRST_FIELD, Number.class);
         if (includeType == Unit.ALL) {
-            if (last != null) {
-                return Optional.of(singletonList(IMPROPER_LAST));
+            if (emitType == Unit.RECORD) {
+                return Optional.of(singletonList(NO_RECORD_ALL));
+            }
+            if (first != null) {
+                return Optional.of(singletonList(IMPROPER_FIRST));
             }
             return Optional.empty();
         }
         // This is temporary. For now, emit needs to be equal to include. Change when other windows are supported.
-        if (includeType != emitType || last == null || last.intValue() != every.intValue()) {
+        if (includeType != emitType || first == null || first.intValue() != every.intValue()) {
             return Optional.of(singletonList(IMPROPER_INCLUDE));
         }
         return Optional.empty();
@@ -179,21 +189,5 @@ public class Window implements Configurable, Initializable {
         }
         String type = Utilities.getCasted(map, TYPE_FIELD, String.class);
         return SUPPORTED_TYPES.get(type);
-    }
-
-    /**
-     * Creates a window that emits one record per window.
-     *
-     * @param config A validated {@link BulletConfig} to use to configure the window.
-     * @return A configured window object that emits one record in each window.
-     */
-    public static Window oneRecordWindow(BulletConfig config) {
-        Map<String, Object> emit = new HashMap<>();
-        emit.put(Window.TYPE_FIELD, Window.Unit.RECORD.getName());
-        emit.put(Window.EMIT_EVERY_FIELD, 1);
-        Window window = new Window();
-        window.setEmit(emit);
-        window.configure(config);
-        return window;
     }
 }

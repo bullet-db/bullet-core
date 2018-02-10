@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.yahoo.bullet.common.BulletError.makeError;
+
 /**
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
  */
@@ -34,6 +36,10 @@ public class Query implements Configurable, Initializable {
     @Expose
     private Long duration;
 
+    public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
+                                                                "Change your aggregation type or your window emit type to \"TIME\"");
+    public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
+                                                           "Change your aggregation type or your window include type");
     /**
      * Default constructor. GSON recommended.
      */
@@ -89,6 +95,14 @@ public class Query implements Configurable, Initializable {
 
         if (window != null) {
             window.initialize().ifPresent(errors::addAll);
+            Aggregation.Type type = aggregation.getType();
+            Window.Classification kind = window.getType();
+            if (type != Aggregation.Type.RAW && kind == Window.Classification.RECORD_RECORD) {
+                errors.add(ONLY_RAW_RECORD);
+            }
+            if (type == Aggregation.Type.RAW && kind == Window.Classification.TIME_ALL) {
+                errors.add(NO_RAW_ALL);
+            }
         }
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }

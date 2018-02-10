@@ -38,7 +38,7 @@ public class WindowUtils {
     }
 
     public static Map<String, Object> makeInclude(Window.Unit unit, Integer value) {
-        return makeWindowMap(unit, Window.INCLUDE_LAST_FIELD, value);
+        return makeWindowMap(unit, Window.INCLUDE_FIRST_FIELD, value);
     }
 
     public static Map<String, Object> makeWindowMap(Window.Unit unit, String key, Integer value) {

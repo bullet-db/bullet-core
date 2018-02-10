@@ -338,7 +338,7 @@ public class QueryUtils {
     private static String makeWindow(Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
                  "'emit' : " + makeWindowPart(emit, Window.EMIT_EVERY_FIELD, emitValue) + ", " +
-                 "'include' : " + makeWindowPart(include, Window.INCLUDE_LAST_FIELD, includeValue) +
+                 "'include' : " + makeWindowPart(include, Window.INCLUDE_FIRST_FIELD, includeValue) +
                "}";
     }
 

@@ -54,7 +54,7 @@ public class WindowingOperationsTest {
     }
 
     @Test
-    public void testRawAdditiveTumblingForcedToReactive() {
+    public void testNotForcingRawToReactive() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
@@ -64,11 +64,11 @@ public class WindowingOperationsTest {
         aggregation.setType(Aggregation.Type.RAW);
         query.setAggregation(aggregation);
 
-        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Reactive.class);
+        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), AdditiveTumbling.class);
     }
 
     @Test
-    public void testReactiveOnNonRawAggregationsForcedToTumbling() {
+    public void testNotForcingNonRawToTumbling() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         Window window = WindowUtils.makeReactiveWindow();
@@ -78,7 +78,7 @@ public class WindowingOperationsTest {
         aggregation.setType(Aggregation.Type.GROUP);
         query.setAggregation(aggregation);
 
-        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Tumbling.class);
+        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Reactive.class);
     }
 
     @Test

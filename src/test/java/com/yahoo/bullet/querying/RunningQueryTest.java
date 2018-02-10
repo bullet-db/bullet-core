@@ -13,6 +13,7 @@ import com.yahoo.bullet.parsing.Window;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,8 +58,7 @@ public class RunningQueryTest {
 
         Optional<List<BulletError>> errors = runningQuery.initialize();
         Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().size(), 1);
-        Assert.assertEquals(errors.get().get(0), Window.IMPROPER_INCLUDE);
+        Assert.assertEquals(errors.get(), Collections.singletonList(Window.NOT_ONE_RECORD_EMIT));
     }
 
     @Test

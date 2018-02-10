@@ -21,7 +21,6 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
-import com.yahoo.bullet.windowing.Reactive;
 import com.yahoo.bullet.windowing.Scheme;
 import com.yahoo.bullet.windowing.Tumbling;
 import org.apache.commons.lang3.tuple.Pair;
@@ -593,7 +592,7 @@ public class QuerierTest {
         aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
         aggregation.setFields(singletonMap("foo", "bar"));
         query.setAggregation(aggregation);
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
         query.configure(config);
         Querier querier = make(query, config);
 
@@ -603,22 +602,29 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithNonTimeWindowsAreForcedToReactive() {
+    public void testRawQueriesWithNonReactiveWindowsAreErrors() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
         query.configure(config);
-        Querier querier = make(query, config);
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        Optional<List<BulletError>> errors = querier.initialize();
 
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Window.NOT_ONE_RECORD_EMIT));
+    }
 
-        querier.consume(RecordBox.get().getRecord());
+    @Test
+    public void testRawQueriesWithAllIncludeWindowsAreErrors() {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1, Window.Unit.ALL, null));
+        query.configure(config);
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        Optional<List<BulletError>> errors = querier.initialize();
 
-        Assert.assertTrue(querier.isClosed());
-        Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertEquals(querier.getWindow().getClass(), Reactive.class);
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Query.NO_RAW_ALL));
     }
 
     @Test
@@ -638,5 +644,21 @@ public class QuerierTest {
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertEquals(querier.getWindow().getClass(), Tumbling.class);
+    }
+
+    @Test
+    public void testNonRawQueriesWithRecordWindowsAreErrors() {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
+        query.setAggregation(aggregation);
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 1));
+        query.configure(config);
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        Optional<List<BulletError>> errors = querier.initialize();
+
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Query.ONLY_RAW_RECORD));
     }
 }

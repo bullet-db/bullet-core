@@ -63,11 +63,12 @@ public class ReactiveTest {
     public void testBadMaxWindowSize() {
         Window window = WindowUtils.makeWindow(Window.Unit.RECORD, 10);
         window.configure(config);
-        Assert.assertFalse(window.initialize().isPresent());
+        Optional<List<BulletError>> errors = window.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(Window.NOT_ONE_RECORD_EMIT));
+
         Reactive reactive = new Reactive(strategy, window, config);
-
-
-        Optional<List<BulletError>> errors = reactive.initialize();
+        errors = reactive.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get(), singletonList(Reactive.ONLY_ONE_RECORD));
 

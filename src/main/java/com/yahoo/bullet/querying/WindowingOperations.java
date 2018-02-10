@@ -7,7 +7,6 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
@@ -26,34 +25,26 @@ public class WindowingOperations {
      * @return A windowing scheme to use for this query.
      */
     public static Scheme findScheme(Query query, Strategy strategy, BulletConfig config) {
-        // TODO: Support other windows
-        Window window = query.getWindow();
-
         /*
+         * TODO: Support other windows
          * The windows we support at the moment:
          * 1. No window -> Basic
-         * 2. If Raw:
-         *    a) Any window that is not Tumbling -> Reactive (Sliding Window of size 1)
-         *    b) Tumbling -> Tumbling
-         * 3. Window is emit type TIME and include type ALL -> Additive Tumbling
+         * 2. Window is emit RECORD and include RECORD -> Reactive
+         * 3. Window is emit TIME and include ALL -> Additive Tumbling
          * 4. All other windows -> Tumbling (RAW can be Tumbling too)
          */
+        Window window = query.getWindow();
         if (window == null) {
             return new Basic(strategy, null, config);
         }
 
         Window.Classification classification = window.getType();
-        Aggregation.Type type = query.getAggregation().getType();
-
-        // If RAW and not a TIME_TIME window, force Reactive and replace the window with a new record by record window
-        if (type == Aggregation.Type.RAW && classification != Window.Classification.TIME_TIME) {
-            return new Reactive(strategy, Window.oneRecordWindow(config), config);
+        if (classification == Window.Classification.RECORD_RECORD) {
+            return new Reactive(strategy, window, config);
         }
-
         if (classification == Window.Classification.TIME_ALL) {
             return new AdditiveTumbling(strategy, window, config);
         }
-        // Raw can be Tumbling and all other aggregations default to Tumbling
         return new Tumbling(strategy, window, config);
     }
 }
