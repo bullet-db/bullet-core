@@ -68,7 +68,8 @@ public class Window implements Configurable, Initializable {
                                                               "Please set type to one of: \"TIME\" or \"RECORD\"");
     public static final BulletError IMPROPER_EVERY = makeError("The every field was missing or had bad values",
                                                               "Please set every to a positive integer");
-    public static final BulletError IMPROPER_INCLUDE = makeError("The include field has to match emit or not be set",
+    public static final BulletError IMPROPER_INCLUDE = makeError("The include field has to match emit or have type " +
+                                                                   "\"ALL\" for emit type \"TIME\" or not be set",
                                                                  "Please remove include or match it to emit");
     public static final BulletError IMPROPER_FIRST = makeError("The first field should not be set for \"ALL\"",
                                                               "Please remove the first field");

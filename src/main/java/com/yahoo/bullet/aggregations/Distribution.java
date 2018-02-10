@@ -179,8 +179,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
 
     private static boolean invalidBounds(Type type, double[] points) {
         // No points or if type is QUANTILE, invalid range if the start < 0 or end > 1
-        return points.length < 1 || (type == Type.QUANTILE && (points[0] < 0.0 ||
-                                                                           points[points.length - 1] > 1.0));
+        return points.length < 1 || (type == Type.QUANTILE && (points[0] < 0.0 || points[points.length - 1] > 1.0));
     }
 
     // Point generation methods

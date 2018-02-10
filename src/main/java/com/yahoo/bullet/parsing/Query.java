@@ -48,7 +48,6 @@ public class Query implements Configurable, Initializable {
         aggregation = new Aggregation();
     }
 
-
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {

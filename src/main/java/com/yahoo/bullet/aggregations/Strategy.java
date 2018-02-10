@@ -18,10 +18,10 @@ public interface Strategy extends Monoidal {
             makeError("This aggregation type requires at least one field", REQUIRES_FEED_RESOLUTION);
 
     /**
-     * Returns false if more data will be not be consumed or combined. This method can be used to avoid passing more
+     * Returns false if more data should not be consumed or combined. This method can be used to avoid passing more
      * data into this Strategy. By default, returns false unless overridden.
      *
-     * @return A boolean denoting whether the next consumption or combination will not occur.
+     * @return A boolean denoting whether the next consumption or combination should not occur.
      */
     @Override
     default boolean isClosed() {
