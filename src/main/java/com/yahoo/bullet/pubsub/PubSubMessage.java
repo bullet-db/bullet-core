@@ -8,6 +8,7 @@ package com.yahoo.bullet.pubsub;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
 import com.yahoo.bullet.result.JSONFormatter;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -24,13 +25,14 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     private String id;
     private int sequence;
     private String content;
+    @Setter
     private Metadata metadata;
 
     /**
      * Constructor for a message having no information. Used internally. Not recommended for use.
      */
     public PubSubMessage() {
-        this("", null);
+        this("", (String) null);
     }
 
     /**
@@ -63,6 +65,16 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      */
     public PubSubMessage(String id, String content, Metadata metadata) {
         this(id, content, metadata, -1);
+    }
+
+    /**
+     * Constructor for a message having only a {@link Metadata.Signal}.
+     *
+     * @param id The ID associated with the message.
+     * @param signal The signal only for the Metadata.
+     */
+    public PubSubMessage(String id, Signal signal) {
+        this(id, null, signal);
     }
 
     /**

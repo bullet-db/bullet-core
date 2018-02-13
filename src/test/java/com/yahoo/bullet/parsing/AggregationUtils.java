@@ -5,17 +5,11 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.yahoo.bullet.BulletConfig;
-import com.yahoo.bullet.operations.AggregationOperations;
-import com.yahoo.bullet.operations.AggregationOperations.DistributionType;
-import com.yahoo.bullet.operations.aggregations.CountDistinct;
-import com.yahoo.bullet.operations.aggregations.Distribution;
-import com.yahoo.bullet.operations.aggregations.TopK;
-import com.yahoo.bullet.operations.aggregations.grouping.GroupOperation;
-import com.yahoo.bullet.result.Metadata;
+import com.yahoo.bullet.aggregations.CountDistinct;
+import com.yahoo.bullet.aggregations.Distribution;
+import com.yahoo.bullet.aggregations.TopK;
+import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,28 +19,6 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public class AggregationUtils {
-    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Metadata.Concept, String>> metadata) {
-        if (metadata == null) {
-            config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
-            return config;
-        }
-        List<Map<String, String>> metadataList = new ArrayList<>();
-        for (Map.Entry<Metadata.Concept, String> meta : metadata) {
-            Map<String, String> entry = new HashMap<>();
-            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, meta.getKey().getName());
-            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, meta.getValue());
-            metadataList.add(entry);
-        }
-        config.set(BulletConfig.RESULT_METADATA_METRICS, metadataList);
-        config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
-        return config;
-    }
-
-    @SafeVarargs
-    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Metadata.Concept, String>... metadata) {
-        return addMetadata(config, metadata == null ? null : Arrays.asList(metadata));
-    }
-
     public static Map<String, String> makeGroupFields(List<String> fields) {
         if (fields != null) {
             return fields.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
@@ -65,7 +37,7 @@ public class AggregationUtils {
         return makeGroupOperation(operation.getType(), operation.getField(), operation.getNewName());
     }
 
-    public static Map<String, String> makeGroupOperation(AggregationOperations.GroupOperationType type, String field, String newName) {
+    public static Map<String, String> makeGroupOperation(GroupOperation.GroupOperationType type, String field, String newName) {
         Map<String, String> map = new HashMap<>();
         if (type != null) {
             map.put(GroupOperation.OPERATION_TYPE, type.getName());
@@ -90,7 +62,7 @@ public class AggregationUtils {
         return map;
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, Double start, Double end, Double increment,
+    public static Map<String, Object> makeAttributes(Distribution.Type type, Double start, Double end, Double increment,
                                                      Long numberOfPoints, List<Double> points) {
         Map<String, Object> map = new HashMap<>();
         if (type != null) {
@@ -110,15 +82,15 @@ public class AggregationUtils {
         return map;
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, double start, double end, double increment) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, double start, double end, double increment) {
         return makeAttributes(type, start, end, increment, null, null);
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, long numberOfPoints) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, long numberOfPoints) {
         return makeAttributes(type, null, null, null, numberOfPoints, null);
     }
 
-    public static Map<String, Object> makeAttributes(DistributionType type, List<Double> points) {
+    public static Map<String, Object> makeAttributes(Distribution.Type type, List<Double> points) {
         return makeAttributes(type, null, null, null, null, points);
     }
 

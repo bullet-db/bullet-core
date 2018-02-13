@@ -21,8 +21,12 @@ coverage:
 doc:
 	    mvn clean javadoc:javadoc
 
+cc: see-coverage
+
 see-coverage: coverage
 	    cd target/site/clover; python -m SimpleHTTPServer
+
+cd: see-doc
 
 see-doc: doc
 	    cd target/site/apidocs; python -m SimpleHTTPServer

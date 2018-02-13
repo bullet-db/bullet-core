@@ -16,7 +16,8 @@ public class Metadata implements Serializable {
     public enum Signal {
         ACKNOWLEDGE,
         COMPLETE,
-        FAIL
+        FAIL,
+        KILL
     }
 
     private static final long serialVersionUID = 4234800234857923112L;

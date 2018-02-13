@@ -7,31 +7,30 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.yahoo.bullet.BulletConfig;
-import com.yahoo.bullet.operations.FilterOperations.FilterType;
+import com.yahoo.bullet.common.BulletConfig;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
             FieldTypeAdapterFactory.of(Clause.class, t -> t.getAsJsonObject().get(Clause.OPERATION_FIELD).getAsString())
-                                   .registerSubType(FilterClause.class, FilterType.RELATIONALS)
-                                   .registerSubType(LogicalClause.class, FilterType.LOGICALS);
-    private static final Gson GSON = new GsonBuilder()
-                                         .registerTypeAdapterFactory(CLAUSE_FACTORY)
-                                         .excludeFieldsWithoutExposeAnnotation()
-                                         .create();
+                                   .registerSubType(FilterClause.class, Clause.Operation.RELATIONALS)
+                                   .registerSubType(LogicalClause.class, Clause.Operation.LOGICALS);
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
+                                                      .excludeFieldsWithoutExposeAnnotation()
+                                                      .create();
 
     /**
-     * Parses a Specification out of the query string.
+     * Parses a Query out of the query string.
      *
      * @param queryString The String version of the query.
-     * @param config Additional configuration for the specification.
+     * @param config Additional configuration for the query.
      *
-     * @return The parsed, configured Specification.
+     * @return The parsed, configured Query.
+     * @throws com.google.gson.JsonParseException if there was an issue parsing the query.
      */
-    public static Specification parse(String queryString, BulletConfig config) {
-        Specification specification = GSON.fromJson(queryString, Specification.class);
-        specification.configure(config);
-        return specification;
+    public static Query parse(String queryString, BulletConfig config) {
+        Query query = GSON.fromJson(queryString, Query.class);
+        query.configure(config);
+        return query;
     }
 }
 

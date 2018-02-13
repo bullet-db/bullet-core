@@ -6,17 +6,11 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.BulletConfig;
-import com.yahoo.bullet.Utilities;
-import com.yahoo.bullet.operations.AggregationOperations.AggregationType;
-import com.yahoo.bullet.operations.aggregations.CountDistinct;
-import com.yahoo.bullet.operations.aggregations.Distribution;
-import com.yahoo.bullet.operations.aggregations.GroupAll;
-import com.yahoo.bullet.operations.aggregations.GroupBy;
-import com.yahoo.bullet.operations.aggregations.Raw;
-import com.yahoo.bullet.operations.aggregations.Strategy;
-import com.yahoo.bullet.operations.aggregations.TopK;
-import lombok.AccessLevel;
+import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.Configurable;
+import com.yahoo.bullet.common.Initializable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,31 +20,41 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.yahoo.bullet.parsing.Error.makeError;
+import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @Getter @Setter
-public class Aggregation implements Configurable, Validatable {
+public class Aggregation implements Configurable, Initializable {
+    /** Represents the type of the Aggregation. */
+    public enum Type {
+        // The alternate value of DISTINCT for GROUP is allowed since having no GROUP operations is implicitly
+        // a DISTINCT
+        @SerializedName(value = "GROUP", alternate = { "DISTINCT" })
+        GROUP,
+        @SerializedName("COUNT DISTINCT")
+        COUNT_DISTINCT,
+        @SerializedName("TOP K")
+        TOP_K,
+        @SerializedName("DISTRIBUTION")
+        DISTRIBUTION,
+        // The alternate value of LIMIT for RAW is allowed to preserve backward compatibility.
+        @SerializedName(value = "RAW", alternate = { "LIMIT" })
+        RAW
+    }
+
     @Expose
     private Integer size;
     @Expose
-    private AggregationType type;
+    private Type type;
     @Expose
     private Map<String, Object> attributes;
     @Expose
     private Map<String, String> fields;
 
-    @Setter(AccessLevel.NONE)
-    private Strategy strategy;
-
-    // In case any strategies need it.
-    private BulletConfig configuration;
-
-    public static final Set<AggregationType> SUPPORTED_AGGREGATION_TYPES =
-            new HashSet<>(asList(AggregationType.GROUP, AggregationType.COUNT_DISTINCT, AggregationType.RAW,
-                                 AggregationType.DISTRIBUTION, AggregationType.TOP_K));
-    public static final Error TYPE_NOT_SUPPORTED_ERROR =
+    public static final Set<Type> SUPPORTED_AGGREGATION_TYPES =
+            new HashSet<>(asList(Type.GROUP, Type.COUNT_DISTINCT, Type.RAW, Type.DISTRIBUTION, Type.TOP_K));
+    public static final BulletError TYPE_NOT_SUPPORTED_ERROR =
             makeError("Unknown aggregation type", "Current supported aggregation types are: RAW (or LIMIT), " +
                                                   "GROUP (or DISTINCT), COUNT DISTINCT, DISTRIBUTION, TOP K");
 
@@ -58,54 +62,24 @@ public class Aggregation implements Configurable, Validatable {
      * Default constructor. GSON recommended
      */
     public Aggregation() {
-        type = AggregationType.RAW;
+        type = Type.RAW;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        this.configuration = config;
-
         int sizeDefault = config.getAs(BulletConfig.AGGREGATION_DEFAULT_SIZE, Integer.class);
         int sizeMaximum = config.getAs(BulletConfig.AGGREGATION_MAX_SIZE, Integer.class);
 
-        // Null or negative, then default, else min of size and max
-        size = (size == null || size < 0) ? sizeDefault : Math.min(size, sizeMaximum);
-
-        strategy = findStrategy();
+        // Null or not positive, then default, else min of size and max
+        size = (size == null || size <= 0) ? sizeDefault : Math.min(size, sizeMaximum);
     }
 
     @Override
-    public Optional<List<Error>> validate() {
-        if (strategy == null) {
-            return Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));
-        }
-        List<Error> errors = strategy.initialize();
-        return Utilities.isEmpty(errors) ? Optional.empty() : Optional.of(errors);
-    }
-
-    /**
-     * Returns a new {@link Strategy} instance that can handle this aggregation.
-     *
-     * @return the created instance of a strategy that can implement the provided AggregationType or null if it cannot.
-     */
-    Strategy findStrategy() {
+    public Optional<List<BulletError>> initialize() {
         // Includes null
-        if (!SUPPORTED_AGGREGATION_TYPES.contains(type)) {
-            return null;
-        }
-        switch (type) {
-            case COUNT_DISTINCT:
-                return new CountDistinct(this);
-            case DISTRIBUTION:
-                return new Distribution(this);
-            case RAW:
-                return new Raw(this);
-            case TOP_K:
-                return new TopK(this);
-        }
-        // If we have any fields -> GroupBy
-        return Utilities.isEmpty(fields) ? new GroupAll(this) : new GroupBy(this);
+        return SUPPORTED_AGGREGATION_TYPES.contains(type) ? Optional.empty() :
+                                                            Optional.of(singletonList(TYPE_NOT_SUPPORTED_ERROR));
     }
 
     @Override

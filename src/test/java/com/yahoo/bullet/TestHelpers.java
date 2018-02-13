@@ -7,13 +7,19 @@ package com.yahoo.bullet;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.yahoo.bullet.operations.SerializerDeserializer;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.result.Meta;
 import org.testng.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class TestHelpers {
@@ -50,5 +56,27 @@ public class TestHelpers {
         ArrayList<BulletRecord> asList = new ArrayList<>();
         Collections.addAll(asList, records);
         return SerializerDeserializer.toBytes(asList);
+    }
+
+    public static BulletConfig addMetadata(BulletConfig config, List<Map.Entry<Meta.Concept, String>> metadata) {
+        if (metadata == null) {
+            config.set(BulletConfig.RESULT_METADATA_ENABLE, false);
+            return config.validate();
+        }
+        List<Map<String, String>> metadataList = new ArrayList<>();
+        for (Map.Entry<Meta.Concept, String> meta : metadata) {
+            Map<String, String> entry = new HashMap<>();
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY, meta.getKey().getName());
+            entry.put(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY, meta.getValue());
+            metadataList.add(entry);
+        }
+        config.set(BulletConfig.RESULT_METADATA_METRICS, metadataList);
+        config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
+        return config.validate();
+    }
+
+    @SafeVarargs
+    public static BulletConfig addMetadata(BulletConfig config, Map.Entry<Meta.Concept, String>... metadata) {
+        return addMetadata(config, metadata == null ? null : Arrays.asList(metadata));
     }
 }

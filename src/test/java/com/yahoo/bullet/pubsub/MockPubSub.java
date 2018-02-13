@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
-import com.yahoo.bullet.BulletConfig;
+import com.yahoo.bullet.common.BulletConfig;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -45,5 +45,11 @@ class MockPubSub extends PubSub {
     @Override
     public List<Publisher> getPublishers(int n) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void switchContext(Context context, BulletConfig config) throws PubSubException {
+        super.switchContext(context, config);
+        mockMessage = getRequiredConfig(String.class, MOCK_MESSAGE_NAME);
     }
 }
