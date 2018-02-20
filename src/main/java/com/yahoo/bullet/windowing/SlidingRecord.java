@@ -34,7 +34,7 @@ public class SlidingRecord extends Basic {
     protected int recordCount;
 
     @AllArgsConstructor @Getter
-    private static class Data implements Serializable {
+    public static class Data implements Serializable {
         private static final long serialVersionUID = -3035790881273001274L;
         private final long count;
         private final byte[] data;

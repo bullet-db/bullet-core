@@ -96,6 +96,26 @@ public class QueryUtils {
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
+                                                          Aggregation.Type aggregation, Integer size, Window.Unit emit,
+                                                          Integer emitValue, Window.Unit include, Integer includeValue) {
+        return "{" +
+               "'filters' : [" + makeFilter(field, values, operation) + "], " +
+               "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+               "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+               "}";
+    }
+
+    public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
+                                                          Aggregation.Type aggregation, Integer size, Window.Unit emit,
+                                                          Integer emitValue, Window.Unit include, Integer includeValue) {
+        return "{" +
+               "'filters' : [" + makeFilter(clauses, operation) + "], " +
+               "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+               "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+               "}";
+    }
+
+    public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
                                                           Aggregation.Type aggregation, Integer size) {
         return "{" +
                "'filters' : [" + makeFilter(field, values, operation) + "], " +
