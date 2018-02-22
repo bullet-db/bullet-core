@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -534,16 +535,22 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns if this query should be buffered for a bit before getting results out. You can use this to wait for the
-     * extra results in your Join or Combine stage after a query is {@link #isDone()} or {@link #isClosed()}. If so,
-     * you should wait for more results to trickle in from the Filter stage.
+     * Returns if this query should buffer before emitting results. You can use this to wait for the final results
+     * for your window (or your final results if you have no window) in your Join or Combine stage after a query is
+     * {@link #isDone()} or {@link #isClosed()}.
      *
-     * @return A boolean that is true if this is a time based query window.
+     * @return A boolean that is true if the query results should be buffered.
      */
     public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
-        // No window means duration drives the query -> time based. Otherwise, if the window is time based.
-        return window == null || window.isTimeBased();
+        boolean noWindow = window == null;
+        // If it's a RAW query without a window, it should be buffered if and only if it timed out. This means that the
+        // query is not yet done. So this tells the driver to buffer the query to wait for more potential results.
+        if (noWindow && isRaw()) {
+            return runningQuery.isTimedOut();
+        }
+        // No window (and not raw) is a duration based query => do buffer. Otherwise, buffer if the window is time based.
+        return noWindow || window.isTimeBased();
     }
 
     /**
@@ -609,6 +616,10 @@ public class Querier implements Monoidal {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
         // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
+    }
+
+    private boolean isRaw() {
+        return runningQuery.getQuery().getAggregation().getType() == Aggregation.Type.RAW;
     }
 
     private Meta getErrorMeta(Exception e) {
