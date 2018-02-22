@@ -535,18 +535,21 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns if this query has a time based window.
+     * Returns if this query has a time based window. You can use this to wait for the final results in your Join
+     * or Combine stage after a query is {@link #isDone()}. If it is a time based window, you should buffer your result
+     * to wait for more results to trickle in from the Filter stage.
      *
      * @return A boolean that is true if this is a time based query window.
      */
     public boolean isTimeBasedWindow() {
         Window window = runningQuery.getQuery().getWindow();
         boolean noWindow = window == null;
-        // If it's a RAW query without a window, it is NOT time based.
+        // If it's a RAW query without a window, it is a time based window if and only if it timed out.
+        // The query is not yet done so this tells the driver to buffer the query to wait for potential final results.
         if (noWindow && isRaw()) {
-            return false;
+            return runningQuery.isTimedOut();
         }
-        // No window means duration drives the query, it IS time based. Otherwise, check if the window is time based.
+        // No window (and not raw) means duration drives the query -> time based. Otherwise, if the window is time based.
         return noWindow || window.isTimeBased();
     }
 
