@@ -194,7 +194,7 @@ bullet.result.metadata.metrics:
       key: "Expected Emit Time"
 
 # Enables whether each record should have a new key added to it denoting it was projected.
-bullet.record.inject.timestamp.enable: true
+bullet.record.inject.timestamp.enable: false
 # This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
 # the record is projected. This is only applicable to RAW queries.
 bullet.record.inject.timestamp.key: "bullet_project_timestamp"
@@ -212,7 +212,7 @@ bullet.query.rate.limit.enable: true
 # This is the maximum amount of times data can be retrieved for a query in a given time interval (bullet.query.rate.limit.time.interval)
 # before it is considered as exceeding the rate limit.
 bullet.query.rate.limit.max.emit.count: 100
-# This is the smallest interval in ms at which the check for whether the rate limit is being exceeded check is done ff your backend uses rate limiting.
+# This is the smallest interval in ms at which the check for whether the rate limit is being exceeded check is done if your backend uses rate limiting.
 bullet.query.rate.limit.time.interval: 100
 
 ## PubSub default settings

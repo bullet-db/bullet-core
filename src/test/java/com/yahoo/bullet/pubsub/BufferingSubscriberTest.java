@@ -175,9 +175,9 @@ public class BufferingSubscriberTest {
         // Commit 0 and 2 and fail 1
         subscriber.commit(String.valueOf(0));
         subscriber.commit(String.valueOf(2));
-        Assert.assertTrue(subscriber.unCommittedMessages.containsKey(ImmutablePair.of(String.valueOf(1), -1)));
+        Assert.assertTrue(subscriber.uncommittedMessages.containsKey(ImmutablePair.of(String.valueOf(1), -1)));
         subscriber.fail(String.valueOf(1));
-        Assert.assertFalse(subscriber.unCommittedMessages.containsKey(ImmutablePair.of(String.valueOf(1), -1)));
+        Assert.assertFalse(subscriber.uncommittedMessages.containsKey(ImmutablePair.of(String.valueOf(1), -1)));
 
         PubSubMessage actualSecondTime = subscriber.receive();
         Assert.assertNotNull(actualSecondTime);
@@ -206,9 +206,9 @@ public class BufferingSubscriberTest {
         // Commit 0 and 2 sequence and fail 1
         subscriber.commit(expectedID, 0);
         subscriber.commit(expectedID, 2);
-        Assert.assertTrue(subscriber.unCommittedMessages.containsKey(ImmutablePair.of(expectedID, 1)));
+        Assert.assertTrue(subscriber.uncommittedMessages.containsKey(ImmutablePair.of(expectedID, 1)));
         subscriber.fail(expectedID, 1);
-        Assert.assertFalse(subscriber.unCommittedMessages.containsKey(ImmutablePair.of(expectedID, 1)));
+        Assert.assertFalse(subscriber.uncommittedMessages.containsKey(ImmutablePair.of(expectedID, 1)));
 
         PubSubMessage actualSecondTime = subscriber.receive();
         Assert.assertNotNull(actualSecondTime);
@@ -231,7 +231,7 @@ public class BufferingSubscriberTest {
         subscriber.commit(String.valueOf(0));
         // This doesn't exist
         subscriber.fail(String.valueOf(42));
-        Assert.assertFalse(subscriber.unCommittedMessages.containsKey(ImmutablePair.of(String.valueOf(42), -1)));
+        Assert.assertFalse(subscriber.uncommittedMessages.containsKey(ImmutablePair.of(String.valueOf(42), -1)));
 
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);

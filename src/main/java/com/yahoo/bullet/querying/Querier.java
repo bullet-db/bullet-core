@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -540,8 +541,13 @@ public class Querier implements Monoidal {
      */
     public boolean isTimeBasedWindow() {
         Window window = runningQuery.getQuery().getWindow();
-        // No window means duration drives the query => it is time based.
-        return window == null || window.isTimeBased();
+        boolean noWindow = window == null;
+        // If it's a RAW query without a window, it is NOT time based.
+        if (noWindow && isRaw()) {
+            return false;
+        }
+        // No window means duration drives the query, it IS time based. Otherwise, check if the window is time based.
+        return noWindow || window.isTimeBased();
     }
 
     /**
@@ -607,6 +613,10 @@ public class Querier implements Monoidal {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
         // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
+    }
+
+    private boolean isRaw() {
+        return runningQuery.getQuery().getAggregation().getType() == Aggregation.Type.RAW;
     }
 
     private Meta getErrorMeta(Exception e) {
