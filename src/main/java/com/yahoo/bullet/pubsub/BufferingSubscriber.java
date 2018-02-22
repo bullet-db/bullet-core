@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * This implements a {@link Subscriber} that provides a base subscriber that buffers a fixed number of messages read.
- * See {@link BufferingSubscriber#maxUncommitedMessages}.
+ * See {@link BufferingSubscriber#maxUncommittedMessages}.
  *
  * It provides implementations of {@link Subscriber#commit(String, int)}, {@link Subscriber#fail(String, int)} and
  * {@link Subscriber#receive()} that honor the fixed number of messages to read.
@@ -29,7 +29,7 @@ public abstract class BufferingSubscriber implements Subscriber {
     /**
      * The maximum number of PubSubMessages we can have unacked at any time. Further calls to receive will return nothing.
      */
-    protected final int maxUncommitedMessages;
+    protected final int maxUncommittedMessages;
 
     /**
      * A List of messages read. {@link #receive()} emits from the head.
@@ -39,28 +39,28 @@ public abstract class BufferingSubscriber implements Subscriber {
     /**
      * A Map of messages that have not been committed so far.
      */
-    protected Map<Pair<String, Integer>, PubSubMessage> unCommittedMessages = new HashMap<>();
+    protected Map<Pair<String, Integer>, PubSubMessage> uncommittedMessages = new HashMap<>();
 
     /**
      * Creates an instance of this class with the given max for commited messages.
      *
-     * @param maxUncommitedMessages The maximum number of messages that this Subscriber will buffer.
+     * @param maxUncommittedMessages The maximum number of messages that this Subscriber will buffer.
      */
-    public BufferingSubscriber(int maxUncommitedMessages) {
-        this.maxUncommitedMessages = maxUncommitedMessages;
+    public BufferingSubscriber(int maxUncommittedMessages) {
+        this.maxUncommittedMessages = maxUncommittedMessages;
     }
 
     @Override
     public PubSubMessage receive() throws PubSubException {
-        if (unCommittedMessages.size() >= maxUncommitedMessages) {
-            log.warn("Reached limit of max uncommitted messages: {}. Waiting for commits to proceed.", maxUncommitedMessages);
+        if (uncommittedMessages.size() >= maxUncommittedMessages) {
+            log.warn("Reached limit of max uncommitted messages: {}. Waiting for commits to proceed.", maxUncommittedMessages);
             return null;
         }
         if (!haveMessages()) {
             return null;
         }
         PubSubMessage message = receivedMessages.remove(0);
-        unCommittedMessages.put(ImmutablePair.of(message.getId(), message.getSequence()), message);
+        uncommittedMessages.put(ImmutablePair.of(message.getId(), message.getSequence()), message);
         return message;
     }
 
@@ -68,13 +68,13 @@ public abstract class BufferingSubscriber implements Subscriber {
      * {@inheritDoc}
      *
      * Marks a message as fully processed. This message is forgotten and cannot be failed after. If we have equal or
-     * more than {@link #maxUncommitedMessages} uncommited messages, further calls to {@link #receive()} will return
+     * more than {@link #maxUncommittedMessages} uncommited messages, further calls to {@link #receive()} will return
      * nulls till some messages are commited.
      */
     @Override
     public void commit(String id, int sequence) {
         ImmutablePair<String, Integer> key = ImmutablePair.of(id, sequence);
-        unCommittedMessages.remove(key);
+        uncommittedMessages.remove(key);
     }
 
     /**
@@ -86,10 +86,10 @@ public abstract class BufferingSubscriber implements Subscriber {
     @Override
     public void fail(String id, int sequence) {
         Pair<String, Integer> compositeID = ImmutablePair.of(id, sequence);
-        PubSubMessage message = unCommittedMessages.get(compositeID);
+        PubSubMessage message = uncommittedMessages.get(compositeID);
         if (message != null) {
             receivedMessages.add(0, message);
-            unCommittedMessages.remove(compositeID);
+            uncommittedMessages.remove(compositeID);
         }
     }
 
