@@ -194,8 +194,8 @@ public class QuerierTest {
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
-        // RAW query
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        // No window => so duration based
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
@@ -640,7 +640,7 @@ public class QuerierTest {
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertTrue(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
 
         querier.consume(RecordBox.get().getRecord());
 
@@ -666,7 +666,7 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithoutWindowsAreNotTimeBased() {
+    public void testRawQueriesWithoutWindowsThatAreClosedShouldBuffer() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
@@ -680,19 +680,19 @@ public class QuerierTest {
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
 
         querier.consume(RecordBox.get().getRecord());
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
 
         IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
 
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
     }
 }
