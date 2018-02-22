@@ -21,6 +21,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
 import com.yahoo.bullet.windowing.Tumbling;
 import org.apache.commons.lang3.tuple.Pair;
@@ -187,12 +188,14 @@ public class QuerierTest {
 
         Query query = querier.getRunningQuery().getQuery();
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        Assert.assertEquals(query.getAggregation().getType(), Aggregation.Type.RAW);
         Assert.assertFalse(querier.isClosedForPartition());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
-        Assert.assertTrue(querier.isTimeBasedWindow());
+        // RAW query
+        Assert.assertFalse(querier.isTimeBasedWindow());
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
@@ -660,5 +663,36 @@ public class QuerierTest {
 
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get(), singletonList(Query.ONLY_RAW_RECORD));
+    }
+
+    @Test
+    public void testRawQueriesWithoutWindowsAreNotTimeBased() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
+        config.validate();
+
+        Query query = new Query();
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(Aggregation.Type.RAW);
+        query.setAggregation(aggregation);
+        query.configure(config);
+        Querier querier = make(query, config);
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
+
+        querier.consume(RecordBox.get().getRecord());
+
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertFalse(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isTimeBasedWindow());
+
+        IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
+
+        Assert.assertTrue(querier.isClosed());
+        Assert.assertTrue(querier.isClosedForPartition());
+        Assert.assertFalse(querier.isTimeBasedWindow());
     }
 }
