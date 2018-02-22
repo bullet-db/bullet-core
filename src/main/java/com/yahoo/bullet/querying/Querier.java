@@ -10,7 +10,6 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -177,7 +176,7 @@ import java.util.function.Consumer;
  *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You should put it in a buffer
  *   for a little bit of time while the data arrives if {@link #isClosed()}, then {@link #getResult()} and
  *   {@link #reset()}. Similarly, for {@link #isDone()}. You should only do this for queries for which
- *   {@link #isTimeBasedWindow()} is true. For record based windows, you can use {@link #isClosed()} to drive the
+ *   {@link #shouldBuffer()} is true. For record based windows, you can use {@link #isClosed()} to drive the
  *   emission of the results.
  * </li>
  * </ol>
@@ -226,7 +225,7 @@ import java.util.function.Consumer;
  *     queryPubSubPublisher.emit(
  * else if (querier.isClosed())
  *     Clip clip = querier.getResult()
- *     // See note above regarding buffering if querier.isTimeBasedWindow()
+ *     // See note above regarding buffering if querier.shouldBuffer()
  *     emit(clip)
  *     querier.reset()
  *
@@ -535,22 +534,16 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns if this query has a time based window. You can use this to wait for the final results in your Join
-     * or Combine stage after a query is {@link #isDone()}. If it is a time based window, you should buffer your result
-     * to wait for more results to trickle in from the Filter stage.
+     * Returns if this query should be buffered for a bit before getting results out. You can use this to wait for the
+     * extra results in your Join or Combine stage after a query is {@link #isDone()} or {@link #isClosed()}. If so,
+     * you should wait for more results to trickle in from the Filter stage.
      *
      * @return A boolean that is true if this is a time based query window.
      */
-    public boolean isTimeBasedWindow() {
+    public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow = window == null;
-        // If it's a RAW query without a window, it is a time based window if and only if it timed out.
-        // The query is not yet done so this tells the driver to buffer the query to wait for potential final results.
-        if (noWindow && isRaw()) {
-            return runningQuery.isTimedOut();
-        }
-        // No window (and not raw) means duration drives the query -> time based. Otherwise, if the window is time based.
-        return noWindow || window.isTimeBased();
+        // No window means duration drives the query -> time based. Otherwise, if the window is time based.
+        return window == null || window.isTimeBased();
     }
 
     /**
@@ -618,10 +611,6 @@ public class Querier implements Monoidal {
         return window.getClass().equals(Basic.class);
     }
 
-    private boolean isRaw() {
-        return runningQuery.getQuery().getAggregation().getType() == Aggregation.Type.RAW;
-    }
-
     private Meta getErrorMeta(Exception e) {
         return Meta.of(BulletError.makeError(e.getMessage(), TRY_AGAIN_LATER));
     }
@@ -631,5 +620,4 @@ public class Querier implements Monoidal {
             rateLimit.increment();
         }
     }
-
 }

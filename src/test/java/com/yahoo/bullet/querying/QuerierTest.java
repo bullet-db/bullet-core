@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.primitives.Booleans.asList;
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
@@ -47,9 +46,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.mockito.AdditionalAnswers.returnsElementsOf;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
 
 public class QuerierTest {
     private static class FailingScheme extends Scheme {
@@ -198,8 +194,8 @@ public class QuerierTest {
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
-        // RAW query without window and not timed out.
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        // No window => so duration based
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
@@ -644,7 +640,7 @@ public class QuerierTest {
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertTrue(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
 
         querier.consume(RecordBox.get().getRecord());
 
@@ -670,7 +666,7 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithoutWindowsThatAreClosedAreNotTimeBased() {
+    public void testRawQueriesWithoutWindowsThatAreClosedShouldBuffer() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
@@ -684,50 +680,19 @@ public class QuerierTest {
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
 
         querier.consume(RecordBox.get().getRecord());
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
 
         IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
 
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
-    }
-
-    @Test
-    public void testRawQueriesWithoutWindowsThatAreTimedOutAreTimeBased() {
-        BulletConfig config = new BulletConfig();
-        config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
-        config.validate();
-
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
-        query.setAggregation(aggregation);
-        query.configure(config);
-
-        RunningQuery runningQuery = spy(new RunningQuery("", query));
-        doAnswer(returnsElementsOf(asList(false, true))).when(runningQuery).isTimedOut();
-
-        Querier querier = new Querier(runningQuery, config);
-        querier.initialize();
-
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        Assert.assertFalse(querier.isTimeBasedWindow());
-        Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
-
-        IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
-
-        Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.isClosedForPartition());
-        // Now runningQuery is timed out but query is not done.
-        Assert.assertTrue(querier.isTimeBasedWindow());
+        Assert.assertTrue(querier.shouldBuffer());
     }
 }
