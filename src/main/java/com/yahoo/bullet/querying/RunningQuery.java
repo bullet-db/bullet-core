@@ -62,8 +62,7 @@ public class RunningQuery implements Initializable {
 
     @Override
     public String toString() {
-        String body = queryString != null ? queryString : query.toString();
-        return String.format("%s : %s", id, body);
+        return queryString != null ? queryString : query.toString();
     }
 
     /**
