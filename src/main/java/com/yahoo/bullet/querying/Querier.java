@@ -602,7 +602,7 @@ public class Querier implements Monoidal {
         }
         Meta meta = new Meta();
         addMetadata(Concept.QUERY_ID, (k) -> meta.add(k, runningQuery.getId()));
-        addMetadata(Concept.QUERY_BODY, (k) -> meta.add(k, runningQuery.getQuery().toString()));
+        addMetadata(Concept.QUERY_BODY, (k) -> meta.add(k, runningQuery.toString()));
         addMetadata(Concept.QUERY_RECEIVE_TIME, (k) -> meta.add(k, runningQuery.getStartTime()));
         addMetadata(Concept.RESULT_EMIT_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
         return meta;
