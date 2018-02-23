@@ -27,7 +27,7 @@ public class RunningQueryTest {
         Assert.assertFalse(runningQuery.initialize().isPresent());
         Assert.assertEquals(runningQuery.getId(), "foo");
         Assert.assertNotNull(runningQuery.getQuery());
-        Assert.assertEquals(runningQuery.toString(), "foo : {}");
+        Assert.assertEquals(runningQuery.toString(), "{}");
     }
 
     @Test
@@ -43,7 +43,7 @@ public class RunningQueryTest {
         Assert.assertEquals(runningQuery.getId(), "foo");
         Assert.assertNotNull(runningQuery.getQuery());
         String actual = runningQuery.toString();
-        Assert.assertTrue(actual.contains("foo : {"));
+        Assert.assertTrue(actual.contains("{"));
         Assert.assertTrue(actual.contains("filters: null, projection: null,"));
         Assert.assertTrue(actual.contains("aggregation: {size: 500, type: RAW, fields: null, attributes: null},"));
         Assert.assertTrue(actual.contains("window: null, duration:"));

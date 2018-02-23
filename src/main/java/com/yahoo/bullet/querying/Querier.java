@@ -568,7 +568,7 @@ public class Querier implements Monoidal {
 
     @Override
     public String toString() {
-        return runningQuery.toString();
+        return String.format("%s : %s", runningQuery.getId(), runningQuery.toString());
     }
 
     // ********************************* Private helpers *********************************
