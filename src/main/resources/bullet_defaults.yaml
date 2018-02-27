@@ -217,6 +217,27 @@ bullet.query.rate.limit.time.interval: 100
 
 ## PubSub default settings
 # This should point to a concrete implementation of PubSub.
-bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.PubSub"
+bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.memory.MemoryPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
+
+# In-Memory pubsub settings that you may change for each instance (there may be multiple in-memory pubsub instances)
+# The context-path of the servlet container hosting this in-memory pubsub instance
+bullet.pubsub.memory.context.path: "/api/bullet"
+# The location (host:port) of this instance's pubsub endpoints
+bullet.pubsub.memory.server: "http://localhost:9999"
+# The paths (not including the context.path) of the endpoints for reading/writing queries/responses
+bullet.pubsub.memory.read.query.path: "/pubsub/read/query"
+bullet.pubsub.memory.read.response.path: "/pubsub/read/response"
+bullet.pubsub.memory.write.query.path: "/pubsub/write/query"
+bullet.pubsub.memory.write.response.path: "/pubsub/write/response"
+# Http connection timout (used by both the web service and the backend)
+bullet.pubsub.memory.connect.timeout.ms: 30000
+# Http connection retry limit (used by both the web service and the backend)
+bullet.pubsub.memory.connect.retry.limit: 10
+# Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
+bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
+## In-Memory pubsub default settings used in the backend
+# The paths of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
+bullet.pubsub.memory.backend.read.query.paths: "http://localhost:9999/api/bullet/pubsub/read/query,http://localhost:9998/api/bullet/pubsub/read/query"
+
