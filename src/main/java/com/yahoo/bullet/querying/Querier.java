@@ -26,10 +26,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
+
+import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
  * This manages a {@link RunningQuery} that is currently being executed. It can {@link #consume(BulletRecord)} records for the
@@ -560,9 +562,7 @@ public class Querier implements Monoidal {
      */
     public Clip finish() {
         Clip result = getResult();
-        Meta meta = new Meta();
-        addMetadata(Concept.QUERY_FINISH_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
-        result.add(meta);
+        addFinishTime(result.getMeta());
         return result;
     }
 
@@ -597,19 +597,22 @@ public class Querier implements Monoidal {
     }
 
     private Meta getResultMetadata() {
-        if (metaKeys.isEmpty()) {
+        String metaKey = getMetaKey();
+        if (metaKey == null) {
             return null;
         }
-        Meta meta = new Meta();
-        addMetadata(Concept.QUERY_ID, (k) -> meta.add(k, runningQuery.getId()));
-        addMetadata(Concept.QUERY_BODY, (k) -> meta.add(k, runningQuery.toString()));
-        addMetadata(Concept.QUERY_RECEIVE_TIME, (k) -> meta.add(k, runningQuery.getStartTime()));
-        addMetadata(Concept.RESULT_EMIT_TIME, (k) -> meta.add(k, System.currentTimeMillis()));
-        return meta;
+        Map<String, Object> meta = new HashMap<>();
+        addIfNonNull(meta, metaKeys, Concept.QUERY_ID, runningQuery::getId);
+        addIfNonNull(meta, metaKeys, Concept.QUERY_BODY, runningQuery::toString);
+        addIfNonNull(meta, metaKeys, Concept.QUERY_RECEIVE_TIME, runningQuery::getStartTime);
+        return new Meta().add(metaKey, meta);
     }
 
-    private void addMetadata(Concept concept, Consumer<String> action) {
-        Meta.consumeRegisteredConcept(concept, metaKeys, action);
+    private void addFinishTime(Meta meta) {
+        Map<String, Object> queryMeta = (Map<String, Object>) meta.asMap().get(getMetaKey());
+        if (queryMeta != null) {
+            addIfNonNull(queryMeta, metaKeys, Concept.QUERY_FINISH_TIME, System::currentTimeMillis);
+        }
     }
 
     private boolean isLastWindow() {
@@ -630,5 +633,9 @@ public class Querier implements Monoidal {
         if (rateLimit != null) {
             rateLimit.increment();
         }
+    }
+
+    private String getMetaKey() {
+        return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
     }
 }

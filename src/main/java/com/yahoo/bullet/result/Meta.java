@@ -24,8 +24,9 @@ public class Meta {
 
     @Getter
     public enum Concept {
+        // Query metadata
+        QUERY_METADATA("Query Metadata"),
         QUERY_RECEIVE_TIME("Query Receive Time"),
-        RESULT_EMIT_TIME("Result Emit Time"),
         QUERY_FINISH_TIME("Query Finish Time"),
         QUERY_ID("Query ID"),
         QUERY_BODY("Query Body"),
