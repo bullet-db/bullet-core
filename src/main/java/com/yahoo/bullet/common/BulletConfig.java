@@ -98,11 +98,11 @@ public class BulletConfig extends Config {
     public static final boolean DEFAULT_RESULT_METADATA_ENABLE = true;
     /** The mapping from Metadata concepts to the keys with which they should logged in the result metadata. */
     public static final List<Map<String, String>> DEFAULT_RESULT_METADATA_METRICS =
-        makeMetadata(ImmutablePair.of(Concept.QUERY_ID, "Query ID"),
-                     ImmutablePair.of(Concept.QUERY_BODY, "Query"),
-                     ImmutablePair.of(Concept.QUERY_RECEIVE_TIME, "Query Receive Time"),
-                     ImmutablePair.of(Concept.RESULT_EMIT_TIME, "Result Emit Time"),
-                     ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Query Finish Time"),
+        makeMetadata(ImmutablePair.of(Concept.QUERY_METADATA, "Query"),
+                     ImmutablePair.of(Concept.QUERY_ID, "ID"),
+                     ImmutablePair.of(Concept.QUERY_BODY, "Body"),
+                     ImmutablePair.of(Concept.QUERY_RECEIVE_TIME, "Receive Time"),
+                     ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Finish Time"),
                      ImmutablePair.of(Concept.SKETCH_METADATA, "Sketch"),
                      ImmutablePair.of(Concept.SKETCH_ESTIMATED_RESULT, "Was Estimated"),
                      ImmutablePair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "Standard Deviations"),
