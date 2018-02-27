@@ -38,7 +38,6 @@ public class FilterClause extends Clause {
         operation = null;
     }
 
-
     @Override
     public void configure(BulletConfig configuration) {
         if (operation == REGEX_LIKE) {
