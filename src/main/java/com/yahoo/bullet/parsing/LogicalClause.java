@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,13 @@ public class LogicalClause extends Clause {
      */
     public LogicalClause() {
         clauses = null;
+    }
+
+    @Override
+    public void configure(BulletConfig configuration) {
+        if (clauses != null) {
+            clauses.forEach(clause -> clause.configure(configuration));
+        }
     }
 
     @Override

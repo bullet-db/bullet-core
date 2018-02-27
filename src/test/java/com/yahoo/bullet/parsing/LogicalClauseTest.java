@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,6 +17,7 @@ import static com.yahoo.bullet.parsing.Clause.Operation.AND;
 import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
 import static com.yahoo.bullet.parsing.Clause.Operation.NOT;
 import static com.yahoo.bullet.parsing.Clause.Operation.OR;
+import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -26,6 +28,21 @@ public class LogicalClauseTest {
         LogicalClause logicalClause = new LogicalClause();
         Assert.assertNull(logicalClause.getOperation());
         Assert.assertNull(logicalClause.getClauses());
+    }
+
+    @Test
+    public void testConfigure() {
+        LogicalClause logicalClause = new LogicalClause();
+        logicalClause.setOperation(AND);
+        FilterClause filterClause =  new FilterClause();
+        filterClause.setField("id");
+        filterClause.setOperation(REGEX_LIKE);
+        filterClause.setValues(singletonList("f.*"));
+        logicalClause.setClauses(singletonList(filterClause));
+
+        Assert.assertNull(filterClause.getPatterns());
+        logicalClause.configure(new BulletConfig());
+        Assert.assertNotNull(filterClause.getPatterns());
     }
 
     @Test
