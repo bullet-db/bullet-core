@@ -149,8 +149,9 @@ bullet.result.metadata.enable: true
 # Number adds the number of the window from the start of the query - e.g. 253 means this is the 253rd window.
 # Size adds the number of records in this window. This only applies for record based windows.
 # Emit Time adds the time when the window was emitted. This replaces the old Result Receive Time concept.
-# Expected Emit Time adds the time when the window was supposed to be emitted. This should be <= the Window Emit Time.
-#                    The difference lets you know how long the window was buffered. This only applies for time windows.
+# Expected Emit Time adds the time when the window was supposed to be emitted. This should be <= the Window Emit Time
+#                    except for the final window. The difference lets you know how long the window was buffered. This
+#                    only applies for time based windows.
 bullet.result.metadata.metrics:
     - name: "Query Metadata"
       key: "Query"
