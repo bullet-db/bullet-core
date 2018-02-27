@@ -245,6 +245,20 @@ public class QuerierTest {
     }
 
     @Test
+    public void testDisabledQueryMeta() {
+        BulletConfig defaults = new BulletConfig();
+        defaults.set(BulletConfig.RESULT_METADATA_METRICS, emptyMap());
+
+        Querier querier = make("{'aggregation' : {}}", defaults);
+        Assert.assertTrue(querier.getMetadata().asMap().isEmpty());
+
+        Clip result = querier.finish();
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.getRecords().isEmpty());
+        Assert.assertTrue(result.getMeta().asMap().isEmpty());
+    }
+
+    @Test
     public void testTimes() {
         BulletConfig defaults = new BulletConfig();
         Map<String, String> names = (Map<String, String>) defaults.get(BulletConfig.RESULT_METADATA_METRICS);
