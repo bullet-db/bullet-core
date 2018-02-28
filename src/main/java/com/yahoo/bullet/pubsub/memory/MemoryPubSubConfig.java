@@ -29,11 +29,11 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String WRITE_QUERY_PATH = PREFIX + "write.query.path";
     public static final String WRITE_RESPONSE_PATH = PREFIX + "write.response.path";
     // The full paths (comma-seperated list) of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
-    public static final String BACKED_READ_QUERY_PATHS = PREFIX + "backend.read.query.path";
+    public static final String BACKED_READ_QUERY_PATHS = PREFIX + "backend.read.query.paths";
 
     // Defaults
     public static final String DEFAULT_CONTEXT_PATH = "/api/bullet";
-    public static final String DEFAULT_SERVER = "http://localhost:9999";
+    public static final String DEFAULT_SERVER = "http://localhost:9901";
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
@@ -41,7 +41,7 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String DEFAULT_READ_RESPONSE_PATH = "/pubsub/read/response";
     public static final String DEFAULT_WRITE_QUERY_PATH = "/pubsub/write/query";
     public static final String DEFAULT_WRITE_RESPONSE_PATH = "/pubsub/write/response";
-    public static final String DEFAULT_BACKED_READ_QUERY_PATHS = "http://localhost:9999/api/bullet/pubsub/read/query,http://localhost:9998/api/bullet/pubsub/read/query";
+    public static final String DEFAULT_BACKED_READ_QUERY_PATHS = "http://localhost:9901/api/bullet/pubsub/read/query,http://localhost:9902/api/bullet/pubsub/read/query";
 
     /**
      * Constructor that loads specific file augmented with defaults.
