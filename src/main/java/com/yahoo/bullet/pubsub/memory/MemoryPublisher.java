@@ -5,18 +5,13 @@
  */
 package com.yahoo.bullet.pubsub.memory;
 
-
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.AsyncHttpClientConfig;
-import org.asynchttpclient.DefaultAsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Response;
 
 import java.io.IOException;
@@ -26,7 +21,6 @@ import java.util.function.Consumer;
 public abstract class MemoryPublisher implements Publisher {
     protected MemoryPubSubConfig config;
     protected AsyncHttpClient client;
-    public static final int NO_TIMEOUT = -1;
 
     /**
      * Create a MemoryPublisher from a {@link BulletConfig}.
@@ -35,16 +29,7 @@ public abstract class MemoryPublisher implements Publisher {
      */
     public MemoryPublisher(BulletConfig config) {
         this.config = new MemoryPubSubConfig(config);
-
-        Number connectTimeout = this.config.getAs(MemoryPubSubConfig.CONNECT_TIMEOUT_MS, Number.class);
-        Number retryLimit = this.config.getAs(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, Number.class);
-        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
-                .setConnectTimeout(connectTimeout.intValue())
-                .setMaxRequestRetry(retryLimit.intValue())
-                .setReadTimeout(NO_TIMEOUT)
-                .setRequestTimeout(NO_TIMEOUT)
-                .build();
-        client = new DefaultAsyncHttpClient(clientConfig);
+        client = MemoryPubSubClientUtils.getClient(this.config);
     }
 
     @Override
@@ -92,7 +77,7 @@ public abstract class MemoryPublisher implements Publisher {
     }
 
     private void handleResponse(String id, Response response) {
-        if (response == null || response.getStatusCode() != HttpStatus.SC_OK) {
+        if (response == null || response.getStatusCode() != MemoryPubSubClientUtils.OK_200) {
             log.error("Failed to write message with id: {}. Couldn't reach memory pubsub server. Got response: {}", id, response);
             return;
         }
