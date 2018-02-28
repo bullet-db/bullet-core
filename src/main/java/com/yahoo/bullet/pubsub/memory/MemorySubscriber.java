@@ -26,21 +26,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class MemorySubscriber extends BufferingSubscriber {
     MemoryPubSubConfig config;
-    List<String> URIs;
+    List<String> uris;
     HttpClient client;
 
+    /**
+     * Create a MemorySubscriber from a {@link BulletConfig}.
+     *
+     * @param config The config.
+     * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
+     */
     public MemorySubscriber(BulletConfig config, int maxUncommittedMessages) {
         super(maxUncommittedMessages);
         this.config = new MemoryPubSubConfig(config);
 
-        this.URIs = getURIs();
+        this.uris = getUris();
         this.client = HttpClients.createDefault();
     }
 
     @Override
     public List<PubSubMessage> getMessages() throws PubSubException {
         List<PubSubMessage> messages = new ArrayList<>();
-        for (String uri : URIs) {
+        for (String uri : uris) {
             try {
                 HttpGet get = new HttpGet(uri);
                 HttpResponse response = client.execute(get);
@@ -55,7 +61,7 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
                     continue;
                 }
                 messages.add(PubSubMessage.fromJSON(readResponseContent(response)));
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("Http call failed with error: " + e);
             }
         }
@@ -74,12 +80,12 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
     }
 
     /**
-     * Each subclass should implement this function to return the appropriate list of complete URIs from which to read.
+     * Each subclass should implement this function to return the appropriate list of complete uris from which to read.
      * The backend can read from all in-memory pubsub hosts, the WS should just read from the single in-memory pubsub
      * instance that is running on that host.
-     * @return The list of URIs from which to read.
+     * @return The list of uris from which to read.
      */
-    protected abstract List<String> getURIs();
+    protected abstract List<String> getUris();
 
     @Override
     public void close() {

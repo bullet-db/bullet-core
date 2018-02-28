@@ -18,6 +18,12 @@ import java.util.List;
 @Slf4j
 public class MemoryPubSub extends PubSub {
 
+    /**
+     * Create a MemoryPubSub from a {@link BulletConfig}.
+     *
+     * @param config The config.
+     * @throws PubSubException
+     */
     public MemoryPubSub(BulletConfig config) throws PubSubException {
         super(config);
         this.config = new MemoryPubSubConfig(config);

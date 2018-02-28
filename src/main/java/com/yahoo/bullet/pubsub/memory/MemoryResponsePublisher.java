@@ -13,6 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MemoryResponsePublisher extends MemoryPublisher {
 
+    /**
+     * Create a MemoryResponsePublisher from a {link BulletConfig}.
+     *
+     * @param config The config.
+     */
     public MemoryResponsePublisher(BulletConfig config) {
         super(config);
     }

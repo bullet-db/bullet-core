@@ -16,6 +16,11 @@ public class MemoryQueryPublisher extends MemoryPublisher {
     String writeURI;
     String respondURI;
 
+    /**
+     * Create a MemroyQueryPublisher from a {@link BulletConfig}.
+     *
+     * @param config The config.
+     */
     public MemoryQueryPublisher(BulletConfig config) {
         super(config);
         this.writeURI = createWriteURI();

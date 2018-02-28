@@ -7,8 +7,8 @@ package com.yahoo.bullet.pubsub.memory;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Config;
+import com.yahoo.bullet.common.Validator;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.Optional;
 
 @Slf4j
@@ -31,6 +31,17 @@ public class MemoryPubSubConfig extends BulletConfig {
     // The full paths (comma-seperated list) of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
     public static final String BACKED_READ_QUERY_PATHS = PREFIX + "backend.read.query.path";
 
+    // Defaults
+    public static final String DEFAULT_CONTEXT_PATH = "/api/bullet";
+    public static final String DEFAULT_SERVER = "http://localhost:9999";
+    public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
+    public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
+    public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
+    public static final String DEFAULT_READ_QUERY_PATH = "/pubsub/read/query";
+    public static final String DEFAULT_READ_RESPONSE_PATH = "/pubsub/read/response";
+    public static final String DEFAULT_WRITE_QUERY_PATH = "/pubsub/write/query";
+    public static final String DEFAULT_WRITE_RESPONSE_PATH = "/pubsub/write/response";
+    public static final String DEFAULT_BACKED_READ_QUERY_PATHS = "http://localhost:9999/api/bullet/pubsub/read/query,http://localhost:9998/api/bullet/pubsub/read/query";
 
     /**
      * Constructor that loads specific file augmented with defaults.
@@ -38,7 +49,7 @@ public class MemoryPubSubConfig extends BulletConfig {
      * @param file YAML file to load.
      */
     public MemoryPubSubConfig(String file) {
-        this(new Config(file));
+        this(new BulletConfig(file));
     }
 
     /**
@@ -49,6 +60,42 @@ public class MemoryPubSubConfig extends BulletConfig {
     public MemoryPubSubConfig(Config other) {
         super();
         merge(other);
+        VALIDATOR.validate(this);
         log.info("Merged settings:\n {}", getAll(Optional.empty()));
     }
+
+    private static final Validator VALIDATOR = new Validator();
+    static {
+        VALIDATOR.define(CONTEXT_PATH)
+                 .defaultTo(DEFAULT_CONTEXT_PATH)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(SERVER)
+                 .defaultTo(DEFAULT_SERVER)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(CONNECT_TIMEOUT_MS)
+                 .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
+                 .checkIf(Validator::isPositive);
+        VALIDATOR.define(CONNECT_RETRY_LIMIT)
+                 .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
+                 .checkIf(Validator::isPositive);
+        VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
+                 .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
+                 .checkIf(Validator::isPositive);
+        VALIDATOR.define(READ_QUERY_PATH)
+                 .defaultTo(DEFAULT_READ_QUERY_PATH)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(READ_RESPONSE_PATH)
+                 .defaultTo(DEFAULT_READ_RESPONSE_PATH)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(WRITE_QUERY_PATH)
+                 .defaultTo(DEFAULT_WRITE_QUERY_PATH)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(WRITE_RESPONSE_PATH)
+                 .defaultTo(DEFAULT_WRITE_RESPONSE_PATH)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(BACKED_READ_QUERY_PATHS)
+                 .defaultTo(DEFAULT_BACKED_READ_QUERY_PATHS)
+                 .checkIf(Validator::isString);
+    }
+
 }

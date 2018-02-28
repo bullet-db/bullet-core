@@ -13,12 +13,17 @@ import java.util.List;
 @Slf4j
 public class MemoryQuerySubscriber extends MemorySubscriber {
 
+    /**
+     * Create a MemoryQuerySubscriber from a {@link BulletConfig}.
+     * @param config The config.
+     * @param maxUncommittedMessages The maxiumum number of messages that will be buffered before a commit() must be called.
+     */
     public MemoryQuerySubscriber(BulletConfig config, int maxUncommittedMessages) {
         super(config, maxUncommittedMessages);
     }
 
     @Override
-    protected List<String> getURIs() {
+    protected List<String> getUris() {
         return Arrays.asList(this.config.getAs(MemoryPubSubConfig.BACKED_READ_QUERY_PATHS, String.class).split(","));
     }
 }

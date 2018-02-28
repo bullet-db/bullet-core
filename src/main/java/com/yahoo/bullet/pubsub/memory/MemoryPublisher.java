@@ -28,6 +28,11 @@ public abstract class MemoryPublisher implements Publisher {
     protected AsyncHttpClient client;
     public static final int NO_TIMEOUT = -1;
 
+    /**
+     * Create a MemoryPublisher from a {@link BulletConfig}.
+     *
+     * @param config The publisher configuration.
+     */
     public MemoryPublisher(BulletConfig config) {
         this.config = new MemoryPubSubConfig(config);
 
@@ -63,12 +68,12 @@ public abstract class MemoryPublisher implements Publisher {
      */
     protected void send(String uri, PubSubMessage message) {
         client.preparePost(uri)
-                .setBody(message.asJSON())
-                .setHeader("content-type", "text/plain")
-                .execute()
-                .toCompletableFuture()
-                .exceptionally(this::handleException)
-                .thenAcceptAsync(createResponseConsumer(message.getId()));
+              .setBody(message.asJSON())
+              .setHeader("content-type", "text/plain")
+              .execute()
+              .toCompletableFuture()
+              .exceptionally(this::handleException)
+              .thenAcceptAsync(createResponseConsumer(message.getId()));
     }
 
     /**
