@@ -44,7 +44,7 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
                 Response response = client.prepareGet(uri).execute().get();
                 int statusCode = response.getStatusCode();
                 if (statusCode == MemoryPubSubClientUtils.NO_CONTENT_204) {
-                    // SC_NO_CONTENT (204) indicates there are no new messages
+                    // NO_CONTENT_204 indicates there are no new messages
                     continue;
                 }
                 if (statusCode != MemoryPubSubClientUtils.OK_200) {
@@ -63,7 +63,7 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
      * Each subclass should implement this function to return the appropriate list of complete uris from which to read.
      * The backend can read from all in-memory pubsub hosts, the WS should just read from the single in-memory pubsub
      * instance that is running on that host.
-     * 
+     *
      * @return The list of uris from which to read.
      */
     protected abstract List<String> getUris();
