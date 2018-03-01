@@ -9,6 +9,8 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Config;
 import com.yahoo.bullet.common.Validator;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,7 +30,7 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String READ_RESPONSE_PATH = PREFIX + "read.response.path";
     public static final String WRITE_QUERY_PATH = PREFIX + "write.query.path";
     public static final String WRITE_RESPONSE_PATH = PREFIX + "write.response.path";
-    // The full paths (comma-seperated list) of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
+    // A list of the full paths of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
     public static final String BACKED_READ_QUERY_PATHS = PREFIX + "backend.read.query.paths";
 
     // Defaults
@@ -41,7 +43,9 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String DEFAULT_READ_RESPONSE_PATH = "/pubsub/read/response";
     public static final String DEFAULT_WRITE_QUERY_PATH = "/pubsub/write/query";
     public static final String DEFAULT_WRITE_RESPONSE_PATH = "/pubsub/write/response";
-    public static final String DEFAULT_BACKED_READ_QUERY_PATHS = "http://localhost:9901/api/bullet/pubsub/read/query,http://localhost:9902/api/bullet/pubsub/read/query";
+    public static final List<String> DEFAULT_BACKED_READ_QUERY_PATHS =
+            Arrays.asList("http://localhost:9901/api/bullet/pubsub/read/query",
+                          "http://localhost:9902/api/bullet/pubsub/read/query");
 
     /**
      * Constructor that loads specific file augmented with defaults.
@@ -95,7 +99,7 @@ public class MemoryPubSubConfig extends BulletConfig {
                  .checkIf(Validator::isString);
         VALIDATOR.define(BACKED_READ_QUERY_PATHS)
                  .defaultTo(DEFAULT_BACKED_READ_QUERY_PATHS)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isList);
     }
 
 }

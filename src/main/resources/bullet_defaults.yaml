@@ -239,4 +239,6 @@ bullet.pubsub.memory.connect.retry.limit: 10
 bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
 ## In-Memory pubsub default settings used in the backend:
 # The paths of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
-bullet.pubsub.memory.backend.read.query.paths: "http://localhost:9901/api/bullet/pubsub/read/query,http://localhost:9902fileDefault/api/bullet/pubsub/read/query"
+bullet.pubsub.memory.backend.read.query.paths:
+    - "http://localhost:9901/api/bullet/pubsub/read/query"
+    - "http://localhost:9902/api/bullet/pubsub/read/query"

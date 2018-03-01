@@ -7,7 +7,6 @@ package com.yahoo.bullet.pubsub.memory;
 
 import com.yahoo.bullet.common.BulletConfig;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +23,6 @@ public class MemoryQuerySubscriber extends MemorySubscriber {
 
     @Override
     protected List<String> getUris() {
-        return Arrays.asList(this.config.getAs(MemoryPubSubConfig.BACKED_READ_QUERY_PATHS, String.class).split(","));
+        return (List<String>) this.config.getAs(MemoryPubSubConfig.BACKED_READ_QUERY_PATHS, List.class);
     }
 }
