@@ -227,16 +227,16 @@ bullet.pubsub.memory.context.path: "/api/bullet"
 # The location (host:port) of this instance's pubsub endpoints
 bullet.pubsub.memory.server: "http://localhost:9901"
 # The paths (not including the context.path) of the endpoints for reading/writing queries/responses
-bullet.pubsub.memory.read.query.path: "/pubsub/read/queryFileDefault"
-bullet.pubsub.memory.read.response.path: "/pubsub/read/responseFileDefault"
-bullet.pubsub.memory.write.query.path: "/pubsub/write/queryFileDefault"
-bullet.pubsub.memory.write.response.path: "/pubsub/write/responseFileDefault"
+bullet.pubsub.memory.read.query.path: "/pubsub/read/query"
+bullet.pubsub.memory.read.response.path: "/pubsub/read/response"
+bullet.pubsub.memory.write.query.path: "/pubsub/write/query"
+bullet.pubsub.memory.write.response.path: "/pubsub/write/response"
 # Http connection timout (used by both the web service and the backend)
 bullet.pubsub.memory.connect.timeout.ms: 30000
 # Http connection retry limit (used by both the web service and the backend)
 bullet.pubsub.memory.connect.retry.limit: 10
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
 bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
-## In-Memory pubsub default settings used in the backend
+## In-Memory pubsub default settings used in the backend:
 # The paths of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
 bullet.pubsub.memory.backend.read.query.paths: "http://localhost:9901/api/bullet/pubsub/read/query,http://localhost:9902fileDefault/api/bullet/pubsub/read/query"
