@@ -28,11 +28,11 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
-    public static final String DEFAULT_QUERY_URI = "http://localhost:9901/api/bullet/pubsub/query";
-    public static final String DEFAULT_RESULT_URI = "http://localhost:9901/api/bullet/pubsub/result";
+    public static final String DEFAULT_QUERY_URI = "http://localhost:9901/bullet/api/pubsub/query";
+    public static final String DEFAULT_RESULT_URI = "http://localhost:9901/bullet/api/pubsub/result";
     public static final List<String> DEFAULT_BACKED_QUERY_URIS =
-            Arrays.asList("http://localhost:9901/api/bullet/pubsub/query",
-                          "http://localhost:9902/api/bullet/pubsub/query");
+            Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
+                          "http://localhost:9902/bullet/api/pubsub/query");
 
     /**
      * Constructor that loads specific file augmented with defaults.
