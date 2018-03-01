@@ -24,6 +24,6 @@ public class MemoryQuerySubscriber extends MemorySubscriber {
 
     @Override
     protected List<String> getUris() {
-        return (List<String>) this.config.getAs(MemoryPubSubConfig.BACKED_READ_QUERY_PATHS, List.class);
+        return (List<String>) this.config.getAs(MemoryPubSubConfig.BACKED_QUERY_PATHS, List.class);
     }
 }

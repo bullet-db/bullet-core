@@ -36,11 +36,11 @@ public class MemoryQueryPublisher extends MemoryPublisher {
     }
 
     private String createWriteURI() {
-        return getHostPath() + this.config.getAs(MemoryPubSubConfig.WRITE_QUERY_PATH, String.class);
+        return getHostPath() + this.config.getAs(MemoryPubSubConfig.QUERY_PATH, String.class);
     }
 
     private String createRespondURI() {
-        return getHostPath() + this.config.getAs(MemoryPubSubConfig.WRITE_RESPONSE_PATH, String.class);
+        return getHostPath() + this.config.getAs(MemoryPubSubConfig.RESULT_PATH, String.class);
     }
 
     private String getHostPath() {

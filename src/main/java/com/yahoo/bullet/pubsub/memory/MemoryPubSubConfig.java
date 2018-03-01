@@ -22,11 +22,9 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
     public static final String CONNECT_RETRY_LIMIT = PREFIX + "connect.retry.limit";
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
-    public static final String READ_QUERY_PATH = PREFIX + "read.query.path";
-    public static final String READ_RESPONSE_PATH = PREFIX + "read.response.path";
-    public static final String WRITE_QUERY_PATH = PREFIX + "write.query.path";
-    public static final String WRITE_RESPONSE_PATH = PREFIX + "write.response.path";
-    public static final String BACKED_READ_QUERY_PATHS = PREFIX + "backend.read.query.paths";
+    public static final String QUERY_PATH = PREFIX + "query.path";
+    public static final String RESULT_PATH = PREFIX + "result.path";
+    public static final String BACKED_QUERY_PATHS = PREFIX + "backend.query.paths";
 
     // Defaults
     public static final String DEFAULT_CONTEXT_PATH = "/api/bullet";
@@ -34,13 +32,11 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
-    public static final String DEFAULT_READ_QUERY_PATH = "/pubsub/read/query";
-    public static final String DEFAULT_READ_RESPONSE_PATH = "/pubsub/read/response";
-    public static final String DEFAULT_WRITE_QUERY_PATH = "/pubsub/write/query";
-    public static final String DEFAULT_WRITE_RESPONSE_PATH = "/pubsub/write/response";
-    public static final List<String> DEFAULT_BACKED_READ_QUERY_PATHS =
-            Arrays.asList("http://localhost:9901/api/bullet/pubsub/read/query",
-                          "http://localhost:9902/api/bullet/pubsub/read/query");
+    public static final String DEFAULT_QUERY_PATH = "/pubsub/query";
+    public static final String DEFAULT_RESULT_PATH = "/pubsub/result";
+    public static final List<String> DEFAULT_BACKED_QUERY_PATHS =
+            Arrays.asList("http://localhost:9901/api/bullet/pubsub/query",
+                          "http://localhost:9902/api/bullet/pubsub/query");
 
     /**
      * Constructor that loads specific file augmented with defaults.
@@ -80,20 +76,14 @@ public class MemoryPubSubConfig extends BulletConfig {
         VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
                  .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
                  .checkIf(Validator::isPositive);
-        VALIDATOR.define(READ_QUERY_PATH)
-                 .defaultTo(DEFAULT_READ_QUERY_PATH)
+        VALIDATOR.define(QUERY_PATH)
+                 .defaultTo(DEFAULT_QUERY_PATH)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(READ_RESPONSE_PATH)
-                 .defaultTo(DEFAULT_READ_RESPONSE_PATH)
+        VALIDATOR.define(RESULT_PATH)
+                 .defaultTo(DEFAULT_RESULT_PATH)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(WRITE_QUERY_PATH)
-                 .defaultTo(DEFAULT_WRITE_QUERY_PATH)
-                 .checkIf(Validator::isString);
-        VALIDATOR.define(WRITE_RESPONSE_PATH)
-                 .defaultTo(DEFAULT_WRITE_RESPONSE_PATH)
-                 .checkIf(Validator::isString);
-        VALIDATOR.define(BACKED_READ_QUERY_PATHS)
-                 .defaultTo(DEFAULT_BACKED_READ_QUERY_PATHS)
+        VALIDATOR.define(BACKED_QUERY_PATHS)
+                 .defaultTo(DEFAULT_BACKED_QUERY_PATHS)
                  .checkIf(Validator::isList);
     }
 

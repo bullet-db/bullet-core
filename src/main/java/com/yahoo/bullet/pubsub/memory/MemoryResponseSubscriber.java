@@ -27,7 +27,7 @@ public class MemoryResponseSubscriber extends MemorySubscriber {
     protected List<String> getUris() {
         String server = this.config.getAs(MemoryPubSubConfig.SERVER, String.class);
         String contextPath = this.config.getAs(MemoryPubSubConfig.CONTEXT_PATH, String.class);
-        String path = this.config.getAs(MemoryPubSubConfig.READ_RESPONSE_PATH, String.class);
+        String path = this.config.getAs(MemoryPubSubConfig.RESULT_PATH, String.class);
         return Collections.singletonList(server + contextPath + path);
     }
 }
