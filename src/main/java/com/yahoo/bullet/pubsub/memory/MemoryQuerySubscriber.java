@@ -14,8 +14,9 @@ public class MemoryQuerySubscriber extends MemorySubscriber {
 
     /**
      * Create a MemoryQuerySubscriber from a {@link BulletConfig}.
+     *
      * @param config The config.
-     * @param maxUncommittedMessages The maxiumum number of messages that will be buffered before a commit() must be called.
+     * @param maxUncommittedMessages The maximum number of messages that will be buffered before a commit() must be called.
      */
     public MemoryQuerySubscriber(BulletConfig config, int maxUncommittedMessages) {
         super(config, maxUncommittedMessages);

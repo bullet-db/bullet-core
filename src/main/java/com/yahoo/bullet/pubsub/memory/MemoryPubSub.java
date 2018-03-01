@@ -46,8 +46,11 @@ public class MemoryPubSub extends PubSub {
     @Override
     public Subscriber getSubscriber() throws PubSubException {
         int maxUncommittedMessages = config.getAs(MemoryPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
-        return context == Context.QUERY_PROCESSING ? new MemoryQuerySubscriber(config, maxUncommittedMessages) :
-                new MemoryResponseSubscriber(config, maxUncommittedMessages);
+        if (context == Context.QUERY_PROCESSING) {
+            return new MemoryQuerySubscriber(config, maxUncommittedMessages);
+        } else {
+            return new MemoryResponseSubscriber(config, maxUncommittedMessages);
+        }
     }
 
     @Override

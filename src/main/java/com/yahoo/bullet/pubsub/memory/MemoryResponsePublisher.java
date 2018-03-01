@@ -27,6 +27,7 @@ public class MemoryResponsePublisher extends MemoryPublisher {
         String uri;
         try {
             uri = (String) message.getMetadata().getContent();
+            log.debug("Extracted uri to which to send results: " + uri);
         } catch (Throwable e) {
             log.error("Failed to extract uri from Metadata. Caught: " + e);
             return;

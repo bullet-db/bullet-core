@@ -17,7 +17,7 @@ public class MemoryQueryPublisher extends MemoryPublisher {
     String respondURI;
 
     /**
-     * Create a MemroyQueryPublisher from a {@link BulletConfig}.
+     * Create a MemoryQueryPublisher from a {@link BulletConfig}.
      *
      * @param config The config.
      */

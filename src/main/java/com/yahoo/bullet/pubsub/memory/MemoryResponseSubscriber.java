@@ -17,7 +17,7 @@ public class MemoryResponseSubscriber extends MemorySubscriber {
      * Create a MemoryResponseSubscriber from a {@link BulletConfig}.
      *
      * @param config The config.
-     * @param maxUncommittedMessages The maxiumum number of records that will be buffered before commit must be called.
+     * @param maxUncommittedMessages The maximum number of records that will be buffered before commit must be called.
      */
     public MemoryResponseSubscriber(BulletConfig config, int maxUncommittedMessages) {
         super(config, maxUncommittedMessages);

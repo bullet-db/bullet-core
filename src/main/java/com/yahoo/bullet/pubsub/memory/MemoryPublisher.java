@@ -48,10 +48,12 @@ public abstract class MemoryPublisher implements Publisher {
 
     /**
      * Send the PubSubMessage to the given uri.
+     *
      * @param uri The uri to which to send the message.
      * @param message The message to send.
      */
     protected void send(String uri, PubSubMessage message) {
+        log.debug("Sending message: " + message + " to uri: " + uri);
         client.preparePost(uri)
               .setBody(message.asJSON())
               .setHeader("content-type", "text/plain")
@@ -65,6 +67,7 @@ public abstract class MemoryPublisher implements Publisher {
      * Send the PubSub message. The MemoryQueryPublisher subclass will put the response uri in the MetaData of the
      * PubSubMessage. The MemoryResponsePublisher subclass will extract the uri to determine the host to which it should
      * send the Response.
+     *
      * @param message The message to send.
      * @throws PubSubException
      */
@@ -85,7 +88,7 @@ public abstract class MemoryPublisher implements Publisher {
     }
 
     private Response handleException(Throwable throwable) {
-        log.error("Received error while posting query", throwable);
+        log.error("Received error while posting query: ", throwable);
         return null;
     }
 }
