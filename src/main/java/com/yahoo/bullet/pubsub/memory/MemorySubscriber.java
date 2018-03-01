@@ -17,7 +17,7 @@ import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
 
 @Slf4j
-public abstract class MemorySubscriber extends BufferingSubscriber {
+public class MemorySubscriber extends BufferingSubscriber {
     protected MemoryPubSubConfig config;
     protected AsyncHttpClient client;
     List<String> uris;
@@ -28,11 +28,11 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(BulletConfig config, int maxUncommittedMessages) {
+    public MemorySubscriber(BulletConfig config, int maxUncommittedMessages, List<String> uris) {
         super(maxUncommittedMessages);
         this.config = new MemoryPubSubConfig(config);
         client = MemoryPubSubClientUtils.getClient(this.config);
-        this.uris = getUris();
+        this.uris = uris;
     }
 
     @Override
@@ -58,15 +58,6 @@ public abstract class MemorySubscriber extends BufferingSubscriber {
         }
         return messages;
     }
-
-    /**
-     * Each subclass should implement this function to return the appropriate list of complete uris from which to read.
-     * The backend can read from all in-memory pubsub hosts, the WS should just read from the single in-memory pubsub
-     * instance that is running on that host.
-     *
-     * @return The list of uris from which to read.
-     */
-    protected abstract List<String> getUris();
 
     @Override
     public void close() {

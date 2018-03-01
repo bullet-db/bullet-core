@@ -65,7 +65,7 @@ public abstract class MemoryPublisher implements Publisher {
 
     /**
      * Send the PubSub message. The MemoryQueryPublisher subclass will put the response uri in the MetaData of the
-     * PubSubMessage. The MemoryResponsePublisher subclass will extract the uri to determine the host to which it should
+     * PubSubMessage. The MemoryResultPublisher subclass will extract the uri to determine the host to which it should
      * send the Response.
      *
      * @param message The message to send.

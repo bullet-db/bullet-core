@@ -11,14 +11,14 @@ import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class MemoryResponsePublisher extends MemoryPublisher {
+public class MemoryResultPublisher extends MemoryPublisher {
 
     /**
-     * Create a MemoryResponsePublisher from a {link BulletConfig}.
+     * Create a MemoryResultPublisher from a {link BulletConfig}.
      *
      * @param config The config.
      */
-    public MemoryResponsePublisher(BulletConfig config) {
+    public MemoryResultPublisher(BulletConfig config) {
         super(config);
     }
 

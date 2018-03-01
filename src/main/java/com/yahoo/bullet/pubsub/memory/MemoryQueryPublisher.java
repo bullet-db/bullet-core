@@ -13,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MemoryQueryPublisher extends MemoryPublisher {
-    String writeURI;
-    String respondURI;
+    String queryURI;
+    String resultURI;
 
     /**
      * Create a MemoryQueryPublisher from a {@link BulletConfig}.
@@ -23,29 +23,15 @@ public class MemoryQueryPublisher extends MemoryPublisher {
      */
     public MemoryQueryPublisher(BulletConfig config) {
         super(config);
-        this.writeURI = createWriteURI();
-        this.respondURI = createRespondURI();
+        this.queryURI = this.config.getAs(MemoryPubSubConfig.QUERY_URI, String.class);
+        this.resultURI = this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class);
     }
 
     @Override
     public void send(PubSubMessage message) throws PubSubException {
         // Put responseURI in the metadata so the ResponsePublisher knows to which host to send the response
-        Metadata metadata = new Metadata(message.getMetadata().getSignal(), respondURI);
+        Metadata metadata = new Metadata(message.getMetadata().getSignal(), resultURI);
         PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
-        send(writeURI, newMessage);
-    }
-
-    private String createWriteURI() {
-        return getHostPath() + this.config.getAs(MemoryPubSubConfig.QUERY_PATH, String.class);
-    }
-
-    private String createRespondURI() {
-        return getHostPath() + this.config.getAs(MemoryPubSubConfig.RESULT_PATH, String.class);
-    }
-
-    private String getHostPath() {
-        String server = this.config.getAs(MemoryPubSubConfig.SERVER, String.class);
-        String contextPath = this.config.getAs(MemoryPubSubConfig.CONTEXT_PATH, String.class);
-        return server + contextPath;
+        send(queryURI, newMessage);
     }
 }

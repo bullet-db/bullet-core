@@ -17,24 +17,20 @@ import java.util.Optional;
 public class MemoryPubSubConfig extends BulletConfig {
     // Field names
     public static final String PREFIX = "bullet.pubsub.memory.";
-    public static final String CONTEXT_PATH = PREFIX + "context.path";
-    public static final String SERVER = PREFIX + "server";
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
     public static final String CONNECT_RETRY_LIMIT = PREFIX + "connect.retry.limit";
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
-    public static final String QUERY_PATH = PREFIX + "query.path";
-    public static final String RESULT_PATH = PREFIX + "result.path";
-    public static final String BACKED_QUERY_PATHS = PREFIX + "backend.query.paths";
+    public static final String QUERY_URI = PREFIX + "query.uri";
+    public static final String RESULT_URI = PREFIX + "result.uri";
+    public static final String BACKED_QUERY_URIS = PREFIX + "backend.query.uris";
 
     // Defaults
-    public static final String DEFAULT_CONTEXT_PATH = "/api/bullet";
-    public static final String DEFAULT_SERVER = "http://localhost:9901";
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
-    public static final String DEFAULT_QUERY_PATH = "/pubsub/query";
-    public static final String DEFAULT_RESULT_PATH = "/pubsub/result";
-    public static final List<String> DEFAULT_BACKED_QUERY_PATHS =
+    public static final String DEFAULT_QUERY_URI = "http://localhost:9901/api/bullet/pubsub/query";
+    public static final String DEFAULT_RESULT_URI = "http://localhost:9901/api/bullet/pubsub/result";
+    public static final List<String> DEFAULT_BACKED_QUERY_URIS =
             Arrays.asList("http://localhost:9901/api/bullet/pubsub/query",
                           "http://localhost:9902/api/bullet/pubsub/query");
 
@@ -61,12 +57,6 @@ public class MemoryPubSubConfig extends BulletConfig {
 
     private static final Validator VALIDATOR = new Validator();
     static {
-        VALIDATOR.define(CONTEXT_PATH)
-                 .defaultTo(DEFAULT_CONTEXT_PATH)
-                 .checkIf(Validator::isString);
-        VALIDATOR.define(SERVER)
-                 .defaultTo(DEFAULT_SERVER)
-                 .checkIf(Validator::isString);
         VALIDATOR.define(CONNECT_TIMEOUT_MS)
                  .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
                  .checkIf(Validator::isPositive);
@@ -76,14 +66,14 @@ public class MemoryPubSubConfig extends BulletConfig {
         VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
                  .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
                  .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_PATH)
-                 .defaultTo(DEFAULT_QUERY_PATH)
+        VALIDATOR.define(QUERY_URI)
+                 .defaultTo(DEFAULT_QUERY_URI)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(RESULT_PATH)
-                 .defaultTo(DEFAULT_RESULT_PATH)
+        VALIDATOR.define(RESULT_URI)
+                 .defaultTo(DEFAULT_RESULT_URI)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(BACKED_QUERY_PATHS)
-                 .defaultTo(DEFAULT_BACKED_QUERY_PATHS)
+        VALIDATOR.define(BACKED_QUERY_URIS)
+                 .defaultTo(DEFAULT_BACKED_QUERY_URIS)
                  .checkIf(Validator::isList);
     }
 
