@@ -221,18 +221,18 @@ bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.memory.MemoryPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
 
-# In-Memory pubsub settings that you may change for each instance (there may be multiple in-memory pubsub instances)
-# The paths (not including the context.path) of this pubsub instance's endpoints for reading/writing queries/responses
-bullet.pubsub.memory.query.uri: "http://localhost:9901/bullet/api/pubsub/query"
-bullet.pubsub.memory.result.uri: "http://localhost:9901/bullet/api/pubsub/result"
+## In-Memory pubsub settings
 # Http connection timout (used by both the web service and the backend)
 bullet.pubsub.memory.connect.timeout.ms: 30000
 # Http connection retry limit (used by both the web service and the backend)
 bullet.pubsub.memory.connect.retry.limit: 10
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
 bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
-## In-Memory pubsub default settings used in the backend:
-# The paths of the http endpoints for reading queries (the backend reads from all in-memory pubsub instances)
-bullet.pubsub.memory.backend.query.uris:
+# The uri of the result http endpoint (this is only used in the web service)
+bullet.pubsub.memory.result.uri: "http://localhost:9901/bullet/api/pubsub/result"
+# A list of uri(s) for the query endpoint. In the web service, this should contain a single URI for the query endpoint
+# of the in-memory pubsub instance running on that web service. For the backend it should contain the uris of all
+# the pubsub instances.
+bullet.pubsub.memory.query.uris:
     - "http://localhost:9901/bullet/api/pubsub/query"
     - "http://localhost:9902/bullet/api/pubsub/query"

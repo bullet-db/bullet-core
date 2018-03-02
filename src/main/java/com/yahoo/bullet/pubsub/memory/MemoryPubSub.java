@@ -47,7 +47,7 @@ public class MemoryPubSub extends PubSub {
     public Subscriber getSubscriber() throws PubSubException {
         int maxUncommittedMessages = config.getAs(MemoryPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         if (context == Context.QUERY_PROCESSING) {
-            List<String> uris = (List<String>) this.config.getAs(MemoryPubSubConfig.BACKED_QUERY_URIS, List.class);
+            List<String> uris = (List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class);
             return new MemorySubscriber(config, maxUncommittedMessages, uris);
         } else {
             List<String> uri = Collections.singletonList(this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class));

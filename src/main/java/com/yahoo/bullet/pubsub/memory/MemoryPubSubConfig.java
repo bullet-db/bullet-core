@@ -20,19 +20,16 @@ public class MemoryPubSubConfig extends BulletConfig {
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
     public static final String CONNECT_RETRY_LIMIT = PREFIX + "connect.retry.limit";
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
-    public static final String QUERY_URI = PREFIX + "query.uri";
+    public static final String QUERY_URIS = PREFIX + "query.uris";
     public static final String RESULT_URI = PREFIX + "result.uri";
-    public static final String BACKED_QUERY_URIS = PREFIX + "backend.query.uris";
 
     // Defaults
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
-    public static final String DEFAULT_QUERY_URI = "http://localhost:9901/bullet/api/pubsub/query";
+    public static final List<String> DEFAULT_QUERY_URIS = Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
+                                                                        "http://localhost:9902/bullet/api/pubsub/query");
     public static final String DEFAULT_RESULT_URI = "http://localhost:9901/bullet/api/pubsub/result";
-    public static final List<String> DEFAULT_BACKED_QUERY_URIS =
-            Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
-                          "http://localhost:9902/bullet/api/pubsub/query");
 
     /**
      * Constructor that loads specific file augmented with defaults.
@@ -66,15 +63,12 @@ public class MemoryPubSubConfig extends BulletConfig {
         VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
                  .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
                  .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_URI)
-                 .defaultTo(DEFAULT_QUERY_URI)
-                 .checkIf(Validator::isString);
+        VALIDATOR.define(QUERY_URIS)
+                 .defaultTo(DEFAULT_QUERY_URIS)
+                 .checkIf(Validator::isList);
         VALIDATOR.define(RESULT_URI)
                  .defaultTo(DEFAULT_RESULT_URI)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(BACKED_QUERY_URIS)
-                 .defaultTo(DEFAULT_BACKED_QUERY_URIS)
-                 .checkIf(Validator::isList);
     }
 
 }

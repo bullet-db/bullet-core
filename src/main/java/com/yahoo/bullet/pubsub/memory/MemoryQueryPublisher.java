@@ -11,6 +11,8 @@ import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 public class MemoryQueryPublisher extends MemoryPublisher {
     String queryURI;
@@ -23,7 +25,7 @@ public class MemoryQueryPublisher extends MemoryPublisher {
      */
     public MemoryQueryPublisher(BulletConfig config) {
         super(config);
-        this.queryURI = this.config.getAs(MemoryPubSubConfig.QUERY_URI, String.class);
+        this.queryURI = ((List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class)).get(0);
         this.resultURI = this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class);
     }
 
