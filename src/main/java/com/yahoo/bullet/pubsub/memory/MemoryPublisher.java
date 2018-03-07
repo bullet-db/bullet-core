@@ -29,7 +29,7 @@ public abstract class MemoryPublisher implements Publisher {
      */
     public MemoryPublisher(BulletConfig config) {
         this.config = new MemoryPubSubConfig(config);
-        client = MemoryPubSubClientUtils.getClient(this.config);
+        client = MemoryPubSub.getClient(this.config);
     }
 
     @Override
@@ -80,7 +80,7 @@ public abstract class MemoryPublisher implements Publisher {
     }
 
     private void handleResponse(String id, Response response) {
-        if (response == null || response.getStatusCode() != MemoryPubSubClientUtils.OK_200) {
+        if (response == null || response.getStatusCode() != MemoryPubSub.OK_200) {
             log.error("Failed to write message with id: {}. Couldn't reach memory pubsub server. Got response: {}", id, response);
             return;
         }

@@ -11,12 +11,19 @@ import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.Publisher;
 import com.yahoo.bullet.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClientConfig;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 public class MemoryPubSub extends PubSub {
+    private static final int NO_TIMEOUT = -1;
+    public static final int OK_200 = 200;
+    public static final int NO_CONTENT_204 = 204;
 
     /**
      * Create a MemoryPubSub from a {@link BulletConfig}.
@@ -58,5 +65,22 @@ public class MemoryPubSub extends PubSub {
     @Override
     public List<Subscriber> getSubscribers(int n) throws PubSubException {
         return Collections.nCopies(n, getSubscriber());
+    }
+
+    /**
+     * Get a {@link AsyncHttpClient} configured with the given config.
+     *
+     * @param config The config.
+     * @return The client.
+     */
+    static AsyncHttpClient getClient(MemoryPubSubConfig config) {
+        int connectTimeout = config.getAs(MemoryPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
+        int retryLimit = config.getAs(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
+        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
+                .setMaxRequestRetry(retryLimit)
+                .setReadTimeout(NO_TIMEOUT)
+                .setRequestTimeout(NO_TIMEOUT)
+                .build();
+        return new DefaultAsyncHttpClient(clientConfig);
     }
 }

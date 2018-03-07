@@ -31,7 +31,7 @@ public class MemorySubscriber extends BufferingSubscriber {
     public MemorySubscriber(BulletConfig config, int maxUncommittedMessages, List<String> uris) {
         super(maxUncommittedMessages);
         this.config = new MemoryPubSubConfig(config);
-        client = MemoryPubSubClientUtils.getClient(this.config);
+        client = MemoryPubSub.getClient(this.config);
         this.uris = uris;
     }
 
@@ -43,11 +43,11 @@ public class MemorySubscriber extends BufferingSubscriber {
                 log.debug("Getting messages from uri: " + uri);
                 Response response = client.prepareGet(uri).execute().get();
                 int statusCode = response.getStatusCode();
-                if (statusCode == MemoryPubSubClientUtils.NO_CONTENT_204) {
+                if (statusCode == MemoryPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages
                     continue;
                 }
-                if (statusCode != MemoryPubSubClientUtils.OK_200) {
+                if (statusCode != MemoryPubSub.OK_200) {
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                     continue;
                 }
