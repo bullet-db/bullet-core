@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Notation: Partition is a unit of parallelism in the Pub/Sub queue.
@@ -133,5 +134,11 @@ public abstract class PubSub {
         } catch (Exception e) {
             throw PubSubException.forArgument(name, e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "context: " + context.toString() + "\n" +
+               "config: " + config.getAll(Optional.empty());
     }
 }

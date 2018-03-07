@@ -59,5 +59,4 @@ public class MemoryPubSub extends PubSub {
     public List<Subscriber> getSubscribers(int n) throws PubSubException {
         return Collections.nCopies(n, getSubscriber());
     }
-
 }
