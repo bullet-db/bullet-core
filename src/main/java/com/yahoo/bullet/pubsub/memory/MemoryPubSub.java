@@ -39,9 +39,9 @@ public class MemoryPubSub extends PubSub {
     @Override
     public Publisher getPublisher() throws PubSubException {
         if (context == Context.QUERY_PROCESSING) {
-            return new MemoryResultPublisher(config);
+            return new MemoryResultPublisher(config, getClient());
         } else {
-            return new MemoryQueryPublisher(config);
+            return new MemoryQueryPublisher(config, getClient());
         }
     }
 
@@ -55,10 +55,10 @@ public class MemoryPubSub extends PubSub {
         int maxUncommittedMessages = config.getAs(MemoryPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         if (context == Context.QUERY_PROCESSING) {
             List<String> uris = (List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class);
-            return new MemorySubscriber(config, maxUncommittedMessages, uris);
+            return new MemorySubscriber(config, maxUncommittedMessages, uris, getClient());
         } else {
             List<String> uri = Collections.singletonList(this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class));
-            return new MemorySubscriber(config, maxUncommittedMessages, uri);
+            return new MemorySubscriber(config, maxUncommittedMessages, uri, getClient());
         }
     }
 
@@ -67,13 +67,7 @@ public class MemoryPubSub extends PubSub {
         return Collections.nCopies(n, getSubscriber());
     }
 
-    /**
-     * Get a {@link AsyncHttpClient} configured with the given config.
-     *
-     * @param config The config.
-     * @return The client.
-     */
-    static AsyncHttpClient getClient(MemoryPubSubConfig config) {
+    private AsyncHttpClient getClient() {
         int connectTimeout = config.getAs(MemoryPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
         int retryLimit = config.getAs(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
         AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)

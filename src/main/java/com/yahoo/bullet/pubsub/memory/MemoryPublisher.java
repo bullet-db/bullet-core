@@ -23,13 +23,14 @@ public abstract class MemoryPublisher implements Publisher {
     protected AsyncHttpClient client;
 
     /**
-     * Create a MemoryPublisher from a {@link BulletConfig}.
+     * Create a MemoryQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
      *
-     * @param config The publisher configuration.
+     * @param config The config.
+     * @param client The client.
      */
-    public MemoryPublisher(BulletConfig config) {
+    public MemoryPublisher(BulletConfig config, AsyncHttpClient client) {
         this.config = new MemoryPubSubConfig(config);
-        client = MemoryPubSub.getClient(this.config);
+        this.client = client;
     }
 
     @Override

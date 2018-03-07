@@ -28,10 +28,10 @@ public class MemorySubscriber extends BufferingSubscriber {
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(BulletConfig config, int maxUncommittedMessages, List<String> uris) {
+    public MemorySubscriber(BulletConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client) {
         super(maxUncommittedMessages);
         this.config = new MemoryPubSubConfig(config);
-        client = MemoryPubSub.getClient(this.config);
+        this.client = client;
         this.uris = uris;
     }
 

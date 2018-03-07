@@ -9,17 +9,19 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.asynchttpclient.AsyncHttpClient;
 
 @Slf4j
 public class MemoryResultPublisher extends MemoryPublisher {
 
     /**
-     * Create a MemoryResultPublisher from a {link BulletConfig}.
+     * Create a MemoryQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
      *
      * @param config The config.
+     * @param client The client.
      */
-    public MemoryResultPublisher(BulletConfig config) {
-        super(config);
+    public MemoryResultPublisher(BulletConfig config, AsyncHttpClient client) {
+        super(config, client);
     }
 
     @Override

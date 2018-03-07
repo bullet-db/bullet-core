@@ -10,6 +10,7 @@ import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.asynchttpclient.AsyncHttpClient;
 
 import java.util.List;
 
@@ -19,12 +20,13 @@ public class MemoryQueryPublisher extends MemoryPublisher {
     String resultURI;
 
     /**
-     * Create a MemoryQueryPublisher from a {@link BulletConfig}.
+     * Create a MemoryQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
      *
      * @param config The config.
+     * @param client The client.
      */
-    public MemoryQueryPublisher(BulletConfig config) {
-        super(config);
+    public MemoryQueryPublisher(BulletConfig config, AsyncHttpClient client) {
+        super(config, client);
         this.queryURI = ((List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class)).get(0);
         this.resultURI = this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class);
     }
