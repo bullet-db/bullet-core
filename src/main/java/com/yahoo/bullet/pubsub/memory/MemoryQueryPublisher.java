@@ -34,8 +34,10 @@ public class MemoryQueryPublisher extends MemoryPublisher {
     @Override
     public void send(PubSubMessage message) throws PubSubException {
         // Put responseURI in the metadata so the ResponsePublisher knows to which host to send the response
-        Metadata metadata = new Metadata(message.getMetadata().getSignal(), resultURI);
-        PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
+        Metadata metadata = message.getMetadata();
+        metadata = metadata == null ? new Metadata() : metadata;
+        Metadata newMetadata = new Metadata(metadata.getSignal(), resultURI);
+        PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), newMetadata, message.getSequence());
         send(queryURI, newMessage);
     }
 }
