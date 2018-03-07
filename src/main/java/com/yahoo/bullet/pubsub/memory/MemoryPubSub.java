@@ -77,10 +77,10 @@ public class MemoryPubSub extends PubSub {
         int connectTimeout = config.getAs(MemoryPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
         int retryLimit = config.getAs(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
         AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
-                .setMaxRequestRetry(retryLimit)
-                .setReadTimeout(NO_TIMEOUT)
-                .setRequestTimeout(NO_TIMEOUT)
-                .build();
+                                                                                       .setMaxRequestRetry(retryLimit)
+                                                                                       .setReadTimeout(NO_TIMEOUT)
+                                                                                       .setRequestTimeout(NO_TIMEOUT)
+                                                                                       .build();
         return new DefaultAsyncHttpClient(clientConfig);
     }
 }

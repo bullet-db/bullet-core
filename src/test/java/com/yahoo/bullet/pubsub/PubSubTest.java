@@ -62,7 +62,7 @@ public class PubSubTest {
         PubSub pubSub = PubSub.from(config);
 
         Assert.assertEquals(pubSub.getClass(), MockPubSub.class);
-        Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
+        Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
         Assert.assertTrue(pubSub.getSubscriber().receive().getContent().isEmpty());
 
         // No switch
