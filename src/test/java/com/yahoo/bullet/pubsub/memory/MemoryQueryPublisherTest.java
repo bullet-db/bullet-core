@@ -5,24 +5,31 @@
  */
 package com.yahoo.bullet.pubsub.memory;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.BoundRequestBuilder;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 public class MemoryQueryPublisherTest {
@@ -36,6 +43,17 @@ public class MemoryQueryPublisherTest {
     private BoundRequestBuilder mockBuilderWith(CompletableFuture<Response> future) {
         ListenableFuture<Response> mockListenable = (ListenableFuture<Response>) mock(ListenableFuture.class);
         doReturn(future).when(mockListenable).toCompletableFuture();
+
+        BoundRequestBuilder mockBuilder = mock(BoundRequestBuilder.class);
+        doReturn(mockBuilder).when(mockBuilder).setHeader(any(), anyString());
+        doReturn(mockBuilder).when(mockBuilder).setBody(anyString());
+        doReturn(mockListenable).when(mockBuilder).execute();
+        return mockBuilder;
+    }
+
+    private BoundRequestBuilder mockBuilderThatThrows(Throwable throwable) {
+        ListenableFuture<Response> mockListenable = (ListenableFuture<Response>) mock(ListenableFuture.class);
+        doThrow(throwable).when(mockListenable).toCompletableFuture();
 
         BoundRequestBuilder mockBuilder = mock(BoundRequestBuilder.class);
         doReturn(mockBuilder).when(mockBuilder).setHeader(any(), anyString());
@@ -60,6 +78,10 @@ public class MemoryQueryPublisherTest {
         return getResponse(MemoryPubSub.OK_200, "Ok", data);
     }
 
+    private Response getNotOkResponse(int status) {
+        return getResponse(status, "Error", null);
+    }
+
     private Response getResponse(int status, String statusText, String body) {
         Response mock = mock(Response.class);
         doReturn(status).when(mock).getStatusCode();
@@ -68,58 +90,100 @@ public class MemoryQueryPublisherTest {
         return mock;
     }
 
-    @Test(timeOut = 5000L)
-    public void testReadingOkResponse() throws Exception {
-        //PubSubMessage expected = new PubSubMessage("foo", "response");
-        CompletableFuture<Response> response = getOkFuture(getOkResponse(new PubSubMessage("foo", "bar").asJSON()));
+    @Test
+    public void testSendResultUriPutInMetadataAckPreserved() throws Exception {
+        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
         config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
         MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, mockClient);
 
-        publisher.send(new PubSubMessage("foo", "bar"));
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
+        verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setHeader("content-type", "text/plain");
+    }
+
+    @Test
+    public void testSendResultUriPutInMetadataCompletePreserved() throws Exception {
+        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
+        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, mockClient);
+
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
+        verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setHeader("content-type", "text/plain");
+    }
+
+    @Test
+    public void testSendMetadataCreated() throws Exception {
+        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
+        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, mockClient);
+
+        publisher.send("foo", "bar");
         verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
         verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/uri\"}}");
         verify(mockBuilder).setHeader("content-type", "text/plain");
-
-
-//        //MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("baz"), mockClient);
-//
-//
-//        // This is async (but practically still very fast since we mocked the response), so need a timeout.
-//        PubSubMessage actual = fetchAsync().get();
-//
-//        Assert.assertNotNull(actual);
-//        Assert.assertEquals(actual.getId(), expected.getId());
-//        Assert.assertEquals(actual.getContent(), expected.getContent());
     }
 
-//    @Test
-//    public void testSend() throws PubSubException {
-//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-//        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-//        List<String> queryURIS = Arrays.asList("foo", "bar");
-//        config.set(MemoryPubSubConfig.RESULT_URI, "baz");
-//        config.set(MemoryPubSubConfig.QUERY_URIS, queryURIS);
-//        MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, mockClient);
-//        publisher.send(new PubSubMessage("foo", "bar"));
-//        verify(mockClient).preparePost()
+    @Test
+    public void testClose() throws Exception {
+        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
+        doNothing().when(mockClient).close();
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(new MemoryPubSubConfig((String) null), mockClient);
 
+        publisher.close();
+        verify(mockClient).close();
+    }
 
-//        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-//        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
-//        MemoryPubSub pubSub = new MemoryPubSub(config);
-//        Publisher publisher = pubSub.getPublisher();
-//        Assert.assertNotNull(publisher);
-//        Assert.assertTrue(publisher instanceof MemoryQueryPublisher);
-//
-//        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
-//        pubSub = new MemoryPubSub(config);
-//        publisher = pubSub.getPublisher();
-//        Assert.assertNotNull(publisher);
-//        Assert.assertTrue(publisher instanceof MemoryResultPublisher);
-//    }
-    // queryURI is pulled from the config correctly and the client is setup with it correctly
-    // test resultURI is pulled from the config correctly and put into the metadata correctly
+    @Test
+    public void testCloseDoesNotThrow() throws Exception {
+        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
+        doThrow(new IOException("error!")).when(mockClient).close();
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(new MemoryPubSubConfig((String) null), mockClient);
+
+        publisher.close();
+        verify(mockClient).close();
+    }
+
+    @Test
+    public void testHandleBadResponse() throws Exception {
+        CompletableFuture<Response> response = getOkFuture(getNotOkResponse(500));
+        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, mockClient);
+
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
+        verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setHeader("content-type", "text/plain");
+    }
+
+    @Test(timeOut = 5000L)
+    public void testException() throws Exception {
+        // This will hit a non-existent url and fail, testing our exceptions
+        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(100)
+                                                                                       .setMaxRequestRetry(1)
+                                                                                       .setReadTimeout(-1)
+                                                                                       .setRequestTimeout(-1)
+                                                                                       .build();
+        AsyncHttpClient client = new DefaultAsyncHttpClient(clientConfig);
+        AsyncHttpClient spyClient = spy(client);
+        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        MemoryQueryPublisher publisher = new MemoryQueryPublisher(config, spyClient);
+
+        publisher.send(new PubSubMessage("foo", "bar"));
+        verify(spyClient).preparePost("http://localhost:9901/CUSTOM/query");
+    }
 }
