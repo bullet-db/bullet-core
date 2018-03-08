@@ -121,10 +121,10 @@ bullet.query.aggregation.top.k.sketch.error.type: "NFN"
 bullet.result.metadata.enable: true
 
 # Each entry in this list indicates which metadata to collect (the name) and what key to add it as (the key) to the meta
+# Query Metadata adds additional nested metadata about the query if set. These are listed below.
 # Query Identifier adds the ID that was generated for the query.
 # Query Body adds the received query definition. This is useful for diagnosing syntax exceptions when errors are received.
 # Query Receive Time adds the timestamp in milliseconds when the query was received.
-# Result Emit Time adds the timestamp in milliseconds when the result was emitted.
 # Query Finish Time adds the timestamp in milliseconds when the final result was emitted.
 
 # Sketch Metadata adds additional nested metadata about sketches if set. These are listed below.
@@ -143,17 +143,26 @@ bullet.result.metadata.enable: true
 # Maximum Count Error adds the error of the FrequentItems Sketch as a long. This will be the distance between the upper
 #                     bound and lower bound of a count for an item. It will be 0 if the count is exact. (TOP K)
 # Active Items adds the number of items being tracked in the the FrequentItems Sketch at the time of the query completion. (TOP K)
+
+# Window Metadata adds additional nested metadata about the window if set. These are listed below.
+# Name adds the type of the window used for the query.
+# Number adds the number of the window from the start of the query - e.g. 253 means this is the 253rd window.
+# Size adds the number of records in this window. This only applies for record based windows.
+# Emit Time adds the time when the window was emitted. This replaces the old Result Receive Time concept.
+# Expected Emit Time adds the time when the window was supposed to be emitted. This should be <= the Window Emit Time
+#                    except for the final window. The difference lets you know how long the window was buffered. This
+#                    only applies for time based windows.
 bullet.result.metadata.metrics:
-    - name: "Query ID"
-      key: "Query ID"
-    - name: "Query Body"
+    - name: "Query Metadata"
       key: "Query"
+    - name: "Query ID"
+      key: "ID"
+    - name: "Query Body"
+      key: "Body"
     - name: "Query Receive Time"
-      key: "Query Receive Time"
-    - name: "Result Emit Time"
-      key: "Result Emit Time"
+      key: "Receive Time"
     - name: "Query Finish Time"
-      key: "Query Finish Time"
+      key: "Finish Time"
     - name: "Sketch Metadata"
       key: "Sketch"
     - name: "Sketch Estimated Result"

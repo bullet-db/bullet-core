@@ -245,27 +245,49 @@ public class QuerierTest {
     }
 
     @Test
+    public void testDisabledQueryMeta() {
+        BulletConfig defaults = new BulletConfig();
+        defaults.set(BulletConfig.RESULT_METADATA_METRICS, emptyMap());
+
+        Querier querier = make("{'aggregation' : {}}", defaults);
+        Assert.assertTrue(querier.getMetadata().asMap().isEmpty());
+
+        Clip result = querier.finish();
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.getRecords().isEmpty());
+        Assert.assertTrue(result.getMeta().asMap().isEmpty());
+    }
+
+    @Test
     public void testTimes() {
+        BulletConfig defaults = new BulletConfig();
+        Map<String, String> names = (Map<String, String>) defaults.get(BulletConfig.RESULT_METADATA_METRICS);
+
         long startTime = System.currentTimeMillis();
         Querier querier = make("{'aggregation' : {}}", emptyMap());
         Map<String, Object> meta = querier.getMetadata().asMap();
-        long creationTime = ((Number) meta.get(Meta.Concept.QUERY_RECEIVE_TIME.getName())).longValue();
-        long resultTime = ((Number) meta.get(Meta.Concept.RESULT_EMIT_TIME.getName())).longValue();
+        Assert.assertEquals(meta.size(), 2);
+        Map<String, Object> queryMeta = (Map<String, Object>) meta.get(names.get(Meta.Concept.QUERY_METADATA.getName()));
+        Map<String, Object> windowMeta = (Map<String, Object>) meta.get(names.get(Meta.Concept.WINDOW_METADATA.getName()));
+        long creationTime = ((Number) queryMeta.get(names.get(Meta.Concept.QUERY_RECEIVE_TIME.getName()))).longValue();
+        long emitTime = ((Number) windowMeta.get(names.get(Meta.Concept.WINDOW_EMIT_TIME.getName()))).longValue();
         long endTime = System.currentTimeMillis();
         Assert.assertTrue(creationTime >= startTime && creationTime <= endTime);
-        Assert.assertTrue(resultTime >= creationTime && resultTime <= endTime);
+        Assert.assertTrue(emitTime >= startTime && emitTime <= endTime);
 
         Clip finalResult = querier.finish();
         Assert.assertNotNull(finalResult);
         Assert.assertTrue(finalResult.getRecords().isEmpty());
 
         meta = finalResult.getMeta().asMap();
-        creationTime = ((Number) meta.get(Meta.Concept.QUERY_RECEIVE_TIME.getName())).longValue();
-        resultTime = ((Number) meta.get(Meta.Concept.RESULT_EMIT_TIME.getName())).longValue();
-        long finishTime = ((Number) meta.get(Meta.Concept.QUERY_FINISH_TIME.getName())).longValue();
+        queryMeta = (Map<String, Object>) meta.get(names.get(Meta.Concept.QUERY_METADATA.getName()));
+        windowMeta = (Map<String, Object>) meta.get(names.get(Meta.Concept.WINDOW_METADATA.getName()));
+        creationTime = ((Number) queryMeta.get(names.get(Meta.Concept.QUERY_RECEIVE_TIME.getName()))).longValue();
+        emitTime = ((Number) windowMeta.get(names.get(Meta.Concept.WINDOW_EMIT_TIME.getName()))).longValue();
+        long finishTime = ((Number) queryMeta.get(names.get(Meta.Concept.QUERY_FINISH_TIME.getName()))).longValue();
         endTime = System.currentTimeMillis();
         Assert.assertTrue(creationTime >= startTime && creationTime <= finishTime);
-        Assert.assertTrue(resultTime >= startTime && resultTime <= finishTime);
+        Assert.assertTrue(emitTime >= startTime && emitTime <= finishTime);
         Assert.assertTrue(finishTime <= endTime);
     }
 

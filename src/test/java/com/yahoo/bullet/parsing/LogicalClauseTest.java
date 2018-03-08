@@ -34,6 +34,8 @@ public class LogicalClauseTest {
     public void testConfigure() {
         LogicalClause logicalClause = new LogicalClause();
         logicalClause.setOperation(AND);
+        logicalClause.configure(new BulletConfig());
+
         FilterClause filterClause =  new FilterClause();
         filterClause.setField("id");
         filterClause.setOperation(REGEX_LIKE);
