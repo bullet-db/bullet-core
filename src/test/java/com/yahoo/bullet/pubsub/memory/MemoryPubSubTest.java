@@ -47,11 +47,13 @@ public class MemoryPubSubTest {
     public static AsyncHttpClient mockClientWith(BoundRequestBuilder builder) {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doReturn(builder).when(mockClient).preparePost(anyString());
+        doReturn(builder).when(mockClient).prepareGet(anyString());
         return mockClient;
     }
 
-    public static BoundRequestBuilder mockBuilderWith(CompletableFuture<Response> future) {
+    public static BoundRequestBuilder mockBuilderWith(CompletableFuture<Response> future) throws Exception {
         ListenableFuture<Response> mockListenable = (ListenableFuture<Response>) mock(ListenableFuture.class);
+        doReturn(future.get()).when(mockListenable).get();
         doReturn(future).when(mockListenable).toCompletableFuture();
 
         BoundRequestBuilder mockBuilder = mock(BoundRequestBuilder.class);
@@ -61,24 +63,14 @@ public class MemoryPubSubTest {
         return mockBuilder;
     }
 
-    public static BoundRequestBuilder mockBuilderThatThrows(Throwable throwable) {
-        ListenableFuture<Response> mockListenable = (ListenableFuture<Response>) mock(ListenableFuture.class);
-        doThrow(throwable).when(mockListenable).toCompletableFuture();
-
-        BoundRequestBuilder mockBuilder = mock(BoundRequestBuilder.class);
-        doReturn(mockBuilder).when(mockBuilder).setHeader(any(), anyString());
-        doReturn(mockBuilder).when(mockBuilder).setBody(anyString());
-        doReturn(mockListenable).when(mockBuilder).execute();
-        return mockBuilder;
-    }
-
-    public static CompletableFuture<Response> getOkFuture(Response response) {
+    public static CompletableFuture<Response> getOkFuture(Response response) throws Exception {
         CompletableFuture<Response> finished = CompletableFuture.completedFuture(response);
         CompletableFuture<Response> mock = mock(CompletableFuture.class);
         // This is the weird bit. We mock the call to exceptionally to return the finished response so that chaining
         // a thenAcceptAsync on it will call the consumer of it with the finished response. This is why it looks
         // weird: mocking the exceptionally to take the "good" path.
         doReturn(finished).when(mock).exceptionally(any());
+        doReturn(finished.get()).when(mock).get();
         // So if we do get to thenAccept on our mock, we should throw an exception because we shouldn't get there.
         doThrow(new RuntimeException("Good futures don't throw")).when(mock).thenAcceptAsync(any());
         return mock;

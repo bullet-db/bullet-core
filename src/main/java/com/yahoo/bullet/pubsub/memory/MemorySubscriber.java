@@ -9,6 +9,8 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,5 +63,10 @@ public class MemorySubscriber extends BufferingSubscriber {
 
     @Override
     public void close() {
+        try {
+            client.close();
+        } catch (IOException e) {
+            log.warn("Caught exception when closing AsyncHttpClient: " + e);
+        }
     }
 }
