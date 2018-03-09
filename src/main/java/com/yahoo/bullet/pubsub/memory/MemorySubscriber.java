@@ -30,9 +30,9 @@ public class MemorySubscriber extends BufferingSubscriber {
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(BulletConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client) {
+    public MemorySubscriber(MemoryPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client) {
         super(maxUncommittedMessages);
-        this.config = new MemoryPubSubConfig(config);
+        this.config = config;
         this.client = client;
         this.uris = uris;
     }
@@ -45,15 +45,12 @@ public class MemorySubscriber extends BufferingSubscriber {
                 log.debug("Getting messages from uri: " + uri);
                 Response response = client.prepareGet(uri).execute().get();
                 int statusCode = response.getStatusCode();
-                if (statusCode == Status.NO_CONTENT.getStatusCode()) {
-                    // NO_CONTENT_204 indicates there are no new messages
-                    continue;
-                }
-                if (statusCode != Status.OK.getStatusCode()) {
+                if (statusCode == Status.OK.getStatusCode()) {
+                    messages.add(PubSubMessage.fromJSON(response.getResponseBody()));
+                } else if (statusCode != Status.NO_CONTENT.getStatusCode()) {
+                    // NO_CONTENT (204) indicates there are no new messages - anything else indicates a problem
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
-                    continue;
                 }
-                messages.add(PubSubMessage.fromJSON(response.getResponseBody()));
             } catch (Exception e) {
                 log.error("Http call failed with error: " + e);
             }

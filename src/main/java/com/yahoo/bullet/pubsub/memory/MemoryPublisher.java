@@ -29,14 +29,9 @@ public abstract class MemoryPublisher implements Publisher {
      * @param config The config.
      * @param client The client.
      */
-    public MemoryPublisher(BulletConfig config, AsyncHttpClient client) {
-        this.config = new MemoryPubSubConfig(config);
+    public MemoryPublisher(MemoryPubSubConfig config, AsyncHttpClient client) {
+        this.config = config;
         this.client = client;
-    }
-
-    @Override
-    public void send(String id, String content) throws PubSubException {
-        send(new PubSubMessage(id, content, new Metadata()));
     }
 
     @Override

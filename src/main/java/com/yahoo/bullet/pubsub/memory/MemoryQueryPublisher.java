@@ -26,7 +26,7 @@ public class MemoryQueryPublisher extends MemoryPublisher {
      * @param client The client.
      */
     public MemoryQueryPublisher(BulletConfig config, AsyncHttpClient client) {
-        super(config, client);
+        super(new MemoryPubSubConfig(config), client);
         this.queryURI = ((List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class)).get(0);
         this.resultURI = this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class);
     }
@@ -36,8 +36,8 @@ public class MemoryQueryPublisher extends MemoryPublisher {
         // Put responseURI in the metadata so the ResponsePublisher knows to which host to send the response
         Metadata metadata = message.getMetadata();
         metadata = metadata == null ? new Metadata() : metadata;
-        Metadata newMetadata = new Metadata(metadata.getSignal(), resultURI);
-        PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), newMetadata, message.getSequence());
+        metadata.setContent(resultURI);
+        PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
         send(queryURI, newMessage);
     }
 }

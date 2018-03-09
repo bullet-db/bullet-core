@@ -21,19 +21,14 @@ public class MemoryResultPublisher extends MemoryPublisher {
      * @param client The client.
      */
     public MemoryResultPublisher(BulletConfig config, AsyncHttpClient client) {
-        super(config, client);
+        super(new MemoryPubSubConfig(config), client);
     }
 
     @Override
     public void send(PubSubMessage message) throws PubSubException {
         String uri;
-        try {
-            uri = (String) message.getMetadata().getContent();
-            log.debug("Extracted uri to which to send results: " + uri);
-        } catch (Throwable e) {
-            log.error("Failed to extract uri from Metadata. Caught: " + e);
-            return;
-        }
+        uri = (String) message.getMetadata().getContent();
+        log.debug("Extracted uri to which to send results: " + uri);
         send(uri, message);
     }
 }
