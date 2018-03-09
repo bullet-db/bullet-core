@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
-
+import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +45,11 @@ public class MemorySubscriber extends BufferingSubscriber {
                 log.debug("Getting messages from uri: " + uri);
                 Response response = client.prepareGet(uri).execute().get();
                 int statusCode = response.getStatusCode();
-                if (statusCode == MemoryPubSub.NO_CONTENT_204) {
+                if (statusCode == Status.NO_CONTENT.getStatusCode()) {
                     // NO_CONTENT_204 indicates there are no new messages
                     continue;
                 }
-                if (statusCode != MemoryPubSub.OK_200) {
+                if (statusCode != Status.OK.getStatusCode()) {
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                     continue;
                 }
