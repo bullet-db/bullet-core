@@ -15,7 +15,6 @@ import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import javax.ws.rs.core.Response.Status;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -78,7 +77,7 @@ public class MemoryPubSubTest {
     }
 
     public static Response getOkResponse(String data) {
-        return getResponse(Status.OK.getStatusCode(), "Ok", data);
+        return getResponse(MemoryPubSub.OK_200, "Ok", data);
     }
 
     public static Response getNotOkResponse(int status) {

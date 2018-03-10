@@ -10,7 +10,6 @@ import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
-import javax.ws.rs.core.Response.Status;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -63,7 +62,7 @@ public abstract class MemoryPublisher implements Publisher {
     }
 
     private void handleResponse(String id, Response response) {
-        if (response == null || response.getStatusCode() != Status.OK.getStatusCode()) {
+        if (response == null || response.getStatusCode() != MemoryPubSub.OK_200) {
             log.error("Failed to write message with id: {}. Couldn't reach memory pubsub server. Got response: {}", id, response);
             return;
         }

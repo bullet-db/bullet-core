@@ -22,6 +22,8 @@ import java.util.List;
 @Slf4j
 public class MemoryPubSub extends PubSub {
     private static final int NO_TIMEOUT = -1;
+    public static final int OK_200 = 200;
+    public static final int NO_CONTENT_204 = 204;
 
     /**
      * Create a MemoryPubSub from a {@link BulletConfig}.
