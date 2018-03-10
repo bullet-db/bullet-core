@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.pubsub.memory;
 
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
@@ -25,7 +24,7 @@ public class MemorySubscriber extends BufferingSubscriber {
     List<String> uris;
 
     /**
-     * Create a MemorySubscriber from a {@link BulletConfig}.
+     * Create a MemorySubscriber from a {@link MemoryPubSubConfig}.
      *
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.

@@ -5,8 +5,6 @@
  */
 package com.yahoo.bullet.pubsub.memory;
 
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
@@ -24,7 +22,7 @@ public abstract class MemoryPublisher implements Publisher {
     protected AsyncHttpClient client;
 
     /**
-     * Create a MemoryQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
+     * Create a MemoryQueryPublisher from a {@link MemoryPubSubConfig} and a {@link AsyncHttpClient}.
      *
      * @param config The config.
      * @param client The client.
