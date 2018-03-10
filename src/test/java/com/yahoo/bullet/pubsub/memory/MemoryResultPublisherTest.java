@@ -18,11 +18,9 @@ import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.getOkFuture;
 import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.getOkResponse;
 import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.mockBuilderWith;
 import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.mockClientWith;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 public class MemoryResultPublisherTest {
@@ -41,7 +39,7 @@ public class MemoryResultPublisherTest {
         verify(mockBuilder).setHeader("content-type", "text/plain");
     }
 
-    @Test
+    @Test(expectedExceptions = ClassCastException.class)
     public void testSendBadURI() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
@@ -51,9 +49,6 @@ public class MemoryResultPublisherTest {
 
         PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, 88));
         publisher.send(message);
-        verify(mockClient, never()).preparePost(anyString());
-        verify(mockBuilder, never()).setBody(anyString());
-        verify(mockBuilder, never()).setHeader(anyString(), anyString());
     }
 
     @Test
