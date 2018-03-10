@@ -38,6 +38,6 @@ public class MemoryQueryPublisher extends MemoryPublisher {
         metadata = metadata == null ? new Metadata() : metadata;
         metadata.setContent(resultURI);
         PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
-        send(queryURI, newMessage);
+        sendToURI(queryURI, newMessage);
     }
 }

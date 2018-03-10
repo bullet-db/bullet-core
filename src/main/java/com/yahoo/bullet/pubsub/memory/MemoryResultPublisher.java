@@ -29,6 +29,6 @@ public class MemoryResultPublisher extends MemoryPublisher {
         String uri;
         uri = (String) message.getMetadata().getContent();
         log.debug("Extracted uri to which to send results: " + uri);
-        send(uri, message);
+        sendToURI(uri, message);
     }
 }
