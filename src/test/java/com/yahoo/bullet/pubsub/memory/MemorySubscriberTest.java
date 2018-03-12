@@ -98,4 +98,27 @@ public class MemorySubscriberTest {
         subscriber.close();
         verify(mockClient).close();
     }
+
+    @Test
+    public void testMinWait() throws Exception {
+        PubSubMessage responseData = new PubSubMessage("someID", "someContent");
+        CompletableFuture<Response> response = getOkFuture(getOkResponse(responseData.asJSON()));
+        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 1000);
+
+        // First response should give content (2 events since we have 2 endpoints in the config)
+        List<PubSubMessage> messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 2);
+        // Second and third response should give nothing since the wait duration hasn't passed
+        messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 0);
+        messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 0);
+
+        // After waiting a second it should return messages again
+        Thread.sleep(1000);
+        messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 2);
+    }
 }
