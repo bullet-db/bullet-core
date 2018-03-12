@@ -226,7 +226,7 @@ bullet.query.rate.limit.time.interval: 100
 
 ## PubSub default settings
 # This should point to the implementation of your PubSub.
-bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.memory.MemoryPubSub"
+bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.memory.RESTPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
 

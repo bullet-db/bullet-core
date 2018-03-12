@@ -25,12 +25,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-public class MemoryPubSubTest {
+public class RESTPubSubTest {
 
     @Test
     public void testSettings() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
+        RESTPubSub pubSub = new RESTPubSub(config);
 
         // Test custom values from file
         RESTQueryPublisher publisher = (RESTQueryPublisher) pubSub.getPublisher();
@@ -77,7 +77,7 @@ public class MemoryPubSubTest {
     }
 
     public static Response getOkResponse(String data) {
-        return getResponse(MemoryPubSub.OK_200, "Ok", data);
+        return getResponse(RESTPubSub.OK_200, "Ok", data);
     }
 
     public static Response getNotOkResponse(int status) {
@@ -96,13 +96,13 @@ public class MemoryPubSubTest {
     public void testGetPublisher() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
+        RESTPubSub pubSub = new RESTPubSub(config);
         Publisher publisher = pubSub.getPublisher();
         Assert.assertNotNull(publisher);
         Assert.assertTrue(publisher instanceof RESTQueryPublisher);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
-        pubSub = new MemoryPubSub(config);
+        pubSub = new RESTPubSub(config);
         publisher = pubSub.getPublisher();
         Assert.assertNotNull(publisher);
         Assert.assertTrue(publisher instanceof RESTResultPublisher);
@@ -112,14 +112,14 @@ public class MemoryPubSubTest {
     public void testGetPublishers() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
+        RESTPubSub pubSub = new RESTPubSub(config);
         List<Publisher> publishers = pubSub.getPublishers(8);
         Assert.assertNotNull(publishers);
         Assert.assertTrue(publishers.get(0) instanceof RESTQueryPublisher);
         Assert.assertTrue(publishers.get(7) instanceof RESTQueryPublisher);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
-        pubSub = new MemoryPubSub(config);
+        pubSub = new RESTPubSub(config);
         publishers = pubSub.getPublishers(8);
         Assert.assertNotNull(publishers);
         Assert.assertTrue(publishers.get(0) instanceof RESTResultPublisher);
@@ -130,13 +130,13 @@ public class MemoryPubSubTest {
     public void testGetSubscriber() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
+        RESTPubSub pubSub = new RESTPubSub(config);
         Subscriber subscriber = pubSub.getSubscriber();
         Assert.assertNotNull(subscriber);
         Assert.assertTrue(subscriber instanceof MemorySubscriber);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
-        pubSub = new MemoryPubSub(config);
+        pubSub = new RESTPubSub(config);
         subscriber = pubSub.getSubscriber();
         Assert.assertNotNull(subscriber);
         Assert.assertTrue(subscriber instanceof MemorySubscriber);
@@ -146,14 +146,14 @@ public class MemoryPubSubTest {
     public void testGetSubscribers() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
+        RESTPubSub pubSub = new RESTPubSub(config);
         List<Subscriber> subscribers = pubSub.getSubscribers(8);
         Assert.assertNotNull(subscribers);
         Assert.assertTrue(subscribers.get(0) instanceof MemorySubscriber);
         Assert.assertTrue(subscribers.get(7) instanceof MemorySubscriber);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
-        pubSub = new MemoryPubSub(config);
+        pubSub = new RESTPubSub(config);
         subscribers = pubSub.getSubscribers(8);
         Assert.assertNotNull(subscribers);
         Assert.assertTrue(subscribers.get(0) instanceof MemorySubscriber);

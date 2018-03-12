@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class MemoryPubSubConfigTest {
+public class RESTPubSubConfigTest {
     @Test
     public void testNoFiles() {
         MemoryPubSubConfig config = new MemoryPubSubConfig((String) null);

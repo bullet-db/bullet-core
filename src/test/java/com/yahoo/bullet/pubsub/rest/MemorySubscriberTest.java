@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getNotOkResponse;
-import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getOkFuture;
-import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getOkResponse;
-import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.mockBuilderWith;
-import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.mockClientWith;
+import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getNotOkResponse;
+import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkFuture;
+import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkResponse;
+import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockBuilderWith;
+import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockClientWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;

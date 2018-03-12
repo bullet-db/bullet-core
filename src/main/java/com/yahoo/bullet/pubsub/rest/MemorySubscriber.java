@@ -52,9 +52,9 @@ public class MemorySubscriber extends BufferingSubscriber {
                 log.debug("Getting messages from uri: " + uri);
                 Response response = client.prepareGet(uri).execute().get();
                 int statusCode = response.getStatusCode();
-                if (statusCode == MemoryPubSub.OK_200) {
+                if (statusCode == RESTPubSub.OK_200) {
                     messages.add(PubSubMessage.fromJSON(response.getResponseBody()));
-                } else if (statusCode != MemoryPubSub.NO_CONTENT_204) {
+                } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                 }
