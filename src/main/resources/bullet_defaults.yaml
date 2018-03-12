@@ -232,20 +232,20 @@ bullet.pubsub.context.name: "QUERY_PROCESSING"
 
 ## In-Memory pubsub settings
 # Http connection timout (used by both the web service and the backend)
-bullet.pubsub.memory.connect.timeout.ms: 30000
+bullet.pubsub.rest.connect.timeout.ms: 30000
 # Http connection retry limit (used by both the web service and the backend)
-bullet.pubsub.memory.connect.retry.limit: 10
+bullet.pubsub.rest.connect.retry.limit: 10
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
-bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
+bullet.pubsub.rest.subscriber.max.uncommitted.messages: 100
 # Minimum time (ms) between http calls to the result subscriber REST endpoint
-bullet.pubsub.memory.subscriber.result.min.wait.ms: 10
+bullet.pubsub.rest.subscriber.result.min.wait.ms: 10
 # Minimum time (ms) between http calls to the query subscriber REST endpoint
-bullet.pubsub.memory.subscriber.query.min.wait.ms: 10
+bullet.pubsub.rest.subscriber.query.min.wait.ms: 10
 # The uri of the result http endpoint (this is only used in the web service - the backend loads the uri from the message metadata)
-bullet.pubsub.memory.result.uri: "http://localhost:9901/bullet/api/pubsub/result"
+bullet.pubsub.rest.result.uri: "http://localhost:9901/bullet/api/pubsub/result"
 # A list of uri(s) for the query endpoint. In the web service, this should contain a single URI for the query endpoint
 # of the in-memory pubsub instance running on that web service. For the backend it should contain the uris of all
 # the pubsub instances.
-bullet.pubsub.memory.query.uris:
+bullet.pubsub.rest.query.uris:
     - "http://localhost:9901/bullet/api/pubsub/query"
     - "http://localhost:9902/bullet/api/pubsub/query"

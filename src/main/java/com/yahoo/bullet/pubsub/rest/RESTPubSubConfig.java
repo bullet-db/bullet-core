@@ -16,7 +16,7 @@ import java.util.Optional;
 @Slf4j
 public class RESTPubSubConfig extends BulletConfig {
     // Field names
-    public static final String PREFIX = "bullet.pubsub.memory.";
+    public static final String PREFIX = "bullet.pubsub.rest.";
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
     public static final String CONNECT_RETRY_LIMIT = PREFIX + "connect.retry.limit";
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
