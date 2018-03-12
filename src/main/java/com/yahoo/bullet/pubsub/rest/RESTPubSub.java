@@ -33,7 +33,7 @@ public class RESTPubSub extends PubSub {
      */
     public RESTPubSub(BulletConfig config) throws PubSubException {
         super(config);
-        this.config = new MemoryPubSubConfig(config);
+        this.config = new RESTPubSubConfig(config);
     }
 
     @Override
@@ -52,15 +52,15 @@ public class RESTPubSub extends PubSub {
 
     @Override
     public Subscriber getSubscriber() throws PubSubException {
-        int maxUncommittedMessages = config.getAs(MemoryPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
+        int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         if (context == Context.QUERY_PROCESSING) {
-            List<String> uris = (List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class);
-            Long minWait = this.config.getAs(MemoryPubSubConfig.QUERY_MIN_WAIT, Long.class);
-            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uris, getClient(), minWait);
+            List<String> uris = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URIS, List.class);
+            Long minWait = this.config.getAs(RESTPubSubConfig.QUERY_MIN_WAIT, Long.class);
+            return new MemorySubscriber(new RESTPubSubConfig(config), maxUncommittedMessages, uris, getClient(), minWait);
         } else {
-            List<String> uri = Collections.singletonList(this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class));
-            Long minWait = this.config.getAs(MemoryPubSubConfig.RESULT_MIN_WAIT, Long.class);
-            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uri, getClient(), minWait);
+            List<String> uri = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URI, String.class));
+            Long minWait = this.config.getAs(RESTPubSubConfig.RESULT_MIN_WAIT, Long.class);
+            return new MemorySubscriber(new RESTPubSubConfig(config), maxUncommittedMessages, uri, getClient(), minWait);
         }
     }
 
@@ -70,8 +70,8 @@ public class RESTPubSub extends PubSub {
     }
 
     private AsyncHttpClient getClient() {
-        int connectTimeout = config.getAs(MemoryPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
-        int retryLimit = config.getAs(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
+        int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
+        int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
         AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
                                                                                        .setMaxRequestRetry(retryLimit)
                                                                                        .setReadTimeout(NO_TIMEOUT)

@@ -26,9 +26,9 @@ public class RESTQueryPublisher extends RESTPublisher {
      * @param client The client.
      */
     public RESTQueryPublisher(BulletConfig config, AsyncHttpClient client) {
-        super(new MemoryPubSubConfig(config), client);
-        this.queryURI = ((List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class)).get(0);
-        this.resultURI = this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class);
+        super(new RESTPubSubConfig(config), client);
+        this.queryURI = ((List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URIS, List.class)).get(0);
+        this.resultURI = this.config.getAs(RESTPubSubConfig.RESULT_URI, String.class);
     }
 
     @Override

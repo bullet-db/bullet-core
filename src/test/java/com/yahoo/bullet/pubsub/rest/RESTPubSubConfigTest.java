@@ -18,28 +18,28 @@ import java.util.Set;
 public class RESTPubSubConfigTest {
     @Test
     public void testNoFiles() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig((String) null);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        RESTPubSubConfig config = new RESTPubSubConfig((String) null);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
 
-        config = new MemoryPubSubConfig((Config) null);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        config = new RESTPubSubConfig((Config) null);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
 
-        config = new MemoryPubSubConfig("");
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        config = new RESTPubSubConfig("");
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
     }
 
     @Test
     public void testMissingFile() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        RESTPubSubConfig config = new RESTPubSubConfig("/path/to/non/existant/file");
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
     }
 
     @Test
     public void testCustomConfig() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
-        List<String> queries = ((List<String>) config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class));
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
+        List<String> queries = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URIS, List.class));
         Assert.assertEquals(queries.size(), 2);
         Assert.assertEquals(queries.get(0), "http://localhost:9901/CUSTOM/query");
         Assert.assertEquals(queries.get(1), "http://localhost:9902/CUSTOM/query");
@@ -47,7 +47,7 @@ public class RESTPubSubConfigTest {
 
     @Test
     public void testCustomProperties() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig((String) null);
+        RESTPubSubConfig config = new RESTPubSubConfig((String) null);
         Assert.assertNull(config.get("foo"));
         config.set("foo", "bar");
         Assert.assertEquals(config.get("foo"), "bar");
@@ -55,15 +55,15 @@ public class RESTPubSubConfigTest {
 
     @Test
     public void testGettingWithDefault() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.getOrDefault(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, "51"), 88L);
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        Assert.assertEquals(config.getOrDefault(RESTPubSubConfig.CONNECT_RETRY_LIMIT, "51"), 88L);
         Assert.assertEquals(config.getOrDefault("does.not.exist", "foo"), "foo");
         Assert.assertEquals(config.getOrDefault("fake.setting", "bar"), "bar");
     }
 
     @Test
     public void testGettingMultipleProperties() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig((String) null);
+        RESTPubSubConfig config = new RESTPubSubConfig((String) null);
         config.clear();
         config.set("1", 1);
         config.set("pi", 3.14);
@@ -86,40 +86,40 @@ public class RESTPubSubConfigTest {
 
     @Test
     public void testMerging() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
 
-        Config another = new MemoryPubSubConfig((String) null);
+        Config another = new RESTPubSubConfig((String) null);
         another.clear();
-        another.set(MemoryPubSubConfig.CONNECT_RETRY_LIMIT, 51L);
+        another.set(RESTPubSubConfig.CONNECT_RETRY_LIMIT, 51L);
         // This is a bad setting
-        another.set(MemoryPubSubConfig.AGGREGATION_MAX_SIZE, -1);
+        another.set(RESTPubSubConfig.AGGREGATION_MAX_SIZE, -1);
         // Some other non-Bullet setting
         config.set("pi", 3.14);
 
         config.merge(another);
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
         // Bad setting gets defaulted.
-        Assert.assertEquals(config.get(MemoryPubSubConfig.AGGREGATION_MAX_SIZE), MemoryPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
+        Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         // Other setting is preserved.
         Assert.assertEquals(config.get("pi"), 3.14);
 
         // Test null and verify it is unchanged
         config.merge(null);
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
-        Assert.assertEquals(config.get(MemoryPubSubConfig.AGGREGATION_MAX_SIZE), MemoryPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
 
     @Test
     public void testPropertiesWithPrefix() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub";
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
@@ -127,12 +127,12 @@ public class RESTPubSubConfigTest {
         Assert.assertEquals(configSize, 9);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
-        Assert.assertEquals(properties.get(MemoryPubSubConfig.PUBSUB_CLASS_NAME), fieldValue);
+        Assert.assertEquals(properties.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), fieldValue);
     }
 
     @Test
     public void testPropertiesStripPrefix() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub.";
         String fieldName = "class.name";
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
@@ -141,15 +141,15 @@ public class RESTPubSubConfigTest {
         Assert.assertEquals(configSize, 9);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
-        Assert.assertNull(properties.get(MemoryPubSubConfig.PUBSUB_CLASS_NAME));
+        Assert.assertNull(properties.get(RESTPubSubConfig.PUBSUB_CLASS_NAME));
         Assert.assertEquals(properties.get(fieldName), fieldValue);
     }
 
     @Test
     public void testGetAsAGivenType() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/custom_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/custom_config.yaml");
 
-        int defaulted = config.getAs(MemoryPubSubConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
+        int defaulted = config.getAs(RESTPubSubConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
         Assert.assertEquals(defaulted, 100);
 
         Map customMap = config.getAs("my.custom.map", Map.class);
@@ -167,9 +167,9 @@ public class RESTPubSubConfigTest {
 
     @Test
     public void testGetOrDefaultAsAGivenType() {
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
 
-        int notDefaulted = config.getOrDefaultAs(MemoryPubSubConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42, Integer.class);
+        int notDefaulted = config.getOrDefaultAs(RESTPubSubConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42, Integer.class);
         Assert.assertEquals(notDefaulted, 100);
 
         String defaulted = config.getOrDefaultAs("foo", "value", String.class);
@@ -181,6 +181,6 @@ public class RESTPubSubConfigTest {
 
     @Test
     public void testValidatorIsACopy() {
-        Assert.assertTrue(MemoryPubSubConfig.getValidator() != MemoryPubSubConfig.getValidator());
+        Assert.assertTrue(RESTPubSubConfig.getValidator() != RESTPubSubConfig.getValidator());
     }
 }

@@ -21,7 +21,7 @@ public class RESTResultPublisher extends RESTPublisher {
      * @param client The client.
      */
     public RESTResultPublisher(BulletConfig config, AsyncHttpClient client) {
-        super(new MemoryPubSubConfig(config), client);
+        super(new RESTPubSubConfig(config), client);
     }
 
     @Override

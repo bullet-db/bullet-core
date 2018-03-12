@@ -34,7 +34,7 @@ public class MemorySubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(responseData.asJSON()));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
@@ -47,7 +47,7 @@ public class MemorySubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getNotOkResponse(204));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
@@ -59,7 +59,7 @@ public class MemorySubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getNotOkResponse(500));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
@@ -72,7 +72,7 @@ public class MemorySubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse("thisCannotBeTurnedIntoAPubSubMessage"));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
@@ -83,7 +83,7 @@ public class MemorySubscriberTest {
     public void testClose() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doNothing().when(mockClient).close();
-        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        MemorySubscriber subscriber = new MemorySubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();
@@ -93,7 +93,7 @@ public class MemorySubscriberTest {
     public void testCloseDoesNotThrow() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        MemorySubscriber subscriber = new MemorySubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();
@@ -105,7 +105,7 @@ public class MemorySubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(responseData.asJSON()));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 1000);
+        MemorySubscriber subscriber = new MemorySubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 1000);
 
         // First response should give content (2 events since we have 2 endpoints in the config)
         List<PubSubMessage> messages = subscriber.getMessages();

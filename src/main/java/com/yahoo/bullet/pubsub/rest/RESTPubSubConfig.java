@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public class MemoryPubSubConfig extends BulletConfig {
+public class RESTPubSubConfig extends BulletConfig {
     // Field names
     public static final String PREFIX = "bullet.pubsub.memory.";
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
@@ -40,7 +40,7 @@ public class MemoryPubSubConfig extends BulletConfig {
      *
      * @param file YAML file to load.
      */
-    public MemoryPubSubConfig(String file) {
+    public RESTPubSubConfig(String file) {
         this(new BulletConfig(file));
     }
 
@@ -49,7 +49,7 @@ public class MemoryPubSubConfig extends BulletConfig {
      *
      * @param other The other config to wrap.
      */
-    public MemoryPubSubConfig(Config other) {
+    public RESTPubSubConfig(Config other) {
         super();
         merge(other);
         VALIDATOR.validate(this);

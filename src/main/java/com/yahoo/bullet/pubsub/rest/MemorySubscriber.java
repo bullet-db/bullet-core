@@ -18,19 +18,19 @@ import org.asynchttpclient.Response;
 
 @Slf4j
 public class MemorySubscriber extends BufferingSubscriber {
-    MemoryPubSubConfig config;
+    RESTPubSubConfig config;
     AsyncHttpClient client;
     List<String> uris;
     long minWait;
     long lastRequest;
 
     /**
-     * Create a MemorySubscriber from a {@link MemoryPubSubConfig}.
+     * Create a MemorySubscriber from a {@link RESTPubSubConfig}.
      *
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(MemoryPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
+    public MemorySubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);
         this.config = config;
         this.client = client;

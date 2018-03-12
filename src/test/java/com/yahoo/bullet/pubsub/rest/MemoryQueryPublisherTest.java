@@ -33,8 +33,8 @@ public class MemoryQueryPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
@@ -48,8 +48,8 @@ public class MemoryQueryPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
@@ -63,8 +63,8 @@ public class MemoryQueryPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send("foo", "bar");
@@ -77,7 +77,7 @@ public class MemoryQueryPublisherTest {
     public void testClose() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doNothing().when(mockClient).close();
-        RESTQueryPublisher publisher = new RESTQueryPublisher(new MemoryPubSubConfig((String) null), mockClient);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(new RESTPubSubConfig((String) null), mockClient);
 
         publisher.close();
         verify(mockClient).close();
@@ -87,7 +87,7 @@ public class MemoryQueryPublisherTest {
     public void testCloseDoesNotThrow() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        RESTQueryPublisher publisher = new RESTQueryPublisher(new MemoryPubSubConfig((String) null), mockClient);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(new RESTPubSubConfig((String) null), mockClient);
 
         publisher.close();
         verify(mockClient).close();
@@ -98,8 +98,8 @@ public class MemoryQueryPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getNotOkResponse(500));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(MemoryPubSubConfig.RESULT_URI, "my/custom/uri");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
@@ -118,7 +118,7 @@ public class MemoryQueryPublisherTest {
                                                                                        .build();
         AsyncHttpClient client = new DefaultAsyncHttpClient(clientConfig);
         AsyncHttpClient spyClient = spy(client);
-        MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, spyClient);
 
         publisher.send(new PubSubMessage("foo", "bar"));
