@@ -63,7 +63,7 @@ public abstract class RESTPublisher implements Publisher {
 
     private void handleResponse(String id, Response response) {
         if (response == null || response.getStatusCode() != RESTPubSub.OK_200) {
-            log.error("Failed to write message with id: {}. Couldn't reach memory pubsub server. Got response: {}", id, response);
+            log.error("Failed to write message with id: {}. Couldn't reach pubsub server. Got response: {}", id, response);
             return;
         }
         log.info("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
