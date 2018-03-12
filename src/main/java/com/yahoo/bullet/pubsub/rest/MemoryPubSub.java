@@ -3,7 +3,7 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
-package com.yahoo.bullet.pubsub.memory;
+package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSub;
@@ -39,9 +39,9 @@ public class MemoryPubSub extends PubSub {
     @Override
     public Publisher getPublisher() throws PubSubException {
         if (context == Context.QUERY_PROCESSING) {
-            return new MemoryResultPublisher(config, getClient());
+            return new RESTResultPublisher(config, getClient());
         } else {
-            return new MemoryQueryPublisher(config, getClient());
+            return new RESTQueryPublisher(config, getClient());
         }
     }
 

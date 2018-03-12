@@ -3,7 +3,7 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
-package com.yahoo.bullet.pubsub.memory;
+package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.asynchttpclient.AsyncHttpClient;
@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.getNotOkResponse;
-import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.getOkFuture;
-import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.getOkResponse;
-import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.mockBuilderWith;
-import static com.yahoo.bullet.pubsub.memory.MemoryPubSubTest.mockClientWith;
+import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getNotOkResponse;
+import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getOkFuture;
+import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.getOkResponse;
+import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.mockBuilderWith;
+import static com.yahoo.bullet.pubsub.rest.MemoryPubSubTest.mockClientWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;

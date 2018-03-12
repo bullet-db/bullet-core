@@ -3,7 +3,7 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
-package com.yahoo.bullet.pubsub.memory;
+package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSubException;
@@ -33,7 +33,7 @@ public class MemoryPubSubTest {
         MemoryPubSub pubSub = new MemoryPubSub(config);
 
         // Test custom values from file
-        MemoryQueryPublisher publisher = (MemoryQueryPublisher) pubSub.getPublisher();
+        RESTQueryPublisher publisher = (RESTQueryPublisher) pubSub.getPublisher();
         String queryUri = publisher.queryURI;
         Assert.assertEquals(queryUri, "http://localhost:9901/CUSTOM/query");
 
@@ -99,13 +99,13 @@ public class MemoryPubSubTest {
         MemoryPubSub pubSub = new MemoryPubSub(config);
         Publisher publisher = pubSub.getPublisher();
         Assert.assertNotNull(publisher);
-        Assert.assertTrue(publisher instanceof MemoryQueryPublisher);
+        Assert.assertTrue(publisher instanceof RESTQueryPublisher);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         pubSub = new MemoryPubSub(config);
         publisher = pubSub.getPublisher();
         Assert.assertNotNull(publisher);
-        Assert.assertTrue(publisher instanceof MemoryResultPublisher);
+        Assert.assertTrue(publisher instanceof RESTResultPublisher);
     }
 
     @Test
@@ -115,15 +115,15 @@ public class MemoryPubSubTest {
         MemoryPubSub pubSub = new MemoryPubSub(config);
         List<Publisher> publishers = pubSub.getPublishers(8);
         Assert.assertNotNull(publishers);
-        Assert.assertTrue(publishers.get(0) instanceof MemoryQueryPublisher);
-        Assert.assertTrue(publishers.get(7) instanceof MemoryQueryPublisher);
+        Assert.assertTrue(publishers.get(0) instanceof RESTQueryPublisher);
+        Assert.assertTrue(publishers.get(7) instanceof RESTQueryPublisher);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         pubSub = new MemoryPubSub(config);
         publishers = pubSub.getPublishers(8);
         Assert.assertNotNull(publishers);
-        Assert.assertTrue(publishers.get(0) instanceof MemoryResultPublisher);
-        Assert.assertTrue(publishers.get(7) instanceof MemoryResultPublisher);
+        Assert.assertTrue(publishers.get(0) instanceof RESTResultPublisher);
+        Assert.assertTrue(publishers.get(7) instanceof RESTResultPublisher);
     }
 
     @Test

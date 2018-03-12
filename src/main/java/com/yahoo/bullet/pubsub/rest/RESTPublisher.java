@@ -3,7 +3,7 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
-package com.yahoo.bullet.pubsub.memory;
+package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
@@ -15,17 +15,17 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 @Slf4j
-public abstract class MemoryPublisher implements Publisher {
+public abstract class RESTPublisher implements Publisher {
     protected MemoryPubSubConfig config;
     protected AsyncHttpClient client;
 
     /**
-     * Create a MemoryQueryPublisher from a {@link MemoryPubSubConfig} and a {@link AsyncHttpClient}.
+     * Create a RESTQueryPublisher from a {@link MemoryPubSubConfig} and a {@link AsyncHttpClient}.
      *
      * @param config The config.
      * @param client The client.
      */
-    public MemoryPublisher(MemoryPubSubConfig config, AsyncHttpClient client) {
+    public RESTPublisher(MemoryPubSubConfig config, AsyncHttpClient client) {
         this.config = config;
         this.client = client;
     }
