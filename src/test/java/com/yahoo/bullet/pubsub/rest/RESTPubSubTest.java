@@ -38,7 +38,7 @@ public class RESTPubSubTest {
         Assert.assertEquals(queryUri, "http://localhost:9901/CUSTOM/query");
 
         // Test defaults
-        MemorySubscriber resultSubscriber = (MemorySubscriber) pubSub.getSubscriber();
+        RESTSubscriber resultSubscriber = (RESTSubscriber) pubSub.getSubscriber();
         List<String> uris = resultSubscriber.uris;
         Assert.assertEquals(uris.size(), 1);
         Assert.assertEquals(uris.get(0), "http://localhost:9901/bullet/api/pubsub/result");
@@ -133,13 +133,13 @@ public class RESTPubSubTest {
         RESTPubSub pubSub = new RESTPubSub(config);
         Subscriber subscriber = pubSub.getSubscriber();
         Assert.assertNotNull(subscriber);
-        Assert.assertTrue(subscriber instanceof MemorySubscriber);
+        Assert.assertTrue(subscriber instanceof RESTSubscriber);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         pubSub = new RESTPubSub(config);
         subscriber = pubSub.getSubscriber();
         Assert.assertNotNull(subscriber);
-        Assert.assertTrue(subscriber instanceof MemorySubscriber);
+        Assert.assertTrue(subscriber instanceof RESTSubscriber);
     }
 
     @Test
@@ -149,14 +149,14 @@ public class RESTPubSubTest {
         RESTPubSub pubSub = new RESTPubSub(config);
         List<Subscriber> subscribers = pubSub.getSubscribers(8);
         Assert.assertNotNull(subscribers);
-        Assert.assertTrue(subscribers.get(0) instanceof MemorySubscriber);
-        Assert.assertTrue(subscribers.get(7) instanceof MemorySubscriber);
+        Assert.assertTrue(subscribers.get(0) instanceof RESTSubscriber);
+        Assert.assertTrue(subscribers.get(7) instanceof RESTSubscriber);
 
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         pubSub = new RESTPubSub(config);
         subscribers = pubSub.getSubscribers(8);
         Assert.assertNotNull(subscribers);
-        Assert.assertTrue(subscribers.get(0) instanceof MemorySubscriber);
-        Assert.assertTrue(subscribers.get(7) instanceof MemorySubscriber);
+        Assert.assertTrue(subscribers.get(0) instanceof RESTSubscriber);
+        Assert.assertTrue(subscribers.get(7) instanceof RESTSubscriber);
     }
 }

@@ -17,7 +17,7 @@ import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
 
 @Slf4j
-public class MemorySubscriber extends BufferingSubscriber {
+public class RESTSubscriber extends BufferingSubscriber {
     RESTPubSubConfig config;
     AsyncHttpClient client;
     List<String> uris;
@@ -25,12 +25,12 @@ public class MemorySubscriber extends BufferingSubscriber {
     long lastRequest;
 
     /**
-     * Create a MemorySubscriber from a {@link RESTPubSubConfig}.
+     * Create a RESTSubscriber from a {@link RESTPubSubConfig}.
      *
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
+    public RESTSubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);
         this.config = config;
         this.client = client;
