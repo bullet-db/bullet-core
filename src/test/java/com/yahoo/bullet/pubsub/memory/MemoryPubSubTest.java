@@ -159,37 +159,4 @@ public class MemoryPubSubTest {
         Assert.assertTrue(subscribers.get(0) instanceof MemorySubscriber);
         Assert.assertTrue(subscribers.get(7) instanceof MemorySubscriber);
     }
-
-    @Test
-    public void testToString() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        MemoryPubSub pubSub = new MemoryPubSub(config);
-        Assert.assertEquals(pubSub.toString(), "context: QUERY_SUBMISSION\n" +
-                "config: {bullet.query.aggregation.group.sketch.resize.factor=8, fake.setting=null, " +
-                "bullet.query.aggregation.count.distinct.sketch.resize.factor=8, " +
-                "bullet.pubsub.memory.query.uris=[http://localhost:9901/CUSTOM/query, http://localhost:9902/CUSTOM/query], " +
-                "bullet.query.window.min.emit.every=1000, bullet.pubsub.memory.connect.timeout.ms=30000, " +
-                "bullet.pubsub.memory.connect.retry.limit=88, bullet.pubsub.class.name=com.yahoo.bullet.pubsub.MockPubSub, " +
-                "bullet.query.default.duration=1000, bullet.query.rate.limit.time.interval=100, " +
-                "bullet.query.aggregation.group.sketch.entries=512, bullet.query.aggregation.raw.max.size=100, " +
-                "bullet.query.rate.limit.enable=true, bullet.query.aggregation.top.k.sketch.error.type=NFN, " +
-                "bullet.result.metadata.enable=true, bullet.record.inject.timestamp.enable=false, " +
-                "bullet.query.aggregation.count.distinct.sketch.entries=16384, bullet.query.window.disable=false, " +
-                "bullet.query.aggregation.count.distinct.sketch.family=Alpha, bullet.query.aggregation.default.size=500, " +
-                "bullet.query.aggregation.group.sketch.sampling=1.0, bullet.query.aggregation.distribution.max.points=100, " +
-                "bullet.query.aggregation.group.max.size=500, bullet.pubsub.memory.result.uri=http://localhost:9901/bullet/api/pubsub/result, " +
-                "bullet.query.aggregation.distribution.generated.points.rounding=6, bullet.query.aggregation.composite.field.separator=|, " +
-                "bullet.query.aggregation.distribution.sketch.entries=1024, bullet.pubsub.context.name=QUERY_SUBMISSION, " +
-                "bullet.query.aggregation.top.k.sketch.entries=1024, bullet.pubsub.memory.subscriber.max.uncommitted.messages=100, " +
-                "bullet.query.max.duration=10000, bullet.result.metadata.metrics={Window Expected Emit Time=Expected Emit Time, " +
-                    "Sketch Maximum Value=Maximum Value, Window Metadata=Window, Query Body=Body, Sketch Metadata=Sketch, " +
-                    "Window Emit Time=Emit Time, Query Receive Time=Receive Time, Sketch Family=Family, " +
-                    "Sketch Uniques Estimate=Uniques Estimate, Sketch Items Seen=Items Seen, Query Metadata=Query, " +
-                    "Window Number=Number, Sketch Minimum Value=Minimum Value, Window Size=Size, Query Finish Time=Finish Time, " +
-                    "Sketch Theta=Theta, Window Name=Name, Query ID=ID, Sketch Maximum Count Error=Maximum Count Error, " +
-                    "Sketch Standard Deviations=Standard Deviations, Sketch Normalized Rank Error=Normalized Rank Error, " +
-                    "Sketch Estimated Result=Was Estimated, Sketch Size=Size, Sketch Active Items=Active Items}, " +
-                "bullet.query.rate.limit.max.emit.count=100, bullet.record.inject.timestamp.key=bullet_project_timestamp, " +
-                "bullet.query.aggregation.max.size=500, bullet.query.aggregation.count.distinct.sketch.sampling=1.0}");
-    }
 }

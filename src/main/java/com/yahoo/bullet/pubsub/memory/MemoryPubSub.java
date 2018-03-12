@@ -55,10 +55,12 @@ public class MemoryPubSub extends PubSub {
         int maxUncommittedMessages = config.getAs(MemoryPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         if (context == Context.QUERY_PROCESSING) {
             List<String> uris = (List<String>) this.config.getAs(MemoryPubSubConfig.QUERY_URIS, List.class);
-            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uris, getClient());
+            Long minWait = this.config.getAs(MemoryPubSubConfig.QUERY_MIN_WAIT, Long.class);
+            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uris, getClient(), minWait);
         } else {
             List<String> uri = Collections.singletonList(this.config.getAs(MemoryPubSubConfig.RESULT_URI, String.class));
-            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uri, getClient());
+            Long minWait = this.config.getAs(MemoryPubSubConfig.RESULT_MIN_WAIT, Long.class);
+            return new MemorySubscriber(new MemoryPubSubConfig(config), maxUncommittedMessages, uri, getClient(), minWait);
         }
     }
 

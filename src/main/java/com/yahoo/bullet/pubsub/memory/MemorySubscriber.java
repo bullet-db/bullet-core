@@ -18,9 +18,11 @@ import org.asynchttpclient.Response;
 
 @Slf4j
 public class MemorySubscriber extends BufferingSubscriber {
-    protected MemoryPubSubConfig config;
-    protected AsyncHttpClient client;
+    MemoryPubSubConfig config;
+    AsyncHttpClient client;
     List<String> uris;
+    long minWait;
+    long lastRequest;
 
     /**
      * Create a MemorySubscriber from a {@link MemoryPubSubConfig}.
@@ -28,16 +30,23 @@ public class MemorySubscriber extends BufferingSubscriber {
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      */
-    public MemorySubscriber(MemoryPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client) {
+    public MemorySubscriber(MemoryPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);
         this.config = config;
         this.client = client;
         this.uris = uris;
+        this.minWait = minWait;
+        this.lastRequest = 0;
     }
 
     @Override
     public List<PubSubMessage> getMessages() throws PubSubException {
         List<PubSubMessage> messages = new ArrayList<>();
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastRequest < minWait) {
+            return messages;
+        }
+        lastRequest = currentTime;
         for (String uri : uris) {
             try {
                 log.debug("Getting messages from uri: " + uri);

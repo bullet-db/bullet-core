@@ -35,7 +35,7 @@ public class MemorySubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
@@ -48,7 +48,7 @@ public class MemorySubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -60,7 +60,7 @@ public class MemorySubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -73,7 +73,7 @@ public class MemorySubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         MemoryPubSubConfig config = new MemoryPubSubConfig("src/test/resources/test_config.yaml");
-        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -83,7 +83,7 @@ public class MemorySubscriberTest {
     public void testClose() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doNothing().when(mockClient).close();
-        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();
@@ -93,7 +93,7 @@ public class MemorySubscriberTest {
     public void testCloseDoesNotThrow() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient);
+        MemorySubscriber subscriber = new MemorySubscriber(new MemoryPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();

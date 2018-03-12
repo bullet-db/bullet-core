@@ -237,6 +237,10 @@ bullet.pubsub.memory.connect.timeout.ms: 30000
 bullet.pubsub.memory.connect.retry.limit: 10
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
 bullet.pubsub.memory.subscriber.max.uncommitted.messages: 100
+# Minimum time (ms) between http calls to the result subscriber REST endpoint
+bullet.pubsub.memory.subscriber.result.min.wait.ms: 10
+# Minimum time (ms) between http calls to the query subscriber REST endpoint
+bullet.pubsub.memory.subscriber.query.min.wait.ms: 10
 # The uri of the result http endpoint (this is only used in the web service - the backend loads the uri from the message metadata)
 bullet.pubsub.memory.result.uri: "http://localhost:9901/bullet/api/pubsub/result"
 # A list of uri(s) for the query endpoint. In the web service, this should contain a single URI for the query endpoint
