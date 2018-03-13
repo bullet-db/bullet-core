@@ -16,8 +16,11 @@ import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class RESTPubSub extends PubSub {
@@ -37,7 +40,7 @@ public class RESTPubSub extends PubSub {
     }
 
     @Override
-    public Publisher getPublisher() throws PubSubException {
+    public Publisher getPublisher() {
         if (context == Context.QUERY_PROCESSING) {
             return new RESTResultPublisher(config, getClient());
         } else {
@@ -46,12 +49,12 @@ public class RESTPubSub extends PubSub {
     }
 
     @Override
-    public List<Publisher> getPublishers(int n) throws PubSubException {
-        return Collections.nCopies(n, getPublisher());
+    public List<Publisher> getPublishers(int n) {
+        return IntStream.range(0, n).mapToObj(i -> getPublisher()).collect(Collectors.toList());
     }
 
     @Override
-    public Subscriber getSubscriber() throws PubSubException {
+    public Subscriber getSubscriber() {
         int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         if (context == Context.QUERY_PROCESSING) {
             List<String> uris = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URIS, List.class);
@@ -65,7 +68,7 @@ public class RESTPubSub extends PubSub {
     }
 
     @Override
-    public List<Subscriber> getSubscribers(int n) throws PubSubException {
+    public List<Subscriber> getSubscribers(int n) {
         return Collections.nCopies(n, getSubscriber());
     }
 

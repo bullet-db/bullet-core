@@ -29,6 +29,8 @@ public class RESTSubscriber extends BufferingSubscriber {
      *
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
+     * @param uris The URIs which will be used to make the http request.
+     * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
     public RESTSubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);

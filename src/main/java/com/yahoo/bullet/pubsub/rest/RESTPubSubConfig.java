@@ -53,7 +53,7 @@ public class RESTPubSubConfig extends BulletConfig {
         super();
         merge(other);
         VALIDATOR.validate(this);
-        log.info("Merged settings:\n {}", getAll(Optional.empty()));
+        log.info("Merged settings:\n {}", this);
     }
 
     private static final Validator VALIDATOR = new Validator();
