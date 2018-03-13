@@ -69,7 +69,7 @@ public class RESTPubSub extends PubSub {
 
     @Override
     public List<Subscriber> getSubscribers(int n) {
-        return Collections.nCopies(n, getSubscriber());
+        return IntStream.range(0, n).mapToObj(i -> getSubscriber()).collect(Collectors.toList());
     }
 
     private AsyncHttpClient getClient() {
