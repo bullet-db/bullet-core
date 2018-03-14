@@ -117,7 +117,7 @@ public class RESTSubscriberTest {
         Assert.assertEquals(messages.size(), 0);
 
         // After waiting a second it should return messages again
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
     }
