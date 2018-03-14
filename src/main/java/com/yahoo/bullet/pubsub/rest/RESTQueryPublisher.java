@@ -20,7 +20,8 @@ public class RESTQueryPublisher extends RESTPublisher {
     String resultURL;
 
     /**
-     * Create a RESTQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
+     * Create a RESTQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}. The BulletConfig must
+     * contain a valid url in the bullet.pubsub.rest.query.urls field.
      *
      * @param config The config.
      * @param client The client.

@@ -230,7 +230,7 @@ bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.rest.RESTPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
 
-## In-Memory REST pubsub settings
+## In-Memory RESTPubSub settings
 # Http connection timout (used by both the web service and the backend)
 bullet.pubsub.rest.connect.timeout.ms: 5000
 # Http connection retry limit (used by both the web service and the backend)

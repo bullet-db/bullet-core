@@ -35,18 +35,18 @@ public abstract class RESTPublisher implements Publisher {
         try {
             client.close();
         } catch (IOException e) {
-            log.warn("Caught exception when closing AsyncHttpClient: " + e);
+            log.error("Caught exception when closing AsyncHttpClient...: ", e);
         }
     }
 
     /**
-     * Send the PubSubMessage to the given url.
+     * Send the {@link PubSubMessage} to the given url.
      *
      * @param url The url to which to send the message.
      * @param message The message to send.
      */
     protected void sendToURL(String url, PubSubMessage message) {
-        log.debug("Sending message: " + message + " to url: " + url);
+        log.debug("Sending message: {} to url: {}", message, url);
         client.preparePost(url)
               .setBody(message.asJSON())
               .setHeader("content-type", "text/plain")

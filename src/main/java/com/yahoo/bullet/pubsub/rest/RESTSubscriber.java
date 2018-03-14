@@ -45,7 +45,7 @@ public class RESTSubscriber extends BufferingSubscriber {
     public List<PubSubMessage> getMessages() throws PubSubException {
         List<PubSubMessage> messages = new ArrayList<>();
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastRequest < minWait) {
+        if (currentTime - lastRequest <= minWait) {
             return messages;
         }
         lastRequest = currentTime;
