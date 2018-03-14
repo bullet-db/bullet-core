@@ -1,10 +1,11 @@
 /*
- *  Copyright 2017, Yahoo Inc.
+ *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
 package com.yahoo.bullet.pubsub.rest;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Config;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -182,5 +183,22 @@ public class RESTPubSubConfigTest {
     @Test
     public void testValidatorIsACopy() {
         Assert.assertTrue(RESTPubSubConfig.getValidator() != RESTPubSubConfig.getValidator());
+    }
+
+    @Test
+    public void testValidate() {
+        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
+
+        // Test validate() corrects BulletConfig settings
+        config.set(BulletConfig.AGGREGATION_DEFAULT_SIZE, -88);
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), -88);
+        config.validate();
+        Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+
+        // Test validate() corrects RESTPubSubConfig settings
+        config.set(RESTPubSubConfig.CONNECT_RETRY_LIMIT, -88);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), -88);
+        config.validate();
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), RESTPubSubConfig.DEFAULT_CONNECT_RETRY_LIMIT);
     }
 }

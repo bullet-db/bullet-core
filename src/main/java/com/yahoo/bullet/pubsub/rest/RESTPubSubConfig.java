@@ -55,7 +55,7 @@ public class RESTPubSubConfig extends BulletConfig {
         log.info("Merged settings:\n {}", this);
     }
 
-    private static final Validator VALIDATOR = new Validator();
+    private static final Validator VALIDATOR = BulletConfig.getValidator();
     static {
         VALIDATOR.define(CONNECT_TIMEOUT_MS)
                  .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
@@ -80,4 +80,10 @@ public class RESTPubSubConfig extends BulletConfig {
                  .checkIf(Validator::isPositive);
     }
 
+    @Override
+    public BulletConfig validate() {
+        super.validate(this);
+        VALIDATOR.validate(this);
+        return this;
+    }
 }

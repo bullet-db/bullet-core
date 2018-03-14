@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017, Yahoo Inc.
+ *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class MemoryResultPublisherTest {
+public class RESTResultPublisherTest {
     @Test
     public void testSend() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));

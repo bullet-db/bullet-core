@@ -55,14 +55,17 @@ public class RESTPubSub extends PubSub {
     @Override
     public Subscriber getSubscriber() {
         int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
+        RESTPubSubConfig pubsubConfig = new RESTPubSubConfig(config);
+        AsyncHttpClient client = getClient();
+
         if (context == Context.QUERY_PROCESSING) {
             List<String> uris = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URIS, List.class);
             Long minWait = this.config.getAs(RESTPubSubConfig.QUERY_MIN_WAIT, Long.class);
-            return new RESTSubscriber(new RESTPubSubConfig(config), maxUncommittedMessages, uris, getClient(), minWait);
+            return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, uris, client, minWait);
         } else {
             List<String> uri = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URI, String.class));
             Long minWait = this.config.getAs(RESTPubSubConfig.RESULT_MIN_WAIT, Long.class);
-            return new RESTSubscriber(new RESTPubSubConfig(config), maxUncommittedMessages, uri, getClient(), minWait);
+            return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, uri, client, minWait);
         }
     }
 

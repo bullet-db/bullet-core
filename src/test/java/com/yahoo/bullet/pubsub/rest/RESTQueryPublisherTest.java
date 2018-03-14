@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017, Yahoo Inc.
+ *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
@@ -27,7 +27,7 @@ import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockBuilderWith;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockClientWith;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getNotOkResponse;
 
-public class MemoryQueryPublisherTest {
+public class RESTQueryPublisherTest {
     @Test
     public void testSendResultUriPutInMetadataAckPreserved() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
