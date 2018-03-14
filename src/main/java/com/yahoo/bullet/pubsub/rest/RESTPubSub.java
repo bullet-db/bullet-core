@@ -57,16 +57,16 @@ public class RESTPubSub extends PubSub {
         int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
         RESTPubSubConfig pubsubConfig = new RESTPubSubConfig(config);
         AsyncHttpClient client = getClient();
-
+        List<String> urls;
+        Long minWait;
         if (context == Context.QUERY_PROCESSING) {
-            List<String> urls = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
-            Long minWait = this.config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
-            return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, urls, client, minWait);
+            urls = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
+            minWait = this.config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
         } else {
-            List<String> url = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
-            Long minWait = this.config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
-            return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, url, client, minWait);
+            urls = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
+            minWait = this.config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
         }
+        return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, urls, client, minWait);
     }
 
     @Override
@@ -77,11 +77,12 @@ public class RESTPubSub extends PubSub {
     private AsyncHttpClient getClient() {
         int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
         int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
-        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
-                                                                                       .setMaxRequestRetry(retryLimit)
-                                                                                       .setReadTimeout(NO_TIMEOUT)
-                                                                                       .setRequestTimeout(NO_TIMEOUT)
-                                                                                       .build();
+        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
+                .setConnectTimeout(connectTimeout)
+                .setMaxRequestRetry(retryLimit)
+                .setReadTimeout(NO_TIMEOUT)
+                .setRequestTimeout(NO_TIMEOUT)
+                .build();
         return new DefaultAsyncHttpClient(clientConfig);
     }
 }

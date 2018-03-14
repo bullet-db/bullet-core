@@ -38,7 +38,7 @@ public class RESTQueryPublisher extends RESTPublisher {
         Metadata metadata = message.getMetadata();
         metadata = metadata == null ? new Metadata() : metadata;
         metadata.setContent(resultURL);
-        PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
-        sendToURL(queryURL, newMessage);
+        message.setMetadata(metadata);
+        sendToURL(queryURL, message);
     }
 }
