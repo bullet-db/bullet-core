@@ -20,19 +20,19 @@ public class RESTPubSubConfigTest {
     @Test
     public void testNoFiles() {
         RESTPubSubConfig config = new RESTPubSubConfig((String) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
 
         config = new RESTPubSubConfig((Config) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
 
         config = new RESTPubSubConfig("");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
     }
 
     @Test
     public void testMissingFile() {
         RESTPubSubConfig config = new RESTPubSubConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 10L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
     }
 
     @Test

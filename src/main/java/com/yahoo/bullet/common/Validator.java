@@ -483,6 +483,16 @@ public class Validator {
         return (toCheck & toCheck - 1) == 0;
     }
 
+    /**
+     * Checks to see if the value is a non-empty {@link List}.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was a non-empty List.
+     */
+    public static boolean isNonEmptyList(Object value) {
+        return isType(value, List.class) && !((List) value).isEmpty();
+    }
+
     // Unary Predicate Generators
 
     /**

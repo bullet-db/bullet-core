@@ -25,14 +25,39 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final String QUERY_SUBSCRIBER_MIN_WAIT = PREFIX + "query.subscriber.min.wait.ms";
 
     // Defaults
-    public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
-    public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
+    public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 5000;
+    public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 3;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
     public static final List<String> DEFAULT_QUERY_URLS = Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
                                                                         "http://localhost:9902/bullet/api/pubsub/query");
     public static final String DEFAULT_RESULT_URL = "http://localhost:9901/bullet/api/pubsub/result";
     public static final Long DEFAULT_RESULT_MIN_WAIT = 10L;
     public static final Long DEFAULT_QUERY_MIN_WAIT = 10L;
+
+    private static final Validator VALIDATOR = BulletConfig.getValidator();
+    static {
+        VALIDATOR.define(CONNECT_TIMEOUT_MS)
+                .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
+                .checkIf(Validator::isPositiveInt);
+        VALIDATOR.define(CONNECT_RETRY_LIMIT)
+                .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
+                .checkIf(Validator::isPositiveInt);
+        VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
+                .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
+                .checkIf(Validator::isPositiveInt);
+        VALIDATOR.define(QUERY_URLS)
+                .defaultTo(DEFAULT_QUERY_URLS)
+                .checkIf(Validator::isNonEmptyList);
+        VALIDATOR.define(RESULT_URL)
+                .defaultTo(DEFAULT_RESULT_URL)
+                .checkIf(Validator::isString);
+        VALIDATOR.define(RESULT_SUBSCRIBER_MIN_WAIT)
+                .defaultTo(DEFAULT_RESULT_MIN_WAIT)
+                .checkIf(Validator::isPositiveInt);
+        VALIDATOR.define(QUERY_SUBSCRIBER_MIN_WAIT)
+                .defaultTo(DEFAULT_QUERY_MIN_WAIT)
+                .checkIf(Validator::isPositiveInt);
+    }
 
     /**
      * Constructor that loads specific file augmented with defaults.
@@ -53,31 +78,6 @@ public class RESTPubSubConfig extends BulletConfig {
         merge(other);
         VALIDATOR.validate(this);
         log.info("Merged settings:\n {}", this);
-    }
-
-    private static final Validator VALIDATOR = BulletConfig.getValidator();
-    static {
-        VALIDATOR.define(CONNECT_TIMEOUT_MS)
-                 .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
-                 .checkIf(Validator::isPositive);
-        VALIDATOR.define(CONNECT_RETRY_LIMIT)
-                 .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
-                 .checkIf(Validator::isPositive);
-        VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
-                 .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
-                 .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_URLS)
-                 .defaultTo(DEFAULT_QUERY_URLS)
-                 .checkIf(Validator::isList);
-        VALIDATOR.define(RESULT_URL)
-                 .defaultTo(DEFAULT_RESULT_URL)
-                 .checkIf(Validator::isString);
-        VALIDATOR.define(RESULT_SUBSCRIBER_MIN_WAIT)
-                 .defaultTo(DEFAULT_RESULT_MIN_WAIT)
-                 .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_SUBSCRIBER_MIN_WAIT)
-                 .defaultTo(DEFAULT_QUERY_MIN_WAIT)
-                 .checkIf(Validator::isPositive);
     }
 
     @Override

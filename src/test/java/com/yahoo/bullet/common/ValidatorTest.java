@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -203,6 +204,16 @@ public class ValidatorTest {
         Assert.assertFalse(Validator.isPowerOfTwo(3));
         Assert.assertFalse(Validator.isPowerOfTwo(2.0));
         Assert.assertFalse(Validator.isPowerOfTwo(-4));
+    }
+
+    @Test
+    public void testIsNonEmptyList() {
+        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList(0)));
+        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList(0, 1)));
+        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList("string")));
+        Assert.assertFalse(Validator.isNonEmptyList("string"));
+        Assert.assertFalse(Validator.isNonEmptyList(null));
+        Assert.assertFalse(Validator.isNonEmptyList(Collections.emptyList()));
     }
 
     @Test
