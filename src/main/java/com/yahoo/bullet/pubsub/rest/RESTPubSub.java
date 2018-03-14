@@ -60,11 +60,11 @@ public class RESTPubSub extends PubSub {
 
         if (context == Context.QUERY_PROCESSING) {
             List<String> urls = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
-            Long minWait = this.config.getAs(RESTPubSubConfig.QUERY_MIN_WAIT, Long.class);
+            Long minWait = this.config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
             return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, urls, client, minWait);
         } else {
             List<String> url = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
-            Long minWait = this.config.getAs(RESTPubSubConfig.RESULT_MIN_WAIT, Long.class);
+            Long minWait = this.config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
             return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, url, client, minWait);
         }
     }

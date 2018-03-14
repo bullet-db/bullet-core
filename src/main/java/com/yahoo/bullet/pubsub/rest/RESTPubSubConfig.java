@@ -21,8 +21,8 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
     public static final String QUERY_URLS = PREFIX + "query.urls";
     public static final String RESULT_URL = PREFIX + "result.url";
-    public static final String RESULT_MIN_WAIT = PREFIX + "subscriber.result.min.wait.ms";
-    public static final String QUERY_MIN_WAIT = PREFIX + "subscriber.query.min.wait.ms";
+    public static final String RESULT_SUBSCRIBER_MIN_WAIT = PREFIX + "result.subscriber.min.wait.ms";
+    public static final String QUERY_SUBSCRIBER_MIN_WAIT = PREFIX + "query.subscriber.min.wait.ms";
 
     // Defaults
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
@@ -72,10 +72,10 @@ public class RESTPubSubConfig extends BulletConfig {
         VALIDATOR.define(RESULT_URL)
                  .defaultTo(DEFAULT_RESULT_URL)
                  .checkIf(Validator::isString);
-        VALIDATOR.define(RESULT_MIN_WAIT)
+        VALIDATOR.define(RESULT_SUBSCRIBER_MIN_WAIT)
                  .defaultTo(DEFAULT_RESULT_MIN_WAIT)
                  .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_MIN_WAIT)
+        VALIDATOR.define(QUERY_SUBSCRIBER_MIN_WAIT)
                  .defaultTo(DEFAULT_QUERY_MIN_WAIT)
                  .checkIf(Validator::isPositive);
     }

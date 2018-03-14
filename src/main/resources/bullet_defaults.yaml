@@ -238,9 +238,9 @@ bullet.pubsub.rest.connect.retry.limit: 10
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
 bullet.pubsub.rest.subscriber.max.uncommitted.messages: 100
 # Minimum time (ms) between http calls to the result subscriber REST endpoint. This can be used to limit the number of http requests to the REST endpoints
-bullet.pubsub.rest.subscriber.result.min.wait.ms: 10
+bullet.pubsub.rest.result.subscriber.min.wait.ms: 10
 # Minimum time (ms) between http calls to the query subscriber REST endpoint. This can be used to limit the number of http requests to the REST endpoints
-bullet.pubsub.rest.subscriber.query.min.wait.ms: 10
+bullet.pubsub.rest.query.subscriber.min.wait.ms: 10
 # The uri of the result http endpoint (this is only used in the web service - the backend loads the uri from the message metadata)
 bullet.pubsub.rest.result.url: "http://localhost:9901/bullet/api/pubsub/result"
 # A list of uri(s) for the query endpoint. In the web service, this should contain a single URI for the query endpoint
