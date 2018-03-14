@@ -77,12 +77,12 @@ public class RESTPubSub extends PubSub {
     private AsyncHttpClient getClient() {
         int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
         int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
-        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder()
-                .setConnectTimeout(connectTimeout)
-                .setMaxRequestRetry(retryLimit)
-                .setReadTimeout(NO_TIMEOUT)
-                .setRequestTimeout(NO_TIMEOUT)
-                .build();
+        AsyncHttpClientConfig clientConfig =
+                new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
+                                                          .setMaxRequestRetry(retryLimit)
+                                                          .setReadTimeout(NO_TIMEOUT)
+                                                          .setRequestTimeout(NO_TIMEOUT)
+                                                          .build();
         return new DefaultAsyncHttpClient(clientConfig);
     }
 }
