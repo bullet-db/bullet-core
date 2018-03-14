@@ -41,7 +41,7 @@ public class RESTPubSubTest {
         RESTSubscriber resultSubscriber = (RESTSubscriber) pubSub.getSubscriber();
         List<String> urls = resultSubscriber.urls;
         Assert.assertEquals(urls.size(), 1);
-        Assert.assertEquals(urls.get(0), "http://localhost:9901/bullet/api/pubsub/result");
+        Assert.assertEquals(urls.get(0), "http://localhost:9901/api/bullet/pubsub/result");
     }
 
     public static AsyncHttpClient mockClientWith(BoundRequestBuilder builder) {
