@@ -40,7 +40,7 @@ public class RESTPubSubConfigTest {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
         Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
         Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
-        List<String> queries = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URIS, List.class));
+        List<String> queries = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class));
         Assert.assertEquals(queries.size(), 2);
         Assert.assertEquals(queries.get(0), "http://localhost:9901/CUSTOM/query");
         Assert.assertEquals(queries.get(1), "http://localhost:9902/CUSTOM/query");

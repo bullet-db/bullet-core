@@ -35,7 +35,7 @@ public class RESTSubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
@@ -48,7 +48,7 @@ public class RESTSubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -60,7 +60,7 @@ public class RESTSubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -73,7 +73,7 @@ public class RESTSubscriberTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(config, 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
@@ -83,7 +83,7 @@ public class RESTSubscriberTest {
     public void testClose() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doNothing().when(mockClient).close();
-        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();
@@ -93,7 +93,7 @@ public class RESTSubscriberTest {
     public void testCloseDoesNotThrow() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 10);
+        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("url", "anotherURL"), mockClient, 10);
 
         subscriber.close();
         verify(mockClient).close();
@@ -105,7 +105,7 @@ public class RESTSubscriberTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(responseData.asJSON()));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("uri", "anotherURI"), mockClient, 1000);
+        RESTSubscriber subscriber = new RESTSubscriber(new RESTPubSubConfig((String) null), 88, Arrays.asList("url", "anotherURL"), mockClient, 1000);
 
         // First response should give content (2 events since we have 2 endpoints in the config)
         List<PubSubMessage> messages = subscriber.getMessages();

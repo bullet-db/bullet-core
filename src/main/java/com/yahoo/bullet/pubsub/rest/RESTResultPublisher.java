@@ -26,9 +26,9 @@ public class RESTResultPublisher extends RESTPublisher {
 
     @Override
     public void send(PubSubMessage message) throws PubSubException {
-        String uri;
-        uri = (String) message.getMetadata().getContent();
-        log.debug("Extracted uri to which to send results: " + uri);
-        sendToURI(uri, message);
+        String url;
+        url = (String) message.getMetadata().getContent();
+        log.debug("Extracted url to which to send results: " + url);
+        sendToURL(url, message);
     }
 }

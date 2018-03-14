@@ -34,14 +34,14 @@ public class RESTPubSubTest {
 
         // Test custom values from file
         RESTQueryPublisher publisher = (RESTQueryPublisher) pubSub.getPublisher();
-        String queryUri = publisher.queryURI;
-        Assert.assertEquals(queryUri, "http://localhost:9901/CUSTOM/query");
+        String queryURL = publisher.queryURL;
+        Assert.assertEquals(queryURL, "http://localhost:9901/CUSTOM/query");
 
         // Test defaults
         RESTSubscriber resultSubscriber = (RESTSubscriber) pubSub.getSubscriber();
-        List<String> uris = resultSubscriber.uris;
-        Assert.assertEquals(uris.size(), 1);
-        Assert.assertEquals(uris.get(0), "http://localhost:9901/bullet/api/pubsub/result");
+        List<String> urls = resultSubscriber.urls;
+        Assert.assertEquals(urls.size(), 1);
+        Assert.assertEquals(urls.get(0), "http://localhost:9901/bullet/api/pubsub/result");
     }
 
     public static AsyncHttpClient mockClientWith(BoundRequestBuilder builder) {

@@ -29,32 +29,32 @@ import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getNotOkResponse;
 
 public class RESTQueryPublisherTest {
     @Test
-    public void testSendResultUriPutInMetadataAckPreserved() throws Exception {
+    public void testSendResultUrlPutInMetadataAckPreserved() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
+        config.set(RESTPubSubConfig.RESULT_URL, "my/custom/url");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
         verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
-        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/url\"}}");
         verify(mockBuilder).setHeader("content-type", "text/plain");
     }
 
     @Test
-    public void testSendResultUriPutInMetadataCompletePreserved() throws Exception {
+    public void testSendResultUrlPutInMetadataCompletePreserved() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
+        config.set(RESTPubSubConfig.RESULT_URL, "my/custom/url");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
         verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
-        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/url\"}}");
         verify(mockBuilder).setHeader("content-type", "text/plain");
     }
 
@@ -64,12 +64,12 @@ public class RESTQueryPublisherTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
+        config.set(RESTPubSubConfig.RESULT_URL, "my/custom/url");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send("foo", "bar");
         verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
-        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}");
         verify(mockBuilder).setHeader("content-type", "text/plain");
     }
 
@@ -99,12 +99,12 @@ public class RESTQueryPublisherTest {
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        config.set(RESTPubSubConfig.RESULT_URI, "my/custom/uri");
+        config.set(RESTPubSubConfig.RESULT_URL, "my/custom/url");
         RESTQueryPublisher publisher = new RESTQueryPublisher(config, mockClient);
 
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
         verify(mockClient).preparePost("http://localhost:9901/CUSTOM/query");
-        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/uri\"}}");
+        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/url\"}}");
         verify(mockBuilder).setHeader("content-type", "text/plain");
     }
 

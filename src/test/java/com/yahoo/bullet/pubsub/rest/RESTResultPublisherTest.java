@@ -40,7 +40,7 @@ public class RESTResultPublisherTest {
     }
 
     @Test(expectedExceptions = ClassCastException.class)
-    public void testSendBadURI() throws Exception {
+    public void testSendBadURL() throws Exception {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);

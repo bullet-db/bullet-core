@@ -19,8 +19,8 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final String CONNECT_TIMEOUT_MS = PREFIX + "connect.timeout.ms";
     public static final String CONNECT_RETRY_LIMIT = PREFIX + "connect.retry.limit";
     public static final String MAX_UNCOMMITTED_MESSAGES = PREFIX + "subscriber.max.uncommitted.messages";
-    public static final String QUERY_URIS = PREFIX + "query.uris";
-    public static final String RESULT_URI = PREFIX + "result.uri";
+    public static final String QUERY_URLS = PREFIX + "query.urls";
+    public static final String RESULT_URL = PREFIX + "result.url";
     public static final String RESULT_MIN_WAIT = PREFIX + "subscriber.result.min.wait.ms";
     public static final String QUERY_MIN_WAIT = PREFIX + "subscriber.query.min.wait.ms";
 
@@ -28,9 +28,9 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final Integer DEFAULT_CONNECT_TIMEOUT_MS = 30000;
     public static final Integer DEFAULT_CONNECT_RETRY_LIMIT = 10;
     public static final Integer DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
-    public static final List<String> DEFAULT_QUERY_URIS = Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
+    public static final List<String> DEFAULT_QUERY_URLS = Arrays.asList("http://localhost:9901/bullet/api/pubsub/query",
                                                                         "http://localhost:9902/bullet/api/pubsub/query");
-    public static final String DEFAULT_RESULT_URI = "http://localhost:9901/bullet/api/pubsub/result";
+    public static final String DEFAULT_RESULT_URL = "http://localhost:9901/bullet/api/pubsub/result";
     public static final Long DEFAULT_RESULT_MIN_WAIT = 10L;
     public static final Long DEFAULT_QUERY_MIN_WAIT = 10L;
 
@@ -66,11 +66,11 @@ public class RESTPubSubConfig extends BulletConfig {
         VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
                  .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
                  .checkIf(Validator::isPositive);
-        VALIDATOR.define(QUERY_URIS)
-                 .defaultTo(DEFAULT_QUERY_URIS)
+        VALIDATOR.define(QUERY_URLS)
+                 .defaultTo(DEFAULT_QUERY_URLS)
                  .checkIf(Validator::isList);
-        VALIDATOR.define(RESULT_URI)
-                 .defaultTo(DEFAULT_RESULT_URI)
+        VALIDATOR.define(RESULT_URL)
+                 .defaultTo(DEFAULT_RESULT_URL)
                  .checkIf(Validator::isString);
         VALIDATOR.define(RESULT_MIN_WAIT)
                  .defaultTo(DEFAULT_RESULT_MIN_WAIT)

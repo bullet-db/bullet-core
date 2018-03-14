@@ -16,8 +16,8 @@ import java.util.List;
 
 @Slf4j
 public class RESTQueryPublisher extends RESTPublisher {
-    String queryURI;
-    String resultURI;
+    String queryURL;
+    String resultURL;
 
     /**
      * Create a RESTQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
@@ -27,17 +27,17 @@ public class RESTQueryPublisher extends RESTPublisher {
      */
     public RESTQueryPublisher(BulletConfig config, AsyncHttpClient client) {
         super(new RESTPubSubConfig(config), client);
-        this.queryURI = ((List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URIS, List.class)).get(0);
-        this.resultURI = this.config.getAs(RESTPubSubConfig.RESULT_URI, String.class);
+        this.queryURL = ((List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class)).get(0);
+        this.resultURL = this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class);
     }
 
     @Override
     public void send(PubSubMessage message) throws PubSubException {
-        // Put responseURI in the metadata so the ResponsePublisher knows to which host to send the response
+        // Put responseURL in the metadata so the ResponsePublisher knows to which host to send the response
         Metadata metadata = message.getMetadata();
         metadata = metadata == null ? new Metadata() : metadata;
-        metadata.setContent(resultURI);
+        metadata.setContent(resultURL);
         PubSubMessage newMessage = new PubSubMessage(message.getId(), message.getContent(), metadata, message.getSequence());
-        sendToURI(queryURI, newMessage);
+        sendToURL(queryURL, newMessage);
     }
 }

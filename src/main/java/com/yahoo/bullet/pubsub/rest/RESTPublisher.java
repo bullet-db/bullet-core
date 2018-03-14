@@ -40,14 +40,14 @@ public abstract class RESTPublisher implements Publisher {
     }
 
     /**
-     * Send the PubSubMessage to the given uri.
+     * Send the PubSubMessage to the given url.
      *
-     * @param uri The uri to which to send the message.
+     * @param url The url to which to send the message.
      * @param message The message to send.
      */
-    protected void sendToURI(String uri, PubSubMessage message) {
-        log.debug("Sending message: " + message + " to uri: " + uri);
-        client.preparePost(uri)
+    protected void sendToURL(String url, PubSubMessage message) {
+        log.debug("Sending message: " + message + " to url: " + url);
+        client.preparePost(url)
               .setBody(message.asJSON())
               .setHeader("content-type", "text/plain")
               .execute()

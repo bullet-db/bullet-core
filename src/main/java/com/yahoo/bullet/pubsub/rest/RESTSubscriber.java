@@ -20,7 +20,7 @@ import org.asynchttpclient.Response;
 public class RESTSubscriber extends BufferingSubscriber {
     RESTPubSubConfig config;
     AsyncHttpClient client;
-    List<String> uris;
+    List<String> urls;
     long minWait;
     long lastRequest;
 
@@ -29,14 +29,14 @@ public class RESTSubscriber extends BufferingSubscriber {
      *
      * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
-     * @param uris The URIs which will be used to make the http request.
+     * @param urls The URLs which will be used to make the http request.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
-    public RESTSubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> uris, AsyncHttpClient client, long minWait) {
+    public RESTSubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> urls, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);
         this.config = config;
         this.client = client;
-        this.uris = uris;
+        this.urls = urls;
         this.minWait = minWait;
         this.lastRequest = 0;
     }
@@ -49,10 +49,10 @@ public class RESTSubscriber extends BufferingSubscriber {
             return messages;
         }
         lastRequest = currentTime;
-        for (String uri : uris) {
+        for (String url : urls) {
             try {
-                log.debug("Getting messages from uri: " + uri);
-                Response response = client.prepareGet(uri).execute().get();
+                log.debug("Getting messages from url: " + url);
+                Response response = client.prepareGet(url).execute().get();
                 int statusCode = response.getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
                     messages.add(PubSubMessage.fromJSON(response.getResponseBody()));
