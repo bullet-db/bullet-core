@@ -83,7 +83,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * </li>
  * <li>
  *   <em>Optional</em>: If your data volume is very, very small (Heuristic: less than 1 per your 0.1 *
- *   bullet.query.window.min.emit.every). across your partitions), you should run the {@link #isDone()} and
+ *   bullet.query.window.min.emit.every.ms). across your partitions), you should run the {@link #isDone()} and
  *   {@link #isClosedForPartition()} and do the emits either on a timer or at fixed intervals so that your queries
  *   are checked for results and maintain their windowing guarantees.
  * </li>
