@@ -36,27 +36,34 @@ public class RESTPubSubConfig extends BulletConfig {
 
     private static final Validator VALIDATOR = BulletConfig.getValidator();
     static {
+
         VALIDATOR.define(CONNECT_TIMEOUT_MS)
-                .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
-                .checkIf(Validator::isPositiveInt);
+                 .defaultTo(DEFAULT_CONNECT_TIMEOUT_MS)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(CONNECT_RETRY_LIMIT)
-                .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
-                .checkIf(Validator::isPositiveInt);
+                 .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(MAX_UNCOMMITTED_MESSAGES)
-                .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
-                .checkIf(Validator::isPositiveInt);
+                 .defaultTo(DEFAULT_MAX_UNCOMMITTED_MESSAGES)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt);
         VALIDATOR.define(QUERY_URLS)
-                .defaultTo(DEFAULT_QUERY_URLS)
-                .checkIf(Validator::isNonEmptyList);
+                 .defaultTo(DEFAULT_QUERY_URLS)
+                 .checkIf(Validator::isNonEmptyList);
         VALIDATOR.define(RESULT_URL)
-                .defaultTo(DEFAULT_RESULT_URL)
-                .checkIf(Validator::isString);
+                 .defaultTo(DEFAULT_RESULT_URL)
+                 .checkIf(Validator::isString)
+                 .castTo(Validator::asString);
         VALIDATOR.define(RESULT_SUBSCRIBER_MIN_WAIT)
-                .defaultTo(DEFAULT_RESULT_MIN_WAIT)
-                .checkIf(Validator::isPositiveInt);
+                 .defaultTo(DEFAULT_RESULT_MIN_WAIT)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asLong);
         VALIDATOR.define(QUERY_SUBSCRIBER_MIN_WAIT)
-                .defaultTo(DEFAULT_QUERY_MIN_WAIT)
-                .checkIf(Validator::isPositiveInt);
+                 .defaultTo(DEFAULT_QUERY_MIN_WAIT)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asLong);
     }
 
     /**

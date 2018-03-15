@@ -63,7 +63,7 @@ public abstract class RESTPublisher implements Publisher {
             log.error("Failed to write message with id: {}. Couldn't reach pubsub server. Got response: {}", id, response);
             return;
         }
-        log.info("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
+        log.debug("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
     }
 
     private Response handleException(Throwable throwable) {

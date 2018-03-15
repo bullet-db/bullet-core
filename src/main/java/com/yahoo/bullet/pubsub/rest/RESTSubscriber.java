@@ -31,6 +31,7 @@ public class RESTSubscriber extends BufferingSubscriber {
      *
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      * @param urls The URLs which will be used to make the http request.
+     * @param client The client to use to make http requests.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
     public RESTSubscriber(int maxUncommittedMessages, List<String> urls, AsyncHttpClient client, long minWait) {
@@ -51,7 +52,7 @@ public class RESTSubscriber extends BufferingSubscriber {
         lastRequest = currentTime;
         for (String url : urls) {
             try {
-                log.debug("Getting messages from url: " + url);
+                log.debug("Getting messages from url: ", url);
                 Response response = client.prepareGet(url).execute().get();
                 int statusCode = response.getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
@@ -61,7 +62,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                 }
             } catch (Exception e) {
-                log.error("Http call failed with error: " + e);
+                log.error("Http call failed with error: ", e);
             }
         }
         return messages;

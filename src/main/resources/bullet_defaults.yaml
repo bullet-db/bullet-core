@@ -243,7 +243,7 @@ bullet.pubsub.rest.result.subscriber.min.wait.ms: 10
 bullet.pubsub.rest.query.subscriber.min.wait.ms: 10
 # The uri of the result http endpoint (this is only used in the web service - the backend loads the uri from the message metadata)
 bullet.pubsub.rest.result.url: "http://localhost:9901/api/bullet/pubsub/result"
-# A list of uri(s) for the query endpoint. In the web service, this should contain a single URI for the query endpoint
+# A list of url(s) for the query endpoint. In the web service, this should contain a single URL for the query endpoint
 # of the in-memory pubsub instance running on that web service. For the backend it should contain the urls of all
 # the pubsub instances.
 bullet.pubsub.rest.query.urls:

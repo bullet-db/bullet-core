@@ -43,8 +43,8 @@ public class RESTPubSub extends PubSub {
         if (context == Context.QUERY_PROCESSING) {
             return new RESTResultPublisher(getClient());
         } else {
-            String queryURL = ((List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class)).get(0);
-            String resultURL = this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class);
+            String queryURL = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class)).get(0);
+            String resultURL = config.getAs(RESTPubSubConfig.RESULT_URL, String.class);
             return new RESTQueryPublisher(getClient(), queryURL, resultURL);
         }
     }
@@ -62,11 +62,11 @@ public class RESTPubSub extends PubSub {
         Long minWait;
 
         if (context == Context.QUERY_PROCESSING) {
-            urls = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
-            minWait = this.config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
+            urls = (List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
+            minWait = config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
         } else {
-            urls = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
-            minWait = this.config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
+            urls = Collections.singletonList(config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
+            minWait = config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
         }
         return new RESTSubscriber(maxUncommittedMessages, urls, client, minWait);
     }

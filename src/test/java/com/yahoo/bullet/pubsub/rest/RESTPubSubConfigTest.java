@@ -20,25 +20,25 @@ public class RESTPubSubConfigTest {
     @Test
     public void testNoFiles() {
         RESTPubSubConfig config = new RESTPubSubConfig((String) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3);
 
         config = new RESTPubSubConfig((Config) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3);
 
         config = new RESTPubSubConfig("");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3);
     }
 
     @Test
     public void testMissingFile() {
         RESTPubSubConfig config = new RESTPubSubConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 3);
     }
 
     @Test
     public void testCustomConfig() {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88);
         Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
         List<String> queries = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class));
         Assert.assertEquals(queries.size(), 2);
@@ -57,7 +57,7 @@ public class RESTPubSubConfigTest {
     @Test
     public void testGettingWithDefault() {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.getOrDefault(RESTPubSubConfig.CONNECT_RETRY_LIMIT, "51"), 88L);
+        Assert.assertEquals(config.getOrDefault(RESTPubSubConfig.CONNECT_RETRY_LIMIT, "51"), 88);
         Assert.assertEquals(config.getOrDefault("does.not.exist", "foo"), "foo");
         Assert.assertEquals(config.getOrDefault("fake.setting", "bar"), "bar");
     }
@@ -90,7 +90,7 @@ public class RESTPubSubConfigTest {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 88);
         Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
 
         Config another = new RESTPubSubConfig((String) null);
