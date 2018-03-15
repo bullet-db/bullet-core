@@ -16,17 +16,14 @@ import java.util.function.Consumer;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
-    protected RESTPubSubConfig config;
     protected AsyncHttpClient client;
 
     /**
      * Create a RESTQueryPublisher from a {@link RESTPubSubConfig} and a {@link AsyncHttpClient}.
      *
-     * @param config The config.
      * @param client The client.
      */
-    public RESTPublisher(RESTPubSubConfig config, AsyncHttpClient client) {
-        this.config = config;
+    public RESTPublisher(AsyncHttpClient client) {
         this.client = client;
     }
 

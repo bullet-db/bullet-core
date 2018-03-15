@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +14,12 @@ import org.asynchttpclient.AsyncHttpClient;
 public class RESTResultPublisher extends RESTPublisher {
 
     /**
-     * Create a RESTQueryPublisher from a {@link BulletConfig} and a {@link AsyncHttpClient}.
+     * Create a RESTQueryPublisher from a {@link AsyncHttpClient}.
      *
-     * @param config The config.
      * @param client The client.
      */
-    public RESTResultPublisher(BulletConfig config, AsyncHttpClient client) {
-        super(new RESTPubSubConfig(config), client);
+    public RESTResultPublisher(AsyncHttpClient client) {
+        super(client);
     }
 
     @Override

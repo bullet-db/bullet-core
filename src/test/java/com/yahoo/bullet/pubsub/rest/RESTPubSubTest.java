@@ -34,12 +34,12 @@ public class RESTPubSubTest {
 
         // Test custom values from file
         RESTQueryPublisher publisher = (RESTQueryPublisher) pubSub.getPublisher();
-        String queryURL = publisher.queryURL;
+        String queryURL = publisher.getQueryURL();
         Assert.assertEquals(queryURL, "http://localhost:9901/CUSTOM/query");
 
         // Test defaults
         RESTSubscriber resultSubscriber = (RESTSubscriber) pubSub.getSubscriber();
-        List<String> urls = resultSubscriber.urls;
+        List<String> urls = resultSubscriber.getUrls();
         Assert.assertEquals(urls.size(), 1);
         Assert.assertEquals(urls.get(0), "http://localhost:9901/api/bullet/pubsub/result");
     }

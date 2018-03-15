@@ -29,8 +29,7 @@ public class RESTResultPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTResultPublisher publisher = new RESTResultPublisher(config, mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
         PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, "custom/url"));
         publisher.send(message);
@@ -44,8 +43,7 @@ public class RESTResultPublisherTest {
         CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
         BoundRequestBuilder mockBuilder = mockBuilderWith(response);
         AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        RESTResultPublisher publisher = new RESTResultPublisher(config, mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
         PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, 88));
         publisher.send(message);
@@ -55,7 +53,7 @@ public class RESTResultPublisherTest {
     public void testClose() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doNothing().when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(new RESTPubSubConfig((String) null), mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
         publisher.close();
         verify(mockClient).close();
@@ -65,7 +63,7 @@ public class RESTResultPublisherTest {
     public void testCloseDoesNotThrow() throws Exception {
         AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(new RESTPubSubConfig((String) null), mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
         publisher.close();
         verify(mockClient).close();

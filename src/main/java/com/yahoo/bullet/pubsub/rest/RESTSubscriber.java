@@ -12,29 +12,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
-    RESTPubSubConfig config;
-    AsyncHttpClient client;
+    @Getter(AccessLevel.PACKAGE)
     List<String> urls;
+    AsyncHttpClient client;
     long minWait;
     long lastRequest;
 
     /**
      * Create a RESTSubscriber from a {@link RESTPubSubConfig}.
      *
-     * @param config The config.
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      * @param urls The URLs which will be used to make the http request.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
-    public RESTSubscriber(RESTPubSubConfig config, int maxUncommittedMessages, List<String> urls, AsyncHttpClient client, long minWait) {
+    public RESTSubscriber(int maxUncommittedMessages, List<String> urls, AsyncHttpClient client, long minWait) {
         super(maxUncommittedMessages);
-        this.config = config;
         this.client = client;
         this.urls = urls;
         this.minWait = minWait;

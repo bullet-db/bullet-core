@@ -41,9 +41,11 @@ public class RESTPubSub extends PubSub {
     @Override
     public Publisher getPublisher() {
         if (context == Context.QUERY_PROCESSING) {
-            return new RESTResultPublisher(config, getClient());
+            return new RESTResultPublisher(getClient());
         } else {
-            return new RESTQueryPublisher(config, getClient());
+            String queryURL = ((List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class)).get(0);
+            String resultURL = this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class);
+            return new RESTQueryPublisher(getClient(), queryURL, resultURL);
         }
     }
 
@@ -55,10 +57,10 @@ public class RESTPubSub extends PubSub {
     @Override
     public Subscriber getSubscriber() {
         int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
-        RESTPubSubConfig pubsubConfig = new RESTPubSubConfig(config);
         AsyncHttpClient client = getClient();
         List<String> urls;
         Long minWait;
+
         if (context == Context.QUERY_PROCESSING) {
             urls = (List<String>) this.config.getAs(RESTPubSubConfig.QUERY_URLS, List.class);
             minWait = this.config.getAs(RESTPubSubConfig.QUERY_SUBSCRIBER_MIN_WAIT, Long.class);
@@ -66,7 +68,7 @@ public class RESTPubSub extends PubSub {
             urls = Collections.singletonList(this.config.getAs(RESTPubSubConfig.RESULT_URL, String.class));
             minWait = this.config.getAs(RESTPubSubConfig.RESULT_SUBSCRIBER_MIN_WAIT, Long.class);
         }
-        return new RESTSubscriber(pubsubConfig, maxUncommittedMessages, urls, client, minWait);
+        return new RESTSubscriber(maxUncommittedMessages, urls, client, minWait);
     }
 
     @Override
