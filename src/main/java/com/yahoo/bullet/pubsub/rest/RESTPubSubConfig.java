@@ -34,9 +34,10 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final Long DEFAULT_RESULT_MIN_WAIT = 10L;
     public static final Long DEFAULT_QUERY_MIN_WAIT = 10L;
 
-    private static final Validator VALIDATOR = BulletConfig.getValidator();
-    static {
+    public static final String DEFAULT_REST_PUBSUB_CONFIGURATION_NAME = "rest_pubsub_defaults.yaml";
 
+    private static final Validator VALIDATOR = new Validator();
+    static {
         VALIDATOR.define(CONNECT_TIMEOUT)
                  .defaultTo(DEFAULT_CONNECT_TIMEOUT)
                  .checkIf(Validator::isPositiveInt)
@@ -81,10 +82,18 @@ public class RESTPubSubConfig extends BulletConfig {
      * @param other The other config to wrap.
      */
     public RESTPubSubConfig(Config other) {
-        super();
+        super(DEFAULT_REST_PUBSUB_CONFIGURATION_NAME);
         merge(other);
         VALIDATOR.validate(this);
         log.info("Merged settings:\n {}", this);
+    }
+
+    /**
+     * Constructor that loads just the defaults.
+     */
+    public RESTPubSubConfig() {
+        super(DEFAULT_REST_PUBSUB_CONFIGURATION_NAME);
+        VALIDATOR.validate(this);
     }
 
     @Override

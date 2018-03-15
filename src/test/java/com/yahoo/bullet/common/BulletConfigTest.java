@@ -173,7 +173,7 @@ public class BulletConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, false).size();
-        Assert.assertEquals(configSize, 9);
+        Assert.assertEquals(configSize, 4);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
         Assert.assertEquals(properties.get(BulletConfig.PUBSUB_CLASS_NAME), fieldValue);
@@ -187,7 +187,7 @@ public class BulletConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, true).size();
-        Assert.assertEquals(configSize, 9);
+        Assert.assertEquals(configSize, 4);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
         Assert.assertNull(properties.get(BulletConfig.PUBSUB_CLASS_NAME));
