@@ -294,7 +294,7 @@ public class BulletConfig extends Config {
      */
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
-        validate(this);
+        VALIDATOR.validate(this);
     }
 
     /**
@@ -302,7 +302,7 @@ public class BulletConfig extends Config {
      */
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
-        validate(this);
+        VALIDATOR.validate(this);
     }
 
     /**
@@ -318,7 +318,7 @@ public class BulletConfig extends Config {
      * @return This config for chaining.
      */
     public BulletConfig validate() {
-        validate(this);
+        VALIDATOR.validate(this);
         return this;
     }
 
@@ -332,20 +332,10 @@ public class BulletConfig extends Config {
         return VALIDATOR.copy();
     }
 
-    /**
-     * Validates and fixes configuration for a given {@link BulletConfig}. This method checks, defaults and fixes the
-     * various settings defined in this class.
-     *
-     * @param config The {@link BulletConfig} to validate.
-     */
-    public static void validate(BulletConfig config) {
-        VALIDATOR.validate(config);
-    }
-
     @Override
     public void merge(Config other) {
         super.merge(other);
-        validate(this);
+        validate();
     }
 
     @SuppressWarnings("unchecked")

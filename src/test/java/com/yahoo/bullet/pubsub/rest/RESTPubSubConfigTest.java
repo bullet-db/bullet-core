@@ -104,7 +104,7 @@ public class RESTPubSubConfigTest {
         config.merge(another);
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51);
         // Bad setting gets defaulted.
         Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         // Other setting is preserved.
@@ -113,7 +113,7 @@ public class RESTPubSubConfigTest {
         // Test null and verify it is unchanged
         config.merge(null);
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51L);
+        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_RETRY_LIMIT), 51);
         Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         Assert.assertEquals(config.get("pi"), 3.14);
     }

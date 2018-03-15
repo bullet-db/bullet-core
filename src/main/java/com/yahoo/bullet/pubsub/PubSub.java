@@ -7,6 +7,7 @@ package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
  * Implementations of PubSub should take in a {@link BulletConfig} and use the information to wire up and return
  * Publishers and Subscribers.
  */
+@Slf4j
 public abstract class PubSub {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
@@ -59,6 +61,7 @@ public abstract class PubSub {
         if (this.context != context) {
             this.config.merge(config);
             this.context = context;
+            log.info("Switched to context: {}", context);
         }
     }
 
