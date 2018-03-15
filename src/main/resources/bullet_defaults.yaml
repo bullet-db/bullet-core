@@ -5,7 +5,7 @@ bullet.query.default.duration.ms: .inf
 
 # The maximum duration in milliseconds allowed for a query. Setting this to 'inf' makes the max duration infinite.
 # Setting this to a positive number will only allow durations up to this number. Anything greater will be clamped to this.
-# bullet.query.default.duration must be less than or equal to this number.
+# bullet.query.default.duration.ms must be less than or equal to this number.
 # IMPORTANT: Note that if queries without windows are received, you will never return a result with this or a very high
 # default.
 bullet.query.max.duration.ms: .inf
@@ -209,7 +209,7 @@ bullet.record.inject.timestamp.enable: false
 bullet.record.inject.timestamp.key: "bullet_project_timestamp"
 
 # If this is set to true, all windows will be ignored. In other words, queries will provide a single result at the end of its duration.
-# IMPORTANT: If you turn this on, ensure that your bullet.query.default.duration and bullet.query.max.duration.ms are set to
+# IMPORTANT: If you turn this on, ensure that your bullet.query.default.duration.ms and bullet.query.max.duration.ms are set to
 # reasonable values (they default to infinity) for your queries.
 bullet.query.window.disable: false
 

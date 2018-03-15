@@ -67,7 +67,7 @@ public abstract class RESTPublisher implements Publisher {
     }
 
     private Response handleException(Throwable throwable) {
-        log.error("Received error while posting query: {}", throwable);
+        log.error("Received error while posting query", throwable);
         return null;
     }
 }
