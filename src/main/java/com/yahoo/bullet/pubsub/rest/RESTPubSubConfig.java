@@ -88,14 +88,6 @@ public class RESTPubSubConfig extends BulletConfig {
         log.info("Merged settings:\n {}", this);
     }
 
-    /**
-     * Constructor that loads just the defaults.
-     */
-    public RESTPubSubConfig() {
-        super(DEFAULT_REST_PUBSUB_CONFIGURATION_NAME);
-        VALIDATOR.validate(this);
-    }
-
     @Override
     public BulletConfig validate() {
         super.validate();
