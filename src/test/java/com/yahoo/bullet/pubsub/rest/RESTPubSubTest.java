@@ -26,7 +26,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 public class RESTPubSubTest {
-
     @Test
     public void testSettings() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");

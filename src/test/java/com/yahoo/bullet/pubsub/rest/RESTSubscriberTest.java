@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTSubscriberTest {
-
     @Test
     public void testGetMessages() throws Exception {
         PubSubMessage responseData = new PubSubMessage("someID", "someContent");
