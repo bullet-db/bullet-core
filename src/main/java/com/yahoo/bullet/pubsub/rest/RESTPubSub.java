@@ -56,7 +56,7 @@ public class RESTPubSub extends PubSub {
 
     @Override
     public Subscriber getSubscriber() {
-        int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Number.class).intValue();
+        int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Integer.class);
         AsyncHttpClient client = getClient();
         List<String> urls;
         Long minWait;
@@ -77,8 +77,8 @@ public class RESTPubSub extends PubSub {
     }
 
     private AsyncHttpClient getClient() {
-        int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT_MS, Number.class).intValue();
-        int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Number.class).intValue();
+        int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT_MS, Integer.class);
+        int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Integer.class);
         AsyncHttpClientConfig clientConfig =
                 new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout)
                                                           .setMaxRequestRetry(retryLimit)
