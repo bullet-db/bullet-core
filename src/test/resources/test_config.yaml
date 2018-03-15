@@ -1,7 +1,11 @@
-bullet.query.max.duration: 10000
-bullet.query.default.duration: 1000
+bullet.query.max.duration.ms: 10000
+bullet.query.default.duration.ms: 1000
 bullet.query.aggregation.max.size: 100
 # Some random fake setting
 fake.setting: null
-bullet.pubsub.context.name: "QUERY_PROCESSING"
+bullet.pubsub.context.name: "QUERY_SUBMISSION"
 bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.MockPubSub"
+bullet.pubsub.rest.connect.retry.limit: 88
+bullet.pubsub.rest.query.urls:
+    - "http://localhost:9901/CUSTOM/query"
+    - "http://localhost:9902/CUSTOM/query"

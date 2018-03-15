@@ -21,8 +21,8 @@ import java.util.Map;
 @Slf4j
 public class BulletConfig extends Config {
     // Field names
-    public static final String QUERY_DEFAULT_DURATION = "bullet.query.default.duration";
-    public static final String QUERY_MAX_DURATION = "bullet.query.max.duration";
+    public static final String QUERY_DEFAULT_DURATION = "bullet.query.default.duration.ms";
+    public static final String QUERY_MAX_DURATION = "bullet.query.max.duration.ms";
     public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
     public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
@@ -55,7 +55,7 @@ public class BulletConfig extends Config {
     public static final String RESULT_METADATA_METRICS_NAME_KEY = "key";
 
     public static final String WINDOW_DISABLE = "bullet.query.window.disable";
-    public static final String WINDOW_MIN_EMIT_EVERY = "bullet.query.window.min.emit.every";
+    public static final String WINDOW_MIN_EMIT_EVERY = "bullet.query.window.min.emit.every.ms";
 
     public static final String RATE_LIMIT_ENABLE = "bullet.query.rate.limit.enable";
     public static final String RATE_LIMIT_MAX_EMIT_COUNT = "bullet.query.rate.limit.max.emit.count";
@@ -294,7 +294,7 @@ public class BulletConfig extends Config {
      */
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
-        validate(this);
+        VALIDATOR.validate(this);
     }
 
     /**
@@ -302,7 +302,7 @@ public class BulletConfig extends Config {
      */
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
-        validate(this);
+        VALIDATOR.validate(this);
     }
 
     /**
@@ -318,7 +318,7 @@ public class BulletConfig extends Config {
      * @return This config for chaining.
      */
     public BulletConfig validate() {
-        validate(this);
+        VALIDATOR.validate(this);
         return this;
     }
 
@@ -332,20 +332,10 @@ public class BulletConfig extends Config {
         return VALIDATOR.copy();
     }
 
-    /**
-     * Validates and fixes configuration for a given {@link BulletConfig}. This method checks, defaults and fixes the
-     * various settings defined in this class.
-     *
-     * @param config The {@link BulletConfig} to validate.
-     */
-    public static void validate(BulletConfig config) {
-        VALIDATOR.validate(config);
-    }
-
     @Override
     public void merge(Config other) {
         super.merge(other);
-        validate(this);
+        validate();
     }
 
     @SuppressWarnings("unchecked")

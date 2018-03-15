@@ -137,7 +137,7 @@ public class Validator {
             Object value = config.get(key);
             boolean shouldGuard = guard.test(value);
             if (shouldGuard) {
-                log.info("Guard satisfied for Key: {}. Using current value: {}", key, value);
+                log.debug("Guard satisfied for Key: {}. Using current value: {}", key, value);
                 return;
             }
             boolean isValid = validation.test(value);
@@ -147,7 +147,7 @@ public class Validator {
             }
             if (adapter != null) {
                 value = adapter.apply(value);
-                log.info("Changed the type for {}: {}", key, value);
+                log.debug("Changed the type for {}: {}", key, value);
             }
             config.set(key, value);
         }
@@ -481,6 +481,16 @@ public class Validator {
         }
         int toCheck = ((Number) value).intValue();
         return (toCheck & toCheck - 1) == 0;
+    }
+
+    /**
+     * Checks to see if the value is a non-empty {@link List}.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was a non-empty List.
+     */
+    public static boolean isNonEmptyList(Object value) {
+        return isType(value, List.class) && !((List) value).isEmpty();
     }
 
     // Unary Predicate Generators

@@ -146,7 +146,7 @@ public class BulletConfigTest {
         another.set(BulletConfig.QUERY_MAX_DURATION, 15000L);
         // This is a bad setting
         another.set(BulletConfig.AGGREGATION_MAX_SIZE, -1);
-        // Some other non-Bullet settingb
+        // Some other non-Bullet setting
         config.set("pi", 3.14);
 
         config.merge(another);
@@ -173,7 +173,7 @@ public class BulletConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, false).size();
-        Assert.assertEquals(configSize, 2);
+        Assert.assertEquals(configSize, 4);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
         Assert.assertEquals(properties.get(BulletConfig.PUBSUB_CLASS_NAME), fieldValue);
@@ -187,7 +187,7 @@ public class BulletConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, true).size();
-        Assert.assertEquals(configSize, 2);
+        Assert.assertEquals(configSize, 4);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
         Assert.assertNull(properties.get(BulletConfig.PUBSUB_CLASS_NAME));
@@ -218,7 +218,6 @@ public class BulletConfigTest {
     public void testGetOrDefaultAsAGivenType() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
 
-
         int notDefaulted = config.getOrDefaultAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, 42, Integer.class);
         Assert.assertEquals(notDefaulted, 100);
 
@@ -232,7 +231,6 @@ public class BulletConfigTest {
     @Test
     public void testGettingRequiredConfig() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-
 
         int present = config.getRequiredConfigAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
         Assert.assertEquals(present, 100);
