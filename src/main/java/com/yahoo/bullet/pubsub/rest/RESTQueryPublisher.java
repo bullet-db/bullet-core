@@ -16,8 +16,8 @@ import org.asynchttpclient.AsyncHttpClient;
 @Slf4j
 public class RESTQueryPublisher extends RESTPublisher {
     @Getter(AccessLevel.PACKAGE)
-    String queryURL;
-    String resultURL;
+    private String queryURL;
+    private String resultURL;
 
     /**
      * Create a RESTQueryPublisher from a {@link AsyncHttpClient}, queryURL and resultURL. The BulletConfig must

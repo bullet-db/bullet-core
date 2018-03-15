@@ -21,10 +21,10 @@ import org.asynchttpclient.Response;
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
     @Getter(AccessLevel.PACKAGE)
-    List<String> urls;
-    AsyncHttpClient client;
-    long minWait;
-    long lastRequest;
+    private List<String> urls;
+    private AsyncHttpClient client;
+    private long minWait;
+    private long lastRequest;
 
     /**
      * Create a RESTSubscriber from a {@link RESTPubSubConfig}.
@@ -73,7 +73,7 @@ public class RESTSubscriber extends BufferingSubscriber {
         try {
             client.close();
         } catch (IOException e) {
-            log.warn("Caught exception when closing AsyncHttpClient: " + e);
+            log.warn("Caught exception when closing AsyncHttpClient: ", e);
         }
     }
 }

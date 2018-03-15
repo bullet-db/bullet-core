@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
-    protected AsyncHttpClient client;
+    private AsyncHttpClient client;
 
     /**
      * Create a RESTQueryPublisher from a {@link RESTPubSubConfig} and a {@link AsyncHttpClient}.

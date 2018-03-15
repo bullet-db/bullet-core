@@ -12,7 +12,6 @@ import org.asynchttpclient.AsyncHttpClient;
 
 @Slf4j
 public class RESTResultPublisher extends RESTPublisher {
-
     /**
      * Create a RESTQueryPublisher from a {@link AsyncHttpClient}.
      *
