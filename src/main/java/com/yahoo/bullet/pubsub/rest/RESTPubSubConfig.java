@@ -89,7 +89,7 @@ public class RESTPubSubConfig extends BulletConfig {
     }
 
     @Override
-    public BulletConfig validate() {
+    public RESTPubSubConfig validate() {
         super.validate();
         VALIDATOR.validate(this);
         return this;
