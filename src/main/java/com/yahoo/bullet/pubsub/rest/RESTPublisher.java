@@ -46,7 +46,7 @@ public abstract class RESTPublisher implements Publisher {
         log.debug("Sending message: {} to url: {}", message, url);
         client.preparePost(url)
               .setBody(message.asJSON())
-              .setHeader("content-type", "text/plain")
+              .setHeader("content-type", "application/json")
               .execute()
               .toCompletableFuture()
               .exceptionally(this::handleException)
