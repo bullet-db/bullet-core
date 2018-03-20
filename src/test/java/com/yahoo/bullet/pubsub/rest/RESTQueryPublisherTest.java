@@ -38,7 +38,7 @@ public class RESTQueryPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
         verify(mockClient).preparePost("my/custom/query/url");
         verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/url\"}}");
-        verify(mockBuilder).setHeader("content-type", "text/plain");
+        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class RESTQueryPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
         verify(mockClient).preparePost("my/custom/query/url");
         verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/result/url\"}}");
-        verify(mockBuilder).setHeader("content-type", "text/plain");
+        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class RESTQueryPublisherTest {
         publisher.send("foo", "bar");
         verify(mockClient).preparePost("my/custom/query/url");
         verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/result/url\"}}");
-        verify(mockBuilder).setHeader("content-type", "text/plain");
+        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class RESTQueryPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
         verify(mockClient).preparePost("my/custom/query/url");
         verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/result/url\"}}");
-        verify(mockBuilder).setHeader("content-type", "text/plain");
+        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
     }
 
     @Test(timeOut = 5000L)

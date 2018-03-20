@@ -16,6 +16,9 @@ import java.util.function.Consumer;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String CONTENT_TYPE = "content-type";
+
     private AsyncHttpClient client;
 
     /**
@@ -46,7 +49,7 @@ public abstract class RESTPublisher implements Publisher {
         log.debug("Sending message: {} to url: {}", message, url);
         client.preparePost(url)
               .setBody(message.asJSON())
-              .setHeader("content-type", "text/plain")
+              .setHeader(CONTENT_TYPE, APPLICATION_JSON)
               .execute()
               .toCompletableFuture()
               .exceptionally(this::handleException)
