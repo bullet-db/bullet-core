@@ -35,7 +35,7 @@ public class RESTResultPublisherTest {
         publisher.send(message);
         verify(mockClient).preparePost("custom/url");
         verify(mockBuilder).setBody("{\"id\":\"someId\",\"sequence\":-1,\"content\":\"someContent\",\"metadata\":{\"signal\":null,\"content\":\"custom/url\"}}");
-        verify(mockBuilder).setHeader("content-type", "application/json");
+        verify(mockBuilder).setHeader("content-type", RESTPublisher.APPLICATION_JSON);
     }
 
     @Test(expectedExceptions = ClassCastException.class)
