@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
-    public static String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_JSON = "application/json";
 
     private AsyncHttpClient client;
 
