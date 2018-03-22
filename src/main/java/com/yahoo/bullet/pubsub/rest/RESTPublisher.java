@@ -9,6 +9,8 @@ import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import java.io.IOException;
@@ -52,27 +54,30 @@ public abstract class RESTPublisher implements Publisher {
             HttpPost httpPost = new HttpPost(url);
             httpPost.setEntity(new StringEntity(message.asJSON()));
             httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
-            client.execute(httpPost, null);
+            client.execute(httpPost, new RequestCallback());
         } catch (UnsupportedEncodingException e) {
             log.error("Error encoding message in preparation for POST: ", e);
         }
     }
 
-//    private Consumer<Response> createResponseConsumer(String id) {
-//        // Create a closure with id
-//        return response -> handleResponse(id, response);
-//    }
-//
-//    private void handleResponse(String id, Response response) {
-//        if (response == null || response.getStatusCode() != RESTPubSub.OK_200) {
-//            log.error("Failed to write message with id: {}. Couldn't reach pubsub server. Got response: {}", id, response);
-//            return;
-//        }
-//        log.debug("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
-//    }
-//
-//    private Response handleException(Throwable throwable) {
-//        log.error("Received error while posting query", throwable);
-//        return null;
-//    }
+    private class RequestCallback implements FutureCallback<HttpResponse> {
+        @Override
+        public void completed(HttpResponse response) {
+            if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {
+                log.error("Couldn't reach REST pubsub server. Got response: {}", response);
+                return;
+            }
+            log.debug("Successfully wrote message with status code {}. Response was: {}", response.getStatusLine().getStatusCode(), response);
+        }
+
+        @Override
+        public void failed(Exception e) {
+            log.error("Failed to post message to RESTPubSub endpoint. Failed with error: ", e);
+        }
+
+        @Override
+        public void cancelled() {
+            log.error("Failed to post message to RESTPubSub endpoint. Request was cancelled.");
+        }
+    }
 }
