@@ -8,26 +8,27 @@ package com.yahoo.bullet.pubsub.rest;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.Response;
-
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import java.io.IOException;
-import java.util.function.Consumer;
+import java.io.UnsupportedEncodingException;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE = "content-type";
 
-    private AsyncHttpClient client;
+    private CloseableHttpAsyncClient client;
 
     /**
-     * Create a RESTQueryPublisher from a {@link RESTPubSubConfig} and a {@link AsyncHttpClient}.
+     * Create a RESTQueryPublisher from a {@link CloseableHttpAsyncClient}.
      *
      * @param client The client.
      */
-    public RESTPublisher(AsyncHttpClient client) {
+    public RESTPublisher(CloseableHttpAsyncClient client) {
         this.client = client;
+        client.start();
     }
 
     @Override
@@ -47,30 +48,31 @@ public abstract class RESTPublisher implements Publisher {
      */
     protected void sendToURL(String url, PubSubMessage message) {
         log.debug("Sending message: {} to url: {}", message, url);
-        client.preparePost(url)
-              .setBody(message.asJSON())
-              .setHeader(CONTENT_TYPE, APPLICATION_JSON)
-              .execute()
-              .toCompletableFuture()
-              .exceptionally(this::handleException)
-              .thenAcceptAsync(createResponseConsumer(message.getId()));
-    }
-
-    private Consumer<Response> createResponseConsumer(String id) {
-        // Create a closure with id
-        return response -> handleResponse(id, response);
-    }
-
-    private void handleResponse(String id, Response response) {
-        if (response == null || response.getStatusCode() != RESTPubSub.OK_200) {
-            log.error("Failed to write message with id: {}. Couldn't reach pubsub server. Got response: {}", id, response);
-            return;
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.setEntity(new StringEntity(message.asJSON()));
+            httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+            client.execute(httpPost, null);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error encoding message in preparation for POST: ", e);
         }
-        log.debug("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
     }
 
-    private Response handleException(Throwable throwable) {
-        log.error("Received error while posting query", throwable);
-        return null;
-    }
+//    private Consumer<Response> createResponseConsumer(String id) {
+//        // Create a closure with id
+//        return response -> handleResponse(id, response);
+//    }
+//
+//    private void handleResponse(String id, Response response) {
+//        if (response == null || response.getStatusCode() != RESTPubSub.OK_200) {
+//            log.error("Failed to write message with id: {}. Couldn't reach pubsub server. Got response: {}", id, response);
+//            return;
+//        }
+//        log.debug("Successfully wrote message with id {}. Response was: {} {}", id, response.getStatusCode(), response.getStatusText());
+//    }
+//
+//    private Response handleException(Throwable throwable) {
+//        log.error("Received error while posting query", throwable);
+//        return null;
+//    }
 }
