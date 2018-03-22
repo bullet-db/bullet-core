@@ -67,7 +67,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                 }
             } catch (Exception e) {
-                log.error("Http call failed with error: ", e);
+                log.error("Http call to {} failed with error: {}", url, e);
             }
         }
         return messages;
