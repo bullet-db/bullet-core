@@ -13,6 +13,8 @@ import com.yahoo.bullet.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +22,6 @@ import java.util.stream.IntStream;
 
 @Slf4j
 public class RESTPubSub extends PubSub {
-    private static final int NO_TIMEOUT = -1;
     public static final int OK_200 = 200;
     public static final int NO_CONTENT_204 = 204;
 
@@ -74,15 +75,8 @@ public class RESTPubSub extends PubSub {
     }
 
     private CloseableHttpAsyncClient getClient() {
-        return HttpAsyncClients.createDefault();
-//        Long connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT, Long.class);
-//        int retryLimit = config.getAs(RESTPubSubConfig.CONNECT_RETRY_LIMIT, Integer.class);
-//        AsyncHttpClientConfig clientConfig =
-//                new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(connectTimeout.intValue())
-//                                                          .setMaxRequestRetry(retryLimit)
-//                                                          .setReadTimeout(NO_TIMEOUT)
-//                                                          .setRequestTimeout(NO_TIMEOUT)
-//                                                          .build();
-//        return new DefaultAsyncHttpClient(clientConfig);
+        int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT, Integer.class);
+        IOReactorConfig ioReactorConfig = IOReactorConfig.custom().setConnectTimeout(connectTimeout).build();
+        return HttpAsyncClients.custom().setDefaultIOReactorConfig(ioReactorConfig).build();
     }
 }

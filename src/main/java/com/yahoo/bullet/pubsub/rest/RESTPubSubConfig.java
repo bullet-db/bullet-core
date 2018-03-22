@@ -25,7 +25,7 @@ public class RESTPubSubConfig extends BulletConfig {
     public static final String QUERY_SUBSCRIBER_MIN_WAIT = PREFIX + "query.subscriber.min.wait.ms";
 
     // Defaults
-    public static final long DEFAULT_CONNECT_TIMEOUT = 5000L;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 5000;
     public static final int DEFAULT_CONNECT_RETRY_LIMIT = 3;
     public static final int DEFAULT_MAX_UNCOMMITTED_MESSAGES = 100;
     public static final List<String> DEFAULT_QUERY_URLS = Arrays.asList("http://localhost:9901/api/bullet/pubsub/query",
@@ -41,7 +41,7 @@ public class RESTPubSubConfig extends BulletConfig {
         VALIDATOR.define(CONNECT_TIMEOUT)
                  .defaultTo(DEFAULT_CONNECT_TIMEOUT)
                  .checkIf(Validator::isPositiveInt)
-                 .castTo(Validator::asLong);
+                 .castTo(Validator::asInt);
         VALIDATOR.define(CONNECT_RETRY_LIMIT)
                  .defaultTo(DEFAULT_CONNECT_RETRY_LIMIT)
                  .checkIf(Validator::isPositiveInt)
