@@ -24,48 +24,48 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTResultPublisherTest {
-    @Test
-    public void testSend() throws Exception {
-        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-
-        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, "custom/url"));
-        publisher.send(message);
-        verify(mockClient).preparePost("custom/url");
-        verify(mockBuilder).setBody("{\"id\":\"someId\",\"sequence\":-1,\"content\":\"someContent\",\"metadata\":{\"signal\":null,\"content\":\"custom/url\"}}");
-        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-    }
-
-    @Test(expectedExceptions = ClassCastException.class)
-    public void testSendBadURL() throws Exception {
-        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-
-        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, 88));
-        publisher.send(message);
-    }
-
-    @Test
-    public void testClose() throws Exception {
-        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-        doNothing().when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-
-        publisher.close();
-        verify(mockClient).close();
-    }
-
-    @Test
-    public void testCloseDoesNotThrow() throws Exception {
-        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-        doThrow(new IOException("error!")).when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-
-        publisher.close();
-        verify(mockClient).close();
-    }
+//    @Test
+//    public void testSend() throws Exception {
+//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
+//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+//
+//        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, "custom/url"));
+//        publisher.send(message);
+//        verify(mockClient).preparePost("custom/url");
+//        verify(mockBuilder).setBody("{\"id\":\"someId\",\"sequence\":-1,\"content\":\"someContent\",\"metadata\":{\"signal\":null,\"content\":\"custom/url\"}}");
+//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
+//    }
+//
+//    @Test(expectedExceptions = ClassCastException.class)
+//    public void testSendBadURL() throws Exception {
+//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
+//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
+//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
+//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+//
+//        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, 88));
+//        publisher.send(message);
+//    }
+//
+//    @Test
+//    public void testClose() throws Exception {
+//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
+//        doNothing().when(mockClient).close();
+//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+//
+//        publisher.close();
+//        verify(mockClient).close();
+//    }
+//
+//    @Test
+//    public void testCloseDoesNotThrow() throws Exception {
+//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
+//        doThrow(new IOException("error!")).when(mockClient).close();
+//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+//
+//        publisher.close();
+//        verify(mockClient).close();
+//    }
 }
