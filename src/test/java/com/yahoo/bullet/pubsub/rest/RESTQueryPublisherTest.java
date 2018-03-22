@@ -7,101 +7,107 @@ package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.AsyncHttpClientConfig;
-import org.asynchttpclient.BoundRequestBuilder;
-import org.asynchttpclient.DefaultAsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClientConfig;
-import org.asynchttpclient.Response;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpPost;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
+import org.testng.Assert;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkFuture;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkResponse;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockBuilderWith;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockClientWith;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getNotOkResponse;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
 public class RESTQueryPublisherTest {
-//    @Test
-//    public void testSendResultUrlPutInMetadataAckPreserved() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
-//
-//        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
-//        verify(mockClient).preparePost("my/custom/query/url");
-//        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/url\"}}");
-//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-//    }
-//
-//    @Test
-//    public void testSendResultUrlPutInMetadataCompletePreserved() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-//        config.set(RESTPubSubConfig.RESULT_URL, "my/custom/url");
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
-//
-//        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
-//        verify(mockClient).preparePost("my/custom/query/url");
-//        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/result/url\"}}");
-//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-//    }
-//
-//    @Test
-//    public void testSendMetadataCreated() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
-//
-//        publisher.send("foo", "bar");
-//        verify(mockClient).preparePost("my/custom/query/url");
-//        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/result/url\"}}");
-//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-//    }
-//
-//    @Test
-//    public void testClose() throws Exception {
-//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-//        doNothing().when(mockClient).close();
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, null, null);
-//
-//        publisher.close();
-//        verify(mockClient).close();
-//    }
-//
-//    @Test
-//    public void testCloseDoesNotThrow() throws Exception {
-//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-//        doThrow(new IOException("error!")).when(mockClient).close();
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, null, null);
-//
-//        publisher.close();
-//        verify(mockClient).close();
-//    }
-//
-//    @Test
-//    public void testHandleBadResponse() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getNotOkResponse(500));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
-//
-//        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
-//        verify(mockClient).preparePost("my/custom/query/url");
-//        verify(mockBuilder).setBody("{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/result/url\"}}");
-//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-//    }
-//
+    @Test
+    public void testSendResultUrlPutInMetadataAckPreserved() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
+
+        ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
+        HttpPost post = argumentCaptor.getValue();
+        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/url\"}}";
+        String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
+        String expectedHeader = RESTPublisher.APPLICATION_JSON;
+        Assert.assertEquals(expectedMessage, actualMessage);
+        Assert.assertEquals(expectedHeader, actualHeader);
+        Assert.assertEquals("my/custom/query/url", post.getURI().toString());
+    }
+
+    @Test
+    public void testSendResultUrlPutInMetadataCompletePreserved() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
+
+        ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
+        HttpPost post = argumentCaptor.getValue();
+        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/url\"}}";
+        String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
+        String expectedHeader = RESTPublisher.APPLICATION_JSON;
+        Assert.assertEquals(expectedMessage, actualMessage);
+        Assert.assertEquals(expectedHeader, actualHeader);
+        Assert.assertEquals("my/custom/query/url", post.getURI().toString());
+    }
+
+    @Test
+    public void testSendMetadataCreated() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        publisher.send("foo", "bar");
+
+        ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
+        HttpPost post = argumentCaptor.getValue();
+        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
+        String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
+        String expectedHeader = RESTPublisher.APPLICATION_JSON;
+        Assert.assertEquals(expectedMessage, actualMessage);
+        Assert.assertEquals(expectedHeader, actualHeader);
+        Assert.assertEquals("my/custom/query/url", post.getURI().toString());
+    }
+
+    @Test
+    public void testClose() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        doNothing().when(mockClient).close();
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        publisher.close();
+        verify(mockClient).close();
+    }
+
+    @Test
+    public void testCloseDoesNotThrow() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        doThrow(new IOException("error!")).when(mockClient).close();
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, null, null);
+
+        publisher.close();
+        verify(mockClient).close();
+    }
+
+    @Test
+    public void testBadResponseDoesNotThrow() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        // This won't work because this method doesn't declare that it throws - figure out how to make the HttpPost
+        // object throw somehow?
+        doThrow(new IOException("error!")).when(mockClient).execute(any(), any());
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
+
+        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
+        verify(mockClient).execute(any(), any());
+    }
+
 //    @Test(timeOut = 5000L)
 //    public void testException() throws Exception {
 //        // This will hit a non-existent url and fail, testing our exceptions

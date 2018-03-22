@@ -60,7 +60,7 @@ public abstract class RESTPublisher implements Publisher {
         }
     }
 
-    private class RequestCallback implements FutureCallback<HttpResponse> {
+    static class RequestCallback implements FutureCallback<HttpResponse> {
         @Override
         public void completed(HttpResponse response) {
             if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {

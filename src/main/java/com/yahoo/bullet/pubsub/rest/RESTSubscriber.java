@@ -60,7 +60,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                 HttpResponse response = client.execute(httpGet, null).get();
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
-                    String message = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+                    String message = IOUtils.toString(response.getEntity().getContent(), RESTPubSub.UTF_8);
                     messages.add(PubSubMessage.fromJSON(message));
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
