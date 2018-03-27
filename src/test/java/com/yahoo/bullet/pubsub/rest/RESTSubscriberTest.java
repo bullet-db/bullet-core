@@ -6,29 +6,45 @@
 package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.PubSubMessage;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.tools.ant.taskdefs.condition.Http;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.BoundRequestBuilder;
 import org.asynchttpclient.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import java.io.IOException;
+import java.net.HttpRetryException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getNotOkResponse;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkFuture;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkResponse;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockBuilderWith;
 import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockClientWith;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTSubscriberTest {
-//    @Test
-//    public void testGetMessages() throws Exception {
+    @Test
+    public void testGetMessages() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        Future<HttpResponse> mockFuture = mock(Future.class);
+        HttpResponse mockResponse = mock(HttpResponse.class);
+        StatusLine mockStatusLine = mock(StatusLine.class);
+        doReturn(RESTPubSub.OK_200).when(mockStatusLine).getStatusCode();
+        doReturn(mockStatusLine).when(mockResponse).getStatusLine();
+        doReturn(mockResponse).when(mockFuture).get();
+        doReturn(mockFuture).when(mockClient).execute(any(), any());
 //        PubSubMessage responseData = new PubSubMessage("someID", "someContent");
 //        CompletableFuture<Response> response = getOkFuture(getOkResponse(responseData.asJSON()));
 //        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
@@ -39,8 +55,8 @@ public class RESTSubscriberTest {
 //        List<PubSubMessage> messages = subscriber.getMessages();
 //        Assert.assertEquals(messages.size(), 2);
 //        Assert.assertEquals(messages.get(0).asJSON(), "{\"id\":\"someID\",\"sequence\":-1,\"content\":\"someContent\",\"metadata\":null}");
-//    }
-//
+    }
+
 //    @Test
 //    public void testGetMessages204() throws Exception {
 //        CompletableFuture<Response> response = getOkFuture(getNotOkResponse(204));

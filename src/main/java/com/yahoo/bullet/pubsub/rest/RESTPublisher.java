@@ -55,7 +55,7 @@ public abstract class RESTPublisher implements Publisher {
             httpPost.setEntity(new StringEntity(message.asJSON()));
             httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
             client.execute(httpPost, new RequestCallback());
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             log.error("Error encoding message in preparation for POST: ", e);
         }
     }
@@ -64,7 +64,7 @@ public abstract class RESTPublisher implements Publisher {
         @Override
         public void completed(HttpResponse response) {
             if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {
-                log.error("Couldn't reach REST pubsub server. Got response: {}", response);
+                error("Couldn't reach REST pubsub server. Got response: {}", response);
                 return;
             }
             log.debug("Successfully wrote message with status code {}. Response was: {}", response.getStatusLine().getStatusCode(), response);
@@ -72,12 +72,22 @@ public abstract class RESTPublisher implements Publisher {
 
         @Override
         public void failed(Exception e) {
-            log.error("Failed to post message to RESTPubSub endpoint. Failed with error: ", e);
+            error("Failed to post message to RESTPubSub endpoint. Failed with error: ", e);
         }
 
         @Override
         public void cancelled() {
-            log.error("Failed to post message to RESTPubSub endpoint. Request was cancelled.");
+            error("Failed to post message to RESTPubSub endpoint. Request was cancelled.");
+        }
+
+        // Exposed for testing
+        void error(String s) {
+            log.error(s);
+        }
+
+        // Exposed for testing
+        void error(String s, Object o) {
+            log.error(s, o);
         }
     }
 }

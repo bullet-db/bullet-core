@@ -7,65 +7,62 @@ package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.BoundRequestBuilder;
-import org.asynchttpclient.Response;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.mockito.ArgumentCaptor;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkFuture;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.getOkResponse;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockBuilderWith;
-import static com.yahoo.bullet.pubsub.rest.RESTPubSubTest.mockClientWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTResultPublisherTest {
-//    @Test
-//    public void testSend() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-//
-//        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, "custom/url"));
-//        publisher.send(message);
-//        verify(mockClient).preparePost("custom/url");
-//        verify(mockBuilder).setBody("{\"id\":\"someId\",\"sequence\":-1,\"content\":\"someContent\",\"metadata\":{\"signal\":null,\"content\":\"custom/url\"}}");
-//        verify(mockBuilder).setHeader(RESTPublisher.CONTENT_TYPE, RESTPublisher.APPLICATION_JSON);
-//    }
-//
-//    @Test(expectedExceptions = ClassCastException.class)
-//    public void testSendBadURL() throws Exception {
-//        CompletableFuture<Response> response = getOkFuture(getOkResponse(null));
-//        BoundRequestBuilder mockBuilder = mockBuilderWith(response);
-//        AsyncHttpClient mockClient = mockClientWith(mockBuilder);
-//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-//
-//        PubSubMessage message = new PubSubMessage("someId", "someContent", new Metadata(null, 88));
-//        publisher.send(message);
-//    }
-//
-//    @Test
-//    public void testClose() throws Exception {
-//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-//        doNothing().when(mockClient).close();
-//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-//
-//        publisher.close();
-//        verify(mockClient).close();
-//    }
-//
-//    @Test
-//    public void testCloseDoesNotThrow() throws Exception {
-//        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-//        doThrow(new IOException("error!")).when(mockClient).close();
-//        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
-//
-//        publisher.close();
-//        verify(mockClient).close();
-//    }
+    @Test
+    public void testSendPullsURLFromMessage() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+        Metadata metadata = new Metadata(null, "my/custom/url");
+        publisher.send(new PubSubMessage("foo", "bar", metadata));
+
+        ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
+        HttpPost post = argumentCaptor.getValue();
+
+        String actualURI = post.getURI().toString();
+        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
+
+        String expectedURI = "my/custom/url";
+        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
+        String expectedHeader = RESTPublisher.APPLICATION_JSON;
+
+        Assert.assertEquals(expectedMessage, actualMessage);
+        Assert.assertEquals(expectedHeader, actualHeader);
+        Assert.assertEquals(expectedURI, actualURI);
+    }
+
+    @Test
+    public void testClose() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        doNothing().when(mockClient).close();
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+
+        publisher.close();
+        verify(mockClient).close();
+    }
+
+    @Test
+    public void testCloseDoesNotThrow() throws Exception {
+        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        doThrow(new IOException("error!")).when(mockClient).close();
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+
+        publisher.close();
+        verify(mockClient).close();
+    }
 }

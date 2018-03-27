@@ -7,15 +7,24 @@ package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
+import org.apache.http.HttpResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpPost;
 import org.mockito.ArgumentCaptor;
+
 import org.testng.annotations.Test;
 import java.io.IOException;
 import org.testng.Assert;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
@@ -99,28 +108,45 @@ public class RESTQueryPublisherTest {
     @Test
     public void testBadResponseDoesNotThrow() throws Exception {
         CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
-        // This won't work because this method doesn't declare that it throws - figure out how to make the HttpPost
-        // object throw somehow?
-        doThrow(new IOException("error!")).when(mockClient).execute(any(), any());
         RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
-
-        publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
-        verify(mockClient).execute(any(), any());
+        PubSubMessage message = mock(PubSubMessage.class);
+        // This will compel the HttpPost object to throw an exception in RESTPublisher.sendToURL()
+        doReturn(null).when(message).asJSON();
+        publisher.send(message);
+        Assert.assertTrue(true);
+        verify(mockClient, never()).execute(any(), any());
     }
 
-//    @Test(timeOut = 5000L)
-//    public void testException() throws Exception {
-//        // This will hit a non-existent url and fail, testing our exceptions
-//        AsyncHttpClientConfig clientConfig = new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(100)
-//                                                                                       .setMaxRequestRetry(1)
-//                                                                                       .setReadTimeout(-1)
-//                                                                                       .setRequestTimeout(-1)
-//                                                                                       .build();
-//        AsyncHttpClient client = new DefaultAsyncHttpClient(clientConfig);
-//        AsyncHttpClient spyClient = spy(client);
-//        RESTQueryPublisher publisher = new RESTQueryPublisher(spyClient, "http://this/does/not/exist:8080", "my/custom/result/url");
-//
-//        publisher.send(new PubSubMessage("foo", "bar"));
-//        verify(spyClient).preparePost("http://this/does/not/exist:8080");
-//    }
+    @Test
+    public void testRequestCallbackCompletedGood() throws Exception {
+        HttpResponse mockResponse = mock(HttpResponse.class);
+        StatusLine mockStatusLine = mock(StatusLine.class);
+        doReturn(RESTPubSub.OK_200).when(mockStatusLine).getStatusCode();
+        doReturn(mockStatusLine).when(mockResponse).getStatusLine();
+        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
+        requestCallback.completed(mockResponse);
+        verify(requestCallback, never()).error(anyString());
+        verify(requestCallback, never()).error(anyString(), any());
+    }
+
+    @Test
+    public void testRequestCallbackCompletedBad() throws Exception {
+        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
+        requestCallback.completed(null);
+        verify(requestCallback).error(anyString(), any());
+    }
+
+    @Test
+    public void testRequestCallbackFailed() throws Exception {
+        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
+        requestCallback.failed(new RuntimeException("error"));
+        verify(requestCallback).error(anyString(), any());
+    }
+
+    @Test
+    public void testRequestCallbackCancelled() throws Exception {
+        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
+        requestCallback.cancelled();
+        verify(requestCallback).error(anyString());
+    }
 }
