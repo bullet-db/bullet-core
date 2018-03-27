@@ -14,7 +14,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {

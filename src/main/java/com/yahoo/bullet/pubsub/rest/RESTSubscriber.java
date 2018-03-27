@@ -11,7 +11,6 @@ import com.yahoo.bullet.pubsub.PubSubMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

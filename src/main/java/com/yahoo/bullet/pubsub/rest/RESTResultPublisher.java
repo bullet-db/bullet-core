@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
-import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
