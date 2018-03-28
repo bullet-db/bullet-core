@@ -77,7 +77,9 @@ public class RESTPubSub extends PubSub {
 
     private CloseableHttpAsyncClient getClient() {
         int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT, Integer.class);
-        IOReactorConfig ioReactorConfig = IOReactorConfig.custom().setConnectTimeout(connectTimeout).build();
-        return HttpAsyncClients.custom().setDefaultIOReactorConfig(ioReactorConfig).build();
+        IOReactorConfig ioReactorConfig = IOReactorConfig.custom().setConnectTimeout(connectTimeout)
+                .setSoTimeout(connectTimeout).build();
+        return HttpAsyncClients.custom().setDefaultIOReactorConfig(ioReactorConfig)
+                .setMaxConnPerRoute(10).setMaxConnTotal(15).build();
     }
 }
