@@ -8,9 +8,9 @@ package com.yahoo.bullet.pubsub.rest;
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.apache.http.HttpResponse;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
 import org.mockito.ArgumentCaptor;
 
 import org.testng.annotations.Test;
@@ -39,7 +39,7 @@ public class RESTQueryPublisherTest {
         ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
-        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
         String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"ACKNOWLEDGE\",\"content\":\"my/custom/url\"}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
@@ -58,7 +58,7 @@ public class RESTQueryPublisherTest {
         ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
-        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
         String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":\"COMPLETE\",\"content\":\"my/custom/url\"}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
@@ -77,7 +77,7 @@ public class RESTQueryPublisherTest {
         ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
-        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
         String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;

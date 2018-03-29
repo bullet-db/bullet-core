@@ -7,9 +7,9 @@ package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.util.EntityUtils;
 import org.mockito.ArgumentCaptor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -34,7 +34,7 @@ public class RESTResultPublisherTest {
         HttpPost post = argumentCaptor.getValue();
 
         String actualURI = post.getURI().toString();
-        String actualMessage = IOUtils.toString(post.getEntity().getContent(), RESTPubSub.UTF_8);
+        String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
 
         String expectedURI = "my/custom/url";

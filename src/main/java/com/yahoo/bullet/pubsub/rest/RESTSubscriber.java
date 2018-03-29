@@ -14,10 +14,10 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.util.EntityUtils;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
@@ -59,7 +59,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                 HttpResponse response = client.execute(httpGet, null).get();
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
-                    String message = IOUtils.toString(response.getEntity().getContent(), RESTPubSub.UTF_8);
+                    String message = EntityUtils.toString(response.getEntity(), RESTPubSub.UTF_8);
                     messages.add(PubSubMessage.fromJSON(message));
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
