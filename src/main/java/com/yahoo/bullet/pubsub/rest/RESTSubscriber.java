@@ -15,17 +15,20 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import org.apache.http.util.EntityUtils;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
     @Getter(AccessLevel.PACKAGE)
     private List<String> urls;
-    private CloseableHttpAsyncClient client;
+    private CloseableHttpClient client;
     private long minWait;
     private long lastRequest;
+    private int connectTimeout;
 
     /**
      * Create a RESTSubscriber.
@@ -35,13 +38,13 @@ public class RESTSubscriber extends BufferingSubscriber {
      * @param client The client to use to make http requests.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
-    public RESTSubscriber(int maxUncommittedMessages, List<String> urls, CloseableHttpAsyncClient client, long minWait) {
+    public RESTSubscriber(int maxUncommittedMessages, List<String> urls, CloseableHttpClient client, long minWait, int connectTimeout) {
         super(maxUncommittedMessages);
         this.client = client;
-        this.client.start();
         this.urls = urls;
         this.minWait = minWait;
         this.lastRequest = 0;
+        this.connectTimeout = connectTimeout;
     }
 
     @Override
@@ -55,8 +58,7 @@ public class RESTSubscriber extends BufferingSubscriber {
         for (String url : urls) {
             try {
                 log.debug("Getting messages from url: {}", url);
-                HttpGet httpGet = new HttpGet(url);
-                HttpResponse response = client.execute(httpGet, null).get();
+                HttpResponse response = client.execute(makeHttpGet(url));
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
                     String message = EntityUtils.toString(response.getEntity(), RESTPubSub.UTF_8);
@@ -79,5 +81,15 @@ public class RESTSubscriber extends BufferingSubscriber {
         } catch (IOException e) {
             log.warn("Caught exception when closing AsyncHttpClient: ", e);
         }
+    }
+
+    private HttpGet makeHttpGet(String url) {
+        HttpGet httpGet = new HttpGet(url);
+        RequestConfig requestConfig =
+                RequestConfig.custom().setConnectTimeout(connectTimeout)
+                                      .setSocketTimeout(connectTimeout)
+                                      .build();
+        httpGet.setConfig(requestConfig);
+        return httpGet;
     }
 }

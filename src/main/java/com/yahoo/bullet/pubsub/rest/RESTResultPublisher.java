@@ -7,16 +7,16 @@ package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 @Slf4j
 public class RESTResultPublisher extends RESTPublisher {
     /**
-     * Create a RESTQueryPublisher from a {@link CloseableHttpAsyncClient}.
+     * Create a RESTQueryPublisher from a {@link CloseableHttpClient}.
      *
      * @param client The client.
      */
-    public RESTResultPublisher(CloseableHttpAsyncClient client) {
+    public RESTResultPublisher(CloseableHttpClient client) {
         super(client);
     }
 

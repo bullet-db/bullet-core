@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import java.io.IOException;
 
@@ -20,16 +21,15 @@ public abstract class RESTPublisher implements Publisher {
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE = "content-type";
 
-    private CloseableHttpAsyncClient client;
+    private CloseableHttpClient client;
 
     /**
-     * Create a RESTQueryPublisher from a {@link CloseableHttpAsyncClient}.
+     * Create a RESTQueryPublisher from a {@link CloseableHttpClient}.
      *
      * @param client The client.
      */
-    public RESTPublisher(CloseableHttpAsyncClient client) {
+    public RESTPublisher(CloseableHttpClient client) {
         this.client = client;
-        client.start();
     }
 
     @Override
@@ -48,8 +48,24 @@ public abstract class RESTPublisher implements Publisher {
      * @param message The message to send.
      */
     protected void sendToURL(String url, PubSubMessage message) {
-        new RESTRequest(url, message.asJSON(), 3, client).send();
+        log.debug("Sending message: {} to url: {}", message, url);
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.setEntity(new StringEntity(message.asJSON()));
+            httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+            client.execute(httpPost);
+        } catch (Exception e) {
+            log.error("Error encoding message in preparation for POST: ", e);
+        }
+
+
     }
+
+
+
+
+
+
 
     static class RESTRequest implements FutureCallback<HttpResponse> {
         private String url;
@@ -78,6 +94,8 @@ public abstract class RESTPublisher implements Publisher {
         @Override
         public void failed(Exception e) {
             error("Failed to post message to RESTPubSub endpoint. Failed with error: ", e);
+            retries++;
+            send();
         }
 
         @Override
@@ -88,7 +106,7 @@ public abstract class RESTPublisher implements Publisher {
         public void send() {
             this.retries++;
             log.debug("Sending message: {} to url: {}", message, url);
-            try {   
+            try {
                 synchronized (client) {
                     HttpPost httpPost = new HttpPost(url);
                     httpPost.setEntity(new StringEntity(message));
