@@ -118,9 +118,9 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *         emit(q.getData())
  *         remove q
  *     else
- *         if (q.isClosedForPartition())
+ *         if (q.isClosed())
  *             emit(q.getData())
- *             q.resetForPartition()
+ *             q.reset()
      *         q.consume(record)
  *         if (q.isExceedingRateLimit())
  *             emit(q.getRateLimitError())
@@ -134,9 +134,9 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *     if (q.isDone())
  *         emit(q.getData())
  *         remove q
- *     if (q.isClosedForPartition())
+ *     if (q.isClosed())
  *         emit(q.getData())
- *         q.resetForPartition()
+ *         q.reset()
  *     if (q.isExceedingRateLimit())
  *         emit(q.getRateLimitError())
  *         remove q
