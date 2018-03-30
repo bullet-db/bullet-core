@@ -23,8 +23,14 @@ public class AdditiveTumbling extends Tumbling {
 
     @Override
     public void reset() {
-        // Don't reset the strategy.
         startedAt = System.currentTimeMillis();
         windowCount++;
+    }
+
+    @Override
+    public void resetForPartition() {
+        // Do reset the strategy.
+        aggregation.reset();
+        reset();
     }
 }
