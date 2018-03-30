@@ -48,18 +48,24 @@ public abstract class RESTPublisher implements Publisher {
      * @param message The message to send.
      */
     protected void sendToURL(String url, PubSubMessage message) {
-        log.debug("Sending message: {} to url: {}", message, url);
-        try {
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new StringEntity(message.asJSON()));
-            httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
-            client.execute(httpPost, new RequestCallback());
-        } catch (Exception e) {
-            log.error("Error encoding message in preparation for POST: ", e);
-        }
+        new RESTRequest(url, message.asJSON(), 3, client).send();
     }
 
-    static class RequestCallback implements FutureCallback<HttpResponse> {
+    static class RESTRequest implements FutureCallback<HttpResponse> {
+        private String url;
+        private String message;
+        private int maxRetries;
+        private int retries;
+        private CloseableHttpAsyncClient client;
+
+        public RESTRequest(String url, String message, int maxRetries, CloseableHttpAsyncClient client) {
+            this.url = url;
+            this.message = message;
+            this.maxRetries = maxRetries;
+            this.client = client;
+            this.retries = 0;
+        }
+
         @Override
         public void completed(HttpResponse response) {
             if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {
@@ -77,6 +83,21 @@ public abstract class RESTPublisher implements Publisher {
         @Override
         public void cancelled() {
             error("Failed to post message to RESTPubSub endpoint. Request was cancelled.");
+        }
+
+        public void send() {
+            this.retries++;
+            log.debug("Sending message: {} to url: {}", message, url);
+            try {   
+                synchronized (client) {
+                    HttpPost httpPost = new HttpPost(url);
+                    httpPost.setEntity(new StringEntity(message));
+                    httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+                    client.execute(httpPost, this);
+                }
+            } catch (Exception e) {
+                log.error("Error encoding message in preparation for POST: ", e);
+            }
         }
 
         // Exposed for testing

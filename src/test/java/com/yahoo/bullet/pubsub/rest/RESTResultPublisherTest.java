@@ -29,7 +29,7 @@ public class RESTResultPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", metadata));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
-        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        ArgumentCaptor<RESTPublisher.RESTRequest> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RESTRequest.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
 

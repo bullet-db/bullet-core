@@ -36,7 +36,7 @@ public class RESTQueryPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
-        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        ArgumentCaptor<RESTPublisher.RESTRequest> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RESTRequest.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
@@ -55,7 +55,7 @@ public class RESTQueryPublisherTest {
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
-        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        ArgumentCaptor<RESTPublisher.RESTRequest> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RESTRequest.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
@@ -74,7 +74,7 @@ public class RESTQueryPublisherTest {
         publisher.send("foo", "bar");
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
-        ArgumentCaptor<RESTPublisher.RequestCallback> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RequestCallback.class);
+        ArgumentCaptor<RESTPublisher.RESTRequest> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RESTRequest.class);
         verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
@@ -118,35 +118,35 @@ public class RESTQueryPublisherTest {
     }
 
     @Test
-    public void testRequestCallbackCompletedGood() throws Exception {
+    public void testrestRequestCompletedGood() throws Exception {
         HttpResponse mockResponse = mock(HttpResponse.class);
         StatusLine mockStatusLine = mock(StatusLine.class);
         doReturn(RESTPubSub.OK_200).when(mockStatusLine).getStatusCode();
         doReturn(mockStatusLine).when(mockResponse).getStatusLine();
-        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
-        requestCallback.completed(mockResponse);
-        verify(requestCallback, never()).error(anyString());
-        verify(requestCallback, never()).error(anyString(), any());
+        RESTPublisher.RESTRequest restRequest = spy(RESTPublisher.RESTRequest.class);
+        restRequest.completed(mockResponse);
+        verify(restRequest, never()).error(anyString());
+        verify(restRequest, never()).error(anyString(), any());
     }
 
     @Test
-    public void testRequestCallbackCompletedBad() throws Exception {
-        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
-        requestCallback.completed(null);
-        verify(requestCallback).error(anyString(), any());
+    public void testrestRequestCompletedBad() throws Exception {
+        RESTPublisher.RESTRequest restRequest = spy(RESTPublisher.RESTRequest.class);
+        restRequest.completed(null);
+        verify(restRequest).error(anyString(), any());
     }
 
     @Test
-    public void testRequestCallbackFailed() throws Exception {
-        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
-        requestCallback.failed(new RuntimeException("error"));
-        verify(requestCallback).error(anyString(), any());
+    public void testrestRequestFailed() throws Exception {
+        RESTPublisher.RESTRequest restRequest = spy(RESTPublisher.RESTRequest.class);
+        restRequest.failed(new RuntimeException("error"));
+        verify(restRequest).error(anyString(), any());
     }
 
     @Test
-    public void testRequestCallbackCancelled() throws Exception {
-        RESTPublisher.RequestCallback requestCallback = spy(RESTPublisher.RequestCallback.class);
-        requestCallback.cancelled();
-        verify(requestCallback).error(anyString());
+    public void testrestRequestCancelled() throws Exception {
+        RESTPublisher.RESTRequest restRequest = spy(RESTPublisher.RESTRequest.class);
+        restRequest.cancelled();
+        verify(restRequest).error(anyString());
     }
 }
