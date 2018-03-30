@@ -94,6 +94,11 @@ public class Basic extends Scheme {
     }
 
     @Override
+    public void resetForPartition() {
+        reset();
+    }
+
+    @Override
     public boolean isClosed() {
         return aggregation.isClosed();
     }

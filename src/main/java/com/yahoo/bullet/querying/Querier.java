@@ -61,8 +61,11 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * <li>
  *   For each Query message from the PubSub, check to see if it is has a KILL or COMPLETE signal.
  *   If yes, remove any existing {@link Querier} objects for that query (identified by the ID)
- *   If no, create an instance of {@link Querier} for the query. If any exceptions or errors initializing, throw away
- *   the querier.
+ *   If no, create an instance of {@link Querier} for the query in {@link Mode#PARTITION} mode if and only if you are
+ *   going to be persisting the querier for the duration of the query. If you are throwing away the querier, such as
+ *   after processing your partitioned data in mini-batches and recreating it every new mini-batch, then you need not
+ *   change the mode. If any exceptions or errors initializing, throw away the querier since the errors are handled in
+ *   the Join stage below.
  * </li>
  * <li>
  *   For every {@link BulletRecord}, call {@link #consume(BulletRecord)} on all the {@link Querier} objects
@@ -72,11 +75,11 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *   If {@link #isDone()}, call {@link #getData()} and also remove the {@link Querier}.
  * </li>
  * <li>
- *   If {@link #isClosedForPartition()}, use {@link #getData()} to emit the intermediate data to the Join stage for
+ *   If {@link #isClosed()}, use {@link #getData()} to emit the intermediate data to the Join stage for
  *   the query ID. Then, call {@link #reset()}.
  * </li>
  * <li>
- *   <em>Optional</em>: if you are processing record by record (instead of micro-batches) and honoring {@link #isClosedForPartition()},
+ *   <em>Optional</em>: if you are processing record by record (instead of micro-batches) and honoring {@link #isClosed()},
  *   you should check if {@link #isExceedingRateLimit()} is true after calling {@link #getData()}. If yes, you should
  *   cancel the query and emit a RateLimitError to the Join stage to kill the query. You can use {@link #getRateLimitError()}
  *   to get the {@link RateLimitError} to pass to the Join stage.
@@ -84,15 +87,17 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * <li>
  *   <em>Optional</em>: If your data volume is very, very small (Heuristic: less than 1 per your 0.1 *
  *   bullet.query.window.min.emit.every.ms). across your partitions), you should run the {@link #isDone()} and
- *   {@link #isClosedForPartition()} and do the emits either on a timer or at fixed intervals so that your queries
+ *   {@link #isClosed()} and do the emits either on a timer or at fixed intervals so that your queries
  *   are checked for results and maintain their windowing guarantees.
  * </li>
  * </ol>
  *
- * You can also use {@link #hasData()} to check if there is any data to emit if you need. If you do not want to call
- * {@link #getData()}, you can serialize Querier using non-native serialization frameworks and use {@link #merge(Monoidal)}
- * in the Join stage to merge them into an empty Querier for the query. This will be equivalent to calling
- * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
+ * You can also use {@link #hasNewData()} to check if there is any new data to emit if you need to know a successful
+ * consumption or combining happened.
+ *
+ * If you do not want to call {@link #getData()}, you can serialize Querier using non-native serialization frameworks
+ * and use {@link #merge(Monoidal)} in the Join stage to merge them into an empty Querier for the query. This will be
+ * equivalent to calling {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
  * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
  *
  * <h4>Pseudo Code</h4>
@@ -115,7 +120,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *         emit(q.getData())
  *         remove q
  *     else
- *         if (q.isClosedForPartition())
+ *         if (q.isClosed())
  *             emit(q.getData())
  *             q.reset()
      *         q.consume(record)
@@ -131,7 +136,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *     if (q.isDone())
  *         emit(q.getData())
  *         remove q
- *     if (q.isClosedForPartition())
+ *     if (q.isClosed())
  *         emit(q.getData())
  *         q.reset()
  *     if (q.isExceedingRateLimit())
@@ -144,8 +149,8 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * <ol>
  * <li>
  *   For each Query message from the PubSub, if it is a KILL signal similar to the Filter stage, kill the query and
- *   return. Otherwise create an instance of {@link Querier} for the query. If any exceptions or errors initializing it,
- *   make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
+ *   return. Otherwise create an instance of {@link Querier} for the query in {@link Mode#ALL} mode. If any exceptions
+ *   or errors initializing it,  make BulletError objects from them and return them as a {@link Clip} back through the PubSub.
  * </li>
  * <li>
  *   For each KILL message from the Filter stage, call {@link #finish()}, and add to the {@link Meta} a
@@ -258,6 +263,20 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  */
 @Slf4j
 public class Querier implements Monoidal {
+    /**
+     * This is used to determine if this operates in partitioned mode or not. If the Querier is operating in
+     * {@link Mode#PARTITION}, it is assumed there are multiple queriers running in parallel and consuming parts of the
+     * data for the query. Use this if you are distributing the {@link #consume(BulletRecord)} calls across multiple
+     * machines. This fixes the semantics of the {@link #reset()} and the {@link #isClosed()} methods to keep the
+     * correct windowing semantics.
+     *
+     * If you are not distributing the data or recreating the querier instance in your parallelized step, you can
+     * leave this at the default of {@link Mode#ALL}.
+     */
+    public enum Mode {
+        PARTITION, ALL
+    }
+
     public static final String TRY_AGAIN_LATER = "Please try again later";
 
     // For testing convenience
@@ -271,10 +290,13 @@ public class Querier implements Monoidal {
     private BulletConfig config;
     private Map<String, String> metaKeys;
     private String timestampKey;
-    private boolean hasData = false;
+    private boolean hasNewData = false;
 
     // This is counting the number of times we get the data out of the query.
     private RateLimiter rateLimit;
+
+    // Mode for the querier
+    private Mode mode;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -286,9 +308,22 @@ public class Querier implements Monoidal {
      * @throws JsonParseException if there was an issue parsing the query.
      */
     public Querier(String id, String queryString, BulletConfig config) throws JsonParseException {
-        this(new RunningQuery(id, queryString, config), config);
+        this(Mode.ALL, new RunningQuery(id, queryString, config), config);
     }
 
+    /**
+     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
+     * query.
+     *
+     * @param mode The mode for this querier.
+     * @param id The query ID.
+     * @param queryString The query as a string.
+     * @param config The validated {@link BulletConfig} configuration to use.
+     * @throws JsonParseException if there was an issue parsing the query.
+     */
+    public Querier(Mode mode, String id, String queryString, BulletConfig config) throws JsonParseException {
+        this(mode, new RunningQuery(id, queryString, config), config);
+    }
     /**
      * Constructor that takes a {@link RunningQuery} instance and a configuration to use. This also starts executing
      * the query.
@@ -297,6 +332,19 @@ public class Querier implements Monoidal {
      * @param config The validated {@link BulletConfig} configuration to use.
      */
     public Querier(RunningQuery query, BulletConfig config) {
+        this(Mode.ALL, query, config);
+    }
+
+    /**
+     * Constructor that takes a {@link Querier.Mode}, {@link RunningQuery} instance and a configuration to use.
+     * This also starts executing the query.
+     *
+     * @param mode The mode for this querier.
+     * @param query The running query.
+     * @param config The validated {@link BulletConfig} configuration to use.
+     */
+    public Querier(Mode mode, RunningQuery query, BulletConfig config) {
+        this.mode = mode;
         this.runningQuery = query;
         this.config = config;
     }
@@ -362,7 +410,7 @@ public class Querier implements Monoidal {
         BulletRecord projected = project(record);
         try {
             window.consume(projected);
-            hasData = true;
+            hasNewData = true;
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
@@ -379,7 +427,7 @@ public class Querier implements Monoidal {
     public void combine(byte[] data) {
         try {
             window.combine(data);
-            hasData = true;
+            hasNewData = true;
         } catch (RuntimeException e) {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
@@ -458,40 +506,31 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns true if the query window is closed and you should emit the result at this time. If you have partitioned
-     * the data, use {@link #isClosedForPartition()}.
+     * Depending on the {@link Mode#ALL} mode this is operating in, returns true if and only if  the query window is
+     * closed and you should emit the result at this time.
      *
-     * @return boolean denoting if query has expired.
+     * @return boolean denoting if query has closed.
      */
     @Override
     public boolean isClosed() {
-        return window.isClosed();
+        return mode == Mode.PARTITION ? window.isClosedForPartition() : window.isClosed();
     }
 
     /**
      * Resets this object. You should call this if you have called {@link #getResult()} or {@link #getData()} after
-     * verifying whether this is {@link #isClosed()} or {@link #isClosedForPartition()}.
+     * verifying whether this is {@link #isClosed()}.
      */
     @Override
     public void reset() {
-        window.reset();
-        hasData = false;
+        if (mode == Mode.PARTITION) {
+            window.resetForPartition();
+        } else {
+            window.reset();
+        }
+        hasNewData = false;
     }
 
     // ********************************* Public helpers *********************************
-
-    /**
-     * Returns true if the query has been consuming parts of the data (parallelized) and should emit the result
-     * for that partition of data when operating that way. Use this if you have distributed the
-     * {@link #consume(BulletRecord)} calls across multiple machines and you want to know if, for this particular kind
-     * of query, whether it is necessary to emit results now. While not necessary to use, it would keep the
-     * windowing semantics for the query correct to adhere to emitting when this is true.
-     *
-     * @return A boolean denoting whether there is data to emit for this query if it was reading part of the data.
-     */
-    public boolean isClosedForPartition() {
-        return window.isClosedForPartition();
-    }
 
     /**
      * Returns true if the query has expired and will never accept any more data.
@@ -504,13 +543,14 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns whether there is any data to emit at all. Use this method if you are driving how data is consumed by this
-     * instance (for instance, microbatches) and need to emit data outside the windowing standards.
+     * Returns whether there is any new data to emit at all since the last {@link #reset()}. Use this method if you are
+     * driving how data is consumed by this instance (for instance, microbatches) and need to emit data outside the
+     * windowing standards.
      *
-     * @return A boolean denoting whether we have any data that can be emitted.
+     * @return A boolean denoting whether we have any new data that can be emitted.
      */
-    public boolean hasData() {
-        return hasData;
+    public boolean hasNewData() {
+        return hasNewData;
     }
 
     /**

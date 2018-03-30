@@ -169,6 +169,32 @@ public class SlidingRecordTest {
     }
 
     @Test
+    public void testResettingForPartition() {
+        Window window = makeSlidingWindow(5);
+        SlidingRecord sliding = new SlidingRecord(strategy, window, config);
+        Assert.assertFalse(sliding.initialize().isPresent());
+        Assert.assertEquals(strategy.getResetCalls(), 0);
+
+        for (int i = 0; i < 4; ++i) {
+            sliding.consume(RecordBox.get().getRecord());
+            Assert.assertFalse(sliding.isClosed());
+            Assert.assertTrue(sliding.isClosedForPartition());
+        }
+        Assert.assertEquals(strategy.getConsumeCalls(), 4);
+
+        sliding.consume(RecordBox.get().getRecord());
+        Assert.assertTrue(sliding.isClosed());
+        Assert.assertTrue(sliding.isClosedForPartition());
+
+        sliding.resetForPartition();
+        Assert.assertFalse(sliding.isClosed());
+        Assert.assertFalse(sliding.isClosedForPartition());
+
+        Assert.assertEquals(strategy.getConsumeCalls(), 5);
+        Assert.assertEquals(strategy.getResetCalls(), 1);
+    }
+
+    @Test
     public void testMetadata() {
         Window window = makeSlidingWindow(5);
         SlidingRecord sliding = new SlidingRecord(strategy, window, config);

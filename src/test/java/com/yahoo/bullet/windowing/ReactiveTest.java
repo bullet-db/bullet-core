@@ -158,6 +158,24 @@ public class ReactiveTest {
     }
 
     @Test
+    public void testResettingForPartitoin() {
+        Window window = makeReactiveWindow();
+        Reactive reactive = new Reactive(strategy, window, config);
+        Assert.assertFalse(reactive.initialize().isPresent());
+        Assert.assertEquals(strategy.getResetCalls(), 0);
+
+        reactive.consume(RecordBox.get().getRecord());
+        Assert.assertTrue(reactive.isClosed());
+        Assert.assertTrue(reactive.isClosedForPartition());
+        Assert.assertEquals(strategy.getConsumeCalls(), 1);
+
+        reactive.resetForPartition();
+        Assert.assertFalse(reactive.isClosed());
+        Assert.assertFalse(reactive.isClosedForPartition());
+        Assert.assertEquals(strategy.getResetCalls(), 1);
+    }
+
+    @Test
     public void testMetadata() {
         Window window = makeReactiveWindow();
         Reactive reactive = new Reactive(strategy, window, config);

@@ -129,6 +129,31 @@ public class TumblingTest {
     }
 
     @Test
+    public void testResettingForPartition() throws Exception {
+        long started = System.currentTimeMillis();
+        // Change minimum length to 1 ms
+        Tumbling tumbling = make(1, 1);
+        Assert.assertEquals(strategy.getResetCalls(), 0);
+        Assert.assertFalse(tumbling.initialize().isPresent());
+        long originalStartedAt = tumbling.startedAt;
+        Assert.assertTrue(originalStartedAt >= started);
+
+        // Sleep to make sure it's 1 ms
+        Thread.sleep(1);
+
+        Assert.assertTrue(tumbling.isClosed());
+        Assert.assertTrue(tumbling.isClosedForPartition());
+
+        long resetTime = System.currentTimeMillis();
+        tumbling.resetForPartition();
+        long newStartedAt = tumbling.startedAt;
+        Assert.assertTrue(resetTime > started);
+        Assert.assertTrue(newStartedAt > originalStartedAt);
+        Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertEquals(strategy.getResetCalls(), 1);
+    }
+
+    @Test
     public void testMetadata() throws Exception {
         long started = System.currentTimeMillis();
 
