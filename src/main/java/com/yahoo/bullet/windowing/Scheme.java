@@ -60,6 +60,12 @@ public abstract class Scheme implements Monoidal {
     public abstract boolean isClosedForPartition();
 
     /**
+     * Resets the window when operating in partition mode. If this window has been consuming slices of data (partitions)
+     * instead of the full data, you should use this method to reset the window to maintain the windowing invariant.
+     */
+    public abstract void resetForPartition();
+
+    /**
      * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.
      *
      * @return A non-null Meta object.

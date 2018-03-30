@@ -130,6 +130,32 @@ public class AdditiveTumblingTest {
     }
 
     @Test
+    public void testResettingInPartitionMode() throws Exception {
+        long started = System.currentTimeMillis();
+        // Change minimum length to 1 ms
+        AdditiveTumbling additiveTumbling = make(1, 1);
+        Assert.assertEquals(strategy.getResetCalls(), 0);
+        Assert.assertFalse(additiveTumbling.initialize().isPresent());
+        long originalStartedAt = additiveTumbling.startedAt;
+        Assert.assertTrue(originalStartedAt >= started);
+
+        // Sleep to make sure it's 1 ms
+        Thread.sleep(1);
+
+        Assert.assertTrue(additiveTumbling.isClosed());
+        Assert.assertTrue(additiveTumbling.isClosedForPartition());
+
+        long resetTime = System.currentTimeMillis();
+        additiveTumbling.resetForPartition();
+        long newStartedAt = additiveTumbling.startedAt;
+        Assert.assertTrue(resetTime > started);
+        Assert.assertTrue(newStartedAt > originalStartedAt);
+        Assert.assertTrue(newStartedAt >= resetTime);
+        // Aggregation should have been reset
+        Assert.assertEquals(strategy.getResetCalls(), 1);
+    }
+
+    @Test
     public void testMetadata() throws Exception {
         long started = System.currentTimeMillis();
 

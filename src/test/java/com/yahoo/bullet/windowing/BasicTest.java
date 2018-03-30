@@ -90,6 +90,9 @@ public class BasicTest {
 
         basic.reset();
         Assert.assertEquals(strategy.getResetCalls(), 1);
+
+        basic.resetForPartition();
+        Assert.assertEquals(strategy.getResetCalls(), 2);
     }
 
     @Test
