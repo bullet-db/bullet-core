@@ -8,7 +8,7 @@ package com.yahoo.bullet.pubsub.rest;
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.mockito.ArgumentCaptor;
 import org.testng.Assert;
@@ -23,14 +23,13 @@ import static org.mockito.Mockito.verify;
 public class RESTResultPublisherTest {
     @Test
     public void testSendPullsURLFromMessage() throws Exception {
-        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
         Metadata metadata = new Metadata(null, "my/custom/url");
         publisher.send(new PubSubMessage("foo", "bar", metadata));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
-        ArgumentCaptor<RESTPublisher.RESTRequest> argumentCaptor2 = ArgumentCaptor.forClass(RESTPublisher.RESTRequest.class);
-        verify(mockClient).execute(argumentCaptor.capture(), argumentCaptor2.capture());
+        verify(mockClient).execute(argumentCaptor.capture());
         HttpPost post = argumentCaptor.getValue();
 
         String actualURI = post.getURI().toString();
@@ -48,7 +47,7 @@ public class RESTResultPublisherTest {
 
     @Test
     public void testClose() throws Exception {
-        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doNothing().when(mockClient).close();
         RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
@@ -58,7 +57,7 @@ public class RESTResultPublisherTest {
 
     @Test
     public void testCloseDoesNotThrow() throws Exception {
-        CloseableHttpAsyncClient mockClient = mock(CloseableHttpAsyncClient.class);
+        CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
         RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
 
