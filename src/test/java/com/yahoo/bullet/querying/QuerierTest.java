@@ -495,20 +495,20 @@ public class QuerierTest {
         querier.consume(RecordBox.get().getRecord());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expected);
 
         querier.consume(RecordBox.get().getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because RAW is closed
         makeStream(10).forEach(querier::consume);
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expectedTwice);
     }
 
@@ -525,33 +525,33 @@ public class QuerierTest {
         querier.consume(RecordBox.get().add("mid", "23").getRecord());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expected);
 
         // Doesn't match
         querier.consume(RecordBox.get().add("mid", "42").getRecord());
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expected);
 
         querier.consume(RecordBox.get().add("mid", "23").getRecord());
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         // Nothing else is consumed because RAW is closed
         IntStream.range(0, 10).mapToObj(i -> RecordBox.get().add("mid", "23").getRecord()).forEach(querier::consume);
         Assert.assertTrue(querier.isClosed());
         Assert.assertTrue(querier.isDone());
-        Assert.assertTrue(querier.hasData());
+        Assert.assertTrue(querier.hasNewData());
         Assert.assertEquals(querier.getData(), expectedTwice);
 
         querier.reset();
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
-        Assert.assertFalse(querier.hasData());
+        Assert.assertFalse(querier.hasNewData());
         Assert.assertNull(querier.getData());
     }
 
@@ -566,13 +566,13 @@ public class QuerierTest {
         querierA.consume(RecordBox.get().getRecord());
         Assert.assertFalse(querierA.isClosed());
         Assert.assertFalse(querierA.isDone());
-        Assert.assertTrue(querierA.hasData());
+        Assert.assertTrue(querierA.hasNewData());
         Assert.assertEquals(querierA.getData(), expected);
 
         querierB.consume(RecordBox.get().getRecord());
         Assert.assertFalse(querierB.isClosed());
         Assert.assertFalse(querierB.isDone());
-        Assert.assertTrue(querierB.hasData());
+        Assert.assertTrue(querierB.hasNewData());
         Assert.assertEquals(querierB.getData(), expected);
 
 
@@ -581,7 +581,7 @@ public class QuerierTest {
         querierC.merge(querierB);
         Assert.assertTrue(querierC.isClosed());
         Assert.assertTrue(querierC.isDone());
-        Assert.assertTrue(querierC.hasData());
+        Assert.assertTrue(querierC.hasNewData());
         Assert.assertEquals(querierC.getData(), expectedTwice);
     }
 

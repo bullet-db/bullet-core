@@ -92,10 +92,12 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * </li>
  * </ol>
  *
- * You can also use {@link #hasData()} to check if there is any data to emit if you need. If you do not want to call
- * {@link #getData()}, you can serialize Querier using non-native serialization frameworks and use {@link #merge(Monoidal)}
- * in the Join stage to merge them into an empty Querier for the query. This will be equivalent to calling
- * {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
+ * You can also use {@link #hasNewData()} to check if there is any new data to emit if you need to know a successful
+ * consumption or combining happened.
+ *
+ * If you do not want to call {@link #getData()}, you can serialize Querier using non-native serialization frameworks
+ * and use {@link #merge(Monoidal)} in the Join stage to merge them into an empty Querier for the query. This will be
+ * equivalent to calling {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
  * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
  *
  * <h4>Pseudo Code</h4>
@@ -288,14 +290,13 @@ public class Querier implements Monoidal {
     private BulletConfig config;
     private Map<String, String> metaKeys;
     private String timestampKey;
-    private boolean hasData = false;
+    private boolean hasNewData = false;
 
     // This is counting the number of times we get the data out of the query.
     private RateLimiter rateLimit;
 
     // Mode for the querier
     private Mode mode;
-
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -409,7 +410,7 @@ public class Querier implements Monoidal {
         BulletRecord projected = project(record);
         try {
             window.consume(projected);
-            hasData = true;
+            hasNewData = true;
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
@@ -426,7 +427,7 @@ public class Querier implements Monoidal {
     public void combine(byte[] data) {
         try {
             window.combine(data);
-            hasData = true;
+            hasNewData = true;
         } catch (RuntimeException e) {
             log.error("Unable to aggregate {} for query {}", data, this);
             log.error("Skipping due to", e);
@@ -526,7 +527,7 @@ public class Querier implements Monoidal {
         } else {
             window.reset();
         }
-        hasData = false;
+        hasNewData = false;
     }
 
     // ********************************* Public helpers *********************************
@@ -542,13 +543,14 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns whether there is any data to emit at all. Use this method if you are driving how data is consumed by this
-     * instance (for instance, microbatches) and need to emit data outside the windowing standards.
+     * Returns whether there is any new data to emit at all since the last {@link #reset()}. Use this method if you are
+     * driving how data is consumed by this instance (for instance, microbatches) and need to emit data outside the
+     * windowing standards.
      *
-     * @return A boolean denoting whether we have any data that can be emitted.
+     * @return A boolean denoting whether we have any new data that can be emitted.
      */
-    public boolean hasData() {
-        return hasData;
+    public boolean hasNewData() {
+        return hasNewData;
     }
 
     /**
