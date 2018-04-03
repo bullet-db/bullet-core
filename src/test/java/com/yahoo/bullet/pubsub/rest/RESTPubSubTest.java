@@ -9,21 +9,9 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.Publisher;
 import com.yahoo.bullet.pubsub.Subscriber;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.BoundRequestBuilder;
-import org.asynchttpclient.ListenableFuture;
-import org.asynchttpclient.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 public class RESTPubSubTest {
     @Test
@@ -41,54 +29,6 @@ public class RESTPubSubTest {
         List<String> urls = resultSubscriber.getUrls();
         Assert.assertEquals(urls.size(), 1);
         Assert.assertEquals(urls.get(0), "http://localhost:9901/api/bullet/pubsub/result");
-    }
-
-    public static AsyncHttpClient mockClientWith(BoundRequestBuilder builder) {
-        AsyncHttpClient mockClient = mock(AsyncHttpClient.class);
-        doReturn(builder).when(mockClient).preparePost(anyString());
-        doReturn(builder).when(mockClient).prepareGet(anyString());
-        return mockClient;
-    }
-
-    public static BoundRequestBuilder mockBuilderWith(CompletableFuture<Response> future) throws Exception {
-        ListenableFuture<Response> mockListenable = (ListenableFuture<Response>) mock(ListenableFuture.class);
-        doReturn(future.get()).when(mockListenable).get();
-        doReturn(future).when(mockListenable).toCompletableFuture();
-
-        BoundRequestBuilder mockBuilder = mock(BoundRequestBuilder.class);
-        doReturn(mockBuilder).when(mockBuilder).setHeader(any(), anyString());
-        doReturn(mockBuilder).when(mockBuilder).setBody(anyString());
-        doReturn(mockListenable).when(mockBuilder).execute();
-        return mockBuilder;
-    }
-
-    public static CompletableFuture<Response> getOkFuture(Response response) throws Exception {
-        CompletableFuture<Response> finished = CompletableFuture.completedFuture(response);
-        CompletableFuture<Response> mock = mock(CompletableFuture.class);
-        // This is the weird bit. We mock the call to exceptionally to return the finished response so that chaining
-        // a thenAcceptAsync on it will call the consumer of it with the finished response. This is why it looks
-        // weird: mocking the exceptionally to take the "good" path.
-        doReturn(finished).when(mock).exceptionally(any());
-        doReturn(finished.get()).when(mock).get();
-        // So if we do get to thenAccept on our mock, we should throw an exception because we shouldn't get there.
-        doThrow(new RuntimeException("Good futures don't throw")).when(mock).thenAcceptAsync(any());
-        return mock;
-    }
-
-    public static Response getOkResponse(String data) {
-        return getResponse(RESTPubSub.OK_200, "Ok", data);
-    }
-
-    public static Response getNotOkResponse(int status) {
-        return getResponse(status, "Error", null);
-    }
-
-    public static Response getResponse(int status, String statusText, String body) {
-        Response mock = mock(Response.class);
-        doReturn(status).when(mock).getStatusCode();
-        doReturn(statusText).when(mock).getStatusText();
-        doReturn(body).when(mock).getResponseBody();
-        return mock;
     }
 
     @Test

@@ -11,35 +11,40 @@ import com.yahoo.bullet.pubsub.PubSubMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.Response;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+
+import org.apache.http.util.EntityUtils;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
     @Getter(AccessLevel.PACKAGE)
     private List<String> urls;
-    private AsyncHttpClient client;
+    private CloseableHttpClient client;
     private long minWait;
     private long lastRequest;
+    private int connectTimeout;
 
     /**
-     * Create a RESTSubscriber from a {@link RESTPubSubConfig}.
+     * Create a RESTSubscriber.
      *
      * @param maxUncommittedMessages The maximum number of records that will be buffered before commit() must be called.
      * @param urls The URLs which will be used to make the http request.
      * @param client The client to use to make http requests.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
      */
-    public RESTSubscriber(int maxUncommittedMessages, List<String> urls, AsyncHttpClient client, long minWait) {
+    public RESTSubscriber(int maxUncommittedMessages, List<String> urls, CloseableHttpClient client, long minWait, int connectTimeout) {
         super(maxUncommittedMessages);
         this.client = client;
         this.urls = urls;
         this.minWait = minWait;
         this.lastRequest = 0;
+        this.connectTimeout = connectTimeout;
     }
 
     @Override
@@ -52,17 +57,18 @@ public class RESTSubscriber extends BufferingSubscriber {
         lastRequest = currentTime;
         for (String url : urls) {
             try {
-                log.debug("Getting messages from url: ", url);
-                Response response = client.prepareGet(url).execute().get();
-                int statusCode = response.getStatusCode();
+                log.debug("Getting messages from url: {}", url);
+                HttpResponse response = client.execute(makeHttpGet(url));
+                int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
-                    messages.add(PubSubMessage.fromJSON(response.getResponseBody()));
+                    String message = EntityUtils.toString(response.getEntity(), RESTPubSub.UTF_8);
+                    messages.add(PubSubMessage.fromJSON(message));
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
                     log.error("Http call failed with status code {} and response {}.", statusCode, response);
                 }
             } catch (Exception e) {
-                log.error("Http call failed with error: ", e);
+                log.error("Http call to {} failed with error: {}", url, e);
             }
         }
         return messages;
@@ -75,5 +81,15 @@ public class RESTSubscriber extends BufferingSubscriber {
         } catch (IOException e) {
             log.warn("Caught exception when closing AsyncHttpClient: ", e);
         }
+    }
+
+    private HttpGet makeHttpGet(String url) {
+        HttpGet httpGet = new HttpGet(url);
+        RequestConfig requestConfig =
+                RequestConfig.custom().setConnectTimeout(connectTimeout)
+                                      .setSocketTimeout(connectTimeout)
+                                      .build();
+        httpGet.setConfig(requestConfig);
+        return httpGet;
     }
 }

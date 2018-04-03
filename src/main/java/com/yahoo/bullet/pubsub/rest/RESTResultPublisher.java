@@ -5,24 +5,23 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
-import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.asynchttpclient.AsyncHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 @Slf4j
 public class RESTResultPublisher extends RESTPublisher {
     /**
-     * Create a RESTQueryPublisher from a {@link AsyncHttpClient}.
+     * Create a RESTQueryPublisher from a {@link CloseableHttpClient}.
      *
      * @param client The client.
      */
-    public RESTResultPublisher(AsyncHttpClient client) {
+    public RESTResultPublisher(CloseableHttpClient client) {
         super(client);
     }
 
     @Override
-    public void send(PubSubMessage message) throws PubSubException {
+    public void send(PubSubMessage message) {
         String url = (String) message.getMetadata().getContent();
         log.debug("Extracted url to which to send results: {}", url);
         sendToURL(url, message);
