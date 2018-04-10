@@ -23,7 +23,7 @@ public class AdditiveTumbling extends Tumbling {
 
     @Override
     public void reset() {
-        startedAt = System.currentTimeMillis();
+        nextCloseTime = nextCloseTime + windowLength;
         windowCount++;
     }
 

@@ -111,7 +111,7 @@ public class RESTSubscriberTest {
     public void testMinWait() throws Exception {
         String message = new PubSubMessage("someID", "someContent").asJSON();
         CloseableHttpClient mockClient = mockClient(RESTPubSub.OK_200, message);
-        RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 100, 3000);
+        RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 600000, 3000);
 
         // First response should give content (2 events since we have 2 endpoints in the config)
         List<PubSubMessage> messages = subscriber.getMessages();
@@ -120,8 +120,8 @@ public class RESTSubscriberTest {
         messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 0);
 
-        // After waiting it should return messages again
-        Thread.sleep(150);
+        // After waiting (mocking that by changing the lastRequest time), it should return messages again
+        subscriber.setLastRequest(600000 * 2);
         messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
     }

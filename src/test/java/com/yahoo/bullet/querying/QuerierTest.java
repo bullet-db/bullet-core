@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.SketchingStrategy;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
@@ -217,8 +218,8 @@ public class QuerierTest {
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
-        // RAW query without window and not timed out.
-        Assert.assertFalse(querier.shouldBuffer());
+        // RAW query without window should buffer
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getResult().getRecords(), emptyList());
     }
 
@@ -677,7 +678,7 @@ public class QuerierTest {
         Querier querier = make(Querier.Mode.PARTITION, query, config);
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertTrue(querier.shouldBuffer());
+        Assert.assertFalse(querier.shouldBuffer());
 
         querier.consume(RecordBox.get().getRecord());
 
@@ -702,7 +703,7 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithoutWindowsThatAreClosedAreNotTimeBased() {
+    public void testRawQueriesWithoutWindowsThatAreClosedAreRecordBased() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
@@ -715,22 +716,22 @@ public class QuerierTest {
         Querier querier = make(Querier.Mode.ALL, query, config);
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.shouldBuffer());
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
 
         querier.consume(RecordBox.get().getRecord());
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.shouldBuffer());
+        Assert.assertTrue(querier.shouldBuffer());
 
         IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
 
         Assert.assertTrue(querier.isClosed());
-        Assert.assertFalse(querier.shouldBuffer());
+        Assert.assertTrue(querier.shouldBuffer());
     }
 
     @Test
-    public void testRawQueriesWithoutWindowsThatAreTimedOutAreTimeBased() {
+    public void testRawQueriesWithoutWindowsThatAreTimedOutAreStillRecordBased() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
@@ -748,7 +749,7 @@ public class QuerierTest {
         querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertFalse(querier.shouldBuffer());
+        Assert.assertTrue(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), Basic.class);
 
         IntStream.range(0, 9).forEach(i -> querier.consume(RecordBox.get().getRecord()));
@@ -767,7 +768,7 @@ public class QuerierTest {
         querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertTrue(querier.shouldBuffer());
+        Assert.assertFalse(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), AdditiveTumbling.class);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
@@ -804,7 +805,7 @@ public class QuerierTest {
         querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
-        Assert.assertTrue(querier.shouldBuffer());
+        Assert.assertFalse(querier.shouldBuffer());
         Assert.assertEquals(querier.getWindow().getClass(), AdditiveTumbling.class);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
@@ -830,5 +831,54 @@ public class QuerierTest {
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
         Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 25L);
+    }
+
+    @Test
+    public void testRestarting() throws Exception {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
+        config.validate();
+
+        Query query = new Query();
+        Aggregation aggregation = new Aggregation();
+        aggregation.setType(Aggregation.Type.RAW);
+        query.setAggregation(aggregation);
+        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
+        query.configure(config);
+        RunningQuery runningQuery = new RunningQuery("", query);
+
+        Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
+        querier.initialize();
+
+        querier.consume(RecordBox.get().getRecord());
+        Assert.assertEquals(querier.getRecords().size(), 1);
+
+        long timeNow = System.currentTimeMillis();
+        Meta meta = querier.getMetadata();
+        Map<String, String> mapping = BulletConfigTest.allMetadataAsMap();
+        Map<String, Object> queryMeta = (Map<String, Object>) meta.asMap().get(mapping.get(Meta.Concept.QUERY_METADATA.getName()));
+        Map<String, Object> windowMeta = (Map<String, Object>) meta.asMap().get(mapping.get(Meta.Concept.WINDOW_METADATA.getName()));
+        Assert.assertEquals(windowMeta.get(mapping.get(Meta.Concept.WINDOW_NUMBER.getName())), 1L);
+        long startTime = (Long) queryMeta.get(mapping.get(Meta.Concept.QUERY_RECEIVE_TIME.getName()));
+        long windowEmitTime = (Long) windowMeta.get(mapping.get(Meta.Concept.WINDOW_EMIT_TIME.getName()));
+        Assert.assertTrue(startTime <= timeNow);
+        Assert.assertTrue(windowEmitTime >= timeNow);
+
+        Thread.sleep(1);
+
+        querier.restart();
+        Assert.assertEquals(querier.getRecords().size(), 1);
+        meta = querier.getMetadata();
+        queryMeta = (Map<String, Object>) meta.asMap().get(mapping.get(Meta.Concept.QUERY_METADATA.getName()));
+        Assert.assertEquals(windowMeta.get(mapping.get(Meta.Concept.WINDOW_NUMBER.getName())), 1L);
+        long newStartTime = (Long) queryMeta.get(mapping.get(Meta.Concept.QUERY_RECEIVE_TIME.getName()));
+        Assert.assertTrue(newStartTime > startTime);
+
+        querier.reset();
+        meta = querier.getMetadata();
+        windowMeta = (Map<String, Object>) meta.asMap().get(mapping.get(Meta.Concept.WINDOW_METADATA.getName()));
+        long newEmitTime = (Long) windowMeta.get(mapping.get(Meta.Concept.WINDOW_EMIT_TIME.getName()));
+        Assert.assertEquals(windowMeta.get(mapping.get(Meta.Concept.WINDOW_NUMBER.getName())), 2L);
+        Assert.assertTrue(newEmitTime >  windowEmitTime);
     }
 }

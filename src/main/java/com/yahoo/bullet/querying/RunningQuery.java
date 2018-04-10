@@ -22,10 +22,10 @@ public class RunningQuery implements Initializable {
     @Getter
     private final String id;
     @Getter
-    private final long startTime;
-    @Getter
     private final Query query;
 
+    @Getter
+    private long startTime;
     private String queryString;
 
     /**
@@ -52,11 +52,11 @@ public class RunningQuery implements Initializable {
     RunningQuery(String id, Query query) {
         this.id = id;
         this.query = query;
-        startTime = System.currentTimeMillis();
     }
 
     @Override
     public Optional<List<BulletError>> initialize() {
+        start();
         return query.initialize();
     }
 
@@ -74,5 +74,12 @@ public class RunningQuery implements Initializable {
     public boolean isTimedOut() {
         // Never add to query.getDuration since it can be infinite (Long.MAX_VALUE)
         return System.currentTimeMillis() - startTime >= query.getDuration();
+    }
+
+    /**
+     * Exposed for package only. Starts the query.
+     */
+    void start() {
+        startTime = System.currentTimeMillis();
     }
 }

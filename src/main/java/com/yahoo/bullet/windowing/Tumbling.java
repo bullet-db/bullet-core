@@ -21,8 +21,8 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 public class Tumbling extends Basic {
     public static final String NAME = "Tumbling";
 
-    protected long startedAt;
-    protected long closeAfter;
+    protected long nextCloseTime;
+    protected long windowLength;
 
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy} and {@link BulletConfig}.
@@ -39,27 +39,27 @@ public class Tumbling extends Basic {
     public Optional<List<BulletError>> initialize() {
         // Window is initialized so every is present and positive.
         Number every = Utilities.getCasted(window.getEmit(), Window.EMIT_EVERY_FIELD, Number.class);
-        closeAfter = every.longValue();
-        startedAt = System.currentTimeMillis();
+        windowLength = every.longValue();
+        nextCloseTime = System.currentTimeMillis() + windowLength;
         return Optional.empty();
     }
 
     @Override
     protected Map<String, Object> getMetadata(Map<String, String> metadataKeys) {
         Map<String, Object> meta = super.getMetadata(metadataKeys);
-        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_EXPECTED_EMIT_TIME, () -> this.startedAt + this.closeAfter);
+        addIfNonNull(meta, metadataKeys, Meta.Concept.WINDOW_EXPECTED_EMIT_TIME, () -> this.nextCloseTime);
         return meta;
     }
 
     @Override
     public void reset() {
         super.reset();
-        startedAt = System.currentTimeMillis();
+        nextCloseTime = nextCloseTime + windowLength;
     }
 
     @Override
     public boolean isClosed() {
-        return System.currentTimeMillis() >= startedAt + closeAfter;
+        return System.currentTimeMillis() >= nextCloseTime;
     }
 
     @Override

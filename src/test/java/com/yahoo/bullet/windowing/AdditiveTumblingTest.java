@@ -65,7 +65,7 @@ public class AdditiveTumblingTest {
         AdditiveTumbling additiveTumbling = make(1000, 5000);
         Assert.assertFalse(additiveTumbling.initialize().isPresent());
         // The window is what controls this so AdditiveTumbling has 5000 for the window size
-        Assert.assertEquals(additiveTumbling.closeAfter, 5000L);
+        Assert.assertEquals(additiveTumbling.windowLength, 5000L);
     }
 
     @Test
@@ -110,8 +110,8 @@ public class AdditiveTumblingTest {
         AdditiveTumbling additiveTumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
         Assert.assertFalse(additiveTumbling.initialize().isPresent());
-        long originalStartedAt = additiveTumbling.startedAt;
-        Assert.assertTrue(originalStartedAt >= started);
+        long originalCloseTime = additiveTumbling.nextCloseTime;
+        Assert.assertTrue(originalCloseTime >= started + 1);
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -121,10 +121,10 @@ public class AdditiveTumblingTest {
 
         long resetTime = System.currentTimeMillis();
         additiveTumbling.reset();
-        long newStartedAt = additiveTumbling.startedAt;
+        long newCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
-        Assert.assertTrue(newStartedAt > originalStartedAt);
-        Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
+        Assert.assertTrue(newCloseTime >= resetTime);
         // Aggregation should NOT have been reset
         Assert.assertEquals(strategy.getResetCalls(), 0);
     }
@@ -136,8 +136,8 @@ public class AdditiveTumblingTest {
         AdditiveTumbling additiveTumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
         Assert.assertFalse(additiveTumbling.initialize().isPresent());
-        long originalStartedAt = additiveTumbling.startedAt;
-        Assert.assertTrue(originalStartedAt >= started);
+        long originalCloseTime = additiveTumbling.nextCloseTime;
+        Assert.assertTrue(originalCloseTime >= started + 1);
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -147,10 +147,10 @@ public class AdditiveTumblingTest {
 
         long resetTime = System.currentTimeMillis();
         additiveTumbling.resetForPartition();
-        long newStartedAt = additiveTumbling.startedAt;
+        long newCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
-        Assert.assertTrue(newStartedAt > originalStartedAt);
-        Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
+        Assert.assertTrue(newCloseTime >= resetTime);
         // Aggregation should have been reset
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
