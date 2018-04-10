@@ -34,14 +34,14 @@ public class Validator {
     private static final Predicate<Object> UNARY_IDENTITY = o -> true;
     private static final BiPredicate<Object, Object> BINARY_IDENTITY = (oA, oB) -> true;
     private static final Predicate<List<Object>> NARY_IDENTITY = o -> true;
-    private static final String COMMA = ",";
+    private static final String COMMA = ", ";
 
     /**
      * This represents a field in the Validator. It applies a {@link Predicate} to the value of the field and uses a
      * default value (see {@link Entry#defaultTo(Object)} if the predicate fails. It can also apply an arbitrary
      * conversion using {@link Entry#castTo(Function)}. These are all applied when you call
      * {@link Entry#normalize(BulletConfig)} with a {@link BulletConfig} containing a field that matches the Entry.
-     * You can also ask that the check cause a failure using {@link #andFail()}.
+     * You can also ask that the check cause a failure using {@link #orFail()}.
      */
     public static class Entry {
         private String key;
@@ -97,9 +97,14 @@ public class Validator {
             return this;
         }
 
-        public void andFail() {
+        /**
+         * Fail if this entry fails to hold.
+         *
+         * @return This Entry for chaining.
+         */
+        public Entry orFail() {
             fail = true;
-
+            return this;
         }
 
         /**
@@ -174,7 +179,7 @@ public class Validator {
      * {@link Entry} for these fields before you try to define relationships between them. You can use this to apply a
      * {@link BiPredicate} to these fields and provide or use their defined defaults (defined using
      * {@link Entry#defaultTo(Object)}) if the check fails. You may also ask the relationship to fail with
-     * {@link #andFail()} if you do not want it to default..
+     * {@link #orFail()} if you do not want it to default..
      */
     public static class Relationship {
         private String keyA;
@@ -232,7 +237,7 @@ public class Validator {
         /**
          * Fail if this relationship fails to hold.
          */
-        public void andFail() {
+        public void orFail() {
             fail = true;
         }
 
@@ -267,7 +272,7 @@ public class Validator {
      * This represents a n-ary validation for the config. You can specify as many fields that need to participate in this
      * validation. As with a {@link Relationship}, the {@link Entry} must have been defined for these fields already.
      * You may provide a check for the values of these fields using {@link #checkIf(Predicate)}, which may be chained
-     * onto. If it fails and unless you ask the check to fail with {@link #andFail()}, the defaults from the entries
+     * onto. If it fails and unless you ask the check to fail with {@link #orFail()}, the defaults from the entries
      * defined for these fields will be used for all of them.
      */
     public static class State {
@@ -303,9 +308,9 @@ public class Validator {
         }
 
         /**
-         * Fail if this this validation fails.
+         * Fail if this state check fails.
          */
-        public void andFail() {
+        public void orFail() {
             fail = true;
         }
 
@@ -318,6 +323,7 @@ public class Validator {
          * @param entries The {@link Map} of names to {@link Entry} that are relevant for this config.
          */
         void normalize(BulletConfig config, Map<String, Entry> entries) {
+            // Sequential stream so order is the same
             List<Object> values = keys.stream().map(config::get).collect(Collectors.toList());
             boolean result = validation.test(values);
             if (result) {
@@ -397,19 +403,21 @@ public class Validator {
      * Create a state with a description for the given fields. This lets you validate values for as many fields as you
      * want. By default, the state check will hold true unless you provide one with {@link State#checkIf(Predicate)},
      * which provides you the values for the fields you are defining this for. Unless you ask the the check to fail with
-     * {@link State#andFail()}, it will use the defaults for each of the entries.
+     * {@link State#orFail()}, it will use the defaults for each of the entries.
      *
      * @param description A string description for this state validation.
      * @param keys The non-null fields for this state validation. They must already be defined as entries.
      * @return The create {@link State}.
      */
-    public State define(String description, String... keys) {
+    public State evaluate(String description, String... keys) {
         Objects.requireNonNull(keys, "You must provide the relevant keys for this state validation");
         List<String> missingKeys = Arrays.stream(keys).filter(k -> entries.get(k) == null).collect(Collectors.toList());
         if (!missingKeys.isEmpty())  {
-            throw new NullPointerException("You must define entries for "  + missingKeys.stream().collect(Collectors.joining(COMMA)));
+            throw new NullPointerException("You must evaluate entries for "  + missingKeys.stream().collect(Collectors.joining(COMMA)));
         }
-        return new State(description, Arrays.asList(keys));
+        State state = new State(description, Arrays.asList(keys));
+        states.add(state);
+        return state;
     }
 
     /**
