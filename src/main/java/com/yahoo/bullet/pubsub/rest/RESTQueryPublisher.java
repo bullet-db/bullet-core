@@ -6,7 +6,6 @@
 package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.Metadata;
-import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,7 +33,7 @@ public class RESTQueryPublisher extends RESTPublisher {
     }
 
     @Override
-    public void send(PubSubMessage message) throws PubSubException {
+    public void send(PubSubMessage message) {
         // Put responseURL in the metadata so the ResponsePublisher knows to which host to send the response
         Metadata metadata = message.getMetadata();
         metadata = metadata == null ? new Metadata() : metadata;

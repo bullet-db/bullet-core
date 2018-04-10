@@ -6,20 +6,20 @@
 package com.yahoo.bullet.pubsub.rest;
 
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
-import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
@@ -27,6 +27,7 @@ public class RESTSubscriber extends BufferingSubscriber {
     private List<String> urls;
     private CloseableHttpClient client;
     private long minWait;
+    @Setter(AccessLevel.PACKAGE)
     private long lastRequest;
     private int connectTimeout;
 
@@ -37,6 +38,7 @@ public class RESTSubscriber extends BufferingSubscriber {
      * @param urls The URLs which will be used to make the http request.
      * @param client The client to use to make http requests.
      * @param minWait The minimum time (ms) to wait between subsequent http requests.
+     * @param connectTimeout The minimum time (ms) to wait for a connection to be made.
      */
     public RESTSubscriber(int maxUncommittedMessages, List<String> urls, CloseableHttpClient client, long minWait, int connectTimeout) {
         super(maxUncommittedMessages);
@@ -48,7 +50,7 @@ public class RESTSubscriber extends BufferingSubscriber {
     }
 
     @Override
-    public List<PubSubMessage> getMessages() throws PubSubException {
+    public List<PubSubMessage> getMessages() {
         List<PubSubMessage> messages = new ArrayList<>();
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastRequest <= minWait) {

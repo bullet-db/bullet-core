@@ -109,7 +109,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * if (metadata.hasSignal(Signal.KILL) || metadata.hasSignal(Signal.COMPLETE))
  *     remove Querier for id
  * else
- *     create new Querier(id, queryBody, config) and initialize it;
+ *     create new Querier(id, queryBody, config) and initialize it (see note below regarding delaying start).
  * </pre>
  *
  * <h5>Case 2: BulletRecord record</h5>
@@ -178,20 +178,21 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *   data volume is too low.
  * </li>
  * <li>
- *   <em>Optional but recommended if you are processing event by event not microbatches</em>: Since data from the Filter stage
- *   partitions may not arrive at the same time and since the querier may be {@link #isClosed()} at the same time the
- *   data from the Filter stage partitions arrive, you should not immediately emit {@link #getResult()} if
- *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You should put it in a buffer
- *   for a little bit of time while the data arrives if {@link #isClosed()}, then {@link #getResult()} and
- *   {@link #reset()}. Similarly, for {@link #isDone()}. You should only do this for queries for which
- *   {@link #shouldBuffer()} is true. For record based windows, you can use {@link #isClosed()} to drive the
- *   emission of the results.
+ *   <em>Optional Delayed start and End (recommended if you are processing event by event)</em>: Since data from the
+ *   Filter stage partitions may not arrive at the same time and since the querier may be {@link #isClosed()} at the
+ *   same time the data from the Filter stage partitions arrive, you should not immediately emit {@link #getResult()} if
+ *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You can use the negation of
+ *   {@link #shouldBuffer()} to find out if this kind of query can be started after a bit of delay. This delay will
+ *   ensure that results from the Filter phase always start. To aid you in doing this, you can put it in a buffer and
+ *   use {@link #restart()} to mark the delayed start of the query.
+ *   Similarly, some queries need to be buffered after they are {@link #isDone()} (these include queries that were not
+ *   delayed). You should only do this for queries for which {@link #shouldBuffer()} is true.
  * </li>
  * </ol>
  *
  * <h4>Pseudo Code</h4>
  *
- * <h5>Case 1:  Query</h5>
+ * <h5>Case 1: Query</h5>
  * <pre>
  * (String id, String queryBody, Metadata metadata) = Query
  * if (metadata.hasSignal(Signal.KILL))
@@ -394,6 +395,19 @@ public class Querier implements Monoidal {
     }
 
     /**
+     * Forces a restart of a valid query (must have previously called {@link #initialize()}) to mark the
+     * correct start of this object if it was previously created but delayed in starting it (by using the negation of
+     * {@link #shouldBuffer()}. You might be using this if you were delaying the start of the query in the
+     * Join phase. This does not revalidate the query or reset any data this might have already consumed.
+     */
+    public void restart() {
+        // Only timestamps are in RunningQuery and Scheme.
+        // For RunningQuery, we just need to fix the start time.
+        runningQuery.start();
+        window.initialize();
+    }
+
+    /**
      * Consume a {@link BulletRecord} for this query. The record may or not be actually incorporated into the query
      * results. This depends on whether the query can accept more data, if it is expired or not or if the record matches
      * any query filtering criteria.
@@ -577,22 +591,16 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Returns if this query should buffer before emitting results. You can use this to wait for the final results
-     * for your window (or your final results if you have no window) in your Join or Combine stage after a query is
-     * {@link #isDone()} or {@link #isClosed()}.
+     * Returns if this query should buffer before emitting the final results. You can use this to wait for the final
+     * results in your Join or Combine stage after a query is {@link #isDone()}.
      *
-     * @return A boolean that is true if the query results should be buffered.
+     * @return A boolean that is true if the query results should be buffered in the Join phase.
      */
     public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow = window == null;
-        // If it's a RAW query without a window, it should be buffered if and only if it timed out. This means that the
-        // query is not yet done. So this tells the driver to buffer the query to wait for more potential results.
-        if (noWindow && isRaw()) {
-            return runningQuery.isTimedOut();
-        }
-        // No window (and not raw) is a duration based query => do buffer. Otherwise, buffer if the window is time based.
-        return noWindow || window.isTimeBased();
+        boolean noWindow =  window == null;
+        // Only buffer if there is no window (including Raw) or if it's a record based window.
+        return noWindow || !window.isTimeBased();
     }
 
     /**

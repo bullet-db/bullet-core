@@ -65,7 +65,7 @@ public class TumblingTest {
         Tumbling tumbling = make(1000, 5000);
         Assert.assertFalse(tumbling.initialize().isPresent());
         // The window is what controls this so Tumbling has 5000 for the window size
-        Assert.assertEquals(tumbling.closeAfter, 5000L);
+        Assert.assertEquals(tumbling.windowLength, 5000L);
     }
 
     @Test
@@ -110,8 +110,8 @@ public class TumblingTest {
         Tumbling tumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
         Assert.assertFalse(tumbling.initialize().isPresent());
-        long originalStartedAt = tumbling.startedAt;
-        Assert.assertTrue(originalStartedAt >= started);
+        long originalCloseTime = tumbling.nextCloseTime;
+        Assert.assertTrue(originalCloseTime >= started + 1);
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -121,10 +121,10 @@ public class TumblingTest {
 
         long resetTime = System.currentTimeMillis();
         tumbling.reset();
-        long newStartedAt = tumbling.startedAt;
+        long newCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
-        Assert.assertTrue(newStartedAt > originalStartedAt);
-        Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
+        Assert.assertTrue(newCloseTime >= resetTime);
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
@@ -135,8 +135,8 @@ public class TumblingTest {
         Tumbling tumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
         Assert.assertFalse(tumbling.initialize().isPresent());
-        long originalStartedAt = tumbling.startedAt;
-        Assert.assertTrue(originalStartedAt >= started);
+        long originalCloseTime = tumbling.nextCloseTime;
+        Assert.assertTrue(originalCloseTime >= started + 1);
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -146,10 +146,10 @@ public class TumblingTest {
 
         long resetTime = System.currentTimeMillis();
         tumbling.resetForPartition();
-        long newStartedAt = tumbling.startedAt;
+        long newCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
-        Assert.assertTrue(newStartedAt > originalStartedAt);
-        Assert.assertTrue(newStartedAt >= resetTime);
+        Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
+        Assert.assertTrue(newCloseTime >= resetTime);
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 

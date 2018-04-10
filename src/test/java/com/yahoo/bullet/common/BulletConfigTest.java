@@ -22,7 +22,7 @@ import java.util.Set;
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
 
 public class BulletConfigTest {
-    private static Map<String, String> allMetadataAsMap() {
+    public static Map<String, String> allMetadataAsMap() {
         Map<String, String> meta = new HashMap<>();
         for (Map<String, String> m : BulletConfig.DEFAULT_RESULT_METADATA_METRICS) {
             meta.put(m.get(BulletConfig.RESULT_METADATA_METRICS_CONCEPT_KEY), m.get(BulletConfig.RESULT_METADATA_METRICS_NAME_KEY));
