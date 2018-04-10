@@ -181,13 +181,16 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *   <em>Optional Delayed start and End (recommended if you are processing event by event)</em>: Since data from the
  *   Filter stage partitions may not arrive at the same time and since the querier may be {@link #isClosed()} at the
  *   same time the data from the Filter stage partitions arrive, you should not immediately emit {@link #getResult()} if
- *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You can use the negation of
+ *   {@link #isClosed()} and then {@link #reset()}. There are two ways to handle this. You could delay the start of the
+ *   query by a bit in the Join stage so that windows from the Filter stage always arrive a bit earlier. Or you could
+ *   buffer the results in the Join stage for a bit for each window as results trickle in. The issue with the latter
+ *   approach is that you will slowly add the buffer time to the duration of your windows in your Join stage and
+ *   eventually you will get two windows in one. The former approach does not have this problem. However, that approach
+ *   could lead you to drop results for record based windows due to the result. To solve these, you should buffer
+ *   the final results for all queries for whom {@link #shouldBuffer()} is true. And you can use the negation of
  *   {@link #shouldBuffer()} to find out if this kind of query can be started after a bit of delay. This delay will
- *   ensure that results from the Filter phase always start. To aid you in doing this, you can put it in a buffer and
- *   use {@link #restart()} to mark the delayed start of the query. If you do not do this, you should buffer all
- *   finished queries to wait for the results to arrive from the upstream Filter stage. See buffering below.
- *   Similarly, some queries need to be buffered after they are {@link #isDone()} (these include queries that were not
- *   delayed). You should only do this for queries for which {@link #shouldBuffer()} is true.
+ *   ensure that results from the Filter phase always start for time based windows. To aid you in doing this, you can
+ *   buffer it and use {@link #restart()} to mark the delayed start of the query.
  * </li>
  * </ol>
  *
