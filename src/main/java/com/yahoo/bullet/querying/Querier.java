@@ -109,7 +109,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * if (metadata.hasSignal(Signal.KILL) || metadata.hasSignal(Signal.COMPLETE))
  *     remove Querier for id
  * else
- *     create new Querier(id, queryBody, config) and initialize it (see note below regarding delaying start).
+ *     create new Querier(id, queryBody, config) and initialize it;
  * </pre>
  *
  * <h5>Case 2: BulletRecord record</h5>
@@ -123,7 +123,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *         if (q.isClosed())
  *             emit(q.getData())
  *             q.reset()
-     *         q.consume(record)
+ *             q.consume(record)
  *         if (q.isExceedingRateLimit())
  *             emit(q.getRateLimitError())
  *             remove q
@@ -184,7 +184,8 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *   {@link #isClosed()} and then {@link #reset()} for <em>non time-based windows</em>. You can use the negation of
  *   {@link #shouldBuffer()} to find out if this kind of query can be started after a bit of delay. This delay will
  *   ensure that results from the Filter phase always start. To aid you in doing this, you can put it in a buffer and
- *   use {@link #restart()} to mark the delayed start of the query.
+ *   use {@link #restart()} to mark the delayed start of the query. If you do not do this, you should buffer all
+ *   finished queries to wait for the results to arrive from the upstream Filter stage. See buffering below.
  *   Similarly, some queries need to be buffered after they are {@link #isDone()} (these include queries that were not
  *   delayed). You should only do this for queries for which {@link #shouldBuffer()} is true.
  * </li>
@@ -200,7 +201,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *     return
  * try {
  *     create new Querier(id, queryBody, config)
- *     initialize it and if errors present:
+ *     initialize it (see note above regarding delaying start) and if errors present:
  *         emit(Clip.of(Meta.of(errors.get()));
  * catch (Exception e) {
  *     Clip clip = Clip.of(Meta.of(asList(BulletError.makeError(e, queryBody)))
