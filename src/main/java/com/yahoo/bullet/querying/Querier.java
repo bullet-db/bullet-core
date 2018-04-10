@@ -185,11 +185,13 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *   buffer the results in the Join stage for a bit for each window as results trickle in. The issue with the latter
  *   approach is that you will slowly add the buffer time to the duration of your windows in your Join stage and
  *   eventually you will get two windows in one. The former approach does not have this problem. However, that approach
- *   could lead you to drop results for record based windows due to the result. To solve these, you should buffer
- *   the final results for all queries for whom {@link #shouldBuffer()} is true. And you can use the negation of
- *   {@link #shouldBuffer()} to find out if this kind of query can be started after a bit of delay. This delay will
- *   ensure that results from the Filter phase always start for time based windows. To aid you in doing this, you can
- *   buffer it and use {@link #restart()} to mark the delayed start of the query.
+ *   could lead to results that are sent immediately (for record based windows) being dropped while the delay is
+ *   happening. To solve these issues, you should buffer the final results for all queries for whom {@link #shouldBuffer()}
+ *   is true. This should be true for time-based windows and false for all record-based windows or queries with no
+ *   window. So you can use the negation of {@link #shouldBuffer()} to find out if the latter queries can be delayed.
+ *   This delay will ensure that results from the filter phase are collected in their entirety before emitting from the
+ *   Join phase. To aid you in doing this, you can buffer it and use {@link #restart()} to mark the delayed start of the
+ *   query.
  * </li>
  * </ol>
  *
