@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * This class validates instances of {@link BulletConfig}. Use {@link Validator.Entry} to define
@@ -32,12 +33,15 @@ import java.util.function.Predicate;
 public class Validator {
     private static final Predicate<Object> UNARY_IDENTITY = o -> true;
     private static final BiPredicate<Object, Object> BINARY_IDENTITY = (oA, oB) -> true;
+    private static final Predicate<List<Object>> NARY_IDENTITY = o -> true;
+    private static final String COMMA = ", ";
 
     /**
      * This represents a field in the Validator. It applies a {@link Predicate} to the value of the field and uses a
      * default value (see {@link Entry#defaultTo(Object)} if the predicate fails. It can also apply an arbitrary
      * conversion using {@link Entry#castTo(Function)}. These are all applied when you call
      * {@link Entry#normalize(BulletConfig)} with a {@link BulletConfig} containing a field that matches the Entry.
+     * You can also ask that the check cause a failure using {@link #orFail()}.
      */
     public static class Entry {
         private String key;
@@ -45,11 +49,13 @@ public class Validator {
         private Predicate<Object> guard;
         private Object defaultValue;
         private Function<Object, Object> adapter;
+        private boolean fail;
 
         private Entry(String key) {
             this.validation = UNARY_IDENTITY;
             this.guard = UNARY_IDENTITY.negate();
             this.key = key;
+            this.fail = false;
         }
 
         private Entry copy() {
@@ -58,6 +64,7 @@ public class Validator {
             entry.defaultValue = defaultValue;
             entry.validation = validation;
             entry.guard = guard;
+            entry.fail = fail;
             return entry;
         }
 
@@ -87,6 +94,16 @@ public class Validator {
         public Entry checkIf(Predicate<Object> validator) {
             Objects.requireNonNull(validator);
             this.validation = this.validation.and(validator);
+            return this;
+        }
+
+        /**
+         * Fail if this entry fails to hold.
+         *
+         * @return This Entry for chaining.
+         */
+        public Entry orFail() {
+            fail = true;
             return this;
         }
 
@@ -142,6 +159,10 @@ public class Validator {
             }
             boolean isValid = validation.test(value);
             if (!isValid) {
+                if (fail) {
+                    log.error("Key: {} had an invalid value: {}. Erroring out as default not permitted.", key, value);
+                    throw new IllegalStateException("Check cannot be satisfied or fixed for " + key);
+                }
                 log.warn("Key: {} had an invalid value: {}. Using default: {}", key, value, defaultValue);
                 value = defaultValue;
             }
@@ -157,7 +178,8 @@ public class Validator {
      * This represents a binary relationship between two fields in a {@link BulletConfig}. You should have defined
      * {@link Entry} for these fields before you try to define relationships between them. You can use this to apply a
      * {@link BiPredicate} to these fields and provide or use their defined defaults (defined using
-     * {@link Entry#defaultTo(Object)}) if the check fails.
+     * {@link Entry#defaultTo(Object)}) if the check fails. You may also ask the relationship to fail with
+     * {@link #orFail()} if you do not want it to default..
      */
     public static class Relationship {
         private String keyA;
@@ -166,6 +188,7 @@ public class Validator {
         private BiPredicate<Object, Object> binaryRelation;
         private Object defaultA;
         private Object defaultB;
+        private boolean fail;
 
         private Relationship(String description, String keyA, String keyB, Map<String, Entry> entries) {
             this.description = description;
@@ -175,6 +198,7 @@ public class Validator {
             this.defaultA = entries.get(keyA).getDefaultValue();
             this.defaultB = entries.get(keyB).getDefaultValue();
             this.binaryRelation = BINARY_IDENTITY;
+            this.fail = false;
         }
 
         private Relationship copy(Map<String, Entry> entries) {
@@ -182,6 +206,7 @@ public class Validator {
             relation.binaryRelation = binaryRelation;
             relation.defaultA = defaultA;
             relation.defaultB = defaultB;
+            relation.fail = fail;
             return relation;
         }
 
@@ -210,6 +235,13 @@ public class Validator {
         }
 
         /**
+         * Fail if this relationship fails to hold.
+         */
+        public void orFail() {
+            fail = true;
+        }
+
+        /**
          * Normalize the given {@link BulletConfig} for the fields defined by this relationship. This applies the check
          * and uses the defaults (provided using {@link Relationship#orElseUse(Object, Object)} or the Entry defaults
          * for these fields if the check fails.
@@ -220,20 +252,101 @@ public class Validator {
             Object objectA = config.get(keyA);
             Object objectB = config.get(keyB);
             boolean isValid = binaryRelation.test(objectA, objectB);
-            if (!isValid) {
-                log.warn("{}: {} and {}: {} do not satisfy: {}. Using their defaults", keyA, objectA, keyB, objectB, description);
-                log.warn("Using default {} for {}", defaultA, keyA);
-                log.warn("Using default {} for {}", defaultB, keyB);
-                config.set(keyA, defaultA);
-                config.set(keyB, defaultB);
+            if (isValid) {
+                return;
+            }
+            if (fail) {
+                log.error("{}: {} and {}: {} do not satisfy: {}. Erroring out as using defaults was not permitted...",
+                          keyA, objectA, keyB, objectB, description);
+                throw new IllegalStateException("Relationship cannot be satisfied or fixed: " + description);
+            }
+            log.warn("{}: {} and {}: {} do not satisfy: {}. Using their defaults", keyA, objectA, keyB, objectB, description);
+            log.warn("Using default {} for {}", defaultA, keyA);
+            log.warn("Using default {} for {}", defaultB, keyB);
+            config.set(keyA, defaultA);
+            config.set(keyB, defaultB);
+        }
+    }
+
+    /**
+     * This represents a n-ary validation for the config. You can specify as many fields that need to participate in this
+     * validation. As with a {@link Relationship}, the {@link Entry} must have been defined for these fields already.
+     * You may provide a check for the values of these fields using {@link #checkIf(Predicate)}, which may be chained
+     * onto. If it fails and unless you ask the check to fail with {@link #orFail()}, the defaults from the entries
+     * defined for these fields will be used for all of them.
+     */
+    public static class State {
+        private final String description;
+        private final List<String> keys;
+        private Predicate<List<Object>> validation;
+        private boolean fail;
+
+        private State(String description, List<String> keys) {
+            this.description = description;
+            this.keys = keys;
+            this.validation = NARY_IDENTITY;
+            this.fail = false;
+        }
+
+        private State copy() {
+            State state = new State(description, keys);
+            state.validation = validation;
+            state.fail = fail;
+            return state;
+        }
+
+        /**
+         * Provide the {@link Predicate} that accepts the values that this state is checking.
+         * validations and they will be ANDed on the existing ones.
+         *
+         * @param validation A check for this relationship.
+         * @return This Relationship for chaining.
+         */
+        public State checkIf(Predicate<List<Object>> validation) {
+            this.validation = this.validation.and(validation);
+            return this;
+        }
+
+        /**
+         * Fail if this state check fails.
+         */
+        public void orFail() {
+            fail = true;
+        }
+
+        /*
+         * Normalize the given {@link BulletConfig} for the fields defined by this relationship. This applies the check
+         * and uses the defaults (provided using {@link Relationship#orElseUse(Object, Object)} or the Entry defaults
+         * for these fields if the check fails.
+         *
+         * @param config The config to validate.
+         * @param entries The {@link Map} of names to {@link Entry} that are relevant for this config.
+         */
+        void normalize(BulletConfig config, Map<String, Entry> entries) {
+            // Sequential stream so order is the same
+            List<Object> values = keys.stream().map(config::get).collect(Collectors.toList());
+            boolean result = validation.test(values);
+            if (result) {
+                return;
+            }
+            log.warn("State validation: {} failed for values {}", description, values);
+            if (fail) {
+                log.error("Erroring out as using defaults was not permitted");
+                throw new IllegalStateException("Unsupported values for " + values);
+            }
+            for (String key : keys) {
+                Object defaultValue = entries.get(key).getDefaultValue();
+                log.warn("Using default value of {} for {}", defaultValue, key);
+                config.set(key, defaultValue);
             }
         }
     }
 
+    // For testing
     @Getter(AccessLevel.PACKAGE)
     private final Map<String, Entry> entries;
-    @Getter(AccessLevel.PACKAGE)
     private final List<Relationship> relations;
+    private final List<State> states;
 
     /**
      * Default constructor.
@@ -241,13 +354,15 @@ public class Validator {
     public Validator() {
         entries = new HashMap<>();
         relations = new ArrayList<>();
+        states = new ArrayList<>();
     }
 
-    private Validator(Map<String, Entry> entries, List<Relationship> relations) {
+    private Validator(Map<String, Entry> entries, List<Relationship> relations, List<State> states) {
         // Copy constructor.
         this();
         entries.forEach((name, entry) -> this.entries.put(name, entry.copy()));
         relations.forEach(relation -> this.relations.add(relation.copy(entries)));
+        states.forEach(state -> this.states.add(state.copy()));
     }
 
     /**
@@ -284,6 +399,27 @@ public class Validator {
     }
 
     /**
+     * Create a state with a description for the given fields. This lets you validate values for as many fields as you
+     * want. By default, the state check will hold true unless you provide one with {@link State#checkIf(Predicate)},
+     * which provides you the values for the fields you are defining this for. Unless you ask the the check to fail with
+     * {@link State#orFail()}, it will use the defaults for each of the entries.
+     *
+     * @param description A string description for this state validation.
+     * @param keys The non-null fields for this state validation. They must already be defined as entries.
+     * @return The create {@link State}.
+     */
+    public State evaluate(String description, String... keys) {
+        Objects.requireNonNull(keys, "You must provide the relevant keys for this state validation");
+        List<String> missingKeys = Arrays.stream(keys).filter(k -> entries.get(k) == null).collect(Collectors.toList());
+        if (!missingKeys.isEmpty())  {
+            throw new NullPointerException("You must evaluate entries for "  + missingKeys.stream().collect(Collectors.joining(COMMA)));
+        }
+        State state = new State(description, Arrays.asList(keys));
+        states.add(state);
+        return state;
+    }
+
+    /**
      * Validate and normalize the provided {@link BulletConfig} for the defined entries and relationships. Then entries
      * are used to validate the config first.
      *
@@ -292,6 +428,7 @@ public class Validator {
     public void validate(BulletConfig config) {
         entries.values().forEach(e -> e.normalize(config));
         relations.forEach(r -> r.normalize(config));
+        states.forEach(s -> s.normalize(config, entries));
     }
 
     /**
@@ -301,7 +438,7 @@ public class Validator {
      * @return A copy of this validator with all its defined {@link Entry} and {@link Relationship}.
      */
     public Validator copy() {
-        return new Validator(entries, relations);
+        return new Validator(entries, relations, states);
     }
 
     // Type Adapters
@@ -537,5 +674,18 @@ public class Validator {
      */
     public static boolean isGreaterOrEqual(Object first, Object second) {
         return ((Number) first).doubleValue() >= ((Number) second).doubleValue();
+    }
+
+    // Binary Predicate makers.
+
+    /**
+     * Returns a {@link BiPredicate} that checks to see if the first argument is at least the given times
+     * more than the second.
+     *
+     * @param n The number of times the second argument must be smaller than the first.
+     * @return The created {@link BiPredicate}.
+     */
+    public static BiPredicate<Object, Object> isAtleastNTimes(double n) {
+        return (greater, smaller) -> ((Number) greater).doubleValue() >= n * ((Number) smaller).doubleValue();
     }
 }

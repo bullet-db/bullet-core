@@ -7,6 +7,7 @@ package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.common.Validator.Entry;
 import com.yahoo.bullet.common.Validator.Relationship;
+import com.yahoo.bullet.common.Validator.State;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -122,6 +124,17 @@ public class ValidatorTest {
         Assert.assertEquals(empty.get("foo"), "1");
         // This is the SAME string
         Assert.assertTrue(empty.get("foo") == original);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testEntryFailing() {
+        Validator validator = new Validator();
+        Entry entry = validator.define("foo")
+                               .checkIf(Validator::isNotNull)
+                               .checkIf(Validator.isIn("baz", "bar"))
+                               .orFail();
+        empty.set("foo", "qux");
+        entry.normalize(empty);
     }
 
     @Test
@@ -250,6 +263,20 @@ public class ValidatorTest {
         Assert.assertFalse(Validator.isInRange(-1, 2.0).test(-1.1));
         Assert.assertFalse(Validator.isInRange(-1, 2.0).test(2.1));
         Assert.assertFalse(Validator.isInRange(-1, 2.0).test(null));
+    }
+
+    @Test
+    public void testIsAtleastNTimes() {
+        BiPredicate<Object, Object> isAtleastTwice = Validator.isAtleastNTimes(2.0);
+        Assert.assertTrue(isAtleastTwice.test(2L, 1L));
+        Assert.assertTrue(isAtleastTwice.test(3L, 1L));
+        Assert.assertFalse(isAtleastTwice.test(0L, 1L));
+
+        BiPredicate<Object, Object> isAtleastThrice = Validator.isAtleastNTimes(3.0);
+        Assert.assertFalse(isAtleastThrice.test(2.0, 1L));
+        Assert.assertTrue(isAtleastThrice.test(3.0, 1L));
+        Assert.assertTrue(isAtleastThrice.test(4.0, 1L));
+        Assert.assertFalse(isAtleastThrice.test(0.1, 1L));
     }
 
     @Test
@@ -396,6 +423,86 @@ public class ValidatorTest {
         Assert.assertEquals(empty.get("bar"), "norf");
     }
 
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testRelationshipFailureFailsOut() {
+        Validator validator = new Validator();
+        validator.define("foo").defaultTo(0);
+        validator.define("bar").defaultTo(42);
+
+        Relationship relation = validator.relate("Test", "foo", "bar").checkIf(Validator::isGreaterOrEqual);
+        relation.orFail();
+
+        empty.set("foo", -1L);
+        empty.set("bar", 0.2);
+        relation.normalize(empty);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testStateWithoutEntry() {
+        Validator validator = new Validator();
+        validator.evaluate("Test", "foo", "bar", "baz");
+    }
+
+    @Test
+    public void testStateDefaulting() {
+        Validator validator = new Validator();
+
+        validator.define("foo").defaultTo(42);
+        validator.define("bar").defaultTo(11).castTo(Validator::asDouble);
+        validator.define("baz").defaultTo(true).checkIf(Validator::isBoolean);
+
+        validator.evaluate("Test", "foo", "bar", "baz").checkIf(o -> false);
+
+        empty.set("foo", 22);
+        empty.set("bar", -1.4);
+        empty.set("baz", false);
+        validator.validate(empty);
+
+        Assert.assertEquals(empty.get("foo"), 42);
+        Assert.assertEquals(empty.get("bar"), 11.0);
+        Assert.assertEquals(empty.get("baz"), true);
+    }
+
+    @Test
+    public void testStateMultipleChecks() {
+        Validator validator = new Validator();
+
+        validator.define("foo").defaultTo(42);
+        validator.define("bar").defaultTo(11).castTo(Validator::asDouble);
+        validator.define("baz").defaultTo(true).checkIf(Validator::isBoolean);
+
+        validator.evaluate("Test", "foo", "bar", "baz")
+                 .checkIf((o) -> o.get(0).equals("1") && o.get(1).equals(2.0) && o.get(2).equals(false))
+                 .checkIf((o) -> Double.valueOf(o.get(0).toString()) >= 0.0);
+
+        empty.set("foo", "1");
+        empty.set("bar", 2.0);
+        empty.set("baz", false);
+        validator.validate(empty);
+
+        Assert.assertEquals(empty.get("foo"), "1");
+        Assert.assertEquals(empty.get("bar"), 2.0);
+        Assert.assertEquals(empty.get("baz"), false);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testStateCheckFailureErrorsOut() {
+        Validator validator = new Validator();
+
+        validator.define("foo").defaultTo(42);
+        validator.define("bar").defaultTo(11).castTo(Validator::asDouble);
+        validator.define("baz").defaultTo(true).checkIf(Validator::isBoolean);
+
+        validator.evaluate("Test", "foo", "bar", "baz")
+                 .checkIf((o) -> false)
+                 .orFail();
+
+        empty.set("foo", 22);
+        empty.set("bar", -1.4);
+        empty.set("baz", false);
+        validator.validate(empty);
+    }
+
     @Test
     public void testCopyingPreservesOriginal() {
         Validator validator = new Validator();
@@ -450,39 +557,58 @@ public class ValidatorTest {
 
         validator.define("foo").checkIf(whitelist::contains).defaultTo(0);
         validator.define("bar").defaultTo(42);
+        validator.define("baz").defaultTo(false);
 
         Relationship relation = validator.relate("Test", "foo", "bar").checkIf(Validator::isGreaterOrEqual);
         relation.orElseUse("qux", "norf");
 
+        State state = validator.evaluate("Test", "foo", "bar", "baz").checkIf(o -> true);
+
         empty.set("foo", -1L);
         empty.set("bar", -1.4);
+        empty.set("baz", true);
         validator.validate(empty);
         // Defaults to 0 since -1 is not in the whitelist
         Assert.assertEquals(empty.get("foo"), 0);
         Assert.assertEquals(empty.get("bar"), -1.4);
+        Assert.assertEquals(empty.get("baz"), true);
 
         // Allow -1 through
         whitelist.add(-1L);
 
         empty.set("foo", -1L);
         empty.set("bar", -1.4);
+        empty.set("baz", false);
         validator.validate(empty);
         Assert.assertEquals(empty.get("foo"), -1L);
         Assert.assertEquals(empty.get("bar"), -1.4);
+        Assert.assertEquals(empty.get("baz"), false);
 
         Validator copy = validator.copy();
 
         // The copy also has the shallow copy of contains since -1 goes through
         empty.set("foo", -1L);
         empty.set("bar", -1.4);
+        empty.set("baz", false);
         copy.validate(empty);
         Assert.assertEquals(empty.get("foo"), -1L);
         Assert.assertEquals(empty.get("bar"), -1.4);
+        Assert.assertEquals(empty.get("baz"), false);
 
         // Removing the white
         whitelist.clear();
         copy.validate(empty);
         Assert.assertEquals(empty.get("foo"), 0);
         Assert.assertEquals(empty.get("bar"), -1.4);
+        Assert.assertEquals(empty.get("baz"), false);
+
+        //  Changing the state to fail, doesn't change the copy
+        state.checkIf(o -> false);
+        state.orFail();
+
+        copy.validate(empty);
+        Assert.assertEquals(empty.get("foo"), 0);
+        Assert.assertEquals(empty.get("bar"), -1.4);
+        Assert.assertEquals(empty.get("baz"), false);
     }
 }
