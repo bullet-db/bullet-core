@@ -10,7 +10,6 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -671,10 +670,6 @@ public class Querier implements Monoidal {
         // For now, we only need this to work for Basic windows (i.e. no windows) to quickly terminate queries that
         // have no windows. In the future, this could be computed using window attributes and duration.
         return window.getClass().equals(Basic.class);
-    }
-
-    private boolean isRaw() {
-        return runningQuery.getQuery().getAggregation().getType() == Aggregation.Type.RAW;
     }
 
     private Meta getErrorMeta(Exception e) {
