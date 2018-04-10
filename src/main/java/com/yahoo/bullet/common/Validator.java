@@ -342,11 +342,10 @@ public class Validator {
         }
     }
 
+    // For testing
     @Getter(AccessLevel.PACKAGE)
     private final Map<String, Entry> entries;
-    @Getter(AccessLevel.PACKAGE)
     private final List<Relationship> relations;
-    @Getter(AccessLevel.PACKAGE)
     private final List<State> states;
 
     /**
