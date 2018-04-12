@@ -124,7 +124,6 @@ public class TumblingTest {
         long newCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
         Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
-        Assert.assertTrue(newCloseTime >= resetTime);
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
@@ -149,7 +148,6 @@ public class TumblingTest {
         long newCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
         Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
-        Assert.assertTrue(newCloseTime >= resetTime);
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
 
