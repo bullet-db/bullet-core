@@ -124,7 +124,6 @@ public class AdditiveTumblingTest {
         long newCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
         Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
-        Assert.assertTrue(newCloseTime >= resetTime);
         // Aggregation should NOT have been reset
         Assert.assertEquals(strategy.getResetCalls(), 0);
     }
@@ -150,7 +149,6 @@ public class AdditiveTumblingTest {
         long newCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(resetTime > started);
         Assert.assertTrue(newCloseTime >= originalCloseTime + 1);
-        Assert.assertTrue(newCloseTime >= resetTime);
         // Aggregation should have been reset
         Assert.assertEquals(strategy.getResetCalls(), 1);
     }
