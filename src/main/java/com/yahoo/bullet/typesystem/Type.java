@@ -15,6 +15,7 @@ import java.util.Map;
 public enum Type {
     STRING(String.class),
     BOOLEAN(Boolean.class),
+    INTEGER(Integer.class),
     LONG(Long.class),
     DOUBLE(Double.class),
     LIST(List.class),
@@ -24,8 +25,8 @@ public enum Type {
     UNKNOWN(Type.class);
 
     public static final String NULL_EXPRESSION = "null";
-    public static List<Type> PRIMITIVES = Arrays.asList(BOOLEAN, LONG, DOUBLE, STRING);
-    public static List<Type> NUMERICS = Arrays.asList(LONG, DOUBLE);
+    public static List<Type> PRIMITIVES = Arrays.asList(BOOLEAN, INTEGER, LONG, DOUBLE, STRING);
+    public static List<Type> NUMERICS = Arrays.asList(INTEGER, LONG, DOUBLE);
 
     private final Class underlyingType;
 
@@ -70,6 +71,8 @@ public enum Type {
         switch (this) {
             case BOOLEAN:
                 return Boolean.valueOf(value);
+            case INTEGER:
+                return Integer.valueOf(value);
             case LONG:
                 // If we want to allow decimals to be casted as longs, do Double.valueOf(value).longValue() instead
                 return Long.valueOf(value);
