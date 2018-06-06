@@ -95,6 +95,8 @@ public class TypedObject implements Comparable<TypedObject> {
                 return ((Integer) value).compareTo((Integer) o.value);
             case LONG:
                 return ((Long) value).compareTo((Long) o.value);
+            case FLOAT:
+                return ((Float) value).compareTo((Float) o.value);
             case DOUBLE:
                 return ((Double) value).compareTo((Double) o.value);
             case NULL:
