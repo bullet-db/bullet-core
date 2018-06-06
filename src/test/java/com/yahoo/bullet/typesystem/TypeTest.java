@@ -16,9 +16,9 @@ public class TypeTest {
     @Test
     public void testCurrentTypes() {
         Assert.assertEquals(new HashSet<>(Type.PRIMITIVES),
-                            new HashSet<>(Arrays.asList(Type.LONG, Type.BOOLEAN, Type.DOUBLE, Type.STRING)));
+                            new HashSet<>(Arrays.asList(Type.INTEGER, Type.LONG, Type.BOOLEAN, Type.DOUBLE, Type.STRING)));
         Assert.assertEquals(new HashSet<>(Type.NUMERICS),
-                            new HashSet<>(Arrays.asList(Type.LONG, Type.DOUBLE)));
+                            new HashSet<>(Arrays.asList(Type.INTEGER, Type.LONG, Type.DOUBLE)));
     }
 
     @Test
@@ -28,7 +28,8 @@ public class TypeTest {
         Assert.assertEquals(Type.getType("foo"), Type.STRING);
         Assert.assertEquals(Type.getType(1L), Type.LONG);
         Assert.assertEquals(Type.getType(1.2), Type.DOUBLE);
-        Assert.assertEquals(Type.getType(1), Type.UNKNOWN);
+        Assert.assertEquals(Type.getType(1), Type.INTEGER);
+        Assert.assertEquals(Type.getType(3.14F), Type.UNKNOWN);
         Assert.assertEquals(Type.getType(new HashSet<String>()), Type.UNKNOWN);
     }
 
