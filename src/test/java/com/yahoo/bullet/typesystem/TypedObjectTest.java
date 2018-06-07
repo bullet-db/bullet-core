@@ -30,10 +30,20 @@ public class TypedObjectTest {
 
     @Test
     public void testTypeCasting() {
-        TypedObject object = new TypedObject(1L);
+        TypedObject object = new TypedObject(1);
         TypedObject castedToObjectType = object.typeCast("1234");
+        Assert.assertEquals(castedToObjectType.getType(), Type.INTEGER);
+        Assert.assertEquals(castedToObjectType.getValue(), 1234);
+
+        object = new TypedObject(1L);
+        castedToObjectType = object.typeCast("1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.LONG);
         Assert.assertEquals(castedToObjectType.getValue(), 1234L);
+
+        object = new TypedObject(1.123f);
+        castedToObjectType = object.typeCast("1234");
+        Assert.assertEquals(castedToObjectType.getType(), Type.FLOAT);
+        Assert.assertEquals(castedToObjectType.getValue(), 1234f);
 
         object = new TypedObject(1.123);
         castedToObjectType = object.typeCast("1234");
@@ -98,9 +108,27 @@ public class TypedObjectTest {
     }
 
     @Test
+    public void testIntegerComparison() {
+        TypedObject objectA = new TypedObject(42);
+        TypedObject objectB = new TypedObject(43);
+        Assert.assertTrue(objectA.compareTo(objectB) < 0);
+        Assert.assertTrue(objectB.compareTo(objectA) > 0);
+        Assert.assertTrue(objectA.compareTo(objectA) == 0);
+    }
+
+    @Test
     public void testLongComparison() {
         TypedObject objectA = new TypedObject(42L);
         TypedObject objectB = new TypedObject(43L);
+        Assert.assertTrue(objectA.compareTo(objectB) < 0);
+        Assert.assertTrue(objectB.compareTo(objectA) > 0);
+        Assert.assertTrue(objectA.compareTo(objectA) == 0);
+    }
+
+    @Test
+    public void testFloatComparison() {
+        TypedObject objectA = new TypedObject(42.0f);
+        TypedObject objectB = new TypedObject(42.1f);
         Assert.assertTrue(objectA.compareTo(objectB) < 0);
         Assert.assertTrue(objectB.compareTo(objectA) > 0);
         Assert.assertTrue(objectA.compareTo(objectA) == 0);
