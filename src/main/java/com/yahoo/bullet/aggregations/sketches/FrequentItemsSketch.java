@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.record.AvroBulletRecord;
+import com.yahoo.bullet.record.BulletAvroRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -87,7 +87,7 @@ public class FrequentItemsSketch extends Sketch {
         ItemsSketch.Row<String>[] items = sketch.getFrequentItems(threshold, type);
         for (int i = 0; i < items.length && i < maxSize; ++i) {
             ItemsSketch.Row<String> item = items[i];
-            BulletRecord record = new AvroBulletRecord();
+            BulletRecord record = new BulletAvroRecord();
             record.setString(ITEM_FIELD, item.getItem());
             record.setLong(COUNT_FIELD, item.getEstimate());
             data.add(record);

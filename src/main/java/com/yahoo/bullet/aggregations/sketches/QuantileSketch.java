@@ -6,7 +6,7 @@
 package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.record.AvroBulletRecord;
+import com.yahoo.bullet.record.BulletAvroRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -278,7 +278,7 @@ public class QuantileSketch extends DualSketch {
         List<BulletRecord> records = new ArrayList<>();
 
         for (int i = 0; i < domain.length; ++i) {
-            records.add(new AvroBulletRecord().setDouble(QUANTILE_FIELD, domain[i])
+            records.add(new BulletAvroRecord().setDouble(QUANTILE_FIELD, domain[i])
                                           .setDouble(VALUE_FIELD, range[i]));
         }
         return records;
@@ -288,7 +288,7 @@ public class QuantileSketch extends DualSketch {
         List<BulletRecord> records = new ArrayList<>();
         String[] bins = makeBins(domain, cumulative);
         for (int i = 0; i < bins.length; ++i) {
-            records.add(new AvroBulletRecord().setString(RANGE_FIELD, bins[i])
+            records.add(new BulletAvroRecord().setString(RANGE_FIELD, bins[i])
                                           .setDouble(PROBABILITY_FIELD, range[i])
                                           .setDouble(COUNT_FIELD, range[i] * n));
         }
