@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
+import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.memory.NativeMemory;
@@ -151,7 +152,7 @@ public class ThetaSketch extends KMVSketch {
 
     private BulletRecord getCount() {
         double count = result.getEstimate();
-        BulletRecord record = new BulletRecord();
+        BulletRecord record = new AvroBulletRecord();
         record.setDouble(COUNT_FIELD, count);
         return record;
 

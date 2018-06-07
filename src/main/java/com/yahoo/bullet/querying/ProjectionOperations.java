@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Projection;
+import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +30,7 @@ public class ProjectionOperations {
             return record;
         }
         // More efficient if fields << the fields in the BulletRecord
-        BulletRecord projected = new BulletRecord();
+        BulletRecord projected = new AvroBulletRecord();
         for (Map.Entry<String, String> e : fields.entrySet()) {
             String field = e.getKey();
             String newName = e.getValue();
