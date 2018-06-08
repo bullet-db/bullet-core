@@ -89,7 +89,7 @@ public class GroupDataSummaryTest {
         BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap());
         // Base is 10 -> MAX is 2nd (10 + 1 + 3), MIN is 3rd (10 - 2 - 3)
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
-                                               .add("COUNT_metric_0", 1).add("MAX_metric_1", 14.0).add("MIN_metric_2", 5.0)
+                                               .add("COUNT_metric_0", 1L).add("MAX_metric_1", 14.0).add("MIN_metric_2", 5.0)
                                                .getRecord();
         Assert.assertTrue(actual.equals(expected));
     }
@@ -114,7 +114,7 @@ public class GroupDataSummaryTest {
 
         BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap());
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
-                                               .add("COUNT_metric_0", 2).add("MAX_metric_1", 14.0).add("MIN_metric_2", 0.0)
+                                               .add("COUNT_metric_0", 2L).add("MAX_metric_1", 14.0).add("MIN_metric_2", 0.0)
                                                .getRecord();
         Assert.assertTrue(actual.equals(expected));
     }
@@ -356,7 +356,7 @@ public class GroupDataSummaryTest {
 
         BulletRecord actual = deserialized.getAsBulletRecord(emptyMap());
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
-                                               .add("COUNT_metric_0", 1).addNull("MAX_metric_1").addNull("MIN_metric_2")
+                                               .add("COUNT_metric_0", 1L).addNull("MAX_metric_1").addNull("MIN_metric_2")
                                                .getRecord();
 
         Assert.assertTrue(actual.equals(expected));

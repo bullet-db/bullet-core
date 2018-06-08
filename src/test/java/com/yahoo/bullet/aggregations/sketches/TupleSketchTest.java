@@ -114,9 +114,9 @@ public class TupleSketchTest {
 
         // Groups become strings
         BulletRecord expectedA = RecordBox.get().add("A", "9").add("B", "4.0")
-                                                .add("cnt", 2).add("sumB", 8.0).add("avgA", 9.0).getRecord();
+                                                .add("cnt", 2L).add("sumB", 8.0).add("avgA", 9.0).getRecord();
         BulletRecord expectedB = RecordBox.get().add("A", "3").add("B", "0.2")
-                                                .add("cnt", 1).add("sumB", 0.2).add("avgA", 3.0).getRecord();
+                                                .add("cnt", 1L).add("sumB", 0.2).add("avgA", 3.0).getRecord();
 
         TestHelpers.assertContains(actuals, expectedA);
         TestHelpers.assertContains(actuals, expectedB);

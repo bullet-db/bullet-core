@@ -36,10 +36,12 @@ public class RecordBox {
     public final RecordBox add(String name, Object value) {
         if (value instanceof Boolean) {
             record.setBoolean(name, (Boolean) value);
+        } else if (value instanceof Integer) {
+            record.setInteger(name, (Integer) value);
         } else if (value instanceof Long) {
             record.setLong(name, (Long) value);
-        } else if (value instanceof Integer) {
-            record.setLong(name, ((Number) value).longValue());
+        } else if (value instanceof Float) {
+            record.setFloat(name, (Float) value);
         } else if (value instanceof Double) {
             record.setDouble(name, (Double) value);
         } else if (value instanceof String) {
@@ -56,8 +58,12 @@ public class RecordBox {
             Object value = findObject(entries);
             if (value instanceof Boolean) {
                 record.setBooleanMap(name, asMap(Boolean.class, entries));
+            } else if (value instanceof Integer) {
+                record.setIntegerMap(name, asMap(Integer.class, entries));
             } else if (value instanceof Long) {
                 record.setLongMap(name, asMap(Long.class, entries));
+            } else if (value instanceof Float) {
+                record.setFloatMap(name, asMap(Float.class, entries));
             } else if (value instanceof Double) {
                 record.setDoubleMap(name, asMap(Double.class, entries));
             } else if (value instanceof String) {
@@ -77,8 +83,12 @@ public class RecordBox {
             Object value = findObject(entries);
             if (value instanceof Boolean) {
                 record.setListOfBooleanMap(name, asList(Boolean.class, entries));
+            } else if (value instanceof Integer) {
+                record.setListOfIntegerMap(name, asList(Integer.class, entries));
             } else if (value instanceof Long) {
                 record.setListOfLongMap(name, asList(Long.class, entries));
+            } else if (value instanceof Float) {
+                record.setListOfFloatMap(name, asList(Float.class, entries));
             } else if (value instanceof Double) {
                 record.setListOfDoubleMap(name, asList(Double.class, entries));
             } else if (value instanceof String) {

@@ -156,7 +156,7 @@ public class GroupAllTest {
     @Test
     public void testCounting() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
-        BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
+        BulletRecord someRecord = RecordBox.get().add("foo", 1L).getRecord();
 
         IntStream.range(0, 10).forEach(i -> groupAll.consume(someRecord));
 
@@ -164,7 +164,7 @@ public class GroupAllTest {
         List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add("count", 10).getRecord();
+        BulletRecord expected = RecordBox.get().add("count", 10L).getRecord();
         Assert.assertEquals(actual, expected);
 
         Assert.assertEquals(groupAll.getRecords(), aggregate);
@@ -174,7 +174,7 @@ public class GroupAllTest {
     @Test
     public void testCountingMoreThanMaximum() {
         GroupAll groupAll = makeGroupAll(makeGroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
-        BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
+        BulletRecord someRecord = RecordBox.get().add("foo", 1L).getRecord();
 
         IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
 
