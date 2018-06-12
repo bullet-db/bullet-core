@@ -202,9 +202,6 @@ bullet.result.metadata.metrics:
     - name: "Window Expected Emit Time"
       key: "Expected Emit Time"
 
-# Enables whether each record should have a new key added to it denoting it was projected.
-bullet.record.inject.timestamp.enable: false
-
 # If this is set to true, all windows will be ignored. In other words, queries will provide a single result at the end of its duration.
 # IMPORTANT: If you turn this on, ensure that your bullet.query.default.duration.ms and bullet.query.max.duration.ms are set to
 # reasonable values (they default to infinity) for your queries.
