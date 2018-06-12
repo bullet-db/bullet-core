@@ -204,9 +204,6 @@ bullet.result.metadata.metrics:
 
 # Enables whether each record should have a new key added to it denoting it was projected.
 bullet.record.inject.timestamp.enable: false
-# This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
-# the record is projected. This is only applicable to RAW queries.
-bullet.record.inject.timestamp.key: "bullet_project_timestamp"
 
 # If this is set to true, all windows will be ignored. In other words, queries will provide a single result at the end of its duration.
 # IMPORTANT: If you turn this on, ensure that your bullet.query.default.duration.ms and bullet.query.max.duration.ms are set to

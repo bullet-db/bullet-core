@@ -14,7 +14,6 @@ import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.ProjectionUtils;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
@@ -139,10 +138,6 @@ public class QuerierTest {
         return makeStream(count).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private static Map<String, Object> configWithNoTimestamp() {
-        return singletonMap(BulletConfig.RECORD_INJECT_TIMESTAMP, false);
-    }
-
     private static int size(BulletRecord record) {
         int size = 0;
         for (Object ignored : record) {
@@ -177,6 +172,11 @@ public class QuerierTest {
         BulletConfig config = new BulletConfig();
         query.configure(config);
         return make(mode, query, config);
+    }
+
+    private static Querier make(Querier.Mode mode, String query) {
+        BulletConfig config = new BulletConfig();
+        return make(mode, "", query, config);
     }
 
     private static Querier make(Querier.Mode mode, String id, String query, Map<String, Object> configuration) {
@@ -322,71 +322,6 @@ public class QuerierTest {
     }
 
     @Test
-    public void testReceiveTimestampNoProjection() {
-        Long start = System.currentTimeMillis();
-
-        Query query = new Query();
-        query.setProjection(null);
-        query.setWindow(WindowUtils.makeReactiveWindow());
-
-        BulletConfig config = new BulletConfig();
-        config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
-        config.validate();
-        query.configure(config);
-        Querier querier = make(Querier.Mode.ALL, query, config);
-
-        BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
-        querier.consume(input);
-        Assert.assertTrue(querier.isClosed());
-
-        List<BulletRecord> records = querier.getRecords();
-        Assert.assertEquals(records.size(), 1);
-        BulletRecord actual = records.get(0);
-
-        Long end = System.currentTimeMillis();
-
-        Assert.assertEquals(size(actual), 3);
-        Assert.assertEquals(actual.get("field"), "foo");
-        Assert.assertEquals(actual.get("mid"), "123");
-
-        Long recordedTimestamp = (Long) actual.get(BulletConfig.DEFAULT_RECORD_INJECT_TIMESTAMP_KEY);
-        Assert.assertTrue(recordedTimestamp >= start);
-        Assert.assertTrue(recordedTimestamp <= end);
-    }
-
-    @Test
-    public void testReceiveTimestamp() {
-        Long start = System.currentTimeMillis();
-
-        Query query = new Query();
-        query.setProjection(ProjectionUtils.makeProjection("field", "bid"));
-        query.setWindow(WindowUtils.makeReactiveWindow());
-
-        BulletConfig config = new BulletConfig();
-        config.set(BulletConfig.RECORD_INJECT_TIMESTAMP, true);
-        config.validate();
-        query.configure(config);
-        Querier querier = make(Querier.Mode.ALL, query, config);
-
-        BulletRecord input = RecordBox.get().add("field", "foo").add("mid", "123").getRecord();
-        querier.consume(input);
-        Assert.assertTrue(querier.isClosed());
-
-        List<BulletRecord> records = querier.getRecords();
-        Assert.assertEquals(records.size(), 1);
-        BulletRecord actual = records.get(0);
-
-        Long end = System.currentTimeMillis();
-
-        Assert.assertEquals(size(actual), 2);
-        Assert.assertEquals(actual.get("bid"), "foo");
-
-        Long recordedTimestamp = (Long) actual.get(BulletConfig.DEFAULT_RECORD_INJECT_TIMESTAMP_KEY);
-        Assert.assertTrue(recordedTimestamp >= start);
-        Assert.assertTrue(recordedTimestamp <= end);
-    }
-
-    @Test
     public void testMeetingWindowSize() {
         Querier querier = make(Querier.Mode.ALL, "", "{}", emptyMap());
 
@@ -436,8 +371,7 @@ public class QuerierTest {
     public void testFilteringProjection() {
         Querier querier = make(Querier.Mode.PARTITION,
                                makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
-                                                         Clause.Operation.EQUALS, Pair.of("map_field.id", "mid")),
-                                                         configWithNoTimestamp());
+                                                         Clause.Operation.EQUALS, Pair.of("map_field.id", "mid")));
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
         Assert.assertFalse(querier.isClosed());
@@ -488,7 +422,7 @@ public class QuerierTest {
     @Test
     public void testBasicWindowMaximumEmitted() {
         Querier querier = make(Querier.Mode.PARTITION,
-                               makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
+                               makeAggregationQuery(Aggregation.Type.RAW, 2));
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -517,7 +451,7 @@ public class QuerierTest {
     public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
         Querier querier = make(Querier.Mode.PARTITION,
                                makeRawFullQuery("mid", Arrays.asList("1", "23"), Clause.Operation.EQUALS, Aggregation.Type.RAW,
-                                                2, Pair.of("mid", "mid")), configWithNoTimestamp());
+                                                2, Pair.of("mid", "mid")));
 
         byte[] expected = getListBytes(RecordBox.get().add("mid", "23").getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().add("mid", "23").getRecord(),
@@ -558,8 +492,8 @@ public class QuerierTest {
 
     @Test
     public void testMerging() {
-        Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
-        Querier querierB = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
+        Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2));
+        Querier querierB = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2));
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -577,7 +511,7 @@ public class QuerierTest {
         Assert.assertEquals(querierB.getData(), expected);
 
 
-        Querier querierC = make(Querier.Mode.ALL, makeAggregationQuery(Aggregation.Type.RAW, 2), configWithNoTimestamp());
+        Querier querierC = make(Querier.Mode.ALL, makeAggregationQuery(Aggregation.Type.RAW, 2));
         querierC.merge(querierA);
         querierC.merge(querierB);
         Assert.assertTrue(querierC.isClosed());

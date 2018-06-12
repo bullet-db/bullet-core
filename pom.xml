@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.record.version>0.2.0</bullet.record.version>
+        <bullet.record.version>0.2.0-SNAPSHOT</bullet.record.version>
         <sketches.version>0.9.1</sketches.version>
     </properties>
 

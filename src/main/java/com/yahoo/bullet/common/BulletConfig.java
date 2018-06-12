@@ -23,8 +23,6 @@ public class BulletConfig extends Config {
     // Field names
     public static final String QUERY_DEFAULT_DURATION = "bullet.query.default.duration.ms";
     public static final String QUERY_MAX_DURATION = "bullet.query.max.duration.ms";
-    public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
-    public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
     public static final String AGGREGATION_DEFAULT_SIZE = "bullet.query.aggregation.default.size";
     public static final String AGGREGATION_MAX_SIZE = "bullet.query.aggregation.max.size";
@@ -67,8 +65,6 @@ public class BulletConfig extends Config {
     // Defaults
     public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
     public static final long DEFAULT_QUERY_MAX_DURATION = (long) Double.POSITIVE_INFINITY;
-    public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
-    public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
     public static final int DEFAULT_AGGREGATION_SIZE = 500;
     public static final int DEFAULT_AGGREGATION_MAX_SIZE = 500;
@@ -145,12 +141,6 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_QUERY_MAX_DURATION)
                  .checkIf(Validator::isPositive)
                  .castTo(Validator::asLong);
-        VALIDATOR.define(RECORD_INJECT_TIMESTAMP)
-                 .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP)
-                 .checkIf(Validator::isBoolean);
-        VALIDATOR.define(RECORD_INJECT_TIMESTAMP_KEY)
-                 .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP_KEY)
-                 .checkIf(Validator::isString);
 
         VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_SIZE)
