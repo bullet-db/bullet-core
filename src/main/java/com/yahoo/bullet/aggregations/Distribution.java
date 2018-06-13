@@ -11,6 +11,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -129,7 +130,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         }
 
         // Try to initialize sketch now
-        sketch = getSketch(entries, maxPoints, rounding, type, attributes);
+        sketch = getSketch(entries, maxPoints, rounding, type, attributes, config.getBulletRecordProvider());
 
         if (sketch == null) {
             return Optional.of(type == Type.QUANTILE ?
@@ -151,11 +152,11 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         }
     }
 
-    private static QuantileSketch getSketch(int entries, int maxPoints, int rounding,
-                                            Type type, Map<String, Object> attributes) {
+    private static QuantileSketch getSketch(int entries, int maxPoints, int rounding, Type type,
+                                            Map<String, Object> attributes, BulletRecordProvider bulletRecordProvider) {
         int equidistantPoints = getNumberOfEquidistantPoints(attributes);
         if (equidistantPoints > 0) {
-            return new QuantileSketch(entries, rounding, type, Math.min(equidistantPoints, maxPoints));
+            return new QuantileSketch(entries, rounding, type, Math.min(equidistantPoints, maxPoints), bulletRecordProvider);
         }
         List<Double> points = getProvidedPoints(attributes);
         if (Utilities.isEmpty(points)) {
@@ -174,7 +175,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
             return null;
         }
 
-        return new QuantileSketch(entries, type, cleanedPoints);
+        return new QuantileSketch(entries, type, cleanedPoints, bulletRecordProvider);
     }
 
     private static boolean invalidBounds(Type type, double[] points) {
