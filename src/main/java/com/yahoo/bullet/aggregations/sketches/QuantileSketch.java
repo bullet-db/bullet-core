@@ -283,7 +283,7 @@ public class QuantileSketch extends DualSketch {
 
         for (int i = 0; i < domain.length; ++i) {
             records.add(bulletRecordProvider.getInstance().setDouble(QUANTILE_FIELD, domain[i])
-                    .setDouble(VALUE_FIELD, range[i]));
+                                                          .setDouble(VALUE_FIELD, range[i]));
         }
         return records;
     }
@@ -293,8 +293,8 @@ public class QuantileSketch extends DualSketch {
         String[] bins = makeBins(domain, cumulative);
         for (int i = 0; i < bins.length; ++i) {
             records.add(bulletRecordProvider.getInstance().setString(RANGE_FIELD, bins[i])
-                    .setDouble(PROBABILITY_FIELD, range[i])
-                    .setDouble(COUNT_FIELD, range[i] * n));
+                                                          .setDouble(PROBABILITY_FIELD, range[i])
+                                                          .setDouble(COUNT_FIELD, range[i] * n));
         }
         return records;
     }
