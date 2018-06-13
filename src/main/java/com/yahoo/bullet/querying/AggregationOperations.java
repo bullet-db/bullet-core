@@ -39,6 +39,6 @@ public class AggregationOperations {
         }
 
         // If we have any fields -> GroupBy
-        return Utilities.isEmpty(aggregation.getFields()) ? new GroupAll(aggregation) : new GroupBy(aggregation, config);
+        return Utilities.isEmpty(aggregation.getFields()) ? new GroupAll(aggregation, config) : new GroupBy(aggregation, config);
     }
 }

@@ -5,9 +5,12 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -30,6 +33,13 @@ public class GroupDataSummarySetOperationsTest {
         return new CachingGroupData(fields, metrics);
     }
 
+    private BulletRecordProvider bulletRecordProvider;
+
+    @BeforeMethod
+    private void setup() {
+        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+    }
+
     @Test
     public void testUnionLeftNull() {
         GroupDataSummarySetOperations operations = new GroupDataSummarySetOperations();
@@ -38,7 +48,7 @@ public class GroupDataSummarySetOperationsTest {
         summary.setData(makeSampleGroupData(15, 0.1));
 
         GroupDataSummary result = operations.union(null, summary);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 15.0).add("min", 0.1).getRecord();
 
@@ -55,7 +65,7 @@ public class GroupDataSummarySetOperationsTest {
         summary.setData(makeSampleGroupData(15, 0.1));
 
         GroupDataSummary result = operations.union(summary, null);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 15.0).add("min", 0.1).getRecord();
 
@@ -75,7 +85,7 @@ public class GroupDataSummarySetOperationsTest {
         summaryB.setData(makeSampleGroupData(-20, -10.1));
 
         GroupDataSummary result = operations.union(summaryA, summaryB);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", -5.0).add("min", -10.1).getRecord();
 

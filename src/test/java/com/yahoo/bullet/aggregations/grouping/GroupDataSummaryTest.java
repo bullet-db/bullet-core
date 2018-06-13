@@ -5,13 +5,16 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.memory.Memory;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.tuple.DeserializeResult;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -26,6 +29,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 
 public class GroupDataSummaryTest {
+
+    private BulletRecordProvider bulletRecordProvider;
+
+    @BeforeMethod
+    private void setup() {
+        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+    }
 
     public static Map<String, String> makeGroups(List<String> fields) {
         Map<String, String> map = new HashMap<>(fields.size());
@@ -86,7 +96,7 @@ public class GroupDataSummaryTest {
         GroupDataSummary summary = new GroupDataSummary();
         summary.update(data);
 
-        BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
         // Base is 10 -> MAX is 2nd (10 + 1 + 3), MIN is 3rd (10 - 2 - 3)
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
                                                .add("COUNT_metric_0", 1L).add("MAX_metric_1", 14.0).add("MIN_metric_2", 5.0)
@@ -112,7 +122,7 @@ public class GroupDataSummaryTest {
         data.setCachedRecord(record);
         summary.update(data);
 
-        BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = summary.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
                                                .add("COUNT_metric_0", 2L).add("MAX_metric_1", 14.0).add("MIN_metric_2", 0.0)
                                                .getRecord();
@@ -259,7 +269,7 @@ public class GroupDataSummaryTest {
         // They are different objects
         Assert.assertFalse(mergedData == summaryBData);
 
-        BulletRecord actual = mergedData.getAsBulletRecord(emptyMap());
+        BulletRecord actual = mergedData.getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar")
                                                .add("SUM_metric_0", 5.0).add("MIN_metric_1", -13.0)
                                                .getRecord();
@@ -354,7 +364,7 @@ public class GroupDataSummaryTest {
         Assert.assertNotNull(deserialized);
         Assert.assertNull(deserialized.getCachedRecord());
 
-        BulletRecord actual = deserialized.getAsBulletRecord(emptyMap());
+        BulletRecord actual = deserialized.getAsBulletRecord(emptyMap(), bulletRecordProvider);
         BulletRecord expected = RecordBox.get().add("field_0", "foo").add("field_1", "bar").add("field_2", "baz")
                                                .add("COUNT_metric_0", 1L).addNull("MAX_metric_1").addNull("MIN_metric_2")
                                                .getRecord();

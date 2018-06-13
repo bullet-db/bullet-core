@@ -42,7 +42,7 @@ public class GroupAllTest {
 
     @SafeVarargs
     public static GroupAll makeGroupAll(Map<String, String>... groupOperations) {
-        GroupAll all = new GroupAll(makeAggregation(makeAttributes(groupOperations)));
+        GroupAll all = new GroupAll(makeAggregation(makeAttributes(groupOperations)), new BulletConfig());
         all.initialize();
         return all;
     }
@@ -53,7 +53,7 @@ public class GroupAllTest {
                                                                .collect(Collectors.toList());
 
         when(aggregation.getAttributes()).thenReturn(makeAttributes(operations));
-        GroupAll all = new GroupAll(aggregation);
+        GroupAll all = new GroupAll(aggregation, new BulletConfig());
         all.initialize();
         return all;
     }
@@ -76,7 +76,7 @@ public class GroupAllTest {
     @Test
     public void testAttributeOperationMissing() {
         Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, null));
-        GroupAll groupAll = new GroupAll(aggregation);
+        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
 
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
@@ -88,7 +88,7 @@ public class GroupAllTest {
     @Test
     public void testAttributeOperationBadFormat() {
         Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, asList("foo")));
-        GroupAll groupAll = new GroupAll(aggregation);
+        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
 
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());

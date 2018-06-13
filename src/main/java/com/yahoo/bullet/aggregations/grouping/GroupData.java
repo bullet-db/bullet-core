@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperator;
 import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.record.AvroBulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -132,8 +132,8 @@ public class GroupData implements Serializable {
      *
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getMetricsAsBulletRecord() {
-        BulletRecord record = new AvroBulletRecord();
+    public BulletRecord getMetricsAsBulletRecord(BulletRecordProvider bulletRecordProvider) {
+        BulletRecord record = bulletRecordProvider.getInstance();
         metrics.entrySet().stream().forEach(e -> addToRecord(e, record));
         return record;
     }
@@ -143,8 +143,8 @@ public class GroupData implements Serializable {
      *
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getAsBulletRecord() {
-        return getAsBulletRecord(Collections.emptyMap());
+    public BulletRecord getAsBulletRecord(BulletRecordProvider bulletRecordProvider) {
+        return getAsBulletRecord(Collections.emptyMap(), bulletRecordProvider);
     }
 
     /**
@@ -153,8 +153,8 @@ public class GroupData implements Serializable {
      * @param mapping An non-null new name mapping for the names of the group fields.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getAsBulletRecord(Map<String, String> mapping) {
-        BulletRecord record = getMetricsAsBulletRecord();
+    public BulletRecord getAsBulletRecord(Map<String, String> mapping, BulletRecordProvider bulletRecordProvider) {
+        BulletRecord record = getMetricsAsBulletRecord(bulletRecordProvider);
         for (Map.Entry<String, String> e : groupFields.entrySet()) {
             String field = e.getKey();
             String mapped = mapping.get(field);

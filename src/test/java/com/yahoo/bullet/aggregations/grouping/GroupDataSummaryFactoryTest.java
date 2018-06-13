@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.aggregations.grouping;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.memory.Memory;
@@ -92,7 +93,7 @@ public class GroupDataSummaryFactoryTest {
 
         Assert.assertNotNull(deserialized);
 
-        BulletRecord actual = deserialized.getData().getAsBulletRecord(emptyMap());
+        BulletRecord actual = deserialized.getData().getAsBulletRecord(emptyMap(), new BulletConfig().getBulletRecordProvider());
         BulletRecord expected = RecordBox.get().add("fieldA", "bar").add("sum", 30.0).getRecord();
         Assert.assertTrue(actual.equals(expected));
     }
