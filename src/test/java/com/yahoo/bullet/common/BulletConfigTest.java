@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.common;
 
+import com.yahoo.bullet.record.AvroBulletRecord;
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
@@ -445,5 +447,25 @@ public class BulletConfigTest {
     @Test
     public void testValidatorIsACopy() {
         Assert.assertTrue(BulletConfig.getValidator() != BulletConfig.getValidator());
+    }
+
+    @Test
+    public void testGetBulletRecordMakesNewInstance() {
+        BulletRecord recordA = new BulletConfig().getBulletRecord();
+        BulletRecord recordB = new BulletConfig().getBulletRecord();
+        Assert.assertTrue(recordA instanceof AvroBulletRecord);
+        Assert.assertTrue(recordB instanceof AvroBulletRecord);
+
+        recordB.setString("someField", "someValue");
+        Assert.assertEquals(recordB.get("someField"), "someValue");
+        Assert.assertNull(recordA.get("someField"));
+
+        BulletRecord recordC = new BulletConfig().getBulletRecord();
+        Assert.assertNull(recordC.get("someField"));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testGetBulletRecordCatchesAndThrows() {
+        BulletConfig config = new BulletConfig("src/test/resources/bad_record_provider_config.yaml");
     }
 }

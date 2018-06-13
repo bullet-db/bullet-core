@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperator;
 import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.record.BulletAvroRecord;
+import com.yahoo.bullet.record.AvroBulletRecord;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -133,7 +133,7 @@ public class GroupData implements Serializable {
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getMetricsAsBulletRecord() {
-        BulletRecord record = new BulletAvroRecord();
+        BulletRecord record = new AvroBulletRecord();
         metrics.entrySet().stream().forEach(e -> addToRecord(e, record));
         return record;
     }

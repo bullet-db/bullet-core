@@ -5,12 +5,12 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.record.BulletAvroRecord;
+import com.yahoo.bullet.record.AvroBulletRecord;
 
 import java.io.IOException;
 import java.io.Serializable;
 
-public class NoSerDeBulletRecord extends BulletAvroRecord implements Serializable {
+public class NoSerDeBulletRecord extends AvroBulletRecord implements Serializable {
     private static final long serialVersionUID = 4138653240854288567L;
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {

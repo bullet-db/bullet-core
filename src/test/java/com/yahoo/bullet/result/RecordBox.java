@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.record.BulletAvroRecord;
+import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 @Getter
 public class RecordBox {
-    private BulletRecord record = new BulletAvroRecord();
+    private BulletRecord record = new AvroBulletRecord();
 
     public static RecordBox get() {
         return new RecordBox();

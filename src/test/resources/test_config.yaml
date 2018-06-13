@@ -5,7 +5,9 @@ bullet.query.aggregation.max.size: 100
 fake.setting: null
 bullet.pubsub.context.name: "QUERY_SUBMISSION"
 bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.MockPubSub"
+bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.MockPubSub"
 bullet.pubsub.rest.connect.timeout.ms: 88
+bullet.record.provider.class.name: "com.yahoo.bullet.record.AvroBulletRecordProvider"
 bullet.pubsub.rest.query.urls:
     - "http://localhost:9901/CUSTOM/query"
     - "http://localhost:9902/CUSTOM/query"

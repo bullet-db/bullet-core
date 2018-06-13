@@ -5,13 +5,17 @@
  */
 package com.yahoo.bullet.common;
 
+import com.yahoo.bullet.pubsub.PubSub;
 import com.yahoo.bullet.pubsub.PubSub.Context;
+import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,6 +65,8 @@ public class BulletConfig extends Config {
 
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
+
+    public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
 
     // Defaults
     public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
@@ -128,6 +134,8 @@ public class BulletConfig extends Config {
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
+
+    public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
 
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
@@ -255,6 +263,10 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);
 
+        VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
+                .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
+                .checkIf(Validator::isString);
+
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
@@ -276,6 +288,7 @@ public class BulletConfig extends Config {
 
     // Members
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
+    private BulletRecordProvider bulletRecordProvider;
 
     /**
      * Constructor that loads specific file augmented with defaults and validates itself.
@@ -285,6 +298,7 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
+        bulletRecordProvider = createBulletRecordProvider();
     }
 
     /**
@@ -293,6 +307,28 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
+        bulletRecordProvider = createBulletRecordProvider();
+    }
+
+    private BulletRecordProvider createBulletRecordProvider() {
+        try {
+            String recordProviderClassName = (String) get(RECORD_PROVIDER_CLASS_NAME);
+            Class<BulletRecordProvider> recordProviderClass = (Class<BulletRecordProvider>) Class.forName(recordProviderClassName);
+            Constructor<BulletRecordProvider> constructor = recordProviderClass.getConstructor();
+            return constructor.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot create BulletRecordProvider.", e);
+        }
+    }
+
+    /**
+     * Instantiates and returns a {@link BulletRecord} using the {@link com.yahoo.bullet.record.BulletRecordProvider}
+     * class configured as {@link BulletConfig#RECORD_PROVIDER_CLASS_NAME} in this config object.
+     *
+     * @return A new BulletRecord instance.
+     */
+    public BulletRecord getBulletRecord() {
+        return bulletRecordProvider.getInstance();
     }
 
     /**
