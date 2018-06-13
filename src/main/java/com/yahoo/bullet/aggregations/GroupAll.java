@@ -34,6 +34,7 @@ public class GroupAll implements Strategy {
      * Constructor that requires an {@link Aggregation}.
      *
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
+     * @param config The BulletConfig.
      */
     public GroupAll(Aggregation aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result

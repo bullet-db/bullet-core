@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
-import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -38,6 +37,7 @@ public class ThetaSketch extends KMVSketch {
      * @param family The {@link Family} to use.
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      */
     public ThetaSketch(ResizeFactor resizeFactor, Family family, float samplingProbability, int nominalEntries,
                        BulletRecordProvider bulletRecordProvider) {

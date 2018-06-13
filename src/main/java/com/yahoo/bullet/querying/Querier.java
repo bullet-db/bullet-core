@@ -632,7 +632,7 @@ public class Querier implements Monoidal {
 
     private BulletRecord project(BulletRecord record) {
         Projection projection = runningQuery.getQuery().getProjection();
-        return projection != null ? ProjectionOperations.project(record, projection) : record;
+        return projection != null ? ProjectionOperations.project(record, projection, config.getBulletRecordProvider()) : record;
     }
 
     private Meta getResultMetadata() {

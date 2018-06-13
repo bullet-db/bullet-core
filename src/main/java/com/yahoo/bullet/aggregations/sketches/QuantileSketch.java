@@ -6,7 +6,6 @@
 package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -70,6 +69,7 @@ public class QuantileSketch extends DualSketch {
      * @param k A number representative of the size of the sketch.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param points An array of points to get the quantiles, PMF and/or CDF for.
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      */
     public QuantileSketch(int k, Distribution.Type type, double[] points, BulletRecordProvider bulletRecordProvider) {
         this(k, type);
@@ -85,6 +85,7 @@ public class QuantileSketch extends DualSketch {
      * @param rounding A number representing how many max decimal places points should have.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param numberOfPoints A positive number of evenly spaced points in the range for the type to get the data for.
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      */
     public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints, BulletRecordProvider bulletRecordProvider) {
         this(k, type);

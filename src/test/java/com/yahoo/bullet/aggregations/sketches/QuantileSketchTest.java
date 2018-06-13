@@ -594,7 +594,7 @@ public class QuantileSketchTest {
     public void testZippingBadLength() {
         double[] domain = { -1.0, 0, 4.0 };
         double[] range =  { 0.2, 0.3, 0.5 };
-         getDefaultQuantileSketch().zip(domain, range, Distribution.Type.CDF, 30);
+        getDefaultQuantileSketch().zip(domain, range, Distribution.Type.CDF, 30);
     }
 
     @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)

@@ -42,6 +42,7 @@ public class TupleSketch extends KMVSketch {
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
      * @param maxSize The maximum size of groups to return.
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      */
     @SuppressWarnings("unchecked")
     public TupleSketch(ResizeFactor resizeFactor, float samplingProbability, int nominalEntries, int maxSize, BulletRecordProvider bulletRecordProvider) {

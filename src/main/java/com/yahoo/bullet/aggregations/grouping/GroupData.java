@@ -130,6 +130,7 @@ public class GroupData implements Serializable {
     /**
      * Gets the metrics stored for the group as a {@link BulletRecord}.
      *
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getMetricsAsBulletRecord(BulletRecordProvider bulletRecordProvider) {
@@ -141,6 +142,7 @@ public class GroupData implements Serializable {
     /**
      * Gets the metrics and the group values stored as a {@link BulletRecord}.
      *
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getAsBulletRecord(BulletRecordProvider bulletRecordProvider) {
@@ -151,6 +153,7 @@ public class GroupData implements Serializable {
      * Gets the metrics and the group values stored as a {@link BulletRecord}.
      *
      * @param mapping An non-null new name mapping for the names of the group fields.
+     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getAsBulletRecord(Map<String, String> mapping, BulletRecordProvider bulletRecordProvider) {
