@@ -7,6 +7,7 @@ package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
@@ -46,11 +47,12 @@ public class FrequentItemsSketch extends Sketch {
      * @param threshold The threshold that will be used for selecting items if the Sketch error is less than it.
      * @param maxSize The maximum size of the number of frequent items.
      */
-    public FrequentItemsSketch(ErrorType type, int maxMapCapacity, long threshold, int maxSize) {
+    public FrequentItemsSketch(ErrorType type, int maxMapCapacity, long threshold, int maxSize, BulletRecordProvider bulletRecordProvider) {
         this.type = type;
         this.threshold = threshold;
         this.maxSize = maxSize;
         sketch = new ItemsSketch<>(maxMapCapacity);
+        this.bulletRecordProvider = bulletRecordProvider;
     }
 
     /**
@@ -60,9 +62,9 @@ public class FrequentItemsSketch extends Sketch {
      * @param maxMapCapacity The maximum power of 2 entries for the Sketch used as the internal map size.
      * @param maxSize The maximum size of the number of frequent items.
      */
-    public FrequentItemsSketch(ErrorType type, int maxMapCapacity, int maxSize) {
+    public FrequentItemsSketch(ErrorType type, int maxMapCapacity, int maxSize, BulletRecordProvider bulletRecordProvider) {
         // Using -1 guarantees that the Sketch will use its error rather than the -1 threshold.
-        this(type, maxMapCapacity, -1L, maxSize);
+        this(type, maxMapCapacity, -1L, maxSize, bulletRecordProvider);
     }
 
     /**
@@ -87,7 +89,7 @@ public class FrequentItemsSketch extends Sketch {
         ItemsSketch.Row<String>[] items = sketch.getFrequentItems(threshold, type);
         for (int i = 0; i < items.length && i < maxSize; ++i) {
             ItemsSketch.Row<String> item = items[i];
-            BulletRecord record = new AvroBulletRecord();
+            BulletRecord record = bulletRecordProvider.getInstance();
             record.setString(ITEM_FIELD, item.getItem());
             record.setLong(COUNT_FIELD, item.getEstimate());
             data.add(record);

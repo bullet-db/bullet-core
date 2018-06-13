@@ -5,13 +5,16 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.SketchesArgumentException;
 import com.yahoo.sketches.frequencies.ErrorType;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -30,14 +33,21 @@ public class FrequentItemsSketchTest {
         ALL_METADATA.put(Meta.Concept.SKETCH_ACTIVE_ITEMS.getName(), "actives");
     }
 
+    private BulletRecordProvider bulletRecordProvider;
+
+    @BeforeMethod
+    private void setup() {
+        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+    }
+
     @Test(expectedExceptions = SketchesArgumentException.class, expectedExceptionsMessageRegExp = ".*power of 2.*")
     public void testBadCreation() {
-        new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 12, 1);
+        new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 12, 1, bulletRecordProvider);
     }
 
     @Test
     public void testExactCounting() {
-        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 15);
+        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 15, bulletRecordProvider);
         IntStream.range(0, 10).forEach(i -> IntStream.range(0, 10).forEach(j -> sketch.update(String.valueOf(i))));
         sketch.update("foo");
         IntStream.range(10, 100).forEach(i -> sketch.update("bar"));
@@ -77,7 +87,7 @@ public class FrequentItemsSketchTest {
 
     @Test
     public void testSizeLimiting() {
-        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 10);
+        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 10, bulletRecordProvider);
         // For i from 1 to 13, update the sketch i times
         IntStream.range(1, 13).forEach(i -> IntStream.range(0, i).forEach(j -> sketch.update(String.valueOf(i))));
 
@@ -101,7 +111,7 @@ public class FrequentItemsSketchTest {
 
     @Test
     public void testApproximateCounting() {
-        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_POSITIVES, 32, 40);
+        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_POSITIVES, 32, 40, bulletRecordProvider);
         IntStream.range(0, 40).forEach(i -> sketch.update(String.valueOf(i)));
         IntStream.of(10, 20, 25, 30).forEach(i -> IntStream.range(0, i).forEach(j -> sketch.update(String.valueOf(i))));
 
@@ -132,16 +142,16 @@ public class FrequentItemsSketchTest {
 
     @Test
     public void testUnioning() {
-        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32);
+        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32, bulletRecordProvider);
         IntStream.range(0, 10).forEach(i -> IntStream.range(0, 10).forEach(j -> sketch.update(String.valueOf(i))));
         IntStream.range(10, 100).forEach(i -> sketch.update("bar"));
 
-        FrequentItemsSketch another = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32);
+        FrequentItemsSketch another = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32, bulletRecordProvider);
         another.update("foo");
         another.update("bar");
         another.update("baz");
 
-        FrequentItemsSketch union = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32);
+        FrequentItemsSketch union = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32, bulletRecordProvider);
         union.union(sketch.serialize());
         union.union(another.serialize());
 
@@ -172,11 +182,11 @@ public class FrequentItemsSketchTest {
 
     @Test
     public void testResetting() {
-        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32);
+        FrequentItemsSketch sketch = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32, bulletRecordProvider);
         IntStream.range(0, 10).forEach(i -> IntStream.range(0, 10).forEach(j -> sketch.update(String.valueOf(i))));
         IntStream.range(10, 100).forEach(i -> sketch.update("bar"));
 
-        FrequentItemsSketch another = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32);
+        FrequentItemsSketch another = new FrequentItemsSketch(ErrorType.NO_FALSE_NEGATIVES, 32, 32, bulletRecordProvider);
         another.update("foo");
         another.update("bar");
         another.update("baz");
