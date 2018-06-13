@@ -5,9 +5,7 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.pubsub.PubSub;
 import com.yahoo.bullet.pubsub.PubSub.Context;
-import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -15,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -298,7 +295,7 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = createBulletRecordProvider();
+        bulletRecordProvider = BulletRecordProvider.from((String) get(RECORD_PROVIDER_CLASS_NAME));
     }
 
     /**
@@ -307,28 +304,17 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = createBulletRecordProvider();
-    }
-
-    private BulletRecordProvider createBulletRecordProvider() {
-        try {
-            String recordProviderClassName = (String) get(RECORD_PROVIDER_CLASS_NAME);
-            Class<BulletRecordProvider> recordProviderClass = (Class<BulletRecordProvider>) Class.forName(recordProviderClassName);
-            Constructor<BulletRecordProvider> constructor = recordProviderClass.getConstructor();
-            return constructor.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot create BulletRecordProvider.", e);
-        }
+        bulletRecordProvider = BulletRecordProvider.from((String) get(RECORD_PROVIDER_CLASS_NAME));
     }
 
     /**
-     * Instantiates and returns a {@link BulletRecord} using the {@link com.yahoo.bullet.record.BulletRecordProvider}
-     * class configured as {@link BulletConfig#RECORD_PROVIDER_CLASS_NAME} in this config object.
+     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance. This BulletRecordProvider is
+     * created when this BulletConfig is constructed.
      *
-     * @return A new BulletRecord instance.
+     * @return The BulletRecordProvider instance.
      */
-    public BulletRecord getBulletRecord() {
-        return bulletRecordProvider.getInstance();
+    public BulletRecordProvider getBulletRecordProvider() {
+        return bulletRecordProvider;
     }
 
     /**

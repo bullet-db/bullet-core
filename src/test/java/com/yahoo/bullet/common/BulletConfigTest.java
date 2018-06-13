@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.common;
 
-import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
@@ -450,22 +450,21 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGetBulletRecordMakesNewInstance() {
-        BulletRecord recordA = new BulletConfig().getBulletRecord();
-        BulletRecord recordB = new BulletConfig().getBulletRecord();
-        Assert.assertTrue(recordA instanceof AvroBulletRecord);
-        Assert.assertTrue(recordB instanceof AvroBulletRecord);
+    public void testGetBulletRecordProvider() {
+        BulletConfig config = new BulletConfig();
+        BulletRecordProvider providerA = config.getBulletRecordProvider();
+        BulletRecordProvider providerB = config.getBulletRecordProvider();
+        Assert.assertEquals(providerA, providerB);
+
+        // Ensure the provider generates new records each time
+        BulletRecord recordA = providerA.getInstance();
+        BulletRecord recordB = providerB.getInstance();
+
+        Assert.assertTrue(recordA instanceof BulletRecord);
+        Assert.assertTrue(recordB instanceof BulletRecord);
 
         recordB.setString("someField", "someValue");
         Assert.assertEquals(recordB.get("someField"), "someValue");
         Assert.assertNull(recordA.get("someField"));
-
-        BulletRecord recordC = new BulletConfig().getBulletRecord();
-        Assert.assertNull(recordC.get("someField"));
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testGetBulletRecordCatchesAndThrows() {
-        BulletConfig config = new BulletConfig("src/test/resources/bad_record_provider_config.yaml");
     }
 }
