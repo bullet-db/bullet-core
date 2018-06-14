@@ -24,7 +24,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 public abstract class Sketch {
     // While this class could implement Monoidal, it does not need the full breadth of those methods and it would need to be
     // receiving data as BulletRecord for one off operations, which is cumbersome.
-    BulletRecordProvider bulletRecordProvider;
+    protected BulletRecordProvider bulletRecordProvider;
 
     /**
      * Serializes the sketch.
