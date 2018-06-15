@@ -295,7 +295,7 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = BulletRecordProvider.from((String) get(RECORD_PROVIDER_CLASS_NAME));
+        bulletRecordProvider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
@@ -304,7 +304,7 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = BulletRecordProvider.from((String) get(RECORD_PROVIDER_CLASS_NAME));
+        bulletRecordProvider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
