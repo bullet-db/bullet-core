@@ -11,6 +11,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.sketches.frequencies.ErrorType;
 
@@ -53,8 +54,9 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
         int maxMapSize = config.getAs(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES, Integer.class);
         Number threshold = getThreshold(attributes);
         int size = aggregation.getSize();
-        sketch = threshold != null ? new FrequentItemsSketch(errorType, maxMapSize, threshold.longValue(), size, config.getBulletRecordProvider()) :
-                                     new FrequentItemsSketch(errorType, maxMapSize, size, config.getBulletRecordProvider());
+        BulletRecordProvider bulletRecordProvider = config.getBulletRecordProvider();
+        sketch = threshold != null ? new FrequentItemsSketch(errorType, maxMapSize, threshold.longValue(), size, bulletRecordProvider) :
+                                     new FrequentItemsSketch(errorType, maxMapSize, size, bulletRecordProvider);
     }
 
     @Override

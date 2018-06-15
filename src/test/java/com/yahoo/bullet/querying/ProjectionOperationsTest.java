@@ -13,7 +13,6 @@ import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static com.yahoo.bullet.parsing.ProjectionUtils.makeProjection;
@@ -21,12 +20,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
 public class ProjectionOperationsTest {
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
-    }
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
 
     @Test
     public void testDefaults() {

@@ -36,6 +36,8 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 
 public class TupleSketchTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+
     private static final Set<GroupOperation> OPERATIONS =
             new HashSet<>(Arrays.asList(new GroupOperation(COUNT, null, "cnt"),
                                         new GroupOperation(SUM, "B", "sumB"),
@@ -52,7 +54,6 @@ public class TupleSketchTest {
     }
 
     private CachingGroupData data;
-    private BulletRecordProvider bulletRecordProvider;
 
     private BulletRecord get(String fieldA, double fieldB) {
         return RecordBox.get().add("A", fieldA).add("B", fieldB).getRecord();
@@ -73,7 +74,6 @@ public class TupleSketchTest {
     @BeforeMethod
     public void setup() {
         data = new CachingGroupData(null, GroupData.makeInitialMetrics(OPERATIONS));
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class)

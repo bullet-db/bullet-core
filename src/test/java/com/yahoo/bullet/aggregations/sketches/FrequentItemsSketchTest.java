@@ -14,7 +14,6 @@ import com.yahoo.sketches.Family;
 import com.yahoo.sketches.SketchesArgumentException;
 import com.yahoo.sketches.frequencies.ErrorType;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -23,6 +22,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 public class FrequentItemsSketchTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
         ALL_METADATA.put(Meta.Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
@@ -31,13 +32,6 @@ public class FrequentItemsSketchTest {
         ALL_METADATA.put(Meta.Concept.SKETCH_MAXIMUM_COUNT_ERROR.getName(), "error");
         ALL_METADATA.put(Meta.Concept.SKETCH_ITEMS_SEEN.getName(), "n");
         ALL_METADATA.put(Meta.Concept.SKETCH_ACTIVE_ITEMS.getName(), "actives");
-    }
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class, expectedExceptionsMessageRegExp = ".*power of 2.*")

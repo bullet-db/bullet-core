@@ -12,7 +12,6 @@ import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -26,19 +25,14 @@ import java.util.stream.IntStream;
 import static java.util.Arrays.asList;
 
 public class GroupDataTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+
     public static GroupData make(Map<String, String> groupFields, GroupOperation... operations) {
         return new GroupData(groupFields, new HashSet<>(asList(operations)));
     }
 
     public static GroupData make(GroupOperation... operations) {
         return make(null, operations);
-    }
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test

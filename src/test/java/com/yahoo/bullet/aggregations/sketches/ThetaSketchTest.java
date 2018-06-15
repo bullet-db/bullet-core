@@ -15,7 +15,6 @@ import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
 import com.yahoo.sketches.SketchesArgumentException;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -24,6 +23,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 public class ThetaSketchTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
         ALL_METADATA.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
@@ -31,13 +32,6 @@ public class ThetaSketchTest {
         ALL_METADATA.put(Concept.SKETCH_FAMILY.getName(), "family");
         ALL_METADATA.put(Concept.SKETCH_SIZE.getName(), "size");
         ALL_METADATA.put(Concept.SKETCH_THETA.getName(), "theta");
-    }
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class)

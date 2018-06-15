@@ -14,7 +14,6 @@ import com.yahoo.memory.Memory;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.tuple.DeserializeResult;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -29,13 +28,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 
 public class GroupDataSummaryTest {
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
-    }
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
 
     public static Map<String, String> makeGroups(List<String> fields) {
         Map<String, String> map = new HashMap<>(fields.size());

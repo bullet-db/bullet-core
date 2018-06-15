@@ -16,7 +16,6 @@ import com.yahoo.sketches.Family;
 import com.yahoo.sketches.SketchesArgumentException;
 import com.yahoo.sketches.quantiles.DoublesSketch;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.START_INCLUS
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.VALUE_FIELD;
 
 public class QuantileSketchTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
 
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
@@ -84,13 +84,6 @@ public class QuantileSketchTest {
 
     private QuantileSketch getDefaultQuantileSketch() {
         return new QuantileSketch(64, 6, Distribution.Type.QUANTILE, 10, bulletRecordProvider);
-    }
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class)

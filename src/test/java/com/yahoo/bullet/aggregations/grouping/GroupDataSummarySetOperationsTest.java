@@ -10,7 +10,6 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -19,6 +18,8 @@ import java.util.Map;
 import static java.util.Collections.emptyMap;
 
 public class GroupDataSummarySetOperationsTest {
+    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+
     private static CachingGroupData makeSampleGroupData(int sumValue, double minValue) {
         Map<String, String> fields = new HashMap<>();
         fields.put("fieldA", "foo");
@@ -31,13 +32,6 @@ public class GroupDataSummarySetOperationsTest {
         metrics.put(operationB, minValue);
 
         return new CachingGroupData(fields, metrics);
-    }
-
-    private BulletRecordProvider bulletRecordProvider;
-
-    @BeforeMethod
-    private void setup() {
-        bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
     }
 
     @Test
