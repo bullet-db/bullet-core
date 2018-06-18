@@ -36,7 +36,7 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 
 public class TupleSketchTest {
-    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+    private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
 
     private static final Set<GroupOperation> OPERATIONS =
             new HashSet<>(Arrays.asList(new GroupOperation(COUNT, null, "cnt"),
@@ -78,7 +78,7 @@ public class TupleSketchTest {
 
     @Test(expectedExceptions = SketchesArgumentException.class)
     public void testBadCreation() {
-        new TupleSketch(ResizeFactor.X1, -1.0f, -2, 0, bulletRecordProvider);
+        new TupleSketch(ResizeFactor.X1, -1.0f, -2, 0, provider);
 
     }
 
@@ -86,7 +86,7 @@ public class TupleSketchTest {
     public void testDistincts() {
         data = new CachingGroupData(null, new HashMap<>());
 
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 64, 64, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 64, 64, provider);
 
         sketch.update(addToData("foo", 0.0, data), data);
         sketch.update(addToData("bar", 0.2, data), data);
@@ -106,7 +106,7 @@ public class TupleSketchTest {
 
     @Test
     public void testExactMetrics() {
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 64, 64, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 64, 64, provider);
 
         sketch.update(addToData("9", 4.0, data), data);
         sketch.update(addToData("3", 0.2, data), data);
@@ -128,7 +128,7 @@ public class TupleSketchTest {
 
     @Test
     public void testApproximateMetrics() {
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
 
         // Insert 2 duplicates of 0 - 63
         IntStream.range(0, 128).forEach(i -> sketch.update(addToData(String.valueOf(i % 64), 1, data), data));
@@ -181,15 +181,15 @@ public class TupleSketchTest {
 
     @Test
     public void testUnioning() {
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         // 16 0 - 7 fieldA
         IntStream.range(0, 128).forEach(i -> sketch.update(addToData(String.valueOf(i % 8), 1, data), data));
 
-        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         // 8 copies of 0 - 15 fieldA
         IntStream.range(0, 128).forEach(i -> sketch.update(addToData(String.valueOf(i % 16), 3, data), data));
 
-        TupleSketch unionSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch unionSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         unionSketch.union(sketch.serialize());
         unionSketch.union(anotherSketch.serialize());
 
@@ -224,11 +224,11 @@ public class TupleSketchTest {
     public void testResetting() {
         data = new CachingGroupData(null, new HashMap<>());
 
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("foo", 0.0, data), data);
         sketch.update(addToData("bar", 0.2, data), data);
 
-        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("bar", 0.2, data), data);
         sketch.update(addToData("baz", 0.2, data), data);
         sketch.update(addToData("qux", 0.2, data), data);
@@ -267,11 +267,11 @@ public class TupleSketchTest {
     public void testFetchingDataWithoutResettingAndInsertingMoreData() {
         data = new CachingGroupData(null, new HashMap<>());
 
-        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("foo", 0.0, data), data);
         sketch.update(addToData("bar", 0.2, data), data);
 
-        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, bulletRecordProvider);
+        TupleSketch anotherSketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("bar", 0.2, data), data);
         sketch.update(addToData("baz", 0.2, data), data);
         sketch.update(addToData("qux", 0.2, data), data);

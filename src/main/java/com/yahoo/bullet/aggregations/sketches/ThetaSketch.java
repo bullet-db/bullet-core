@@ -37,17 +37,17 @@ public class ThetaSketch extends KMVSketch {
      * @param family The {@link Family} to use.
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
-     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
     public ThetaSketch(ResizeFactor resizeFactor, Family family, float samplingProbability, int nominalEntries,
-                       BulletRecordProvider bulletRecordProvider) {
+                       BulletRecordProvider provider) {
         updateSketch = UpdateSketch.builder().setFamily(family).setNominalEntries(nominalEntries)
                                              .setP(samplingProbability).setResizeFactor(resizeFactor)
                                              .build();
         unionSketch = SetOperation.builder().setNominalEntries(nominalEntries).setP(samplingProbability)
                                             .setResizeFactor(resizeFactor).buildUnion();
         this.family = family.getFamilyName();
-        this.bulletRecordProvider = bulletRecordProvider;
+        this.provider = provider;
     }
 
     /**
@@ -155,7 +155,7 @@ public class ThetaSketch extends KMVSketch {
 
     private BulletRecord getCount() {
         double count = result.getEstimate();
-        BulletRecord record = bulletRecordProvider.getInstance();
+        BulletRecord record = provider.getInstance();
         record.setDouble(COUNT_FIELD, count);
         return record;
     }

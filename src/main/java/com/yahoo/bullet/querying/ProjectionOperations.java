@@ -21,17 +21,17 @@ public class ProjectionOperations {
      *
      * @param record The record to project.
      * @param projection The projection to apply.
-     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return The projected record.
      */
-    public static BulletRecord project(BulletRecord record, Projection projection, BulletRecordProvider bulletRecordProvider) {
+    public static BulletRecord project(BulletRecord record, Projection projection, BulletRecordProvider provider) {
         Map<String, String> fields = projection.getFields();
         // Returning the record itself if no projections. The record itself should never be modified so it's ok.
         if (fields == null) {
             return record;
         }
         // More efficient if fields << the fields in the BulletRecord
-        BulletRecord projected = bulletRecordProvider.getInstance();
+        BulletRecord projected = provider.getInstance();
         for (Map.Entry<String, String> e : fields.entrySet()) {
             String field = e.getKey();
             String newName = e.getValue();

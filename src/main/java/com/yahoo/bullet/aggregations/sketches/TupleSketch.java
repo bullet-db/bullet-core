@@ -42,10 +42,10 @@ public class TupleSketch extends KMVSketch {
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
      * @param maxSize The maximum size of groups to return.
-     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
     @SuppressWarnings("unchecked")
-    public TupleSketch(ResizeFactor resizeFactor, float samplingProbability, int nominalEntries, int maxSize, BulletRecordProvider bulletRecordProvider) {
+    public TupleSketch(ResizeFactor resizeFactor, float samplingProbability, int nominalEntries, int maxSize, BulletRecordProvider provider) {
         GroupDataSummaryFactory factory = new GroupDataSummaryFactory();
         UpdatableSketchBuilder<CachingGroupData, GroupDataSummary> builder = new UpdatableSketchBuilder(factory);
 
@@ -54,7 +54,7 @@ public class TupleSketch extends KMVSketch {
         unionSketch = new Union<>(nominalEntries, factory);
 
         this.maxSize = maxSize;
-        this.bulletRecordProvider = bulletRecordProvider;
+        this.provider = provider;
     }
 
     /**
@@ -88,7 +88,7 @@ public class TupleSketch extends KMVSketch {
         SketchIterator<GroupDataSummary> iterator = this.result.iterator();
         for (int count = 0; iterator.next() && count < maxSize; count++) {
             GroupData data = iterator.getSummary().getData();
-            result.add(data.getAsBulletRecord(bulletRecordProvider));
+            result.add(data.getAsBulletRecord(provider));
         }
         return result;
     }

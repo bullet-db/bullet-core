@@ -18,7 +18,7 @@ import java.util.Map;
 import static java.util.Collections.emptyMap;
 
 public class GroupDataSummarySetOperationsTest {
-    private static BulletRecordProvider bulletRecordProvider = new BulletConfig().getBulletRecordProvider();
+    private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
 
     private static CachingGroupData makeSampleGroupData(int sumValue, double minValue) {
         Map<String, String> fields = new HashMap<>();
@@ -42,7 +42,7 @@ public class GroupDataSummarySetOperationsTest {
         summary.setData(makeSampleGroupData(15, 0.1));
 
         GroupDataSummary result = operations.union(null, summary);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), provider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 15.0).add("min", 0.1).getRecord();
 
@@ -59,7 +59,7 @@ public class GroupDataSummarySetOperationsTest {
         summary.setData(makeSampleGroupData(15, 0.1));
 
         GroupDataSummary result = operations.union(summary, null);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), provider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 15.0).add("min", 0.1).getRecord();
 
@@ -79,7 +79,7 @@ public class GroupDataSummarySetOperationsTest {
         summaryB.setData(makeSampleGroupData(-20, -10.1));
 
         GroupDataSummary result = operations.union(summaryA, summaryB);
-        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), bulletRecordProvider);
+        BulletRecord actual = result.getData().getAsBulletRecord(emptyMap(), provider);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", -5.0).add("min", -10.1).getRecord();
 

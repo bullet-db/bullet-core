@@ -69,12 +69,12 @@ public class QuantileSketch extends DualSketch {
      * @param k A number representative of the size of the sketch.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param points An array of points to get the quantiles, PMF and/or CDF for.
-     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
-    public QuantileSketch(int k, Distribution.Type type, double[] points, BulletRecordProvider bulletRecordProvider) {
+    public QuantileSketch(int k, Distribution.Type type, double[] points, BulletRecordProvider provider) {
         this(k, type);
         this.points = points;
-        this.bulletRecordProvider = bulletRecordProvider;
+        this.provider = provider;
     }
 
     /**
@@ -85,13 +85,13 @@ public class QuantileSketch extends DualSketch {
      * @param rounding A number representing how many max decimal places points should have.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param numberOfPoints A positive number of evenly spaced points in the range for the type to get the data for.
-     * @param bulletRecordProvider A BulletRecordProvider to generate BulletRecords.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
-    public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints, BulletRecordProvider bulletRecordProvider) {
+    public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints, BulletRecordProvider provider) {
         this(k, type);
         this.rounding = Math.abs(rounding);
         this.numberOfPoints = numberOfPoints;
-        this.bulletRecordProvider = bulletRecordProvider;
+        this.provider = provider;
     }
 
     /**
@@ -282,7 +282,7 @@ public class QuantileSketch extends DualSketch {
         List<BulletRecord> records = new ArrayList<>();
 
         for (int i = 0; i < domain.length; ++i) {
-            records.add(bulletRecordProvider.getInstance().setDouble(QUANTILE_FIELD, domain[i])
+            records.add(provider.getInstance().setDouble(QUANTILE_FIELD, domain[i])
                                                           .setDouble(VALUE_FIELD, range[i]));
         }
         return records;
@@ -292,7 +292,7 @@ public class QuantileSketch extends DualSketch {
         List<BulletRecord> records = new ArrayList<>();
         String[] bins = makeBins(domain, cumulative);
         for (int i = 0; i < bins.length; ++i) {
-            records.add(bulletRecordProvider.getInstance().setString(RANGE_FIELD, bins[i])
+            records.add(provider.getInstance().setString(RANGE_FIELD, bins[i])
                                                           .setDouble(PROBABILITY_FIELD, range[i])
                                                           .setDouble(COUNT_FIELD, range[i] * n));
         }

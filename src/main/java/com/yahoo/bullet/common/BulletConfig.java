@@ -285,7 +285,7 @@ public class BulletConfig extends Config {
 
     // Members
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
-    private BulletRecordProvider bulletRecordProvider;
+    private BulletRecordProvider provider;
 
     /**
      * Constructor that loads specific file augmented with defaults and validates itself.
@@ -295,7 +295,7 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
@@ -304,7 +304,7 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        bulletRecordProvider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
@@ -314,7 +314,7 @@ public class BulletConfig extends Config {
      * @return The BulletRecordProvider instance.
      */
     public BulletRecordProvider getBulletRecordProvider() {
-        return bulletRecordProvider;
+        return provider;
     }
 
     /**

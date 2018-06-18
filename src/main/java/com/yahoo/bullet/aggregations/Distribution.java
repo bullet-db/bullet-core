@@ -153,10 +153,10 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     }
 
     private static QuantileSketch getSketch(int entries, int maxPoints, int rounding, Type type,
-                                            Map<String, Object> attributes, BulletRecordProvider bulletRecordProvider) {
+                                            Map<String, Object> attributes, BulletRecordProvider provider) {
         int equidistantPoints = getNumberOfEquidistantPoints(attributes);
         if (equidistantPoints > 0) {
-            return new QuantileSketch(entries, rounding, type, Math.min(equidistantPoints, maxPoints), bulletRecordProvider);
+            return new QuantileSketch(entries, rounding, type, Math.min(equidistantPoints, maxPoints), provider);
         }
         List<Double> points = getProvidedPoints(attributes);
         if (Utilities.isEmpty(points)) {
@@ -175,7 +175,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
             return null;
         }
 
-        return new QuantileSketch(entries, type, cleanedPoints, bulletRecordProvider);
+        return new QuantileSketch(entries, type, cleanedPoints, provider);
     }
 
     private static boolean invalidBounds(Type type, double[] points) {
