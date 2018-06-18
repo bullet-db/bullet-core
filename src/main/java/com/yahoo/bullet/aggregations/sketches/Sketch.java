@@ -6,6 +6,7 @@
 package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -23,6 +24,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
 public abstract class Sketch {
     // While this class could implement Monoidal, it does not need the full breadth of those methods and it would need to be
     // receiving data as BulletRecord for one off operations, which is cumbersome.
+    protected BulletRecordProvider provider;
 
     /**
      * Serializes the sketch.

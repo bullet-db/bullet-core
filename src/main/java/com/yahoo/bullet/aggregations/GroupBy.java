@@ -62,7 +62,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         int maximumSize = config.getAs(BulletConfig.GROUP_AGGREGATION_MAX_SIZE, Integer.class);
         int size = Math.min(aggregation.getSize(), maximumSize);
 
-        sketch = new TupleSketch(resizeFactor, samplingProbability, nominalEntries, size);
+        sketch = new TupleSketch(resizeFactor, samplingProbability, nominalEntries, size, config.getBulletRecordProvider());
     }
 
     @Override

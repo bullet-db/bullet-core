@@ -5,7 +5,9 @@
  */
 package com.yahoo.bullet.aggregations.sketches;
 
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.result.RecordBox;
@@ -21,6 +23,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 public class ThetaSketchTest {
+    private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
+
     private static final Map<String, String> ALL_METADATA = new HashMap<>();
     static {
         ALL_METADATA.put(Concept.SKETCH_ESTIMATED_RESULT.getName(), "isEst");
@@ -32,12 +36,12 @@ public class ThetaSketchTest {
 
     @Test(expectedExceptions = SketchesArgumentException.class)
     public void testBadCreation() {
-        new ThetaSketch(null, null, 1.0f, -2);
+        new ThetaSketch(null, null, 1.0f, -2, provider);
     }
 
     @Test
     public void testUpdatingForExactResult() {
-        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         sketch.update("foo");
         sketch.update("bar");
         sketch.update("baz");
@@ -52,7 +56,7 @@ public class ThetaSketchTest {
 
     @Test
     public void testUpdatingForApproximateResult() {
-        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         IntStream.range(0, 1024).forEach(i -> sketch.update(String.valueOf(i)));
 
         Map<String, String> metaKeys = new HashMap<>();
@@ -78,13 +82,13 @@ public class ThetaSketchTest {
 
     @Test
     public void testUnioning() {
-        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         IntStream.range(0, 1024).forEach(i -> sketch.update(String.valueOf(i)));
 
-        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         IntStream.range(-1024, 0).forEach(i -> anotherSketch.update(String.valueOf(i)));
 
-        ThetaSketch unionSketch = new ThetaSketch(ResizeFactor.X4, Family.QUICKSELECT, 1.0f, 512);
+        ThetaSketch unionSketch = new ThetaSketch(ResizeFactor.X4, Family.QUICKSELECT, 1.0f, 512, provider);
         unionSketch.union(sketch.serialize());
         unionSketch.union(anotherSketch.serialize());
 
@@ -126,7 +130,7 @@ public class ThetaSketchTest {
 
     @Test
     public void testResetting() {
-        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         sketch.update("foo");
         sketch.update("bar");
         sketch.update("baz");
@@ -145,7 +149,7 @@ public class ThetaSketchTest {
         actual = actuals.get(0);
         Assert.assertEquals(actual, expected);
 
-        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         IntStream.range(0, 41).forEach(i -> anotherSketch.update(String.valueOf(i)));
 
         sketch.union(anotherSketch.serialize());
@@ -160,7 +164,7 @@ public class ThetaSketchTest {
 
     @Test
     public void testFetchingDataWithoutResettingAndInsertingMoreData() {
-        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch sketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         sketch.update("foo");
         sketch.update("bar");
         sketch.update("baz");
@@ -181,7 +185,7 @@ public class ThetaSketchTest {
         actual = actuals.get(0);
         Assert.assertEquals(actual, expected);
 
-        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512);
+        ThetaSketch anotherSketch = new ThetaSketch(ResizeFactor.X4, Family.ALPHA, 1.0f, 512, provider);
         IntStream.range(0, 41).forEach(i -> anotherSketch.update(String.valueOf(i)));
         sketch.union(anotherSketch.serialize());
 

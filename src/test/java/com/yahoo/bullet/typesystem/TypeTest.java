@@ -16,9 +16,9 @@ public class TypeTest {
     @Test
     public void testCurrentTypes() {
         Assert.assertEquals(new HashSet<>(Type.PRIMITIVES),
-                            new HashSet<>(Arrays.asList(Type.LONG, Type.BOOLEAN, Type.DOUBLE, Type.STRING)));
+                            new HashSet<>(Arrays.asList(Type.INTEGER, Type.LONG, Type.BOOLEAN, Type.FLOAT, Type.DOUBLE, Type.STRING)));
         Assert.assertEquals(new HashSet<>(Type.NUMERICS),
-                            new HashSet<>(Arrays.asList(Type.LONG, Type.DOUBLE)));
+                            new HashSet<>(Arrays.asList(Type.INTEGER, Type.LONG, Type.FLOAT, Type.DOUBLE)));
     }
 
     @Test
@@ -26,9 +26,11 @@ public class TypeTest {
         Assert.assertEquals(Type.getType(null), Type.NULL);
         Assert.assertEquals(Type.getType(true), Type.BOOLEAN);
         Assert.assertEquals(Type.getType("foo"), Type.STRING);
+        Assert.assertEquals(Type.getType(1), Type.INTEGER);
         Assert.assertEquals(Type.getType(1L), Type.LONG);
+        Assert.assertEquals(Type.getType(3.14F), Type.FLOAT);
         Assert.assertEquals(Type.getType(1.2), Type.DOUBLE);
-        Assert.assertEquals(Type.getType(1), Type.UNKNOWN);
+        Assert.assertEquals(Type.getType('8'), Type.UNKNOWN);
         Assert.assertEquals(Type.getType(new HashSet<String>()), Type.UNKNOWN);
     }
 
@@ -66,6 +68,21 @@ public class TypeTest {
     }
 
     @Test
+    public void testIntegerCasting() {
+        Assert.assertEquals(Type.INTEGER.cast("41"), 41);
+    }
+
+    @Test(expectedExceptions = NumberFormatException.class)
+    public void testIntegerFailCastingDouble() {
+        Type.INTEGER.cast("41.99");
+    }
+
+    @Test(expectedExceptions = NumberFormatException.class)
+    public void testIntegerFailCastingString() {
+        Type.INTEGER.cast("foo");
+    }
+
+    @Test
     public void testLongCasting() {
         Assert.assertEquals(Type.LONG.cast("41"), 41L);
     }
@@ -78,6 +95,17 @@ public class TypeTest {
     @Test(expectedExceptions = NumberFormatException.class)
     public void testLongFailCastingString() {
         Type.LONG.cast("foo");
+    }
+
+    @Test
+    public void testFloatCasting() {
+        Assert.assertEquals(Type.FLOAT.cast("42.0"), 42.0f);
+        Assert.assertEquals(Type.FLOAT.cast("42"), 42.0f);
+    }
+
+    @Test(expectedExceptions = NumberFormatException.class)
+    public void testFloatFailCastingString() {
+        Type.FLOAT.cast("foo");
     }
 
     @Test

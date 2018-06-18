@@ -202,12 +202,6 @@ bullet.result.metadata.metrics:
     - name: "Window Expected Emit Time"
       key: "Expected Emit Time"
 
-# Enables whether each record should have a new key added to it denoting it was projected.
-bullet.record.inject.timestamp.enable: false
-# This is the key that is used to add the timestamp in milliseconds to the record, if record.inject.timestamp.enable is true. This is the timestamp when
-# the record is projected. This is only applicable to RAW queries.
-bullet.record.inject.timestamp.key: "bullet_project_timestamp"
-
 # If this is set to true, all windows will be ignored. In other words, queries will provide a single result at the end of its duration.
 # IMPORTANT: If you turn this on, ensure that your bullet.query.default.duration.ms and bullet.query.max.duration.ms are set to
 # reasonable values (they default to infinity) for your queries.
@@ -229,3 +223,7 @@ bullet.query.rate.limit.time.interval: 100
 bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.rest.RESTPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
+
+# Factory class to get new BulletRecords while doing group-data operations, sketch operations, etc. This can be changed
+# if a user wants to force Bullet to use a particular type of BulletRecord everywhere.
+bullet.record.provider.class.name: "com.yahoo.bullet.record.AvroBulletRecordProvider"

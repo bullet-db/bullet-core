@@ -4,7 +4,7 @@
 
     <groupId>com.yahoo.bullet</groupId>
     <artifactId>bullet-core</artifactId>
-    <version>0.3.5-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bullet-core</name>
 
@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.record.version>0.1.2</bullet.record.version>
+        <bullet.record.version>0.2.0</bullet.record.version>
         <sketches.version>0.9.1</sketches.version>
     </properties>
 

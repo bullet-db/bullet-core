@@ -6,6 +6,7 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import org.testng.Assert;
@@ -52,7 +53,7 @@ public class StrategyTest {
     public void testDefaultClosed() {
         EmptyStrategy strategy = new EmptyStrategy();
         Assert.assertFalse(strategy.isClosed());
-        strategy.consume(new BulletRecord());
+        strategy.consume(new AvroBulletRecord());
         Assert.assertFalse(strategy.isClosed());
     }
 }

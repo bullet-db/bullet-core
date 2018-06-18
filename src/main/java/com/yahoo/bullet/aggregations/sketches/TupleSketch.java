@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupDataSummary;
 import com.yahoo.bullet.aggregations.grouping.GroupDataSummaryFactory;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
@@ -41,9 +42,10 @@ public class TupleSketch extends KMVSketch {
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
      * @param maxSize The maximum size of groups to return.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
     @SuppressWarnings("unchecked")
-    public TupleSketch(ResizeFactor resizeFactor, float samplingProbability, int nominalEntries, int maxSize) {
+    public TupleSketch(ResizeFactor resizeFactor, float samplingProbability, int nominalEntries, int maxSize, BulletRecordProvider provider) {
         GroupDataSummaryFactory factory = new GroupDataSummaryFactory();
         UpdatableSketchBuilder<CachingGroupData, GroupDataSummary> builder = new UpdatableSketchBuilder(factory);
 
@@ -52,6 +54,7 @@ public class TupleSketch extends KMVSketch {
         unionSketch = new Union<>(nominalEntries, factory);
 
         this.maxSize = maxSize;
+        this.provider = provider;
     }
 
     /**
@@ -85,7 +88,7 @@ public class TupleSketch extends KMVSketch {
         SketchIterator<GroupDataSummary> iterator = this.result.iterator();
         for (int count = 0; iterator.next() && count < maxSize; count++) {
             GroupData data = iterator.getSummary().getData();
-            result.add(data.getAsBulletRecord());
+            result.add(data.getAsBulletRecord(provider));
         }
         return result;
     }

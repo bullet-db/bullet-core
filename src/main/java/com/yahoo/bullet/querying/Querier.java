@@ -295,7 +295,6 @@ public class Querier implements Monoidal {
 
     private BulletConfig config;
     private Map<String, String> metaKeys;
-    private String timestampKey;
     private boolean hasNewData = false;
 
     // This is counting the number of times we get the data out of the query.
@@ -365,11 +364,6 @@ public class Querier implements Monoidal {
     public Optional<List<BulletError>> initialize() {
         // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
-
-        Boolean shouldInjectTimestamp = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP, Boolean.class);
-        if (shouldInjectTimestamp) {
-            timestampKey = config.getAs(BulletConfig.RECORD_INJECT_TIMESTAMP_KEY, String.class);
-        }
 
         boolean isRateLimitEnabled = config.getAs(BulletConfig.RATE_LIMIT_ENABLE, Boolean.class);
         if (isRateLimitEnabled) {
@@ -638,15 +632,7 @@ public class Querier implements Monoidal {
 
     private BulletRecord project(BulletRecord record) {
         Projection projection = runningQuery.getQuery().getProjection();
-        BulletRecord projected = projection != null ? ProjectionOperations.project(record, projection) : record;
-        return addAdditionalFields(projected);
-    }
-
-    private BulletRecord addAdditionalFields(BulletRecord record) {
-        if (timestampKey != null) {
-            record.setLong(timestampKey, System.currentTimeMillis());
-        }
-        return record;
+        return projection != null ? ProjectionOperations.project(record, projection, config.getBulletRecordProvider()) : record;
     }
 
     private Meta getResultMetadata() {
