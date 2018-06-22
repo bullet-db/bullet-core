@@ -6,6 +6,7 @@
 package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.Family;
@@ -36,14 +37,17 @@ public class ThetaSketch extends KMVSketch {
      * @param family The {@link Family} to use.
      * @param samplingProbability The sampling probability to use.
      * @param nominalEntries The nominal entries for the sketch.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
-    public ThetaSketch(ResizeFactor resizeFactor, Family family, float samplingProbability, int nominalEntries) {
+    public ThetaSketch(ResizeFactor resizeFactor, Family family, float samplingProbability, int nominalEntries,
+                       BulletRecordProvider provider) {
         updateSketch = UpdateSketch.builder().setFamily(family).setNominalEntries(nominalEntries)
                                              .setP(samplingProbability).setResizeFactor(resizeFactor)
                                              .build();
         unionSketch = SetOperation.builder().setNominalEntries(nominalEntries).setP(samplingProbability)
                                             .setResizeFactor(resizeFactor).buildUnion();
         this.family = family.getFamilyName();
+        this.provider = provider;
     }
 
     /**
@@ -151,9 +155,8 @@ public class ThetaSketch extends KMVSketch {
 
     private BulletRecord getCount() {
         double count = result.getEstimate();
-        BulletRecord record = new BulletRecord();
+        BulletRecord record = provider.getInstance();
         record.setDouble(COUNT_FIELD, count);
         return record;
-
     }
 }

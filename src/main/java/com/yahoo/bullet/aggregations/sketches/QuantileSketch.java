@@ -7,6 +7,7 @@ package com.yahoo.bullet.aggregations.sketches;
 
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.memory.NativeMemory;
@@ -68,10 +69,12 @@ public class QuantileSketch extends DualSketch {
      * @param k A number representative of the size of the sketch.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param points An array of points to get the quantiles, PMF and/or CDF for.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
-    public QuantileSketch(int k, Distribution.Type type, double[] points) {
+    public QuantileSketch(int k, Distribution.Type type, double[] points, BulletRecordProvider provider) {
         this(k, type);
         this.points = points;
+        this.provider = provider;
     }
 
     /**
@@ -82,11 +85,13 @@ public class QuantileSketch extends DualSketch {
      * @param rounding A number representing how many max decimal places points should have.
      * @param type A {@link Distribution.Type} that determines what the points mean.
      * @param numberOfPoints A positive number of evenly spaced points in the range for the type to get the data for.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      */
-    public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints) {
+    public QuantileSketch(int k, int rounding, Distribution.Type type, int numberOfPoints, BulletRecordProvider provider) {
         this(k, type);
         this.rounding = Math.abs(rounding);
         this.numberOfPoints = numberOfPoints;
+        this.provider = provider;
     }
 
     /**
@@ -233,7 +238,7 @@ public class QuantileSketch extends DualSketch {
      * @param n A long to scale the value of each range entry by if type is not {@link Distribution.Type#QUANTILE}.
      * @return The records that correspond to the data.
      */
-    static List<BulletRecord> zip(double[] domain, double[] range, Distribution.Type type, long n) {
+    List<BulletRecord> zip(double[] domain, double[] range, Distribution.Type type, long n) {
         List<BulletRecord> records = null;
         switch (type) {
             case QUANTILE:
@@ -273,23 +278,23 @@ public class QuantileSketch extends DualSketch {
     }
 
 
-    private static List<BulletRecord> zipQuantiles(double[] domain, double[] range) {
+    private List<BulletRecord> zipQuantiles(double[] domain, double[] range) {
         List<BulletRecord> records = new ArrayList<>();
 
         for (int i = 0; i < domain.length; ++i) {
-            records.add(new BulletRecord().setDouble(QUANTILE_FIELD, domain[i])
-                                          .setDouble(VALUE_FIELD, range[i]));
+            records.add(provider.getInstance().setDouble(QUANTILE_FIELD, domain[i])
+                                                          .setDouble(VALUE_FIELD, range[i]));
         }
         return records;
     }
 
-    private static List<BulletRecord> zipRanges(double[] domain, double[] range, long n, boolean cumulative) {
+    private List<BulletRecord> zipRanges(double[] domain, double[] range, long n, boolean cumulative) {
         List<BulletRecord> records = new ArrayList<>();
         String[] bins = makeBins(domain, cumulative);
         for (int i = 0; i < bins.length; ++i) {
-            records.add(new BulletRecord().setString(RANGE_FIELD, bins[i])
-                                          .setDouble(PROBABILITY_FIELD, range[i])
-                                          .setDouble(COUNT_FIELD, range[i] * n));
+            records.add(provider.getInstance().setString(RANGE_FIELD, bins[i])
+                                                          .setDouble(PROBABILITY_FIELD, range[i])
+                                                          .setDouble(COUNT_FIELD, range[i] * n));
         }
         return records;
     }

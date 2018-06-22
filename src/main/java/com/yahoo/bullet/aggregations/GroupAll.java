@@ -7,6 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
@@ -28,15 +29,18 @@ public class GroupAll implements Strategy {
     private GroupData data;
 
     private Set<GroupOperation> operations;
+    private BulletConfig config;
     /**
      * Constructor that requires an {@link Aggregation}.
      *
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
+     * @param config The BulletConfig.
      */
-    public GroupAll(Aggregation aggregation) {
+    public GroupAll(Aggregation aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result
         operations = GroupOperation.getOperations(aggregation.getAttributes());
         data = new GroupData(operations);
+        this.config = config;
     }
 
     @Override
@@ -70,7 +74,7 @@ public class GroupAll implements Strategy {
     @Override
     public List<BulletRecord> getRecords() {
         List<BulletRecord> list = new ArrayList<>();
-        list.add(data.getMetricsAsBulletRecord());
+        list.add(data.getMetricsAsBulletRecord(config.getBulletRecordProvider()));
         return list;
     }
 

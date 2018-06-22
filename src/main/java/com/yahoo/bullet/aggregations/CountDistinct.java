@@ -52,7 +52,7 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
         newName = attributes == null ? DEFAULT_NEW_NAME :
                                        attributes.getOrDefault(NEW_NAME_FIELD, DEFAULT_NEW_NAME).toString();
 
-        sketch = new ThetaSketch(resizeFactor, family, samplingProbability, nominalEntries);
+        sketch = new ThetaSketch(resizeFactor, family, samplingProbability, nominalEntries, config.getBulletRecordProvider());
     }
 
     @Override

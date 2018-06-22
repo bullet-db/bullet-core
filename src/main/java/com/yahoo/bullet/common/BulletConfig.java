@@ -6,6 +6,7 @@
 package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.pubsub.PubSub.Context;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,6 @@ public class BulletConfig extends Config {
     // Field names
     public static final String QUERY_DEFAULT_DURATION = "bullet.query.default.duration.ms";
     public static final String QUERY_MAX_DURATION = "bullet.query.max.duration.ms";
-    public static final String RECORD_INJECT_TIMESTAMP = "bullet.record.inject.timestamp.enable";
-    public static final String RECORD_INJECT_TIMESTAMP_KEY = "bullet.record.inject.timestamp.key";
 
     public static final String AGGREGATION_DEFAULT_SIZE = "bullet.query.aggregation.default.size";
     public static final String AGGREGATION_MAX_SIZE = "bullet.query.aggregation.max.size";
@@ -64,11 +63,11 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
+    public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
+
     // Defaults
     public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
     public static final long DEFAULT_QUERY_MAX_DURATION = (long) Double.POSITIVE_INFINITY;
-    public static final boolean DEFAULT_RECORD_INJECT_TIMESTAMP = false;
-    public static final String DEFAULT_RECORD_INJECT_TIMESTAMP_KEY = "bullet_project_timestamp";
 
     public static final int DEFAULT_AGGREGATION_SIZE = 500;
     public static final int DEFAULT_AGGREGATION_MAX_SIZE = 500;
@@ -133,6 +132,8 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
+    public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
+
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
@@ -145,12 +146,6 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_QUERY_MAX_DURATION)
                  .checkIf(Validator::isPositive)
                  .castTo(Validator::asLong);
-        VALIDATOR.define(RECORD_INJECT_TIMESTAMP)
-                 .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP)
-                 .checkIf(Validator::isBoolean);
-        VALIDATOR.define(RECORD_INJECT_TIMESTAMP_KEY)
-                 .defaultTo(DEFAULT_RECORD_INJECT_TIMESTAMP_KEY)
-                 .checkIf(Validator::isString);
 
         VALIDATOR.define(AGGREGATION_DEFAULT_SIZE)
                  .defaultTo(DEFAULT_AGGREGATION_SIZE)
@@ -265,6 +260,10 @@ public class BulletConfig extends Config {
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);
 
+        VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
+                .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
+                .checkIf(Validator::isString);
+
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
@@ -286,6 +285,7 @@ public class BulletConfig extends Config {
 
     // Members
     public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
+    private BulletRecordProvider provider;
 
     /**
      * Constructor that loads specific file augmented with defaults and validates itself.
@@ -295,6 +295,7 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
@@ -303,6 +304,17 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
+    }
+
+    /**
+     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance. This BulletRecordProvider is
+     * created when this BulletConfig is constructed.
+     *
+     * @return The BulletRecordProvider instance.
+     */
+    public BulletRecordProvider getBulletRecordProvider() {
+        return provider;
     }
 
     /**

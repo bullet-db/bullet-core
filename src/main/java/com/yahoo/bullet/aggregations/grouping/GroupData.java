@@ -9,6 +9,7 @@ import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperator;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -129,10 +130,11 @@ public class GroupData implements Serializable {
     /**
      * Gets the metrics stored for the group as a {@link BulletRecord}.
      *
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getMetricsAsBulletRecord() {
-        BulletRecord record = new BulletRecord();
+    public BulletRecord getMetricsAsBulletRecord(BulletRecordProvider provider) {
+        BulletRecord record = provider.getInstance();
         metrics.entrySet().stream().forEach(e -> addToRecord(e, record));
         return record;
     }
@@ -140,20 +142,22 @@ public class GroupData implements Serializable {
     /**
      * Gets the metrics and the group values stored as a {@link BulletRecord}.
      *
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getAsBulletRecord() {
-        return getAsBulletRecord(Collections.emptyMap());
+    public BulletRecord getAsBulletRecord(BulletRecordProvider provider) {
+        return getAsBulletRecord(Collections.emptyMap(), provider);
     }
 
     /**
      * Gets the metrics and the group values stored as a {@link BulletRecord}.
      *
      * @param mapping An non-null new name mapping for the names of the group fields.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
-    public BulletRecord getAsBulletRecord(Map<String, String> mapping) {
-        BulletRecord record = getMetricsAsBulletRecord();
+    public BulletRecord getAsBulletRecord(Map<String, String> mapping, BulletRecordProvider provider) {
+        BulletRecord record = getMetricsAsBulletRecord(provider);
         for (Map.Entry<String, String> e : groupFields.entrySet()) {
             String field = e.getKey();
             String mapped = mapping.get(field);

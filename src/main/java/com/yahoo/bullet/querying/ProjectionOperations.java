@@ -7,6 +7,7 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -20,16 +21,17 @@ public class ProjectionOperations {
      *
      * @param record The record to project.
      * @param projection The projection to apply.
+     * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return The projected record.
      */
-    public static BulletRecord project(BulletRecord record, Projection projection) {
+    public static BulletRecord project(BulletRecord record, Projection projection, BulletRecordProvider provider) {
         Map<String, String> fields = projection.getFields();
         // Returning the record itself if no projections. The record itself should never be modified so it's ok.
         if (fields == null) {
             return record;
         }
         // More efficient if fields << the fields in the BulletRecord
-        BulletRecord projected = new BulletRecord();
+        BulletRecord projected = provider.getInstance();
         for (Map.Entry<String, String> e : fields.entrySet()) {
             String field = e.getKey();
             String newName = e.getValue();
