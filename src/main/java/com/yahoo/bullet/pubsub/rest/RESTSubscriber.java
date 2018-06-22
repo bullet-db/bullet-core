@@ -64,6 +64,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
                     String message = EntityUtils.toString(response.getEntity(), RESTPubSub.UTF_8);
+                    log.debug("Received message from url: {}. Message was {}", url, message);
                     messages.add(PubSubMessage.fromJSON(message));
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem

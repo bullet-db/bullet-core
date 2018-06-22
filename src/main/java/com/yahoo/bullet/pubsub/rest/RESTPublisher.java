@@ -59,7 +59,7 @@ public abstract class RESTPublisher implements Publisher {
             }
             log.debug("Successfully wrote message with status code {}. Response was: {}", response.getStatusLine().getStatusCode(), response);
         } catch (Exception e) {
-            log.error("Error encoding message in preparation for POST: ", e);
+            log.error("Error encoding message in preparation for POST. Message was: " + message.asJSON() + ". Error was: ", e);
         }
     }
 
