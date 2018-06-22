@@ -26,8 +26,8 @@ public class RESTQueryPublisher extends RESTPublisher {
      * @param queryURL The URL to which to POST queries.
      * @param resultURL The URL that will be added to the Metadata (results will be sent to this URL from the backend).
      */
-    public RESTQueryPublisher(CloseableHttpClient client, String queryURL, String resultURL) {
-        super(client);
+    public RESTQueryPublisher(CloseableHttpClient client, String queryURL, String resultURL, int connectTimeout) {
+        super(client, connectTimeout);
         this.queryURL = queryURL;
         this.resultURL = resultURL;
     }

@@ -24,7 +24,7 @@ public class RESTResultPublisherTest {
     @Test
     public void testSendPullsURLFromMessage() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient, 5000);
         Metadata metadata = new Metadata(null, "my/custom/url");
         publisher.send(new PubSubMessage("foo", "bar", metadata));
 
@@ -49,7 +49,7 @@ public class RESTResultPublisherTest {
     public void testClose() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doNothing().when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient, 5000);
 
         publisher.close();
         verify(mockClient).close();
@@ -59,7 +59,7 @@ public class RESTResultPublisherTest {
     public void testCloseDoesNotThrow() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        RESTResultPublisher publisher = new RESTResultPublisher(mockClient);
+        RESTResultPublisher publisher = new RESTResultPublisher(mockClient, 5000);
 
         publisher.close();
         verify(mockClient).close();

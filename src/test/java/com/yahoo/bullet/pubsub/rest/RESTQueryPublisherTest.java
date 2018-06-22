@@ -34,7 +34,7 @@ public class RESTQueryPublisherTest {
         doReturn(200).when(mockStatusLine).getStatusCode();
         doReturn(mockStatusLine).when(mockResponse).getStatusLine();
         doReturn(mockResponse).when(mockClient).execute(any());
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
@@ -52,7 +52,7 @@ public class RESTQueryPublisherTest {
     @Test
     public void testSendResultUrlPutInMetadataCompletePreserved() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
         publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
@@ -70,7 +70,7 @@ public class RESTQueryPublisherTest {
     @Test
     public void testSendMetadataCreated() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
         publisher.send("foo", "bar");
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
@@ -89,7 +89,7 @@ public class RESTQueryPublisherTest {
     public void testClose() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doNothing().when(mockClient).close();
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url");
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
         publisher.close();
         verify(mockClient).close();
     }
@@ -98,7 +98,7 @@ public class RESTQueryPublisherTest {
     public void testCloseDoesNotThrow() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         doThrow(new IOException("error!")).when(mockClient).close();
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, null, null);
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, null, null, 5000);
 
         publisher.close();
         verify(mockClient).close();
@@ -107,7 +107,7 @@ public class RESTQueryPublisherTest {
     @Test
     public void testBadResponseDoesNotThrow() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
-        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url");
+        RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/result/url", 5000);
         PubSubMessage message = mock(PubSubMessage.class);
         // This will compel the HttpPost object to throw an exception in RESTPublisher.sendToURL()
         doReturn(null).when(message).asJSON();

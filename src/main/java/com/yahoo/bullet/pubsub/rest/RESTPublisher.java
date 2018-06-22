@@ -8,16 +8,19 @@ package com.yahoo.bullet.pubsub.rest;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 @Slf4j
 public abstract class RESTPublisher implements Publisher {
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE = "content-type";
+    private int connectTimeout;
 
     private CloseableHttpClient client;
 
@@ -26,8 +29,9 @@ public abstract class RESTPublisher implements Publisher {
      *
      * @param client The client.
      */
-    public RESTPublisher(CloseableHttpClient client) {
+    public RESTPublisher(CloseableHttpClient client, int connectTimeout) {
         this.client = client;
+        this.connectTimeout = connectTimeout;
     }
 
     @Override
@@ -48,10 +52,7 @@ public abstract class RESTPublisher implements Publisher {
     protected void sendToURL(String url, PubSubMessage message) {
         log.debug("Sending message: {} to url: {}", message, url);
         try {
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new StringEntity(message.asJSON()));
-            httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
-            HttpResponse response = client.execute(httpPost);
+            HttpResponse response = client.execute(makeHttpPost(url, message));
             if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {
                 log.error("Couldn't reach REST pubsub server. Got response: {}", response);
                 return;
@@ -60,5 +61,17 @@ public abstract class RESTPublisher implements Publisher {
         } catch (Exception e) {
             log.error("Error encoding message in preparation for POST: ", e);
         }
+    }
+
+    private HttpPost makeHttpPost(String url, PubSubMessage message) throws UnsupportedEncodingException {
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setEntity(new StringEntity(message.asJSON()));
+        httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+        RequestConfig requestConfig =
+                RequestConfig.custom().setConnectTimeout(connectTimeout)
+                        .setSocketTimeout(connectTimeout)
+                        .build();
+        httpPost.setConfig(requestConfig);
+        return httpPost;
     }
 }

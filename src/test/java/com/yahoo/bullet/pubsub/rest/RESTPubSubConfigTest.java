@@ -20,25 +20,25 @@ public class RESTPubSubConfigTest {
     @Test
     public void testNoFiles() {
         RESTPubSubConfig config = new RESTPubSubConfig((String) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 5000);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 5000);
 
         config = new RESTPubSubConfig((Config) null);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 5000);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 5000);
 
         config = new RESTPubSubConfig("");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 5000);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 5000);
     }
 
     @Test
     public void testMissingFile() {
         RESTPubSubConfig config = new RESTPubSubConfig("/path/to/non/existant/file");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 5000);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 5000);
     }
 
     @Test
     public void testCustomConfig() {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 88);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 88);
         Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
         List<String> queries = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class));
         Assert.assertEquals(queries.size(), 2);
@@ -57,7 +57,7 @@ public class RESTPubSubConfigTest {
     @Test
     public void testGettingWithDefault() {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
-        Assert.assertEquals(config.getOrDefault(RESTPubSubConfig.CONNECT_TIMEOUT, "51"), 88);
+        Assert.assertEquals(config.getOrDefault(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT, "51"), 88);
         Assert.assertEquals(config.getOrDefault("does.not.exist", "foo"), "foo");
         Assert.assertEquals(config.getOrDefault("fake.setting", "bar"), "bar");
     }
@@ -90,12 +90,12 @@ public class RESTPubSubConfigTest {
         RESTPubSubConfig config = new RESTPubSubConfig("src/test/resources/test_config.yaml");
 
         int configSize = config.getAll(Optional.empty()).size();
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 88);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 88);
         Assert.assertEquals(config.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), "com.yahoo.bullet.pubsub.MockPubSub");
 
         Config another = new RESTPubSubConfig((String) null);
         another.clear();
-        another.set(RESTPubSubConfig.CONNECT_TIMEOUT, 51L);
+        another.set(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT, 51L);
         // This is a bad setting
         another.set(RESTPubSubConfig.AGGREGATION_MAX_SIZE, -1);
         // Some other non-Bullet setting
@@ -104,7 +104,7 @@ public class RESTPubSubConfigTest {
         config.merge(another);
 
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 51);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 51);
         // Bad setting gets defaulted.
         Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         // Other setting is preserved.
@@ -113,7 +113,7 @@ public class RESTPubSubConfigTest {
         // Test null and verify it is unchanged
         config.merge(null);
         Assert.assertEquals(config.getAll(Optional.empty()).size(), configSize + 1);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), 51);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), 51);
         Assert.assertEquals(config.get(RESTPubSubConfig.AGGREGATION_MAX_SIZE), RESTPubSubConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         Assert.assertEquals(config.get("pi"), 3.14);
     }
@@ -125,7 +125,7 @@ public class RESTPubSubConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, false).size();
-        Assert.assertEquals(configSize, 8);
+        Assert.assertEquals(configSize, 9);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
         Assert.assertEquals(properties.get(RESTPubSubConfig.PUBSUB_CLASS_NAME), fieldValue);
@@ -139,7 +139,7 @@ public class RESTPubSubConfigTest {
         String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, true).size();
-        Assert.assertEquals(configSize, 8);
+        Assert.assertEquals(configSize, 9);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
         Assert.assertNull(properties.get(RESTPubSubConfig.PUBSUB_CLASS_NAME));
@@ -196,9 +196,9 @@ public class RESTPubSubConfigTest {
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_DEFAULT_SIZE), BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
         // Test validate() corrects RESTPubSubConfig settings
-        config.set(RESTPubSubConfig.CONNECT_TIMEOUT, -88);
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), -88);
+        config.set(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT, -88);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), -88);
         config.validate();
-        Assert.assertEquals(config.get(RESTPubSubConfig.CONNECT_TIMEOUT), RESTPubSubConfig.DEFAULT_CONNECT_TIMEOUT);
+        Assert.assertEquals(config.get(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT), RESTPubSubConfig.DEFAULT_SUBSCRIBER_CONNECT_TIMEOUT);
     }
 }
