@@ -16,8 +16,8 @@ public class RESTResultPublisher extends RESTPublisher {
      *
      * @param client The client.
      */
-    public RESTResultPublisher(CloseableHttpClient client) {
-        super(client);
+    public RESTResultPublisher(CloseableHttpClient client, int connectTimeout) {
+        super(client, connectTimeout);
     }
 
     @Override

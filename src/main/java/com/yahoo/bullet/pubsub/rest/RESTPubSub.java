@@ -36,12 +36,13 @@ public class RESTPubSub extends PubSub {
 
     @Override
     public Publisher getPublisher() {
+        int connectTimeout = config.getAs(RESTPubSubConfig.PUBLISHER_CONNECT_TIMEOUT, Integer.class);
         if (context == Context.QUERY_PROCESSING) {
-            return new RESTResultPublisher(HttpClients.createDefault());
+            return new RESTResultPublisher(HttpClients.createDefault(), connectTimeout);
         } else {
             String queryURL = ((List<String>) config.getAs(RESTPubSubConfig.QUERY_URLS, List.class)).get(0);
             String resultURL = config.getAs(RESTPubSubConfig.RESULT_URL, String.class);
-            return new RESTQueryPublisher(HttpClients.createDefault(), queryURL, resultURL);
+            return new RESTQueryPublisher(HttpClients.createDefault(), queryURL, resultURL, connectTimeout);
         }
     }
 
@@ -53,7 +54,7 @@ public class RESTPubSub extends PubSub {
     @Override
     public Subscriber getSubscriber() {
         int maxUncommittedMessages = config.getAs(RESTPubSubConfig.MAX_UNCOMMITTED_MESSAGES, Integer.class);
-        int connectTimeout = config.getAs(RESTPubSubConfig.CONNECT_TIMEOUT, Integer.class);
+        int connectTimeout = config.getAs(RESTPubSubConfig.SUBSCRIBER_CONNECT_TIMEOUT, Integer.class);
         List<String> urls;
         Long minWait;
 

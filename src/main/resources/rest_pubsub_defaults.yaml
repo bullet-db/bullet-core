@@ -1,5 +1,7 @@
-# Http connection timout (used by both the web service and the backend)
-bullet.pubsub.rest.connect.timeout.ms: 5000
+# Http connection timout for subscribers
+bullet.pubsub.rest.subscriber.connect.timeout.ms: 5000
+# Http connection timout for publishers
+bullet.pubsub.rest.publisher.connect.timeout.ms: 5000
 # Maxiumum number of uncommitted messages allowed before read requests will wait for commits (used by both the web service and the backend)
 bullet.pubsub.rest.subscriber.max.uncommitted.messages: 100
 # Minimum time (ms) between http calls to the result subscriber REST endpoint. This can be used to limit the number of http requests to the REST endpoints
