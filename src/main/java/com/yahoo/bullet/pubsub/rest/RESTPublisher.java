@@ -9,10 +9,11 @@ import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -51,13 +52,10 @@ public abstract class RESTPublisher implements Publisher {
      */
     protected void sendToURL(String url, PubSubMessage message) {
         log.debug("Sending message: {} to url: {}", message, url);
-        try {
-            HttpResponse response = client.execute(makeHttpPost(url, message));
+        try (CloseableHttpResponse response = client.execute(makeHttpPost(url, message))) {
             if (response == null || response.getStatusLine().getStatusCode() != RESTPubSub.OK_200) {
-                log.error("Couldn't reach REST pubsub server. Got response: {}", response);
-                return;
+                log.error("Couldn't POST to REST pubsub server. Got response: {}", response);
             }
-            log.debug("Successfully wrote message with status code {}. Response was: {}", response.getStatusLine().getStatusCode(), response);
         } catch (Exception e) {
             log.error("Error when trying to POST. Message was: {}. Error was: ", message.asJSON(), e);
         }
@@ -68,9 +66,7 @@ public abstract class RESTPublisher implements Publisher {
         httpPost.setEntity(new StringEntity(message.asJSON()));
         httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
         RequestConfig requestConfig =
-                RequestConfig.custom().setConnectTimeout(connectTimeout)
-                        .setSocketTimeout(connectTimeout)
-                        .build();
+                RequestConfig.custom().setConnectTimeout(connectTimeout).setSocketTimeout(connectTimeout).build();
         httpPost.setConfig(requestConfig);
         return httpPost;
     }

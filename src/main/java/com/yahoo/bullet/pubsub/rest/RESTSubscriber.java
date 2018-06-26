@@ -11,8 +11,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -58,17 +59,16 @@ public class RESTSubscriber extends BufferingSubscriber {
         }
         lastRequest = currentTime;
         for (String url : urls) {
-            try {
-                log.debug("Getting messages from url: {}", url);
-                HttpResponse response = client.execute(makeHttpGet(url));
+            try (CloseableHttpResponse response = client.execute(makeHttpGet(url))) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == RESTPubSub.OK_200) {
-                    String message = EntityUtils.toString(response.getEntity(), RESTPubSub.UTF_8);
-                    log.debug("Received message from url: {}. Message was {}", url, message);
+                    HttpEntity httpEntity = response.getEntity();
+                    String message = EntityUtils.toString(httpEntity, RESTPubSub.UTF_8);
                     messages.add(PubSubMessage.fromJSON(message));
+                    EntityUtils.consume(httpEntity);
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
-                    log.error("Http call failed with status code {} and response {}.", statusCode, response);
+                    log.error("Http call to {} failed with status code {} and response {}.", url, statusCode, response);
                 }
             } catch (Exception e) {
                 log.error("Http call to {} failed with error:", url, e);
@@ -89,9 +89,7 @@ public class RESTSubscriber extends BufferingSubscriber {
     private HttpGet makeHttpGet(String url) {
         HttpGet httpGet = new HttpGet(url);
         RequestConfig requestConfig =
-                RequestConfig.custom().setConnectTimeout(connectTimeout)
-                                      .setSocketTimeout(connectTimeout)
-                                      .build();
+                RequestConfig.custom().setConnectTimeout(connectTimeout).setSocketTimeout(connectTimeout).build();
         httpGet.setConfig(requestConfig);
         return httpGet;
     }
