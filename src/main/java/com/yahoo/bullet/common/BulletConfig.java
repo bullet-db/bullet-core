@@ -126,7 +126,7 @@ public class BulletConfig extends Config {
     public static final int DEFAULT_WINDOW_MIN_EMIT_EVERY = 1000;
 
     public static final boolean DEFAULT_RATE_LIMIT_ENABLE = true;
-    public static final long DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT = 100;
+    public static final long DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT = 50;
     public static final long DEFAULT_RATE_LIMIT_TIME_INTERVAL = 100;
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
@@ -255,7 +255,7 @@ public class BulletConfig extends Config {
 
         VALIDATOR.define(PUBSUB_CONTEXT_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CONTEXT_NAME)
-                 .checkIf(Validator.isIn(String.class, Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
+                 .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);

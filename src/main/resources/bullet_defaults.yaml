@@ -214,7 +214,7 @@ bullet.query.window.min.emit.every.ms: 1000
 bullet.query.rate.limit.enable: true
 # This is the maximum amount of times data can be retrieved for a query in a given time interval (bullet.query.rate.limit.time.interval)
 # before it is considered as exceeding the rate limit.
-bullet.query.rate.limit.max.emit.count: 100
+bullet.query.rate.limit.max.emit.count: 50
 # This is the smallest interval in ms at which the check for whether the rate limit is being exceeded check is done if your backend uses rate limiting.
 bullet.query.rate.limit.time.interval: 100
 
