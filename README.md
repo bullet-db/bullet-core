@@ -14,7 +14,8 @@ All documentation is available at **[Github Pages here](https://bullet-db.github
 
 ### Useful links
 
-* [Quick Start](https://bullet-db.github.io/quick-start/) to start with a Bullet instance running locally on Storm.
+* [Spark Quick Start](https://bullet-db.github.io/quick-start/spark) to start with a Bullet instance running locally on Spark.
+* [Storm Quick Start](https://bullet-db.github.io/quick-start/storm) to start with a Bullet instance running locally on Storm.
 * [API Examples](https://bullet-db.github.io/ws/examples/) to see what kind of queries you can run on Bullet.
 * [Storm Architecture](https://bullet-db.github.io/backend/storm-architecture/) to see how Bullet is implemented on Storm.
 * [Setup on Storm](https://bullet-db.github.io/backend/storm-setup/) to see how to setup Bullet on Storm.
