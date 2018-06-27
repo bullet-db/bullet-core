@@ -64,14 +64,15 @@ public class RESTSubscriber extends BufferingSubscriber {
                 if (statusCode == RESTPubSub.OK_200) {
                     HttpEntity httpEntity = response.getEntity();
                     String message = EntityUtils.toString(httpEntity, RESTPubSub.UTF_8);
+                    log.debug("Received message from url: {}. Message was {}", url, message);
                     messages.add(PubSubMessage.fromJSON(message));
                     EntityUtils.consume(httpEntity);
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
-                    log.error("Http call to {} failed with status code {} and response {}.", url, statusCode, response);
+                    log.error("HTTP call to {} failed with status code {} and response {}.", url, statusCode, response);
                 }
             } catch (Exception e) {
-                log.error("Http call to {} failed with error:", url, e);
+                log.error("HTTP call to {} failed with error:", url, e);
             }
         }
         return messages;
@@ -82,7 +83,7 @@ public class RESTSubscriber extends BufferingSubscriber {
         try {
             client.close();
         } catch (IOException e) {
-            log.warn("Caught exception when closing AsyncHttpClient: ", e);
+            log.warn("Caught exception when closing HTTP client: ", e);
         }
     }
 

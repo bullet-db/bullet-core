@@ -255,7 +255,7 @@ public class BulletConfig extends Config {
 
         VALIDATOR.define(PUBSUB_CONTEXT_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CONTEXT_NAME)
-                 .checkIf(Validator.isIn(String.class, Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
+                 .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
                  .checkIf(Validator::isString);
