@@ -28,7 +28,7 @@ public class RateLimitErrorTest {
         Assert.assertTrue(((List<BulletError>) actual.get(Meta.ERROR_KEY)).get(0) == error);
 
         String asJSON = error.asJSON();
-        double defaultRate = (DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT / DEFAULT_RATE_LIMIT_TIME_INTERVAL) * RateLimiter.SECOND;
+        double defaultRate = ((double) DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT / DEFAULT_RATE_LIMIT_TIME_INTERVAL) * RateLimiter.SECOND;
         double actualRate = 19.34 * RateLimiter.SECOND;
         assertJSONEquals(asJSON, "{'error': '" + String.format(RateLimitError.ERROR_FORMAT, defaultRate, actualRate) + "', " +
                                   "'resolutions': ['" + RateLimitError.NARROW_FILTER + "', '" + RateLimitError.TIME_WINDOW + "']" +
