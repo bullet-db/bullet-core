@@ -18,15 +18,17 @@ import lombok.Getter;
  * the rate limit within your time interval but you neglect to check it for a long enough time interval where the burst
  * is spread out over bringing the overall rate lower than your configured maximum and yielding a false negative.
  */
-@Getter
 public class RateLimiter {
+    @Getter
     private final int maximum;
+    @Getter
     private final int timeInterval;
     private final double absoluteRateLimit;
 
     private long count = 0;
     private long lastCount = 0;
     private long lastCheckTime;
+    @Getter
     private boolean exceededRate = false;
 
     public static final int SECOND = 1000;
