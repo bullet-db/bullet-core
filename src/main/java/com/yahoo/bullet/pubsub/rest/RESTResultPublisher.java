@@ -15,6 +15,7 @@ public class RESTResultPublisher extends RESTPublisher {
      * Create a RESTQueryPublisher from a {@link CloseableHttpClient}.
      *
      * @param client The client.
+     * @param connectTimeout The minimum time (ms) to wait for a connection to be made.
      */
     public RESTResultPublisher(CloseableHttpClient client, int connectTimeout) {
         super(client, connectTimeout);

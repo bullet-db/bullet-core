@@ -73,8 +73,6 @@ public class Window implements Configurable, Initializable {
                                                                  "Please remove include or match it to emit");
     public static final BulletError IMPROPER_FIRST = makeError("The first field should not be set for \"ALL\"",
                                                               "Please remove the first field");
-    public static final BulletError NOT_ONE_RECORD_EMIT = makeError("The emit type was \"RECORD\" but every was not 1",
-                                                                    "Please set every to 1 or change the emit type");
     public static final BulletError NO_RECORD_ALL = makeError("The emit type was \"RECORD\" and include type was \"ALL\"",
                                                               "Please set emit type to \"TIME\" or match include to emit");
 
@@ -120,9 +118,6 @@ public class Window implements Configurable, Initializable {
         Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
         if (every == null || every.intValue() <= 0) {
             return Optional.of(singletonList(IMPROPER_EVERY));
-        }
-        if (emitType == Unit.RECORD && every.intValue() != 1) {
-            return Optional.of(singletonList(NOT_ONE_RECORD_EMIT));
         }
 
         if (include == null) {

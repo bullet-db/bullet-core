@@ -137,13 +137,13 @@ public class QueryTest {
     public void testWindowForced() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
-        query.setWindow(WindowUtils.makeReactiveWindow());
+        query.setWindow(WindowUtils.makeSlidingWindow(1));
         query.configure(config);
         Assert.assertNotNull(query.getWindow());
 
         config.set(BulletConfig.WINDOW_DISABLE, true);
         config.validate();
-        query.setWindow(WindowUtils.makeReactiveWindow());
+        query.setWindow(WindowUtils.makeSlidingWindow(1));
         query.configure(config);
         Assert.assertNull(query.getWindow());
     }

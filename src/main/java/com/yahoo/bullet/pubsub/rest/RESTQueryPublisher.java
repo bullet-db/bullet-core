@@ -25,6 +25,7 @@ public class RESTQueryPublisher extends RESTPublisher {
      * @param client The client.
      * @param queryURL The URL to which to POST queries.
      * @param resultURL The URL that will be added to the Metadata (results will be sent to this URL from the backend).
+     * @param connectTimeout The minimum time (ms) to wait for a connection to be made.
      */
     public RESTQueryPublisher(CloseableHttpClient client, String queryURL, String resultURL, int connectTimeout) {
         super(client, connectTimeout);

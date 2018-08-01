@@ -30,8 +30,8 @@ public class SlidingRecord extends Basic {
 
     public static final BulletError NOT_RECORD = makeError("The \"type\" for \"emit\" was not \"RECORD\"",
                                                            "Please set \"type\" to \"RECORD\"");
-    protected int maxCount;
-    protected int recordCount;
+    private int maxCount;
+    private int recordCount;
 
     @AllArgsConstructor @Getter
     public static class Data implements Serializable {

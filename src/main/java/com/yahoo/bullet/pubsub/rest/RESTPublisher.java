@@ -28,6 +28,7 @@ public abstract class RESTPublisher implements Publisher {
      * Create a RESTQueryPublisher from a {@link CloseableHttpClient}.
      *
      * @param client The client.
+     * @param connectTimeout The minimum time (ms) to wait for a connection to be made.
      */
     public RESTPublisher(CloseableHttpClient client, int connectTimeout) {
         this.client = client;

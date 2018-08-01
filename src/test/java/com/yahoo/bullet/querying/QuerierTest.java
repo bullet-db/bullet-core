@@ -352,7 +352,7 @@ public class QuerierTest {
     public void testFiltering() {
         Query query = new Query();
         query.setFilters(singletonList(getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
-        query.setWindow(WindowUtils.makeReactiveWindow());
+        query.setWindow(WindowUtils.makeSlidingWindow(1));
         Querier querier = make(Querier.Mode.PARTITION, query);
 
         querier.consume(RecordBox.get().add("field", "foo").getRecord());
@@ -575,19 +575,6 @@ public class QuerierTest {
         querier.consume(RecordBox.get().add("foo", "A").getRecord());
 
         Assert.assertTrue(querier.getMetadata().asMap().isEmpty());
-    }
-
-    @Test
-    public void testRawQueriesWithNonReactiveWindowsAreErrors() {
-        BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 2));
-        query.configure(config);
-        Querier querier = new Querier(new RunningQuery("", query), config);
-        Optional<List<BulletError>> errors = querier.initialize();
-
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.NOT_ONE_RECORD_EMIT));
     }
 
     @Test
