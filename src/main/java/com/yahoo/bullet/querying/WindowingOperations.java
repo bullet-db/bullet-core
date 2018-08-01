@@ -29,7 +29,7 @@ public class WindowingOperations {
          * TODO: Support other windows
          * The windows we support at the moment:
          * 1. No window -> Basic
-         * 2. Window is emit RECORD and include RECORD -> SlideRecord
+         * 2. Window is emit RECORD and include RECORD -> SlidingRecord
          * 3. Window is emit TIME and include ALL -> Additive Tumbling
          * 4. All other windows -> Tumbling (RAW can be Tumbling too)
          */
