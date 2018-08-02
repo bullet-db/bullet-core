@@ -7,6 +7,7 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.record.BulletRecord;
@@ -57,6 +58,7 @@ public class FilterOperations {
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
+    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> sizeOf(t) == i.getValue());
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
@@ -71,6 +73,7 @@ public class FilterOperations {
         COMPARATORS.put(Clause.Operation.LESS_EQUALS, isNotNullAnd(LE));
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
+    static final Comparator<TypedObject> SIZE_OF = isNotNullAnd(SIZEOF);
     static final Map<Clause.Operation, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(Clause.Operation.class);
     static {
         LOGICAL_OPERATORS.put(Clause.Operation.AND, AND);
@@ -95,16 +98,34 @@ public class FilterOperations {
         return (t, s) -> IS_NOT_NULL.test(t) && comparator.compare(t, s);
     }
 
+    private static Integer sizeOf(TypedObject object) {
+        Object o = object.getValue();
+        if (o instanceof List) {
+            return List.class.cast(o).size();
+        }
+        if (o instanceof Map) {
+            return Map.class.cast(o).size();
+        }
+        if (o instanceof String) {
+            return String.class.cast(o).length();
+        }
+        return 1;
+    }
+
     private static boolean performRelational(BulletRecord record, FilterClause clause) {
         Clause.Operation operator = clause.getOperation();
         if (isEmpty(clause.getValues())) {
             return true;
         }
         TypedObject object = extractTypedObject(clause.getField(), record);
-        if (operator == Clause.Operation.REGEX_LIKE) {
-            return REGEX_LIKE.compare(object, clause.getPatterns().stream());
+        switch (operator) {
+            case REGEX_LIKE:
+                return REGEX_LIKE.compare(object, clause.getPatterns().stream());
+            case SIZE_OF:
+                return SIZE_OF.compare(object, cast(new TypedObject(Type.INTEGER, 0), clause.getValues()));
+            default:
+                return COMPARATORS.get(operator).compare(object, cast(object, clause.getValues()));
         }
-        return COMPARATORS.get(operator).compare(object, cast(object, clause.getValues()));
     }
 
     private static boolean performLogical(BulletRecord record, LogicalClause clause) {
