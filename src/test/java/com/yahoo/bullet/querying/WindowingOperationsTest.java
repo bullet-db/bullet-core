@@ -12,7 +12,7 @@ import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
-import com.yahoo.bullet.windowing.Reactive;
+import com.yahoo.bullet.windowing.SlidingRecord;
 import com.yahoo.bullet.windowing.Tumbling;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -26,17 +26,17 @@ public class WindowingOperationsTest {
     }
 
     @Test
-    public void testRawReactiveWindow() {
+    public void testRawSlidingWindow() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
-        Window window = WindowUtils.makeReactiveWindow();
+        Window window = WindowUtils.makeSlidingWindow(2);
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
         aggregation.setType(Aggregation.Type.RAW);
         query.setAggregation(aggregation);
 
-        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Reactive.class);
+        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), SlidingRecord.class);
     }
 
     @Test
@@ -71,14 +71,14 @@ public class WindowingOperationsTest {
     public void testNotForcingNonRawToTumbling() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
-        Window window = WindowUtils.makeReactiveWindow();
+        Window window = WindowUtils.makeSlidingWindow(2);
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
         aggregation.setType(Aggregation.Type.GROUP);
         query.setAggregation(aggregation);
 
-        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Reactive.class);
+        Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), SlidingRecord.class);
     }
 
     @Test

@@ -13,8 +13,8 @@ public class WindowUtils {
         return makeWindow(Window.Unit.TIME, emitValue);
     }
 
-    public static Window makeReactiveWindow() {
-        return makeWindow(Window.Unit.RECORD, 1);
+    public static Window makeSlidingWindow(Integer emitValue) {
+        return makeWindow(Window.Unit.RECORD, emitValue);
     }
 
     public static Window makeWindow(Window.Unit emitUnit, Integer emitValue, Window.Unit includeUnit, Integer includeValue) {

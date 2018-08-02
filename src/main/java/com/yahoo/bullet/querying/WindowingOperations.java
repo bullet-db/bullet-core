@@ -11,8 +11,8 @@ import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
-import com.yahoo.bullet.windowing.Reactive;
 import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.SlidingRecord;
 import com.yahoo.bullet.windowing.Tumbling;
 
 public class WindowingOperations {
@@ -29,7 +29,7 @@ public class WindowingOperations {
          * TODO: Support other windows
          * The windows we support at the moment:
          * 1. No window -> Basic
-         * 2. Window is emit RECORD and include RECORD -> Reactive
+         * 2. Window is emit RECORD and include RECORD -> SlidingRecord
          * 3. Window is emit TIME and include ALL -> Additive Tumbling
          * 4. All other windows -> Tumbling (RAW can be Tumbling too)
          */
@@ -40,7 +40,7 @@ public class WindowingOperations {
 
         Window.Classification classification = window.getType();
         if (classification == Window.Classification.RECORD_RECORD) {
-            return new Reactive(strategy, window, config);
+            return new SlidingRecord(strategy, window, config);
         }
         if (classification == Window.Classification.TIME_ALL) {
             return new AdditiveTumbling(strategy, window, config);

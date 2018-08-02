@@ -290,7 +290,7 @@ public class Querier implements Monoidal {
     private Scheme window;
 
     // For testing convenience
-    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE)
     private RunningQuery runningQuery;
 
     private BulletConfig config;

@@ -137,7 +137,7 @@ public class WindowTest {
         errors = window.initialize();
         Assert.assertFalse(errors.isPresent());
 
-        window = WindowUtils.makeReactiveWindow();
+        window = WindowUtils.makeSlidingWindow(1);
         window.configure(config);
         Assert.assertFalse(window.initialize().isPresent());
 
@@ -187,12 +187,6 @@ public class WindowTest {
         errors = window.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 2);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.NOT_ONE_RECORD_EMIT));
 
         window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
         window.getInclude().put(Window.INCLUDE_FIRST_FIELD, 1000);
