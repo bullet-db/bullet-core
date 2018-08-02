@@ -106,6 +106,9 @@ public class FilterOperations {
         if (o instanceof Map) {
             return Map.class.cast(o).size();
         }
+        if (o instanceof String) {
+            return String.class.cast(o).length();
+        }
         return 1;
     }
 

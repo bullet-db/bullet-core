@@ -39,14 +39,14 @@ public abstract class Clause implements Configurable, Initializable {
         LESS_EQUALS,
         @SerializedName("RLIKE")
         REGEX_LIKE,
+        @SerializedName("SIZEOF")
+        SIZE_OF,
         @SerializedName("AND")
         AND,
         @SerializedName("OR")
         OR,
         @SerializedName("NOT")
-        NOT,
-        @SerializedName("SIZEOF")
-        SIZE_OF;
+        NOT;
 
         public static final List<String> LOGICALS = asList("AND", "OR", "NOT");
         public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE", "SIZEOF");

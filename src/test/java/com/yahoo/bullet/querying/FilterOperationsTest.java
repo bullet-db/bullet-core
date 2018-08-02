@@ -341,19 +341,6 @@ public class FilterOperationsTest {
     }
 
     @Test
-    public void testSizeOf() {
-        FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
-        Map<String, Object> map = new HashMap<>();
-        map.put("1", 1);
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map).getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map, map).getRecord(), clause));
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", map, map, map).getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
-    }
-
-    @Test
     public void testRegexLikeNull() {
         FilterClause clause = getFieldFilter("id", REGEX_LIKE, "nu.*");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
@@ -366,6 +353,21 @@ public class FilterOperationsTest {
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "TEST").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "*TEST*").getRecord(), clause));
+    }
+
+    @Test
+    public void testSizeOf() {
+        FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "123").getRecord(), clause));
+        Map<String, Object> map = new HashMap<>();
+        map.put("1", 1);
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map, map).getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", map, map, map).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
     }
 
     @Test
