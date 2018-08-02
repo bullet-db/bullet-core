@@ -18,13 +18,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
-import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static com.yahoo.bullet.parsing.Clause.Operation.AND;
 import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
 import static com.yahoo.bullet.parsing.Clause.Operation.GREATER_EQUALS;
@@ -35,6 +35,9 @@ import static com.yahoo.bullet.parsing.Clause.Operation.NOT;
 import static com.yahoo.bullet.parsing.Clause.Operation.NOT_EQUALS;
 import static com.yahoo.bullet.parsing.Clause.Operation.OR;
 import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
+import static com.yahoo.bullet.parsing.Clause.Operation.SIZE_OF;
+import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
+import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -335,6 +338,19 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "1131112").getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "55003").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "55001").getRecord(), clause));
+    }
+
+    @Test
+    public void testSizeOf() {
+        FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
+        Map<String, Object> map = new HashMap<>();
+        map.put("1", 1);
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", map, map).getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", map, map, map).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
     }
 
     @Test

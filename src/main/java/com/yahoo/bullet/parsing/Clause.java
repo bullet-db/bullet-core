@@ -44,10 +44,12 @@ public abstract class Clause implements Configurable, Initializable {
         @SerializedName("OR")
         OR,
         @SerializedName("NOT")
-        NOT;
+        NOT,
+        @SerializedName("SIZEOF")
+        SIZE_OF;
 
         public static final List<String> LOGICALS = asList("AND", "OR", "NOT");
-        public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE");
+        public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE", "SIZEOF");
     }
 
     @Expose
