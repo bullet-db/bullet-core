@@ -65,7 +65,7 @@ public class TypedObject implements Comparable<TypedObject> {
      */
     public TypedObject typeCastFromObject(Object object) {
         if (object == null) {
-            return typeCast("NULL");
+            return typeCast(Type.NULL_EXPRESSION);
         }
         try {
             return new TypedObject(type, type.getUnderlyingType().cast(object));

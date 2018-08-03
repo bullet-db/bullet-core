@@ -11,6 +11,7 @@ import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -24,9 +25,11 @@ import java.util.stream.Stream;
 import static com.yahoo.bullet.common.Utilities.extractField;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
+import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_UNKNOWN;
 
+@Slf4j
 public class FilterOperations {
     @FunctionalInterface
     public interface Comparator<T> {
@@ -86,14 +89,13 @@ public class FilterOperations {
      * Exposed for testing. Cast the values to the type of the object if possible.
      *
      * @param object The {@link TypedObject} to cast the values to.
-     * @param values The {@link List} of String values to try and cast to the object.
-     * @param compareToFields The Boolean indicates the values are filed names or not.
+     * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<String> values, Boolean compareToFields) {
+    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<Object> values) {
         // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
         // In the future, we might want to support providing non-String values.
-        Stream<TypedObject> s =  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v, compareToFields)).filter(IS_NOT_UNKNOWN);
+        Stream<TypedObject> s =  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, (FilterClause.Value) v)).filter(IS_NOT_UNKNOWN);
         return s;
     }
 
@@ -115,11 +117,16 @@ public class FilterOperations {
         return 1;
     }
 
-    private static TypedObject getValue(BulletRecord record, TypedObject object, String value, Boolean compareToFields) {
-        if (compareToFields != null && compareToFields) {
-            return object.typeCastFromObject(extractField(value, record));
+    private static TypedObject getValue(BulletRecord record, TypedObject object, FilterClause.Value value) {
+        switch (value.getType()) {
+            case FIELD:
+                return object.typeCastFromObject(extractField(value.getValue(), record));
+            case VALUE:
+                return object.typeCast(value.getValue());
+            default:
+                log.error("Unsupported value type: " + value.getType().name());
+                return GENERIC_UNKNOWN;
         }
-        return object.typeCast(value);
     }
 
     private static boolean performRelational(BulletRecord record, FilterClause clause) {
@@ -132,9 +139,9 @@ public class FilterOperations {
             case REGEX_LIKE:
                 return REGEX_LIKE.compare(object, clause.getPatterns().stream());
             case SIZE_OF:
-                return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues(), clause.getCompareToFields()));
+                return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
             default:
-                return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues(), clause.getCompareToFields()));
+                return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
         }
     }
 

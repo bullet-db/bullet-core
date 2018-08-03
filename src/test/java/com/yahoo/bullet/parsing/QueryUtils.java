@@ -22,23 +22,18 @@ import java.util.stream.Collectors;
  * externally submitted query.
  */
 public class QueryUtils {
-    @SafeVarargs
-    public static String makeRawWindowQuery(String field, List<String> values, Clause.Operation operation,
-                                            Aggregation.Type aggregation, Integer size, Window.Unit emit,
-                                            Integer emitValue, Window.Unit include, Integer includeValue,
-                                            Pair<String, String>... projections) {
+    public static String makeFilterValue(FilterClause.Value value) {
         return "{" +
-                "'filters' : [" + makeFilter(field, values, operation) + "], " +
-                "'projection' : " + makeProjections(projections) + ", " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+                "'type' : " + value.getType().name() + ", " +
+                "'value': '" + value.getValue() + "'" +
                 "}";
     }
 
     @SafeVarargs
-    public static String makeGroupFilterQuery(String field, List<String> values, Clause.Operation operation,
+    public static String makeGroupFilterQuery(String field, List<Object> values, Clause.Operation operation,
                                               Aggregation.Type aggregation, Integer size,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{" +
                 "'filters' : [" + makeFilter(field, values, operation) + "], " +
                 "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) +
@@ -56,9 +51,10 @@ public class QueryUtils {
     }
 
     @SafeVarargs
-    public static String makeRawFullQuery(String field, List<String> values, Clause.Operation operation,
+    public static String makeRawFullQuery(String field, List<Object> values, Clause.Operation operation,
                                           Aggregation.Type aggregation, Integer size,
                                           Pair<String, String>... projections) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{" +
                "'filters' : [" + makeFilter(field, values, operation) + "], " +
                "'projection' : " + makeProjections(projections) + ", " +
@@ -78,8 +74,9 @@ public class QueryUtils {
     }
 
     @SafeVarargs
-    public static String makeProjectionFilterQuery(String field, List<String> values, Clause.Operation operation,
+    public static String makeProjectionFilterQuery(String field, List<Object> values, Clause.Operation operation,
                                                    Pair<String, String>... projections) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{" +
                "'filters' : [" + makeFilter(field, values, operation) + "], " +
                "'projection': " + makeProjections(projections) +
@@ -95,9 +92,10 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
+    public static String makeSimpleAggregationFilterQuery(String field, List<Object> values, Clause.Operation operation,
                                                           Aggregation.Type aggregation, Integer size, Window.Unit emit,
                                                           Integer emitValue, Window.Unit include, Integer includeValue) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{" +
                "'filters' : [" + makeFilter(field, values, operation) + "], " +
                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
@@ -115,8 +113,9 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
+    public static String makeSimpleAggregationFilterQuery(String field, List<Object> values, Clause.Operation operation,
                                                           Aggregation.Type aggregation, Integer size) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{" +
                "'filters' : [" + makeFilter(field, values, operation) + "], " +
                "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
@@ -131,7 +130,8 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeFilterQuery(String field, List<String> values, Clause.Operation operation) {
+    public static String makeFilterQuery(String field, List<Object> values, Clause.Operation operation) {
+        values = values.stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
         return "{'filters' : [" + makeFilter(field, values, operation) + "]}";
     }
 
@@ -183,11 +183,11 @@ public class QueryUtils {
         return "{'aggregation' : " + makeTopKAggregation(size, operation, threshold, newName, fields) + "}";
     }
 
-    public static String makeFilter(String field, List<String> values, Clause.Operation operation) {
+    public static String makeFilter(String field, List<Object> values, Clause.Operation operation) {
         return "{" +
                 "'field' : " + makeString(field) + ", " +
                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                "'values' : ['" + values.stream().reduce((a, b) -> a + "' , '" + b).orElse("") + "']" +
+                "'values' : [" + values.stream().map(v -> makeFilterValue((FilterClause.Value) v)).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
                 "}";
     }
 
