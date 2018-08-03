@@ -21,7 +21,7 @@ public class FilterUtils {
 
     public static FilterClause getFieldFilter(String field, Clause.Operation operation, Object... values) {
         List<Object> clauses = values == null ? null : asList(values).stream()
-                                                                     .map(s -> s instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) s) : s)
+                                                                     .map(s -> s instanceof String ? new FilterClause.Value(FilterClause.Value.Kind.VALUE, (String) s) : s)
                                                                      .collect(Collectors.toList());
         return (FilterClause) makeClause(field, clauses, operation);
     }
@@ -40,7 +40,7 @@ public class FilterUtils {
     public static Clause makeClause(String field, List<Object> values, Clause.Operation operation) {
         FilterClause clause = new FilterClause();
         clause.setField(field);
-        clause.setValues(values == null ? Collections.singletonList(new FilterClause.Value(FilterClause.Value.Type.VALUE, Type.NULL_EXPRESSION)) : values);
+        clause.setValues(values == null ? Collections.singletonList(new FilterClause.Value(FilterClause.Value.Kind.VALUE, Type.NULL_EXPRESSION)) : values);
         clause.setOperation(operation);
         clause.configure(new BulletConfig());
         clause.initialize();

@@ -118,13 +118,13 @@ public class FilterOperations {
     }
 
     private static TypedObject getValue(BulletRecord record, TypedObject object, FilterClause.Value value) {
-        switch (value.getType()) {
+        switch (value.getKind()) {
             case FIELD:
                 return object.typeCastFromObject(extractField(value.getValue(), record));
             case VALUE:
                 return object.typeCast(value.getValue());
             default:
-                log.error("Unsupported value type: " + value.getType().name());
+                log.error("Unsupported value kind: " + value.getKind().name());
                 return GENERIC_UNKNOWN;
         }
     }

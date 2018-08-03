@@ -45,7 +45,7 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        List<Object> values = asList(items).stream().map(s -> new FilterClause.Value(FilterClause.Value.Type.VALUE, s)).collect(Collectors.toList());
+        List<Object> values = asList(items).stream().map(s -> new FilterClause.Value(FilterClause.Value.Kind.VALUE, s)).collect(Collectors.toList());
         return FilterOperations.cast(null, source, values);
     }
 
@@ -58,7 +58,7 @@ public class FilterOperationsTest {
     }
 
     private static Clause clause(String field, Clause.Operation operation, String... values) {
-        List<Object> valueObjects = values == null ? null : asList(values).stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Type.VALUE, (String) v) : v).collect(Collectors.toList());
+        List<Object> valueObjects = values == null ? null : asList(values).stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Kind.VALUE, (String) v) : v).collect(Collectors.toList());
         return makeClause(field, valueObjects, operation);
     }
 
@@ -257,7 +257,7 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         clause.setField("field");
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("field", "foo").getRecord(), clause));
-        clause.setValues(singletonList(new FilterClause.Value(FilterClause.Value.Type.VALUE, "bar")));
+        clause.setValues(singletonList(new FilterClause.Value(FilterClause.Value.Kind.VALUE, "bar")));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("field", "foo").getRecord(), clause));
     }
 
@@ -596,7 +596,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testCompareToFields() {
-        FilterClause clause = getFieldFilter("a", EQUALS, new FilterClause.Value(FilterClause.Value.Type.FIELD, "b"));
+        FilterClause clause = getFieldFilter("a", EQUALS, new FilterClause.Value(FilterClause.Value.Kind.FIELD, "b"));
 
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "2").getRecord(), clause));

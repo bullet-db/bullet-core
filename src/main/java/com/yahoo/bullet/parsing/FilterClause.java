@@ -27,7 +27,7 @@ import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 public class FilterClause extends Clause {
     @Getter @AllArgsConstructor
     public static class Value {
-        public enum Type {
+        public enum Kind {
             @SerializedName("VALUE")
             VALUE,
             @SerializedName("FIELD")
@@ -36,13 +36,13 @@ public class FilterClause extends Clause {
             CAST
         }
         @Expose
-        Type type;
+        Kind kind;
         @Expose
         String value;
 
         @Override
         public String toString() {
-            return "{type: " + type + ", " + "value: " + value + "}";
+            return "{kind: " + kind + ", " + "value: " + value + "}";
         }
     }
     @Expose
@@ -66,7 +66,7 @@ public class FilterClause extends Clause {
 
     @Override
     public void configure(BulletConfig configuration) {
-        values = values.stream().map(v -> v instanceof String ? new Value(Value.Type.VALUE, (String) v) : GSON.fromJson(GSON.toJson(v), Value.class)).collect(Collectors.toList());
+        values = values.stream().map(v -> v instanceof String ? new Value(Value.Kind.VALUE, (String) v) : GSON.fromJson(GSON.toJson(v), Value.class)).collect(Collectors.toList());
         if (operation == REGEX_LIKE) {
             patterns = values.stream().map(FilterClause::compile).filter(Objects::nonNull).collect(Collectors.toList());
         }
