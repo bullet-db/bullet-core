@@ -45,7 +45,7 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        return FilterOperations.cast(source, asList(items));
+        return FilterOperations.cast(null, source, asList(items), false);
     }
 
     private static Stream<Pattern> makePattern(String... items) {
@@ -590,5 +590,16 @@ public class FilterOperationsTest {
         Assert.assertFalse(FilterOperations.perform(recordE, clause));
         Assert.assertFalse(FilterOperations.perform(recordF, clause));
         Assert.assertTrue(FilterOperations.perform(recordG, clause));
+    }
+
+    @Test
+    public void testCompareToFields() {
+        FilterClause clause = getFieldFilter("a", EQUALS, "b");
+        clause.setCompareToFields(true);
+
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "2").getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "1").getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").addMap("b", Pair.of("1", 1)).getRecord(), clause));
     }
 }

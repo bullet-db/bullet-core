@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,9 @@ public class FilterClause extends Clause {
     private String field;
     @Expose
     private List<String> values;
+    @Expose
+    @SerializedName("compare-to-fields")
+    private Boolean compareToFields;
 
     // An optimization to cache the compiled patterns per FilterClause rather than redoing it per record
     private List<Pattern> patterns;
