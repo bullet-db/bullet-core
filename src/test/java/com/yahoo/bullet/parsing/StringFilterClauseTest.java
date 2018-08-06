@@ -19,10 +19,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class FilterClauseTest {
+public class StringFilterClauseTest {
     @Test
     public void testToString() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         Assert.assertEquals(filterClause.toString(), "{operation: null, field: null, values: null}");
         filterClause.setValues(emptyList());
         Assert.assertEquals(filterClause.toString(), "{operation: null, field: null, values: []}");
@@ -36,7 +36,7 @@ public class FilterClauseTest {
 
     @Test
     public void testConfigureForPatterns() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         filterClause.setOperation(Clause.Operation.REGEX_LIKE);
         filterClause.setValues(singletonList(".g.*"));
         Assert.assertNull(filterClause.getPatterns());
@@ -50,7 +50,7 @@ public class FilterClauseTest {
 
     @Test
     public void testConfigureForBadPatterns() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         filterClause.setOperation(Clause.Operation.REGEX_LIKE);
         filterClause.setValues(singletonList("*TEST*"));
         Assert.assertNull(filterClause.getPatterns());
@@ -62,7 +62,7 @@ public class FilterClauseTest {
 
     @Test
     public void testInitializeNoOperation() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
@@ -72,7 +72,7 @@ public class FilterClauseTest {
 
     @Test
     public void testInitializeWithOperation() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         filterClause.setOperation(Clause.Operation.EQUALS);
         Optional<List<BulletError>> optionalErrors = filterClause.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
@@ -80,7 +80,7 @@ public class FilterClauseTest {
 
     @Test
     public void testDefaults() {
-        FilterClause filterClause = new FilterClause();
+        FilterClause filterClause = new StringFilterClause();
         Assert.assertNull(filterClause.getOperation());
         Assert.assertNull(filterClause.getField());
         Assert.assertNull(filterClause.getValues());

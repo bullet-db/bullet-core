@@ -6,8 +6,9 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
+import com.yahoo.bullet.parsing.ObjectFilterClause;
+import com.yahoo.bullet.parsing.StringFilterClause;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -92,10 +93,10 @@ public class FilterOperations {
      * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<Object> values) {
+    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<ObjectFilterClause.Value> values) {
         // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
         // In the future, we might want to support providing non-String values.
-        Stream<TypedObject> s =  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, (FilterClause.Value) v)).filter(IS_NOT_UNKNOWN);
+        Stream<TypedObject> s =  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v)).filter(IS_NOT_UNKNOWN);
         return s;
     }
 
@@ -117,7 +118,7 @@ public class FilterOperations {
         return 1;
     }
 
-    private static TypedObject getValue(BulletRecord record, TypedObject object, FilterClause.Value value) {
+    private static TypedObject getValue(BulletRecord record, TypedObject object, ObjectFilterClause.Value value) {
         switch (value.getKind()) {
             case FIELD:
                 return object.typeCastFromObject(extractField(value.getValue(), record));
@@ -129,7 +130,7 @@ public class FilterOperations {
         }
     }
 
-    private static boolean performRelational(BulletRecord record, FilterClause clause) {
+    private static boolean performRelational(BulletRecord record, ObjectFilterClause clause) {
         Clause.Operation operator = clause.getOperation();
         if (isEmpty(clause.getValues())) {
             return true;
@@ -143,6 +144,10 @@ public class FilterOperations {
             default:
                 return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
         }
+    }
+
+    private static boolean performRelational(BulletRecord record, StringFilterClause clause) {
+        return performRelational(record, new ObjectFilterClause(clause));
     }
 
     private static boolean performLogical(BulletRecord record, LogicalClause clause) {
@@ -162,12 +167,17 @@ public class FilterOperations {
      * @return The result of th
      */
     public static boolean perform(BulletRecord record, Clause clause) {
-        // Rather than define another hierarchy of Clause -> FilterClause, LogicalClause evaluators, we'll eat the
+        // Rather than define another hierarchy of Clause -> StringFilterClause, ObjectFilterClause, LogicalClause evaluators, we'll eat the
         // cost of violating polymorphism in this one spot.
-        // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
+        // We do not want processing logic in StringFilterClause, ObjectFilterClause or LogicalClause, otherwise we could put the appropriate
         // methods in those classes.
-        return clause instanceof FilterClause ? performRelational(record, (FilterClause) clause)
-                                              : performLogical(record, (LogicalClause) clause);
+        if (clause instanceof ObjectFilterClause) {
+            return performRelational(record, (ObjectFilterClause) clause);
+        } else if (clause instanceof StringFilterClause) {
+            return performRelational(record, (StringFilterClause) clause);
+        } else {
+            return performLogical(record, (LogicalClause) clause);
+        }
     }
 }
 

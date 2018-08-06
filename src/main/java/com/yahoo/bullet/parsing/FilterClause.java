@@ -5,71 +5,35 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import com.yahoo.bullet.common.BulletConfig;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
-
-import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 
 @Slf4j @Getter @Setter
-public class FilterClause extends Clause {
-    @Getter @AllArgsConstructor
-    public static class Value {
-        public enum Kind {
-            @SerializedName("VALUE")
-            VALUE,
-            @SerializedName("FIELD")
-            FIELD,
-            @SerializedName("CAST")
-            CAST
-        }
-        @Expose
-        Kind kind;
-        @Expose
-        String value;
-
-        @Override
-        public String toString() {
-            return "{kind: " + kind + ", " + "value: " + value + "}";
-        }
-    }
+public abstract class FilterClause<T> extends Clause {
     @Expose
-    private String field;
-    @Expose
-    private List<Object> values;
+    protected String field;
 
-    private static final Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    @Expose
+    protected List<T> values;
 
     // An optimization to cache the compiled patterns per FilterClause rather than redoing it per record
-    private List<Pattern> patterns;
+    protected List<Pattern> patterns;
+
+    public static final String VALUES_FIELD = "values";
 
     /**
      * Default Constructor. GSON recommended.
      */
     public FilterClause() {
         field = null;
-        values = null;
         operation = null;
-    }
-
-    @Override
-    public void configure(BulletConfig configuration) {
-        values = values.stream().map(v -> v instanceof String ? new Value(Value.Kind.VALUE, (String) v) : GSON.fromJson(GSON.toJson(v), Value.class)).collect(Collectors.toList());
-        if (operation == REGEX_LIKE) {
-            patterns = values.stream().map(FilterClause::compile).filter(Objects::nonNull).collect(Collectors.toList());
-        }
+        values = null;
     }
 
     @Override
@@ -77,9 +41,12 @@ public class FilterClause extends Clause {
         return "{" + super.toString() + ", " + "field: " + field + ", " + "values: " + values + "}";
     }
 
-    private static Pattern compile(Object value) {
+    /**
+     * Pattern compiler Method.
+     */
+    protected static Pattern compile(String value) {
         try {
-            return Pattern.compile(((Value) value).getValue());
+            return Pattern.compile(value);
         } catch (PatternSyntaxException pse) {
             return null;
         }

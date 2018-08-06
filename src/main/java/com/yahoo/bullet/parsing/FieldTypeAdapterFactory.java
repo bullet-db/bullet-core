@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
@@ -16,13 +17,10 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Adapted from * Google GSON's RuntimeTypeAdapterFactory to support a field based adapter. Instead of adding a new
@@ -43,39 +41,34 @@ import java.util.function.Function;
  */
 public class FieldTypeAdapterFactory<T> implements TypeAdapterFactory {
     private final Class<T> base;
-    private final Map<Class<?>, Set<String>> registeredTypes = new LinkedHashMap<>();
-    private final Function<JsonElement, String> extractor;
+    private final Map<Class<?>, Predicate<JsonObject>> registeredTypes = new LinkedHashMap<>();
 
-    private FieldTypeAdapterFactory(Class<T> base, Function<JsonElement, String> extractor) {
+    private FieldTypeAdapterFactory(Class<T> base) {
         this.base = base;
-        this.extractor = extractor;
     }
 
     /**
      * Creates a FieldTypeAdapterFactory of this type.
      *
      * @param base The base type for all types that this factory handles.
-     * @param fieldExtractor A {@link Function} that takes a JSONElement and returns the extracted String field that
-     *                       determines the type.
      * @param <T> The base type.
      * @return The created factory.
      */
-    public static <T> FieldTypeAdapterFactory<T> of(Class<T> base, Function<JsonElement, String> fieldExtractor) {
-        return new FieldTypeAdapterFactory<>(base, fieldExtractor);
+    public static <T> FieldTypeAdapterFactory<T> of(Class<T> base) {
+        return new FieldTypeAdapterFactory<>(base);
     }
 
     /**
-     * Register a subtype for the factory with the values it is to support. If the list of matchingValues is not
-     * disjoint across the subtypes, the order in which this method was called will determine which subType is matched.
+     * Register a subtype for the factory with the values it is to support.
      *
      * @param subType A subtype to handle.
-     * @param matchingValues The matching values that will decide this class
+     * @param condition The {@link Predicate} that will decide this class
      * @return this object for chaining.
      */
-    public FieldTypeAdapterFactory<T> registerSubType(Class<? extends T> subType, List<String> matchingValues) {
+    public FieldTypeAdapterFactory<T> registerSubType(Class<? extends T> subType, Predicate<JsonObject> condition) {
         Objects.requireNonNull(subType);
-        Objects.requireNonNull(matchingValues);
-        registeredTypes.put(subType, new HashSet<>(matchingValues));
+        Objects.requireNonNull(condition);
+        registeredTypes.put(subType, condition);
         return this;
     }
 
@@ -88,26 +81,22 @@ public class FieldTypeAdapterFactory<T> implements TypeAdapterFactory {
         for (Class<?> clazz : registeredTypes.keySet()) {
             registeredAdapters.put(clazz, gson.getAdapter(clazz));
         }
-        return new FieldTypeAdapter<>(extractor, registeredAdapters, registeredTypes);
+        return new FieldTypeAdapter<>(registeredAdapters, registeredTypes);
     }
 
     // Type checking for R's super type has already happened at registration. It's safe to ignore type check warnings.
     @SuppressWarnings("unchecked")
     private static class FieldTypeAdapter<R> extends TypeAdapter<R> {
-        private final Function<JsonElement, String> extractor;
         private Map<Class<?>, TypeAdapter<?>> adapters;
-        private Map<Class<?>, Set<String>> types;
+        private Map<Class<?>, Predicate<JsonObject>> types;
 
         /**
          * Constructor for the adapter that takes an extraction mechanism and map of adapters and types.
          *
-         * @param extractor A {@link Function} that takes a {@link JsonElement} and returns the string field from it.
          * @param adapters A Map of Class to TypeAdapters for that Class.
          * @param types A Map of Class to the Set of Strings that are to be matched against the output of extractor.
          */
-        public FieldTypeAdapter(Function<JsonElement, String> extractor, Map<Class<?>, TypeAdapter<?>> adapters,
-                                Map<Class<?>, Set<String>> types) {
-            this.extractor = extractor;
+        public FieldTypeAdapter(Map<Class<?>, TypeAdapter<?>> adapters, Map<Class<?>, Predicate<JsonObject>> types) {
             this.adapters = adapters;
             this.types = types;
         }
@@ -122,9 +111,8 @@ public class FieldTypeAdapterFactory<T> implements TypeAdapterFactory {
         }
 
         private TypeAdapter<R> getAdapterFor(JsonElement element) {
-            String field = extractor.apply(element);
-            for (Map.Entry<Class<?>, Set<String>> entry : types.entrySet()) {
-                if (entry.getValue().contains(field)) {
+            for (Map.Entry<Class<?>, Predicate<JsonObject>> entry : types.entrySet()) {
+                if (entry.getValue().test(element.getAsJsonObject())) {
                     return (TypeAdapter<R>) adapters.get(entry.getKey());
                 }
             }

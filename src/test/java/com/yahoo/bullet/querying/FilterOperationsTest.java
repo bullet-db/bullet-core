@@ -8,6 +8,8 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
+import com.yahoo.bullet.parsing.ObjectFilterClause;
+import com.yahoo.bullet.parsing.StringFilterClause;
 import com.yahoo.bullet.querying.FilterOperations.Comparator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
@@ -37,6 +39,7 @@ import static com.yahoo.bullet.parsing.Clause.Operation.OR;
 import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 import static com.yahoo.bullet.parsing.Clause.Operation.SIZE_OF;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
+import static com.yahoo.bullet.parsing.FilterUtils.getObjectFieldFilter;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -45,7 +48,7 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        List<Object> values = asList(items).stream().map(s -> new FilterClause.Value(FilterClause.Value.Kind.VALUE, s)).collect(Collectors.toList());
+        List<ObjectFilterClause.Value> values = asList(items).stream().map(s -> new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, s)).collect(Collectors.toList());
         return FilterOperations.cast(null, source, values);
     }
 
@@ -58,8 +61,7 @@ public class FilterOperationsTest {
     }
 
     private static Clause clause(String field, Clause.Operation operation, String... values) {
-        List<Object> valueObjects = values == null ? null : asList(values).stream().map(v -> v instanceof String ? new FilterClause.Value(FilterClause.Value.Kind.VALUE, (String) v) : v).collect(Collectors.toList());
-        return makeClause(field, valueObjects, operation);
+        return makeClause(field, values == null ? null : asList(values), operation);
     }
 
     private static LogicalClause clause(Clause.Operation operation, Clause... clauses) {
@@ -235,7 +237,7 @@ public class FilterOperationsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testFilterDefaults() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         clause.setValues(asList("foo", "bar"));
         // Without an operation, it is an error
         FilterOperations.perform(RecordBox.get().getRecord(), clause);
@@ -243,7 +245,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testFilterDefaultsWithOperation() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         // With non-empty values, filter always returns true
         clause.setOperation(EQUALS);
         clause.setValues(emptyList());
@@ -252,12 +254,12 @@ public class FilterOperationsTest {
 
     @Test
     public void testFilterMissingFields() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         clause.setOperation(EQUALS);
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         clause.setField("field");
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("field", "foo").getRecord(), clause));
-        clause.setValues(singletonList(new FilterClause.Value(FilterClause.Value.Kind.VALUE, "bar")));
+        clause.setValues(singletonList("bar"));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("field", "foo").getRecord(), clause));
     }
 
@@ -596,7 +598,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testCompareToFields() {
-        FilterClause clause = getFieldFilter("a", EQUALS, new FilterClause.Value(FilterClause.Value.Kind.FIELD, "b"));
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
 
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "2").getRecord(), clause));

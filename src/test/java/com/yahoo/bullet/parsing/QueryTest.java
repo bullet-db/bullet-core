@@ -205,7 +205,7 @@ public class QueryTest {
 
         Assert.assertEquals(query.toString(),
                             "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo}, {kind: VALUE, value: bar}]}], " +
+                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
                             "window: null, " +
@@ -216,7 +216,7 @@ public class QueryTest {
         query.configure(config);
         Assert.assertEquals(query.toString(),
                             "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo}, {kind: VALUE, value: bar}]}], " +
+                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
                             "window: {emit: {type=TIME, every=4000}, include: null}, " +
