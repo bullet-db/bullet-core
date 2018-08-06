@@ -169,7 +169,7 @@ public class FilterOperations {
     public static boolean perform(BulletRecord record, Clause clause) {
         // Rather than define another hierarchy of Clause -> StringFilterClause, ObjectFilterClause, LogicalClause evaluators, we'll eat the
         // cost of violating polymorphism in this one spot.
-        // We do not want processing logic in StringFilterClause, ObjectFilterClause or LogicalClause, otherwise we could put the appropriate
+        // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
         // methods in those classes.
         if (clause instanceof ObjectFilterClause) {
             return performRelational(record, (ObjectFilterClause) clause);

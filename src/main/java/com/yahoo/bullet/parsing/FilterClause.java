@@ -43,6 +43,9 @@ public abstract class FilterClause<T> extends Clause {
 
     /**
      * Pattern compiler Method.
+     *
+     * @param value The String regex.
+     * @return The Pattern parsed from regex.
      */
     protected static Pattern compile(String value) {
         try {

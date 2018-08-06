@@ -66,7 +66,7 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test
     public void testDeserialization() {
-        Gson gson = getGSON(getFactory(t-> t.get("bar").getAsString().contains("A"), t-> t.get("bar").getAsString().contains("B")));
+        Gson gson = getGSON(getFactory(t -> t.get("bar").getAsString().contains("A"), t -> t.get("bar").getAsString().contains("B")));
 
         Base deserializedB = gson.fromJson(makeJSON(1, "B", asList("a", "b")), Base.class);
         SubTypeB castedB = (SubTypeB) deserializedB;
@@ -85,14 +85,14 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test
     public void testDeserializationFail() {
-        Gson gson = getGSON(getFactory(t-> t.get("bar").getAsString().contains("A"), t-> t.get("bar").getAsString().contains("B")));
+        Gson gson = getGSON(getFactory(t -> t.get("bar").getAsString().contains("A"), t -> t.get("bar").getAsString().contains("B")));
         Base deserialized = gson.fromJson(makeJSON(1, "garbage", "a"), Base.class);
         Assert.assertNull(deserialized);
     }
 
     @Test
     public void testSerialization() {
-        Gson gson = getGSON(getFactory(t-> false, t-> false));
+        Gson gson = getGSON(getFactory(t -> false, t -> false));
         SubTypeA typeA = new SubTypeA();
         typeA.foo = 1;
         typeA.bar = "t1";
@@ -114,7 +114,7 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test(expectedExceptions = JsonParseException.class)
     public void testSerializationFail() {
-        Gson gson = getGSON(getFactory(t-> false, t-> false));
+        Gson gson = getGSON(getFactory(t -> false, t -> false));
         // Not registered
         SubTypeC typeC = new SubTypeC();
         typeC.foo = 1;

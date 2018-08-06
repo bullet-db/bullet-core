@@ -55,9 +55,6 @@ public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
      * @param stringFilterClause The {@link StringFilterClause} object tor construct from.
      */
     public ObjectFilterClause(StringFilterClause stringFilterClause) {
-        if (stringFilterClause == null) {
-            return;
-        }
         this.operation = stringFilterClause.operation;
         this.field = stringFilterClause.field;
         this.patterns = stringFilterClause.patterns;
