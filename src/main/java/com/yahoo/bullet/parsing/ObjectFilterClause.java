@@ -9,13 +9,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j @Getter @Setter
 public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
     @Getter @AllArgsConstructor
     public static class Value {
