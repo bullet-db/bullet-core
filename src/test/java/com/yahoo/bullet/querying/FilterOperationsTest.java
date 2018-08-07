@@ -605,4 +605,10 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "1").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").addMap("b", Pair.of("1", 1)).getRecord(), clause));
     }
+
+    @Test
+    public void testCompareToFieldsWithCastException() {
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", 1).add("b", 1L).getRecord(), clause));
+    }
 }

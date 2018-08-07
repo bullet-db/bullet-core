@@ -6,13 +6,18 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
+
+import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 
 @Slf4j @Getter @Setter
 public abstract class FilterClause<T> extends Clause {
@@ -42,12 +47,21 @@ public abstract class FilterClause<T> extends Clause {
     }
 
     /**
-     * Pattern compiler Method.
+     * Get the value string from an object.
      *
-     * @param value The String regex.
-     * @return The Pattern parsed from regex.
+     * @param value The value object to get from.
+     * @return The value string.
      */
-    protected static Pattern compile(String value) {
+    public abstract String getValue(T value);
+
+    @Override
+    public void configure(BulletConfig configuration) {
+        if (operation == REGEX_LIKE) {
+            patterns = values.stream().map(v -> FilterClause.compile(getValue(v))).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+    }
+
+    private static Pattern compile(String value) {
         try {
             return Pattern.compile(value);
         } catch (PatternSyntaxException pse) {

@@ -94,10 +94,7 @@ public class FilterOperations {
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
     static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<ObjectFilterClause.Value> values) {
-        // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
-        // In the future, we might want to support providing non-String values.
-        Stream<TypedObject> s =  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v)).filter(IS_NOT_UNKNOWN);
-        return s;
+        return  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v)).filter(IS_NOT_UNKNOWN);
     }
 
     private static <T> Comparator<T> isNotNullAnd(Comparator<T> comparator) {
@@ -123,6 +120,8 @@ public class FilterOperations {
             case FIELD:
                 return object.typeCastFromObject(extractField(value.getValue(), record));
             case VALUE:
+                // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
+                // In the future, we might want to support providing non-String values.
                 return object.typeCast(value.getValue());
             default:
                 log.error("Unsupported value kind: " + value.getKind().name());

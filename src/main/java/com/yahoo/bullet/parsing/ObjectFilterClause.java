@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017, Yahoo Inc.
+ *  Copyright 2018, Oath Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
@@ -7,17 +7,13 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.yahoo.bullet.common.BulletConfig;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 
 @Slf4j @Getter @Setter
 public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
@@ -32,9 +28,9 @@ public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
             CAST
         }
         @Expose
-        Kind kind;
+        private Kind kind;
         @Expose
-        String value;
+        private String value;
 
         @Override
         public String toString() {
@@ -65,9 +61,7 @@ public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
     }
 
     @Override
-    public void configure(BulletConfig configuration) {
-        if (operation == REGEX_LIKE) {
-            patterns = values.stream().map(v -> FilterClause.compile(v.getValue())).filter(Objects::nonNull).collect(Collectors.toList());
-        }
+    public String getValue(Value value) {
+        return value.getValue();
     }
 }

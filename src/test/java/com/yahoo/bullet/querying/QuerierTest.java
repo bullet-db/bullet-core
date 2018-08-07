@@ -532,6 +532,18 @@ public class QuerierTest {
         Assert.assertTrue(querier.hasNewData());
     }
 
+    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected STRING but was BEGIN_OBJECT at.*")
+    public void testStringFilterClauseMixWithObjectFilterCaluse() {
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: ['1', {kind: VALUE, value: '2'}]}]}";
+        make(Querier.Mode.PARTITION, query);
+    }
+
+    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected BEGIN_OBJECT but was STRING at.*")
+    public void testObjectFilterClauseMixWithStringFilterCaluse() {
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: [{kind: VALUE, value: '2'}, '1']}]}";
+        make(Querier.Mode.PARTITION, query);
+    }
+
     @Test
     public void testMerging() {
         Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2));
