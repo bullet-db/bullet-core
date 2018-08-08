@@ -15,11 +15,19 @@ import static java.util.Arrays.asList;
 
 public class FilterUtils {
     public static FilterClause getFieldFilter(Clause.Operation operation, String... values) {
-        return (FilterClause) makeClause("field", values == null ? null : asList(values), operation);
+        return getFieldFilter("field", operation, values);
     }
 
     public static FilterClause getFieldFilter(String field, Clause.Operation operation, String... values) {
         return (FilterClause) makeClause(field, values == null ? null : asList(values), operation);
+    }
+
+    public static FilterClause getObjectFieldFilter(Clause.Operation operation, ObjectFilterClause.Value... values) {
+        return getObjectFieldFilter("field", operation, values);
+    }
+
+    public static FilterClause getObjectFieldFilter(String field, Clause.Operation operation, ObjectFilterClause.Value... values) {
+        return (FilterClause) makeObjectClause(field, values == null ? null : asList(values), operation);
     }
 
     public static Clause makeClause(Clause.Operation operation, Clause... clauses) {
@@ -34,9 +42,19 @@ public class FilterUtils {
     }
 
     public static Clause makeClause(String field, List<String> values, Clause.Operation operation) {
-        FilterClause clause = new FilterClause();
+        FilterClause clause = new StringFilterClause();
         clause.setField(field);
         clause.setValues(values == null ? Collections.singletonList(Type.NULL_EXPRESSION) : values);
+        clause.setOperation(operation);
+        clause.configure(new BulletConfig());
+        clause.initialize();
+        return clause;
+    }
+
+    public static Clause makeObjectClause(String field, List<ObjectFilterClause.Value> values, Clause.Operation operation) {
+        FilterClause clause = new ObjectFilterClause();
+        clause.setField(field);
+        clause.setValues(values == null ? Collections.singletonList(new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, Type.NULL_EXPRESSION)) : values);
         clause.setOperation(operation);
         clause.configure(new BulletConfig());
         clause.initialize();

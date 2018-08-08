@@ -57,6 +57,24 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
+     * Takes an object and returns a casted TypedObject according to this type.
+     *
+     * @param object The Object that is being cast.
+     * @return The casted TypedObject with the type set to the appropriate {@link Type} or
+     *         {@link TypedObject#GENERIC_UNKNOWN} if it cannot.
+     */
+    public TypedObject typeCastFromObject(Object object) {
+        if (object == null) {
+            return typeCast(Type.NULL_EXPRESSION);
+        }
+        try {
+            return new TypedObject(type, type.getUnderlyingType().cast(object));
+        } catch (RuntimeException e) {
+            return GENERIC_UNKNOWN;
+        }
+    }
+
+    /**
      * Takes a non-null value and returns a numeric TypedObject - it has a type in {@link Type#NUMERICS}. The value
      * is then a {@link Number}. It uses the String representation of the object to cast it.
      *

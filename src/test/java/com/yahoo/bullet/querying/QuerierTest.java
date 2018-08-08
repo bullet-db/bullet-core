@@ -43,6 +43,7 @@ import static com.google.common.primitives.Booleans.asList;
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
+import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
 import static java.util.Collections.emptyList;
@@ -488,6 +489,59 @@ public class QuerierTest {
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.hasNewData());
         Assert.assertNull(querier.getData());
+    }
+
+    @Test
+    public void testLogicFilterNot() {
+        Clause clause = getFieldFilter(Clause.Operation.EQUALS, "abc");
+        String query = "{'filters' : [" + makeFilter(singletonList(clause), Clause.Operation.NOT) + "]}";
+        Querier querier = make(Querier.Mode.PARTITION, query);
+
+        querier.consume(RecordBox.get().add("field", "abc").getRecord());
+        Assert.assertFalse(querier.hasNewData());
+
+        querier.consume(RecordBox.get().add("field", "ddd").getRecord());
+        Assert.assertTrue(querier.hasNewData());
+    }
+
+    @Test
+    public void testLogicFilterAnd() {
+        Clause clause1 = getFieldFilter(Clause.Operation.EQUALS, "abc");
+        Clause clause2 = getFieldFilter("id", Clause.Operation.EQUALS, "1");
+        String query = "{'filters' : [" + makeFilter(Arrays.asList(clause1, clause2), Clause.Operation.AND) + "]}";
+        Querier querier = make(Querier.Mode.PARTITION, query);
+
+        querier.consume(RecordBox.get().add("field", "abc").add("id", "2").getRecord());
+        Assert.assertFalse(querier.hasNewData());
+
+        querier.consume(RecordBox.get().add("field", "abc").add("id", "1").getRecord());
+        Assert.assertTrue(querier.hasNewData());
+    }
+
+    @Test
+    public void testLogicFilterOr() {
+        Clause clause1 = getFieldFilter(Clause.Operation.EQUALS, "abc");
+        Clause clause2 = getFieldFilter("id", Clause.Operation.EQUALS, "1");
+        String query = "{'filters' : [" + makeFilter(Arrays.asList(clause1, clause2), Clause.Operation.OR) + "]}";
+        Querier querier = make(Querier.Mode.PARTITION, query);
+
+        querier.consume(RecordBox.get().add("field", "abc").add("id", "2").getRecord());
+        Assert.assertTrue(querier.hasNewData());
+
+        querier.consume(RecordBox.get().add("field", "abc").add("id", "1").getRecord());
+        Assert.assertTrue(querier.hasNewData());
+    }
+
+    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected STRING but was BEGIN_OBJECT at.*")
+    public void testStringFilterClauseMixWithObjectFilterCaluse() {
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: ['1', {kind: VALUE, value: '2'}]}]}";
+        make(Querier.Mode.PARTITION, query);
+    }
+
+    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected BEGIN_OBJECT but was STRING at.*")
+    public void testObjectFilterClauseMixWithStringFilterCaluse() {
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: [{kind: VALUE, value: '2'}, '1']}]}";
+        make(Querier.Mode.PARTITION, query);
     }
 
     @Test

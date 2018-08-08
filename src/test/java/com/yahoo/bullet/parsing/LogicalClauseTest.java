@@ -36,7 +36,7 @@ public class LogicalClauseTest {
         logicalClause.setOperation(AND);
         logicalClause.configure(new BulletConfig());
 
-        FilterClause filterClause =  new FilterClause();
+        FilterClause filterClause =  new StringFilterClause();
         filterClause.setField("id");
         filterClause.setOperation(REGEX_LIKE);
         filterClause.setValues(singletonList("f.*"));
@@ -56,7 +56,7 @@ public class LogicalClauseTest {
         logicalClause.setOperation(OR);
         Assert.assertEquals(logicalClause.toString(), "{operation: OR, clauses: []}");
 
-        FilterClause clauseA = new FilterClause();
+        FilterClause clauseA = new StringFilterClause();
         clauseA.setField("foo");
         clauseA.setOperation(EQUALS);
         clauseA.setValues(asList("a", "b"));

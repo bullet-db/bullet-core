@@ -8,6 +8,8 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
+import com.yahoo.bullet.parsing.ObjectFilterClause;
+import com.yahoo.bullet.parsing.StringFilterClause;
 import com.yahoo.bullet.querying.FilterOperations.Comparator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
@@ -37,6 +39,7 @@ import static com.yahoo.bullet.parsing.Clause.Operation.OR;
 import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
 import static com.yahoo.bullet.parsing.Clause.Operation.SIZE_OF;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
+import static com.yahoo.bullet.parsing.FilterUtils.getObjectFieldFilter;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -45,7 +48,8 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        return FilterOperations.cast(source, asList(items));
+        List<ObjectFilterClause.Value> values = asList(items).stream().map(s -> new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, s)).collect(Collectors.toList());
+        return FilterOperations.cast(null, source, values);
     }
 
     private static Stream<Pattern> makePattern(String... items) {
@@ -233,7 +237,7 @@ public class FilterOperationsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testFilterDefaults() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         clause.setValues(asList("foo", "bar"));
         // Without an operation, it is an error
         FilterOperations.perform(RecordBox.get().getRecord(), clause);
@@ -241,7 +245,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testFilterDefaultsWithOperation() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         // With non-empty values, filter always returns true
         clause.setOperation(EQUALS);
         clause.setValues(emptyList());
@@ -250,7 +254,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testFilterMissingFields() {
-        FilterClause clause = new FilterClause();
+        StringFilterClause clause = new StringFilterClause();
         clause.setOperation(EQUALS);
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         clause.setField("field");
@@ -590,5 +594,21 @@ public class FilterOperationsTest {
         Assert.assertFalse(FilterOperations.perform(recordE, clause));
         Assert.assertFalse(FilterOperations.perform(recordF, clause));
         Assert.assertTrue(FilterOperations.perform(recordG, clause));
+    }
+
+    @Test
+    public void testCompareToFields() {
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
+
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "2").getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "1").getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").addMap("b", Pair.of("1", 1)).getRecord(), clause));
+    }
+
+    @Test
+    public void testCompareToFieldsWithCastException() {
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", 1).add("b", 1L).getRecord(), clause));
     }
 }

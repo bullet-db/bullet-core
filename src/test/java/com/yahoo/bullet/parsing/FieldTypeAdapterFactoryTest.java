@@ -9,16 +9,16 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 
 public class FieldTypeAdapterFactoryTest {
     private static class Base {
@@ -42,8 +42,8 @@ public class FieldTypeAdapterFactoryTest {
         return new GsonBuilder().registerTypeAdapterFactory(factory).create();
     }
 
-    private FieldTypeAdapterFactory<Base> getFactory(Function<JsonElement, String> fn, List<String> a, List<String> b) {
-        return FieldTypeAdapterFactory.of(Base.class, fn)
+    private FieldTypeAdapterFactory<Base> getFactory(Predicate<JsonObject> a, Predicate<JsonObject> b) {
+        return FieldTypeAdapterFactory.of(Base.class)
                                       .registerSubType(SubTypeA.class, a)
                                       .registerSubType(SubTypeB.class, b) ;
     }
@@ -66,9 +66,7 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test
     public void testDeserialization() {
-        Gson gson = getGSON(getFactory(t -> t.getAsJsonObject().get("bar").getAsString(),
-                                       asList("typeA", "A"),
-                                       asList("typeB", "B")));
+        Gson gson = getGSON(getFactory(t -> t.get("bar").getAsString().contains("A"), t -> t.get("bar").getAsString().contains("B")));
 
         Base deserializedB = gson.fromJson(makeJSON(1, "B", asList("a", "b")), Base.class);
         SubTypeB castedB = (SubTypeB) deserializedB;
@@ -87,16 +85,14 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test
     public void testDeserializationFail() {
-        Gson gson = getGSON(getFactory(t -> t.getAsJsonObject().get("bar").getAsString(),
-                                       asList("typeA", "A"),
-                                       asList("typeB", "B")));
+        Gson gson = getGSON(getFactory(t -> t.get("bar").getAsString().contains("A"), t -> t.get("bar").getAsString().contains("B")));
         Base deserialized = gson.fromJson(makeJSON(1, "garbage", "a"), Base.class);
         Assert.assertNull(deserialized);
     }
 
     @Test
     public void testSerialization() {
-        Gson gson = getGSON(getFactory(t -> "foo", emptyList(), emptyList()));
+        Gson gson = getGSON(getFactory(t -> false, t -> false));
         SubTypeA typeA = new SubTypeA();
         typeA.foo = 1;
         typeA.bar = "t1";
@@ -118,7 +114,7 @@ public class FieldTypeAdapterFactoryTest {
 
     @Test(expectedExceptions = JsonParseException.class)
     public void testSerializationFail() {
-        Gson gson = getGSON(getFactory(t -> "foo", emptyList(), emptyList()));
+        Gson gson = getGSON(getFactory(t -> false, t -> false));
         // Not registered
         SubTypeC typeC = new SubTypeC();
         typeC.foo = 1;

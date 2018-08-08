@@ -28,10 +28,10 @@ public class QueryUtils {
                                             Integer emitValue, Window.Unit include, Integer includeValue,
                                             Pair<String, String>... projections) {
         return "{" +
-                "'filters' : [" + makeFilter(field, values, operation) + "], " +
-                "'projection' : " + makeProjections(projections) + ", " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'projection' : " + makeProjections(projections) + ", " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+                 "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
                 "}";
     }
 
@@ -40,9 +40,9 @@ public class QueryUtils {
                                               Aggregation.Type aggregation, Integer size,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return "{" +
-                "'filters' : [" + makeFilter(field, values, operation) + "], " +
-                "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) +
-                "}";
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) +
+               "}";
     }
 
     @SafeVarargs
@@ -50,9 +50,9 @@ public class QueryUtils {
                                               Aggregation.Type aggregation, Integer size,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) +
-                "}";
+                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
+                 "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) +
+               "}";
     }
 
     @SafeVarargs
@@ -60,9 +60,9 @@ public class QueryUtils {
                                           Aggregation.Type aggregation, Integer size,
                                           Pair<String, String>... projections) {
         return "{" +
-               "'filters' : [" + makeFilter(field, values, operation) + "], " +
-               "'projection' : " + makeProjections(projections) + ", " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'projection' : " + makeProjections(projections) + ", " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
                "}";
     }
 
@@ -71,9 +71,9 @@ public class QueryUtils {
                                           Aggregation.Type aggregation, Integer size,
                                           Pair<String, String>... projections) {
         return "{" +
-               "'filters' : [" + makeFilter(clauses, operation) + "], " +
-               "'projection' : " + makeProjections(projections) + ", " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
+                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
+                 "'projection' : " + makeProjections(projections) + ", " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
                "}";
     }
 
@@ -81,8 +81,8 @@ public class QueryUtils {
     public static String makeProjectionFilterQuery(String field, List<String> values, Clause.Operation operation,
                                                    Pair<String, String>... projections) {
         return "{" +
-               "'filters' : [" + makeFilter(field, values, operation) + "], " +
-               "'projection': " + makeProjections(projections) +
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'projection': " + makeProjections(projections) +
                "}";
     }
 
@@ -90,8 +90,8 @@ public class QueryUtils {
     public static String makeProjectionFilterQuery(List<Clause> clauses, Clause.Operation operation,
                                                    Pair<String, String>... projections) {
         return "{" +
-               "'filters' : [" + makeFilter(clauses, operation) + "], " +
-               "'projection': " + makeProjections(projections) +
+                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
+                 "'projection': " + makeProjections(projections) +
                "}";
     }
 
@@ -99,9 +99,9 @@ public class QueryUtils {
                                                           Aggregation.Type aggregation, Integer size, Window.Unit emit,
                                                           Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
-               "'filters' : [" + makeFilter(field, values, operation) + "], " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-               "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+                 "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
                "}";
     }
 
@@ -109,30 +109,30 @@ public class QueryUtils {
                                                           Aggregation.Type aggregation, Integer size, Window.Unit emit,
                                                           Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
-               "'filters' : [" + makeFilter(clauses, operation) + "], " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-               "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
+                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
+                 "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
                "}";
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
                                                           Aggregation.Type aggregation, Integer size) {
         return "{" +
-               "'filters' : [" + makeFilter(field, values, operation) + "], " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
+                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
                "}";
     }
 
     public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
                                                           Aggregation.Type aggregation, Integer size) {
         return "{" +
-               "'filters' : [" + makeFilter(clauses, operation) + "], " +
-               "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
+                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
+                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) +
                "}";
     }
 
     public static String makeFilterQuery(String field, List<String> values, Clause.Operation operation) {
-        return "{'filters' : [" + makeFilter(field, values, operation) + "]}";
+        return "{'filters' : [" + makeStringFilter(field, values, operation) + "]}";
     }
 
     public static String makeFilterQuery(List<Clause> values, Clause.Operation operation) {
@@ -183,18 +183,26 @@ public class QueryUtils {
         return "{'aggregation' : " + makeTopKAggregation(size, operation, threshold, newName, fields) + "}";
     }
 
-    public static String makeFilter(String field, List<String> values, Clause.Operation operation) {
+    public static String makeStringFilter(String field, List<String> values, Clause.Operation operation) {
         return "{" +
-                "'field' : " + makeString(field) + ", " +
-                "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                "'values' : ['" + values.stream().reduce((a, b) -> a + "' , '" + b).orElse("") + "']" +
-                "}";
+                 "'field' : " + makeString(field) + ", " +
+                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
+                 "'values' : ['" + values.stream().reduce((a, b) -> a + "' , '" + b).orElse("") + "']" +
+               "}";
+    }
+
+    public static String makeObjectFilter(String field, List<ObjectFilterClause.Value> values, Clause.Operation operation) {
+        return "{" +
+                 "'field' : " + makeString(field) + ", " +
+                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
+                 "'values' : [" + values.stream().map(v -> makeFilterValue(v)).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
+               "}";
     }
 
     public static String makeFilter(List<Clause> values, Clause.Operation operation) {
         return "{" +
-               "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-               "'clauses' : [" + values.stream().map(QueryUtils::toString).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
+                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
+                 "'clauses' : [" + values.stream().map(QueryUtils::toString).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
                "}";
     }
 
@@ -217,10 +225,10 @@ public class QueryUtils {
         return "{" +
                  "'type' : '" + getTypeFor(operation) + "', " +
                  "'fields' : " + makeGroupFields(fields) + ", " +
-                 "'attributes' : {" +
-                    "'operations' : [" +
-                        operations.stream().map(QueryUtils::makeGroupOperation).reduce((a, b) -> a + " , " + b).orElse("") +
-                    "]" +
+                   "'attributes' : {" +
+                      "'operations' : [" +
+                          operations.stream().map(QueryUtils::makeGroupOperation).reduce((a, b) -> a + " , " + b).orElse("") +
+                      "]" +
                  "}, " +
                  "'size' : " + size +
                "}";
@@ -241,11 +249,11 @@ public class QueryUtils {
     public static String makeTopKAggregation(Integer size, Aggregation.Type operation, Long threshold,
                                              String newName, Pair<String, String>... fields) {
         return "{" +
-                "'type' : '" + getTypeFor(operation) + "', " +
-                "'fields' : " + makeGroupFields(fields) + ", " +
-                "'attributes' : " + makeMap(threshold, newName) + ", " +
-                "'size' : " + size +
-                "}";
+                 "'type' : '" + getTypeFor(operation) + "', " +
+                 "'fields' : " + makeGroupFields(fields) + ", " +
+                 "'attributes' : " + makeMap(threshold, newName) + ", " +
+                 "'size' : " + size +
+               "}";
     }
 
     @SafeVarargs
@@ -257,7 +265,7 @@ public class QueryUtils {
                  "'fields' : " + makeGroupFields(fields) + ", " +
                  "'size' : " + size + ", " +
                  "'attributes' : " + makeMap(attributes) +
-                "}";
+               "}";
     }
 
     @SafeVarargs
@@ -274,7 +282,7 @@ public class QueryUtils {
                  "'type' : " + makeString(operation.getType().getName()) + ", " +
                  "'field' : " + makeString(operation.getField()) + ", " +
                  "'newName' : " + makeString(operation.getNewName()) +
-                "}";
+               "}";
     }
 
     public static String makeString(String field) {
@@ -345,9 +353,12 @@ public class QueryUtils {
     // Again, not implementing toString in Clause to not tie the construction of the JSON to the src.
     public static String toString(Clause clause) {
         StringBuilder builder = new StringBuilder();
-        if (clause instanceof FilterClause) {
-            FilterClause filterClause = (FilterClause) clause;
-            builder.append(makeFilter(filterClause.getField(), filterClause.getValues(), filterClause.getOperation()));
+        if (clause instanceof StringFilterClause) {
+            StringFilterClause filterClause = (StringFilterClause) clause;
+            builder.append(makeStringFilter(filterClause.getField(), filterClause.getValues(), filterClause.getOperation()));
+        } else if (clause instanceof ObjectFilterClause) {
+            ObjectFilterClause filterClause = (ObjectFilterClause) clause;
+            builder.append(makeObjectFilter(filterClause.getField(), filterClause.getValues(), filterClause.getOperation()));
         } else if (clause instanceof LogicalClause) {
             LogicalClause logicalClause = (LogicalClause) clause;
             builder.append(makeFilter(logicalClause.getClauses(), logicalClause.getOperation()));
@@ -368,6 +379,13 @@ public class QueryUtils {
             window += ", '" + key  + "' : " + value;
         }
         return window + "}";
+    }
+
+    private static String makeFilterValue(ObjectFilterClause.Value value) {
+        return "{" +
+                 "'kind' : " + value.getKind().name() + ", " +
+                 "'value': '" + value.getValue() + "'" +
+               "}";
     }
 
     public static String getOperationFor(Clause.Operation operation) {

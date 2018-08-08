@@ -5,12 +5,14 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.FilterClause;
+import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.LogicalClause;
+import com.yahoo.bullet.parsing.ObjectFilterClause;
+import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.record.BulletRecord;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -21,11 +23,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.yahoo.bullet.common.Utilities.extractField;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
+import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_UNKNOWN;
 
+@Slf4j
 public class FilterOperations {
     @FunctionalInterface
     public interface Comparator<T> {
@@ -85,13 +90,11 @@ public class FilterOperations {
      * Exposed for testing. Cast the values to the type of the object if possible.
      *
      * @param object The {@link TypedObject} to cast the values to.
-     * @param values The {@link List} of String values to try and cast to the object.
+     * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(TypedObject object, List<String> values) {
-        // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
-        // In the future, we might want to support providing non-String values.
-        return values.stream().filter(Objects::nonNull).map(object::typeCast).filter(IS_NOT_UNKNOWN);
+    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<ObjectFilterClause.Value> values) {
+        return  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v)).filter(IS_NOT_UNKNOWN);
     }
 
     private static <T> Comparator<T> isNotNullAnd(Comparator<T> comparator) {
@@ -112,7 +115,21 @@ public class FilterOperations {
         return 1;
     }
 
-    private static boolean performRelational(BulletRecord record, FilterClause clause) {
+    private static TypedObject getValue(BulletRecord record, TypedObject object, ObjectFilterClause.Value value) {
+        switch (value.getKind()) {
+            case FIELD:
+                return object.typeCastFromObject(extractField(value.getValue(), record));
+            case VALUE:
+                // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
+                // In the future, we might want to support providing non-String values.
+                return object.typeCast(value.getValue());
+            default:
+                log.error("Unsupported value kind: " + value.getKind().name());
+                return GENERIC_UNKNOWN;
+        }
+    }
+
+    private static boolean performRelational(BulletRecord record, ObjectFilterClause clause) {
         Clause.Operation operator = clause.getOperation();
         if (isEmpty(clause.getValues())) {
             return true;
@@ -122,10 +139,14 @@ public class FilterOperations {
             case REGEX_LIKE:
                 return REGEX_LIKE.compare(object, clause.getPatterns().stream());
             case SIZE_OF:
-                return SIZE_OF.compare(object, cast(new TypedObject(Type.INTEGER, 0), clause.getValues()));
+                return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
             default:
-                return COMPARATORS.get(operator).compare(object, cast(object, clause.getValues()));
+                return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
         }
+    }
+
+    private static boolean performRelational(BulletRecord record, StringFilterClause clause) {
+        return performRelational(record, new ObjectFilterClause(clause));
     }
 
     private static boolean performLogical(BulletRecord record, LogicalClause clause) {
@@ -145,12 +166,17 @@ public class FilterOperations {
      * @return The result of th
      */
     public static boolean perform(BulletRecord record, Clause clause) {
-        // Rather than define another hierarchy of Clause -> FilterClause, LogicalClause evaluators, we'll eat the
+        // Rather than define another hierarchy of Clause -> StringFilterClause, ObjectFilterClause, LogicalClause evaluators, we'll eat the
         // cost of violating polymorphism in this one spot.
         // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
         // methods in those classes.
-        return clause instanceof FilterClause ? performRelational(record, (FilterClause) clause)
-                                              : performLogical(record, (LogicalClause) clause);
+        if (clause instanceof ObjectFilterClause) {
+            return performRelational(record, (ObjectFilterClause) clause);
+        } else if (clause instanceof StringFilterClause) {
+            return performRelational(record, (StringFilterClause) clause);
+        } else {
+            return performLogical(record, (LogicalClause) clause);
+        }
     }
 }
 
