@@ -13,6 +13,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -64,6 +65,8 @@ public class FilterOperations {
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
     private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> sizeOf(t) == i.getValue());
+    private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> containsKey(t, i));
+    private static final Comparator<Pair<BulletRecord, ObjectFilterClause.Value>> CONTAINSVALUE = (t, s) -> s.anyMatch(i -> containsValue(t, i));
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
@@ -79,6 +82,8 @@ public class FilterOperations {
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
     static final Comparator<TypedObject> SIZE_OF = isNotNullAnd(SIZEOF);
+    static final Comparator<TypedObject> CONTAINS_KEY = isNotNullAnd(CONTAINSKEY);
+    static final Comparator<Pair<BulletRecord, ObjectFilterClause.Value>> CONTAINS_VALUE = isNotNullAnd(CONTAINSVALUE);
     static final Map<Clause.Operation, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(Clause.Operation.class);
     static {
         LOGICAL_OPERATORS.put(Clause.Operation.AND, AND);
@@ -105,14 +110,70 @@ public class FilterOperations {
         Object o = object.getValue();
         if (o instanceof List) {
             return List.class.cast(o).size();
-        }
-        if (o instanceof Map) {
+        } else if (o instanceof Map) {
             return Map.class.cast(o).size();
-        }
-        if (o instanceof String) {
+        } else if (o instanceof String) {
             return String.class.cast(o).length();
         }
         return 1;
+    }
+
+    private static Boolean containsKey(TypedObject object, TypedObject key) {
+        Object o = object.getValue();
+        if (o instanceof List) {
+            for (Object element : (List) o) {
+                if (element instanceof Map) {
+                    if (((Map) element).containsKey(key.getValue())) {
+                        return true;
+                    }
+                }
+            }
+        } else if (o instanceof Map) {
+            return ((Map) o).containsKey(key.getValue());
+        }
+        return false;
+    }
+
+    private static Boolean containsValueInPrimitiveMap(Map<?, ?> map, Pair<BulletRecord, ObjectFilterClause.Value> value) {
+        for (Map.Entry entry : map.entrySet()) {
+            TypedObject typedObject = new TypedObject(entry.getValue());
+            TypedObject typedValue = getValue(value.getLeft(), typedObject, value.getRight());
+            if (typedObject.compareTo(typedValue) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static Boolean containsValue(TypedObject object, Pair<BulletRecord, ObjectFilterClause.Value> value) {
+        Object o = object.getValue();
+        if (o instanceof List) {
+            for (Object element : (List) o) {
+                if (element instanceof Map) {
+                    if (containsValueInPrimitiveMap((Map) element, value)) {
+                        return true;
+                    }
+                }
+                // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
+            }
+        } else if (o instanceof Map) {
+            for (Map.Entry entry : ((Map<?, ?>) o).entrySet()) {
+                Object entryValue = entry.getValue();
+                if (entryValue instanceof Map) {
+                    if (containsValueInPrimitiveMap((Map) entryValue, value)) {
+                        return true;
+                    }
+                } else {
+                    TypedObject typedObject = new TypedObject(entryValue);
+                    TypedObject typedValue = getValue(value.getLeft(), typedObject, value.getRight());
+                    if (typedObject.compareTo(typedValue) == 0) {
+                        return true;
+                    }
+
+                }
+            }
+        }
+        return false;
     }
 
     private static TypedObject getValue(BulletRecord record, TypedObject object, ObjectFilterClause.Value value) {
@@ -140,6 +201,10 @@ public class FilterOperations {
                 return REGEX_LIKE.compare(object, clause.getPatterns().stream());
             case SIZE_OF:
                 return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
+            case CONTAINS_KEY:
+                return CONTAINS_KEY.compare(object, cast(record, new TypedObject(Type.STRING, ""), clause.getValues()));
+            case CONTAINS_VALUE:
+                return CONTAINS_VALUE.compare(object, clause.getValues().stream().map(v -> Pair.of(record, v)));
             default:
                 return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
         }
