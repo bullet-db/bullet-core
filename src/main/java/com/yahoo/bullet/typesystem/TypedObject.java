@@ -135,6 +135,12 @@ public class TypedObject implements Comparable<TypedObject> {
         }
     }
 
+    /**
+     * Get the size of the value. Currently only LIST, MAP ans STRING are supported.
+     *
+     * @return the size of the value.
+     * @throws RuntimeException if not supported.
+     */
     public Integer sizeOf() {
         switch (type) {
             case LIST:
@@ -144,10 +150,17 @@ public class TypedObject implements Comparable<TypedObject> {
             case STRING:
                 return String.class.cast(value).length();
             default:
-                throw new RuntimeException("Unsupported type cannot be operated sizeOf: " + type);
+                throw new RuntimeException("Unsupported type cannot be operated SIZEOF: " + type);
         }
     }
 
+    /**
+     * Returns true if the value or its underneath values contain a mapping for the specified key. Only LIST and MAP are supported.
+     *
+     * @param key The key to be tested.
+     * @return A Boolean to indicate if the value or its underneath values contain a mapping for the specified key.
+     * @throws RuntimeException if not supported.
+     */
     @SuppressWarnings("unchecked")
     public Boolean containsKey(String key) {
         switch (type) {
@@ -174,10 +187,17 @@ public class TypedObject implements Comparable<TypedObject> {
                 }
                 return false;
             default:
-                throw new RuntimeException("Unsupported type cannot be operated ContainsKey: " + type);
+                throw new RuntimeException("Unsupported type cannot be operated CONTAINSKEY: " + type);
         }
     }
 
+    /**
+     * Returns true if the value or its underneath values contain the specified value. Only LIST and MAP are supported.
+     *
+     * @param target The target {@link TypedObject} to be tested.
+     * @return A Boolean to indicate if the value or its underneath values contain the specified value.
+     * @throws RuntimeException if not supported.
+     */
     @SuppressWarnings("unchecked")
     public Boolean containsValue(TypedObject target) {
         switch (type) {
@@ -208,7 +228,7 @@ public class TypedObject implements Comparable<TypedObject> {
                 }
                 return false;
             default:
-                throw new RuntimeException("Unsupported type cannot be operated ContainsValue: " + type);
+                throw new RuntimeException("Unsupported type cannot be operated CONTAINSVALUE: " + type);
         }
     }
 

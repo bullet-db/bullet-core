@@ -375,10 +375,10 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
     }
 
-    @Test( expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated sizeOf.*")
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated SIZEOF.*")
     public void testUnsupportedTypeSizeOf() {
         FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause));
+        FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause);
     }
 
     @Test
@@ -394,10 +394,10 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord().setMapOfIntegerMap("id", singletonMap("3", singletonMap("1", 1))), clause));
     }
 
-    @Test( expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated ContainsKey.*")
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated CONTAINSKEY.*")
     public void testUnsupportedTypeContainsKey() {
         FilterClause clause = getFieldFilter("id", CONTAINS_KEY, "1", "2");
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause));
+        FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause);
     }
 
     @Test
