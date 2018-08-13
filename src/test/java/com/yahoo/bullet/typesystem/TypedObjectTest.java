@@ -13,7 +13,7 @@ import java.util.Collections;
 public class TypedObjectTest {
     @Test
     public void testTypedObjectWithUnsupportedType() {
-        TypedObject object = new TypedObject(Collections.emptyList());
+        TypedObject object = new TypedObject(Type.UNKNOWN, Collections.emptyList());
         Assert.assertEquals(object.getType(), Type.UNKNOWN);
         Assert.assertEquals(object.getValue(), Collections.emptyList());
     }
@@ -31,32 +31,32 @@ public class TypedObjectTest {
     @Test
     public void testTypeCasting() {
         TypedObject object = new TypedObject(1);
-        TypedObject castedToObjectType = object.typeCast("1234");
+        TypedObject castedToObjectType = TypedObject.typeCast(object.getType(), "1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.INTEGER);
         Assert.assertEquals(castedToObjectType.getValue(), 1234);
 
         object = new TypedObject(1L);
-        castedToObjectType = object.typeCast("1234");
+        castedToObjectType = TypedObject.typeCast(object.getType(),"1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.LONG);
         Assert.assertEquals(castedToObjectType.getValue(), 1234L);
 
         object = new TypedObject(1.123f);
-        castedToObjectType = object.typeCast("1234");
+        castedToObjectType = TypedObject.typeCast(object.getType(),"1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.FLOAT);
         Assert.assertEquals(castedToObjectType.getValue(), 1234f);
 
         object = new TypedObject(1.123);
-        castedToObjectType = object.typeCast("1234");
+        castedToObjectType = TypedObject.typeCast(object.getType(),"1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.DOUBLE);
         Assert.assertEquals(castedToObjectType.getValue(), 1234.0);
 
         object = new TypedObject(true);
-        castedToObjectType = object.typeCast("false");
+        castedToObjectType = TypedObject.typeCast(object.getType(),"false");
         Assert.assertEquals(castedToObjectType.getType(), Type.BOOLEAN);
         Assert.assertEquals(castedToObjectType.getValue(), false);
 
         object = new TypedObject("foo");
-        castedToObjectType = object.typeCast("false");
+        castedToObjectType = TypedObject.typeCast(object.getType(),"false");
         Assert.assertEquals(castedToObjectType.getType(), Type.STRING);
         Assert.assertEquals(castedToObjectType.getValue(), "false");
     }
@@ -67,17 +67,17 @@ public class TypedObjectTest {
         TypedObject casted;
 
         object = new TypedObject(1L);
-        casted = object.typeCast("1234.0");
+        casted =TypedObject.typeCast(object.getType(),"1234.0");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
 
         object = new TypedObject(Type.MAP, Collections.emptyMap());
-        casted = object.typeCast("{}");
+        casted = TypedObject.typeCast(object.getType(),"{}");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
 
         object = new TypedObject(Type.LIST, Collections.emptyList());
-        casted = object.typeCast("[]");
+        casted = TypedObject.typeCast(object.getType(),"[]");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
     }
@@ -145,7 +145,7 @@ public class TypedObjectTest {
 
     @Test
     public void testUnknownComparison() {
-        TypedObject objectA = new TypedObject(Collections.emptyList());
+        TypedObject objectA = new TypedObject(Type.UNKNOWN, null);
         TypedObject objectB = new TypedObject(42.1);
         Assert.assertEquals(objectA.compareTo(objectB), Integer.MIN_VALUE);
         Assert.assertEquals(objectA.compareTo(objectA), Integer.MIN_VALUE);

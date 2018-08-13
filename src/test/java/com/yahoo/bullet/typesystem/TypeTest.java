@@ -59,12 +59,9 @@ public class TypeTest {
         Assert.assertEquals(Type.STRING.cast("1.23"), "1.23");
     }
 
-    @Test
+    @Test(expectedExceptions = ClassCastException.class)
     public void testUnknownCasting() {
         Assert.assertEquals(Type.UNKNOWN.cast("1"), "1");
-        Assert.assertEquals(Type.UNKNOWN.cast("{}"), "{}");
-        Assert.assertEquals(Type.UNKNOWN.cast("[]"), "[]");
-        Assert.assertEquals(Type.UNKNOWN.cast("1.23"), "1.23");
     }
 
     @Test

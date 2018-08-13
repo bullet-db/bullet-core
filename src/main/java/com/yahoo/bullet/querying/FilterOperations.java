@@ -13,7 +13,6 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -29,7 +28,7 @@ import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
-import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_UNKNOWN;
+import static com.yahoo.bullet.typesystem.TypedObject.IS_PRIMITIVES_OR_NULL;
 
 @Slf4j
 public class FilterOperations {
@@ -57,16 +56,16 @@ public class FilterOperations {
     // SOME_LONG_VALUE EQ [1.23, 35.2] will be false
     // SOME_LONG_VALUE NE [1.23. 425.3] will be false
     // SOME_LONG_VALUE GT/LT/GE/LE [12.4, 253.4] will be false! even if SOME_LONG_VALUE numerically could make it true.
-    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(i -> t.compareTo(i) == 0);
+    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(i ->  t.compareTo(i) == 0);
     private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(i -> t.compareTo(i) == 0);
     private static final Comparator<TypedObject> GT = (t, s) -> s.anyMatch(i -> t.compareTo(i) > 0);
     private static final Comparator<TypedObject> LT = (t, s) -> s.anyMatch(i -> t.compareTo(i) < 0);
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> sizeOf(t) == i.getValue());
-    private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> containsKey(t, i));
-    private static final Comparator<Pair<BulletRecord, ObjectFilterClause.Value>> CONTAINSVALUE = (t, s) -> s.anyMatch(i -> containsValue(t, i));
+    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> t.sizeOf() == i.getValue());
+    private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> t.containsKey((String) i.getValue()));
+    private static final Comparator<TypedObject> CONTAINSVALUE = (t, s) -> s.anyMatch(t::containsValue);
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
@@ -79,11 +78,11 @@ public class FilterOperations {
         COMPARATORS.put(Clause.Operation.LESS_THAN, isNotNullAnd(LT));
         COMPARATORS.put(Clause.Operation.GREATER_EQUALS, isNotNullAnd(GE));
         COMPARATORS.put(Clause.Operation.LESS_EQUALS, isNotNullAnd(LE));
+        COMPARATORS.put(Clause.Operation.SIZE_OF, isNotNullAnd(SIZEOF));
+        COMPARATORS.put(Clause.Operation.CONTAINS_KEY, isNotNullAnd(CONTAINSKEY));
+        COMPARATORS.put(Clause.Operation.CONTAINS_VALUE, isNotNullAnd(CONTAINSVALUE));
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
-    static final Comparator<TypedObject> SIZE_OF = isNotNullAnd(SIZEOF);
-    static final Comparator<TypedObject> CONTAINS_KEY = isNotNullAnd(CONTAINSKEY);
-    static final Comparator<Pair<BulletRecord, ObjectFilterClause.Value>> CONTAINS_VALUE = isNotNullAnd(CONTAINSVALUE);
     static final Map<Clause.Operation, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(Clause.Operation.class);
     static {
         LOGICAL_OPERATORS.put(Clause.Operation.AND, AND);
@@ -94,96 +93,26 @@ public class FilterOperations {
     /**
      * Exposed for testing. Cast the values to the type of the object if possible.
      *
-     * @param object The {@link TypedObject} to cast the values to.
+     * @param type The {@link Type} to cast the values to.
      * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(BulletRecord record, TypedObject object, List<ObjectFilterClause.Value> values) {
-        return  values.stream().filter(Objects::nonNull).map(v -> getValue(record, object, v)).filter(IS_NOT_UNKNOWN);
+    static Stream<TypedObject> cast(BulletRecord record, Type type, List<ObjectFilterClause.Value> values) {
+        return values.stream().filter(Objects::nonNull).map(v -> getTypedValue(record, type, v)).filter(IS_PRIMITIVES_OR_NULL);
     }
 
     private static <T> Comparator<T> isNotNullAnd(Comparator<T> comparator) {
         return (t, s) -> IS_NOT_NULL.test(t) && comparator.compare(t, s);
     }
 
-    private static Integer sizeOf(TypedObject object) {
-        Object o = object.getValue();
-        if (o instanceof List) {
-            return List.class.cast(o).size();
-        } else if (o instanceof Map) {
-            return Map.class.cast(o).size();
-        } else if (o instanceof String) {
-            return String.class.cast(o).length();
-        }
-        return 1;
-    }
-
-    private static Boolean containsKey(TypedObject object, TypedObject key) {
-        Object o = object.getValue();
-        if (o instanceof List) {
-            for (Object element : (List) o) {
-                if (element instanceof Map) {
-                    if (((Map) element).containsKey(key.getValue())) {
-                        return true;
-                    }
-                }
-            }
-        } else if (o instanceof Map) {
-            return ((Map) o).containsKey(key.getValue());
-        }
-        return false;
-    }
-
-    private static Boolean containsValueInPrimitiveMap(Map<?, ?> map, Pair<BulletRecord, ObjectFilterClause.Value> value) {
-        for (Map.Entry entry : map.entrySet()) {
-            TypedObject typedObject = new TypedObject(entry.getValue());
-            TypedObject typedValue = getValue(value.getLeft(), typedObject, value.getRight());
-            if (typedObject.compareTo(typedValue) == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Boolean containsValue(TypedObject object, Pair<BulletRecord, ObjectFilterClause.Value> value) {
-        Object o = object.getValue();
-        if (o instanceof List) {
-            for (Object element : (List) o) {
-                if (element instanceof Map) {
-                    if (containsValueInPrimitiveMap((Map) element, value)) {
-                        return true;
-                    }
-                }
-                // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
-            }
-        } else if (o instanceof Map) {
-            for (Map.Entry entry : ((Map<?, ?>) o).entrySet()) {
-                Object entryValue = entry.getValue();
-                if (entryValue instanceof Map) {
-                    if (containsValueInPrimitiveMap((Map) entryValue, value)) {
-                        return true;
-                    }
-                } else {
-                    TypedObject typedObject = new TypedObject(entryValue);
-                    TypedObject typedValue = getValue(value.getLeft(), typedObject, value.getRight());
-                    if (typedObject.compareTo(typedValue) == 0) {
-                        return true;
-                    }
-
-                }
-            }
-        }
-        return false;
-    }
-
-    private static TypedObject getValue(BulletRecord record, TypedObject object, ObjectFilterClause.Value value) {
+    private static TypedObject getTypedValue(BulletRecord record, Type type, ObjectFilterClause.Value value) {
         switch (value.getKind()) {
             case FIELD:
-                return object.typeCastFromObject(extractField(value.getValue(), record));
+                return TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
             case VALUE:
                 // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
                 // In the future, we might want to support providing non-String values.
-                return object.typeCast(value.getValue());
+                return TypedObject.typeCast(type, value.getValue());
             default:
                 log.error("Unsupported value kind: " + value.getKind().name());
                 return GENERIC_UNKNOWN;
@@ -196,18 +125,19 @@ public class FilterOperations {
             return true;
         }
         TypedObject object = extractTypedObject(clause.getField(), record);
-        switch (operator) {
-            case REGEX_LIKE:
-                return REGEX_LIKE.compare(object, clause.getPatterns().stream());
-            case SIZE_OF:
-                return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
-            case CONTAINS_KEY:
-                return CONTAINS_KEY.compare(object, cast(record, new TypedObject(Type.STRING, ""), clause.getValues()));
-            case CONTAINS_VALUE:
-                return CONTAINS_VALUE.compare(object, clause.getValues().stream().map(v -> Pair.of(record, v)));
-            default:
-                return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
+        if (operator == Clause.Operation.REGEX_LIKE) {
+            return REGEX_LIKE.compare(object, clause.getPatterns().stream());
         }
+
+        Type type = object.getType();
+        if (operator == Clause.Operation.SIZE_OF) {
+            type = Type.INTEGER;
+        } else if (operator == Clause.Operation.CONTAINS_KEY) {
+            type = Type.STRING;
+        } else if (operator == Clause.Operation.CONTAINS_VALUE) {
+            type = object.getPrimitiveType();
+        }
+        return COMPARATORS.get(operator).compare(object, cast(record, type, clause.getValues()));
     }
 
     private static boolean performRelational(BulletRecord record, StringFilterClause clause) {
