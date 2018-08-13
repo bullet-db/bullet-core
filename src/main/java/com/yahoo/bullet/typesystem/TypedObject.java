@@ -161,7 +161,6 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underneath values contain a mapping for the specified key.
      * @throws RuntimeException if not supported.
      */
-    @SuppressWarnings("unchecked")
     public Boolean containsKey(String key) {
         switch (type) {
             case LIST:
@@ -174,7 +173,7 @@ public class TypedObject implements Comparable<TypedObject> {
                 }
                 return false;
             case MAP:
-                Map<String, ?> map = (Map) value;
+                Map<?, ?> map = (Map) value;
                 if (map.containsKey(key)) {
                     return true;
                 }
@@ -198,7 +197,6 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underneath values contain the specified value.
      * @throws RuntimeException if not supported.
      */
-    @SuppressWarnings("unchecked")
     public Boolean containsValue(TypedObject target) {
         switch (type) {
             case LIST:
@@ -256,34 +254,29 @@ public class TypedObject implements Comparable<TypedObject> {
 
     }
 
-    @SuppressWarnings("unchecked")
     private static Type extractPrimitiveType(Type type, Object target) {
-        try {
-            switch (type) {
-                case LIST:
-                    List list = (List) target;
-                    if (list.isEmpty()) {
-                        return Type.UNKNOWN;
-                    }
-                    if (list.get(0) instanceof Map) {
-                        return extractPrimitiveTypeFromMap((Map) list.get(0));
-                    }
-                    return Type.getType(list.get(0));
-                case MAP:
-                    Map map = (Map) target;
-                    if (map.isEmpty()) {
-                        return Type.UNKNOWN;
-                    }
-                    Object firstValue = map.get(map.keySet().iterator().next());
-                    if (firstValue instanceof Map) {
-                        return extractPrimitiveTypeFromMap((Map) firstValue);
-                    }
-                    return Type.getType(firstValue);
-                default:
+        switch (type) {
+            case LIST:
+                List list = (List) target;
+                if (list.isEmpty()) {
                     return Type.UNKNOWN;
-            }
-        } catch (RuntimeException e) {
-            return Type.UNKNOWN;
+                }
+                if (list.get(0) instanceof Map) {
+                    return extractPrimitiveTypeFromMap((Map) list.get(0));
+                }
+                return Type.getType(list.get(0));
+            case MAP:
+                Map map = (Map) target;
+                if (map.isEmpty()) {
+                    return Type.UNKNOWN;
+                }
+                Object firstValue = map.get(map.keySet().iterator().next());
+                if (firstValue instanceof Map) {
+                    return extractPrimitiveTypeFromMap((Map) firstValue);
+                }
+                return Type.getType(firstValue);
+            default:
+                return Type.UNKNOWN;
         }
     }
 }

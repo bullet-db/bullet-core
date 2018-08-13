@@ -264,6 +264,7 @@ public class TypedObjectTest {
         Assert.assertTrue(objectD.containsKey("1"));
         Assert.assertFalse(objectE.containsKey("1"));
         Assert.assertTrue(objectF.containsKey("1"));
+        Assert.assertFalse(objectF.containsKey("2"));
         Assert.assertTrue(objectG.containsKey("1"));
     }
 
