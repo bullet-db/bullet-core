@@ -56,7 +56,7 @@ public class FilterOperations {
     // SOME_LONG_VALUE EQ [1.23, 35.2] will be false
     // SOME_LONG_VALUE NE [1.23. 425.3] will be false
     // SOME_LONG_VALUE GT/LT/GE/LE [12.4, 253.4] will be false! even if SOME_LONG_VALUE numerically could make it true.
-    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(i ->  t.compareTo(i) == 0);
+    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(i -> t.compareTo(i) == 0);
     private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(i -> t.compareTo(i) == 0);
     private static final Comparator<TypedObject> GT = (t, s) -> s.anyMatch(i -> t.compareTo(i) > 0);
     private static final Comparator<TypedObject> LT = (t, s) -> s.anyMatch(i -> t.compareTo(i) < 0);
