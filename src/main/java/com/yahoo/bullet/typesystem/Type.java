@@ -86,7 +86,7 @@ public enum Type {
             case NULL:
                 return value == null || NULL_EXPRESSION.compareToIgnoreCase(value) == 0 ? null : value;
             // We won't support the rest for castability. This wouldn't happen if getType was used to create
-            // TypedObjects because because we only support PRIMITIVES and UNKNOWN
+            // TypedObjects because because we only support cast operation on PRIMITIVES and NULL.
             default:
                 throw new ClassCastException("Cannot cast " + value + " to type " + this);
         }

@@ -56,14 +56,14 @@ public class FilterOperations {
     // SOME_LONG_VALUE EQ [1.23, 35.2] will be false
     // SOME_LONG_VALUE NE [1.23. 425.3] will be false
     // SOME_LONG_VALUE GT/LT/GE/LE [12.4, 253.4] will be false! even if SOME_LONG_VALUE numerically could make it true.
-    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(t::equals);
-    private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(t::equals);
+    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(t::equalTo);
+    private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(t::equalTo);
     private static final Comparator<TypedObject> GT = (t, s) -> s.anyMatch(i -> t.compareTo(i) > 0);
     private static final Comparator<TypedObject> LT = (t, s) -> s.anyMatch(i -> t.compareTo(i) < 0);
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> i.equals(t.size()));
+    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> i.equalTo(t.size()));
     private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> t.containsKey((String) i.getValue()));
     private static final Comparator<TypedObject> CONTAINSVALUE = (t, s) -> s.anyMatch(t::containsValue);
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
@@ -129,13 +129,15 @@ public class FilterOperations {
             return REGEX_LIKE.compare(object, clause.getPatterns().stream());
         }
 
-        Type type = object.getType();
+        Type type;
         if (operator == Clause.Operation.SIZE_OF) {
             type = Type.INTEGER;
         } else if (operator == Clause.Operation.CONTAINS_KEY) {
             type = Type.STRING;
         } else if (operator == Clause.Operation.CONTAINS_VALUE) {
             type = object.getPrimitiveType();
+        } else {
+            type = object.getType();
         }
         return COMPARATORS.get(operator).compare(object, cast(record, type, clause.getValues()));
     }

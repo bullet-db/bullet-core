@@ -216,8 +216,13 @@ public class TypedObject implements Comparable<TypedObject> {
         return type == Type.NULL ? Type.NULL_EXPRESSION : value.toString();
     }
 
-    @Override
-    public boolean equals(Object object) {
+    /**
+     * Returns true if this equals to the specified object. The object can be a {@link TypedObject} or be constructed to a {@link TypedObject}.
+     *
+     * @param object The object to compare to.
+     * @return A boolean to indicate if this equals to the specified object.
+     */
+    public boolean equalTo(Object object) {
         if (object instanceof TypedObject) {
             return compareTo((TypedObject) object) == 0;
         } else {
@@ -271,7 +276,7 @@ public class TypedObject implements Comparable<TypedObject> {
                     return true;
                 }
             } else {
-                if (target.equals(entryValue)) {
+                if (target.equalTo(entryValue)) {
                     return true;
                 }
             }
@@ -281,7 +286,7 @@ public class TypedObject implements Comparable<TypedObject> {
 
     private static boolean containsValueInPrimitiveMap(Map<?, ?> map, TypedObject target) {
         for (Map.Entry entry : map.entrySet()) {
-            if (target.equals(entry.getValue())) {
+            if (target.equalTo(entry.getValue())) {
                 return true;
             }
         }
@@ -327,6 +332,5 @@ public class TypedObject implements Comparable<TypedObject> {
         }
         Object firstValue = map.values().stream().findAny().get();
         return Type.getType(firstValue);
-
     }
 }

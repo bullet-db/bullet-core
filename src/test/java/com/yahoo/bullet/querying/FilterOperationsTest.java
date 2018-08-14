@@ -241,7 +241,6 @@ public class FilterOperationsTest {
     public void testFilterDefaults() {
         StringFilterClause clause = new StringFilterClause();
         clause.setValues(asList("foo", "bar"));
-        // Without an operation, it is an error
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
     }
 
