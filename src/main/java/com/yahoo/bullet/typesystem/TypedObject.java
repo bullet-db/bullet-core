@@ -186,10 +186,10 @@ public class TypedObject implements Comparable<TypedObject> {
     public boolean containsKey(String key) {
         switch (type) {
             case LIST:
-                return ((List) value).stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
+                return ((List) value).stream().anyMatch(e -> e instanceof Map && ((Map) e).containsKey(key));
             case MAP:
                 Map map = (Map) value;
-                return map.containsKey(key) || map.values().stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
+                return map.containsKey(key) || map.values().stream().anyMatch(e -> e instanceof Map && ((Map) e).containsKey(key));
             default:
                 throw new UnsupportedOperationException("This type of field does not support contains key: " + type);
         }
@@ -206,8 +206,7 @@ public class TypedObject implements Comparable<TypedObject> {
     public boolean containsValue(TypedObject target) {
         switch (type) {
             case LIST:
-                // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
-                return ((List) value).stream().anyMatch(e -> e instanceof Map && containsValueInPrimitiveMap((Map) e, target));
+                return ((List) value).stream().anyMatch(e -> e instanceof Map ? containsValueInPrimitiveMap((Map) e, target) : target.equalTo(e));
             case MAP:
                 Map map = (Map) value;
                 return map.values().stream().anyMatch(e -> e instanceof Map ? containsValueInPrimitiveMap((Map) e, target) : target.equalTo(e));

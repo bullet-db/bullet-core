@@ -284,6 +284,7 @@ public class TypedObjectTest {
         TypedObject objectF = new TypedObject(Collections.singletonMap("1", "2"));
         TypedObject objectG = new TypedObject(Collections.singletonMap("11", Collections.singletonMap("1", "2")));
         Assert.assertFalse(objectA.containsValue(new TypedObject("3")));
+        Assert.assertTrue(objectA.containsValue(new TypedObject("1")));
         Assert.assertFalse(objectB.containsValue(new TypedObject("1")));
         Assert.assertFalse(objectC.containsValue(new TypedObject("1")));
         Assert.assertFalse(objectD.containsValue(new TypedObject("1")));
