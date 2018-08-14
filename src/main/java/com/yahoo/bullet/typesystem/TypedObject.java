@@ -162,7 +162,7 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return the size of the value.
      * @throws UnsupportedOperationException if not supported.
      */
-    public Integer size() {
+    public int size() {
         switch (type) {
             case LIST:
                 return List.class.cast(value).size();
@@ -182,7 +182,7 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underlying values contain a mapping for the specified key.
      * @throws UnsupportedOperationException if not supported.
      */
-    public Boolean containsKey(String key) {
+    public boolean containsKey(String key) {
         switch (type) {
             case LIST:
                 return containsKeyInList((List) value, key);
@@ -200,7 +200,7 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underlying values contain the specified value.
      * @throws UnsupportedOperationException if not supported.
      */
-    public Boolean containsValue(TypedObject target) {
+    public boolean containsValue(TypedObject target) {
         switch (type) {
             case LIST:
                 return containsValueInList((List) value, target);
@@ -226,7 +226,7 @@ public class TypedObject implements Comparable<TypedObject> {
         }
     }
 
-    private static Boolean containsKeyInList(List list, String key) {
+    private static boolean containsKeyInList(List list, String key) {
         for (Object element : list) {
             if (element instanceof Map) {
                 if (((Map) element).containsKey(key)) {
@@ -237,7 +237,7 @@ public class TypedObject implements Comparable<TypedObject> {
         return false;
     }
 
-    private static Boolean containsKeyInMap(Map<?, ?> map, String key) {
+    private static boolean containsKeyInMap(Map<?, ?> map, String key) {
         if (map.containsKey(key)) {
             return true;
         }
@@ -251,7 +251,7 @@ public class TypedObject implements Comparable<TypedObject> {
         return false;
     }
 
-    private static Boolean containsValueInList(List list, TypedObject target) {
+    private static boolean containsValueInList(List list, TypedObject target) {
         for (Object element : list) {
             if (element instanceof Map) {
                 if (containsValueInPrimitiveMap((Map) element, target)) {
@@ -263,7 +263,7 @@ public class TypedObject implements Comparable<TypedObject> {
         return false;
     }
 
-    private static Boolean containsValueInMap(Map<?, ?> map, TypedObject target) {
+    private static boolean containsValueInMap(Map<?, ?> map, TypedObject target) {
         for (Map.Entry entry : map.entrySet()) {
             Object entryValue = entry.getValue();
             if (entryValue instanceof Map) {
@@ -279,7 +279,7 @@ public class TypedObject implements Comparable<TypedObject> {
         return false;
     }
 
-    private static Boolean containsValueInPrimitiveMap(Map<?, ?> map, TypedObject target) {
+    private static boolean containsValueInPrimitiveMap(Map<?, ?> map, TypedObject target) {
         for (Map.Entry entry : map.entrySet()) {
             if (target.equals(entry.getValue())) {
                 return true;

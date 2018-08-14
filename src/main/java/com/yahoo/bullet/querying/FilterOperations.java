@@ -63,7 +63,7 @@ public class FilterOperations {
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> t.size() == i.getValue());
+    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> i.equals(t.size()));
     private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> t.containsKey((String) i.getValue()));
     private static final Comparator<TypedObject> CONTAINSVALUE = (t, s) -> s.anyMatch(t::containsValue);
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);

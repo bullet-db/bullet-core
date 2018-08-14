@@ -239,10 +239,10 @@ public class TypedObjectTest {
         TypedObject objectB = new TypedObject(Collections.emptyList());
         TypedObject objectC = new TypedObject("");
         TypedObject objectD = new TypedObject("11");
-        Assert.assertEquals(objectA.size().intValue(), 2);
-        Assert.assertEquals(objectB.size().intValue(), 0);
-        Assert.assertEquals(objectC.size().intValue(), 0);
-        Assert.assertEquals(objectD.size().intValue(), 2);
+        Assert.assertEquals(objectA.size(), 2);
+        Assert.assertEquals(objectB.size(), 0);
+        Assert.assertEquals(objectC.size(), 0);
+        Assert.assertEquals(objectD.size(), 2);
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support size of.*")
