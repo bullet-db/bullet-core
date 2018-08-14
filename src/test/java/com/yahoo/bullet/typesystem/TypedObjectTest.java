@@ -318,7 +318,14 @@ public class TypedObjectTest {
         object = new TypedObject(42L);
         Integer integer = 50;
         casted = object.typeCastFromObject(integer);
-        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
+        Assert.assertEquals(casted.getType(), Type.LONG);
+        Assert.assertEquals(casted.getValue(), 50L);
+
+        object = new TypedObject(Type.DOUBLE, 20.5);
+        Float f = 50.0f;
+        casted = object.typeCastFromObject(f);
+        Assert.assertEquals(casted.getType(), Type.DOUBLE);
+        Assert.assertEquals(casted.getValue(), 50.0);
 
         casted = object.typeCastFromObject(null);
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);

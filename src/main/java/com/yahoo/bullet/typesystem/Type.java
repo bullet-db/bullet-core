@@ -100,8 +100,13 @@ public enum Type {
      * @throws ClassCastException if the cast cannot be done.
      */
     public Object castObject(Object object) throws ClassCastException {
-        return underlyingType.cast(object);
+        if (this == LONG && object instanceof Integer) {
+            return ((Integer) object).longValue();
+        } else if (this == DOUBLE && object instanceof Float) {
+            return ((Float) object).doubleValue();
+        } else {
+            return underlyingType.cast(object);
+        }
     }
-
 }
 
