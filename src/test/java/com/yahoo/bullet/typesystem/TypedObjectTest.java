@@ -32,32 +32,32 @@ public class TypedObjectTest {
     @Test
     public void testTypeCasting() {
         TypedObject object = new TypedObject(1);
-        TypedObject castedToObjectType = TypedObject.typeCast(object.getType(), "1234");
+        TypedObject castedToObjectType = object.typeCast("1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.INTEGER);
         Assert.assertEquals(castedToObjectType.getValue(), 1234);
 
         object = new TypedObject(1L);
-        castedToObjectType = TypedObject.typeCast(object.getType(), "1234");
+        castedToObjectType = object.typeCast("1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.LONG);
         Assert.assertEquals(castedToObjectType.getValue(), 1234L);
 
         object = new TypedObject(1.123f);
-        castedToObjectType = TypedObject.typeCast(object.getType(), "1234");
+        castedToObjectType = object.typeCast("1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.FLOAT);
         Assert.assertEquals(castedToObjectType.getValue(), 1234f);
 
         object = new TypedObject(1.123);
-        castedToObjectType = TypedObject.typeCast(object.getType(), "1234");
+        castedToObjectType = object.typeCast("1234");
         Assert.assertEquals(castedToObjectType.getType(), Type.DOUBLE);
         Assert.assertEquals(castedToObjectType.getValue(), 1234.0);
 
         object = new TypedObject(true);
-        castedToObjectType = TypedObject.typeCast(object.getType(), "false");
+        castedToObjectType = object.typeCast("false");
         Assert.assertEquals(castedToObjectType.getType(), Type.BOOLEAN);
         Assert.assertEquals(castedToObjectType.getValue(), false);
 
         object = new TypedObject("foo");
-        castedToObjectType = TypedObject.typeCast(object.getType(), "false");
+        castedToObjectType = object.typeCast("false");
         Assert.assertEquals(castedToObjectType.getType(), Type.STRING);
         Assert.assertEquals(castedToObjectType.getValue(), "false");
     }
@@ -68,17 +68,17 @@ public class TypedObjectTest {
         TypedObject casted;
 
         object = new TypedObject(1L);
-        casted = TypedObject.typeCast(object.getType(), "1234.0");
+        casted = object.typeCast("1234.0");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
 
         object = new TypedObject(Type.MAP, Collections.emptyMap());
-        casted = TypedObject.typeCast(object.getType(), "{}");
+        casted = object.typeCast("{}");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
 
         object = new TypedObject(Type.LIST, Collections.emptyList());
-        casted = TypedObject.typeCast(object.getType(), "[]");
+        casted = object.typeCast("[]");
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
         Assert.assertNull(casted.getValue());
     }
@@ -234,21 +234,21 @@ public class TypedObjectTest {
     }
 
     @Test
-    public void testSizeOf() {
+    public void testSize() {
         TypedObject objectA = new TypedObject(Arrays.asList("1", "2"));
         TypedObject objectB = new TypedObject(Collections.emptyList());
         TypedObject objectC = new TypedObject("");
         TypedObject objectD = new TypedObject("11");
-        Assert.assertEquals(objectA.sizeOf().intValue(), 2);
-        Assert.assertEquals(objectB.sizeOf().intValue(), 0);
-        Assert.assertEquals(objectC.sizeOf().intValue(), 0);
-        Assert.assertEquals(objectD.sizeOf().intValue(), 2);
+        Assert.assertEquals(objectA.size().intValue(), 2);
+        Assert.assertEquals(objectB.size().intValue(), 0);
+        Assert.assertEquals(objectC.size().intValue(), 0);
+        Assert.assertEquals(objectD.size().intValue(), 2);
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated SIZEOF.*")
-    public void testUnsupportedTypeSizeOf() {
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support size of.*")
+    public void testUnsupportedTypeSize() {
         TypedObject object = new TypedObject(1);
-        object.sizeOf();
+        object.size();
     }
 
     @Test
@@ -268,7 +268,7 @@ public class TypedObjectTest {
         Assert.assertTrue(objectG.containsKey("1"));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated CONTAINSKEY.*")
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support contains key.*")
     public void testUnsupportedTypeContainsKey() {
         TypedObject object = new TypedObject(1);
         object.containsKey("1");
@@ -295,9 +295,36 @@ public class TypedObjectTest {
         Assert.assertTrue(objectG.containsValue(new TypedObject("2")));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated CONTAINSVALUE.*")
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support contains value.*")
     public void testUnsupportedTypeContainsValue() {
         TypedObject object = new TypedObject(1);
         object.containsValue(new TypedObject("1"));
+    }
+
+    @Test
+    public void testTypeCastFromObject() {
+        TypedObject object = new TypedObject(42L);
+        Long longNum = 50L;
+        TypedObject casted = object.typeCastFromObject(longNum);
+        Assert.assertEquals(casted.getType(), Type.LONG);
+        Assert.assertEquals(casted.getValue(), 50L);
+
+        object = new TypedObject("str");
+        String str = "test";
+        casted = object.typeCastFromObject(str);
+        Assert.assertEquals(casted.getType(), Type.STRING);
+        Assert.assertEquals(casted.getValue(), "test");
+
+        object = new TypedObject(42L);
+        Integer integer = 50;
+        casted = object.typeCastFromObject(integer);
+        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
+
+        casted = object.typeCastFromObject(null);
+        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
+
+        object = new TypedObject(42);
+        casted = object.typeCastFromObject(longNum);
+        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
     }
 }

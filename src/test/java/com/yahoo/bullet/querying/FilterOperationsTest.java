@@ -237,12 +237,12 @@ public class FilterOperationsTest {
 
     //***************************************** Filter Clause *********************************************************
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testFilterDefaults() {
         StringFilterClause clause = new StringFilterClause();
         clause.setValues(asList("foo", "bar"));
         // Without an operation, it is an error
-        FilterOperations.perform(RecordBox.get().getRecord(), clause);
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
     }
 
     @Test
@@ -365,6 +365,7 @@ public class FilterOperationsTest {
     public void testSizeOf() {
         FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "123").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", new ArrayList<>()), clause));
@@ -375,16 +376,11 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated SIZEOF.*")
-    public void testUnsupportedTypeSizeOf() {
-        FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
-        FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause);
-    }
-
     @Test
     public void testContainsKey() {
         FilterClause clause = getFieldFilter("id", CONTAINS_KEY, "1", "2");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1)).getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("3", 1)).getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", new ArrayList<>()), clause));
@@ -392,12 +388,6 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord().setMapOfIntegerMap("id", singletonMap("1", singletonMap("3", 1))), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().getRecord().setMapOfIntegerMap("id", singletonMap("3", singletonMap("1", 1))), clause));
-    }
-
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Unsupported type cannot be operated CONTAINSKEY.*")
-    public void testUnsupportedTypeContainsKey() {
-        FilterClause clause = getFieldFilter("id", CONTAINS_KEY, "1", "2");
-        FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause);
     }
 
     @Test
@@ -470,13 +460,13 @@ public class FilterOperationsTest {
 
     //***************************************** Logical Clause *********************************************************
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testLogicalNoOperation() {
         LogicalClause clause = new LogicalClause();
         clause.setClauses(asList(makeClause("foo", asList("foo", "bar"), EQUALS),
                                  makeClause("bar", asList("foo", "bar"), EQUALS)));
         Assert.assertNull(clause.getOperation());
-        FilterOperations.perform(RecordBox.get().getRecord(), clause);
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
     }
 
     @Test

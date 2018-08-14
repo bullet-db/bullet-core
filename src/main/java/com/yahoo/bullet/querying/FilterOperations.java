@@ -28,7 +28,7 @@ import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
-import static com.yahoo.bullet.typesystem.TypedObject.IS_PRIMITIVES_OR_NULL;
+import static com.yahoo.bullet.typesystem.TypedObject.IS_PRIMITIVE_OR_NULL;
 
 @Slf4j
 public class FilterOperations {
@@ -56,14 +56,14 @@ public class FilterOperations {
     // SOME_LONG_VALUE EQ [1.23, 35.2] will be false
     // SOME_LONG_VALUE NE [1.23. 425.3] will be false
     // SOME_LONG_VALUE GT/LT/GE/LE [12.4, 253.4] will be false! even if SOME_LONG_VALUE numerically could make it true.
-    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(i -> t.compareTo(i) == 0);
-    private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(i -> t.compareTo(i) == 0);
+    private static final Comparator<TypedObject> EQ = (t, s) -> s.anyMatch(t::equals);
+    private static final Comparator<TypedObject> NE = (t, s) -> s.noneMatch(t::equals);
     private static final Comparator<TypedObject> GT = (t, s) -> s.anyMatch(i -> t.compareTo(i) > 0);
     private static final Comparator<TypedObject> LT = (t, s) -> s.anyMatch(i -> t.compareTo(i) < 0);
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> t.sizeOf() == i.getValue());
+    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> t.size() == i.getValue());
     private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> t.containsKey((String) i.getValue()));
     private static final Comparator<TypedObject> CONTAINSVALUE = (t, s) -> s.anyMatch(t::containsValue);
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
@@ -98,7 +98,7 @@ public class FilterOperations {
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
     static Stream<TypedObject> cast(BulletRecord record, Type type, List<ObjectFilterClause.Value> values) {
-        return values.stream().filter(Objects::nonNull).map(v -> getTypedValue(record, type, v)).filter(IS_PRIMITIVES_OR_NULL);
+        return values.stream().filter(Objects::nonNull).map(v -> getTypedValue(record, type, v)).filter(IS_PRIMITIVE_OR_NULL);
     }
 
     private static <T> Comparator<T> isNotNullAnd(Comparator<T> comparator) {
@@ -165,12 +165,18 @@ public class FilterOperations {
         // cost of violating polymorphism in this one spot.
         // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
         // methods in those classes.
-        if (clause instanceof ObjectFilterClause) {
-            return performRelational(record, (ObjectFilterClause) clause);
-        } else if (clause instanceof StringFilterClause) {
-            return performRelational(record, (StringFilterClause) clause);
-        } else {
-            return performLogical(record, (LogicalClause) clause);
+        try {
+            if (clause instanceof ObjectFilterClause) {
+                return performRelational(record, (ObjectFilterClause) clause);
+            } else if (clause instanceof StringFilterClause) {
+                return performRelational(record, (StringFilterClause) clause);
+            } else {
+                return performLogical(record, (LogicalClause) clause);
+            }
+        } catch (RuntimeException e) {
+            log.error("Unable to perform filter {} to record {}", clause, record);
+            log.error("Skipping due to", e);
+            return false;
         }
     }
 }
