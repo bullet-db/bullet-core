@@ -231,66 +231,27 @@ public class TypedObject implements Comparable<TypedObject> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean containsKeyInList(List list, String key) {
-        for (Object element : list) {
-            if (element instanceof Map) {
-                if (((Map) element).containsKey(key)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return list.stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
     }
 
     private static boolean containsKeyInMap(Map<?, ?> map, String key) {
-        if (map.containsKey(key)) {
-            return true;
-        }
-        for (Map.Entry entry : map.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                if (((Map) entry.getValue()).containsKey(key)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return map.containsKey(key) || map.values().stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean containsValueInList(List list, TypedObject target) {
-        for (Object element : list) {
-            if (element instanceof Map) {
-                if (containsValueInPrimitiveMap((Map) element, target)) {
-                    return true;
-                }
-            }
-            // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
-        }
-        return false;
+        // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
+        return list.stream().anyMatch(e -> e instanceof Map && containsValueInPrimitiveMap((Map) e, target));
     }
 
     private static boolean containsValueInMap(Map<?, ?> map, TypedObject target) {
-        for (Map.Entry entry : map.entrySet()) {
-            Object entryValue = entry.getValue();
-            if (entryValue instanceof Map) {
-                if (containsValueInPrimitiveMap((Map) entryValue, target)) {
-                    return true;
-                }
-            } else {
-                if (target.equalTo(entryValue)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return map.values().stream().anyMatch(e -> e instanceof Map ? containsValueInPrimitiveMap((Map) e, target) : target.equalTo(e));
     }
 
     private static boolean containsValueInPrimitiveMap(Map<?, ?> map, TypedObject target) {
-        for (Map.Entry entry : map.entrySet()) {
-            if (target.equalTo(entry.getValue())) {
-                return true;
-            }
-        }
-        return false;
+        return map.values().stream().anyMatch(target::equalTo);
     }
 
     private static Type extractPrimitiveType(Type type, Object target) {
