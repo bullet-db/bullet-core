@@ -182,12 +182,14 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underlying values contain a mapping for the specified key.
      * @throws UnsupportedOperationException if not supported.
      */
+    @SuppressWarnings("unchecked")
     public boolean containsKey(String key) {
         switch (type) {
             case LIST:
-                return containsKeyInList((List) value, key);
+                return ((List) value).stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
             case MAP:
-                return containsKeyInMap((Map) value, key);
+                Map map = (Map) value;
+                return map.containsKey(key) || map.values().stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
             default:
                 throw new UnsupportedOperationException("This type of field does not support contains key: " + type);
         }
@@ -200,12 +202,15 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return A Boolean to indicate if the value or its underlying values contain the specified value.
      * @throws UnsupportedOperationException if not supported.
      */
+    @SuppressWarnings("unchecked")
     public boolean containsValue(TypedObject target) {
         switch (type) {
             case LIST:
-                return containsValueInList((List) value, target);
+                // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
+                return ((List) value).stream().anyMatch(e -> e instanceof Map && containsValueInPrimitiveMap((Map) e, target));
             case MAP:
-                return containsValueInMap((Map) value, target);
+                Map map = (Map) value;
+                return map.values().stream().anyMatch(e -> e instanceof Map ? containsValueInPrimitiveMap((Map) e, target) : target.equalTo(e));
             default:
                 throw new UnsupportedOperationException("This type of field does not support contains value: " + type);
         }
@@ -217,37 +222,14 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
-     * Returns true if this equals to the specified object. The object can be a {@link TypedObject} or be constructed to a {@link TypedObject}.
+     * Returns true if this equals the specified object. The object can be a {@link TypedObject} or be constructed to a {@link TypedObject}.
      *
      * @param object The object to compare to.
-     * @return A boolean to indicate if this equals to the specified object.
+     * @return A boolean to indicate if this equals the specified object.
      */
     public boolean equalTo(Object object) {
-        if (object instanceof TypedObject) {
-            return compareTo((TypedObject) object) == 0;
-        } else {
-            TypedObject typedObject = new TypedObject(object);
-            return this.compareTo(typedObject) == 0;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static boolean containsKeyInList(List list, String key) {
-        return list.stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
-    }
-
-    private static boolean containsKeyInMap(Map<?, ?> map, String key) {
-        return map.containsKey(key) || map.values().stream().filter(e -> e instanceof Map).anyMatch(e -> ((Map) e).containsKey(key));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static boolean containsValueInList(List list, TypedObject target) {
-        // Support list of primitives after https://github.com/bullet-db/bullet-record/issues/12 is done.
-        return list.stream().anyMatch(e -> e instanceof Map && containsValueInPrimitiveMap((Map) e, target));
-    }
-
-    private static boolean containsValueInMap(Map<?, ?> map, TypedObject target) {
-        return map.values().stream().anyMatch(e -> e instanceof Map ? containsValueInPrimitiveMap((Map) e, target) : target.equalTo(e));
+        TypedObject target = object instanceof TypedObject ? (TypedObject) object : new TypedObject(object);
+        return compareTo(target) == 0;
     }
 
     private static boolean containsValueInPrimitiveMap(Map<?, ?> map, TypedObject target) {
@@ -282,16 +264,9 @@ public class TypedObject implements Comparable<TypedObject> {
         }
         Object firstValue = map.values().stream().findAny().get();
         if (firstValue instanceof Map) {
-            return extractPrimitiveTypeFromPrimitiveMap((Map) firstValue);
+            Map innerMap = (Map) firstValue;
+            return innerMap.isEmpty() ? Type.UNKNOWN : Type.getType(innerMap.values().stream().findAny().get());
         }
-        return Type.getType(firstValue);
-    }
-
-    private static Type extractPrimitiveTypeFromPrimitiveMap(Map map) {
-        if (map.isEmpty()) {
-            return Type.UNKNOWN;
-        }
-        Object firstValue = map.values().stream().findAny().get();
         return Type.getType(firstValue);
     }
 }
