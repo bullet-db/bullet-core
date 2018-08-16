@@ -392,13 +392,6 @@ public class Querier implements Monoidal {
             return errors;
         }
 
-        // Scheme is guaranteed to not be null.
-        window = WindowingOperations.findScheme(query, strategy, config);
-        errors = window.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
-
         if (query.getPostAggregations() != null) {
             postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
             for (PostStrategy postStrategy : postStrategies) {
@@ -408,7 +401,10 @@ public class Querier implements Monoidal {
                 }
             }
         }
-        return Optional.empty();
+
+        // Scheme is guaranteed to not be null.
+        window = WindowingOperations.findScheme(query, strategy, config);
+        return window.initialize();
     }
 
     /**
