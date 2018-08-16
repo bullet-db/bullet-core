@@ -18,11 +18,13 @@ public class PostAggregationOperations {
      * @return The created instance of a post strategy that can implement the PostAggregation.
      */
     public static PostStrategy findPostStrategy(PostAggregation aggregation) {
+        PostStrategy postStrategy = null;
         // Guaranteed to be present.
         switch (aggregation.getType()) {
             case ORDER_BY:
-                return new OrderBy(aggregation);
+                postStrategy  = new OrderBy(aggregation);
+                break;
         }
-        return null;
+        return postStrategy;
     }
 }
