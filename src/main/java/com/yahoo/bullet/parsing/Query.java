@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
@@ -35,6 +36,9 @@ public class Query implements Configurable, Initializable {
     private Window window;
     @Expose
     private Long duration;
+    @Expose
+    @SerializedName("post_aggregations")
+    private List<PostAggregation> postAggregations;
 
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
@@ -75,6 +79,10 @@ public class Query implements Configurable, Initializable {
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration <= 0) ? durationDefault : Math.min(duration, durationMax);
+
+        if (postAggregations != null) {
+            postAggregations.forEach(p -> p.configure(config));
+        }
     }
 
     @Override
@@ -91,6 +99,10 @@ public class Query implements Configurable, Initializable {
         }
 
         aggregation.initialize().ifPresent(errors::addAll);
+
+        if (postAggregations != null) {
+            postAggregations.forEach(p -> p.initialize().ifPresent(errors::addAll));
+        }
 
         if (window != null) {
             window.initialize().ifPresent(errors::addAll);
@@ -110,6 +122,6 @@ public class Query implements Configurable, Initializable {
     @Override
     public String toString() {
         return "{filters: " + filters + ", projection: " + projection + ", aggregation: " + aggregation +
-               ", window: " + window + ", duration: " + duration + "}";
+                ", post_aggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + "}";
     }
 }

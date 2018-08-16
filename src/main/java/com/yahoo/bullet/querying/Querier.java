@@ -14,6 +14,7 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
@@ -303,6 +305,8 @@ public class Querier implements Monoidal {
     // Mode for the querier
     private Mode mode;
 
+    private List<PostStrategy> postStrategies;
+
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
      * query.
@@ -390,7 +394,21 @@ public class Querier implements Monoidal {
 
         // Scheme is guaranteed to not be null.
         window = WindowingOperations.findScheme(query, strategy, config);
-        return window.initialize();
+        errors = window.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
+
+        if (query.getPostAggregations() != null) {
+            postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
+            for (PostStrategy postStrategy : postStrategies) {
+                errors = postStrategy.initialize();
+                if (errors.isPresent()) {
+                    return errors;
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -510,6 +528,7 @@ public class Querier implements Monoidal {
         try {
             incrementRate();
             result = window.getResult();
+            result = postAggregation(result);
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -672,5 +691,15 @@ public class Querier implements Monoidal {
 
     private String getMetaKey() {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
+    }
+
+    private Clip postAggregation(Clip clip) {
+        Clip result = clip;
+        if (postStrategies != null) {
+            for (PostStrategy postStrategy : postStrategies) {
+                result = postStrategy.execute(result);
+            }
+        }
+        return result;
     }
 }

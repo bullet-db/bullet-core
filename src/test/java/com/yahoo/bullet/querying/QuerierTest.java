@@ -14,9 +14,11 @@ import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
+import com.yahoo.bullet.parsing.PostAggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
+import com.yahoo.bullet.postaggregations.OrderBy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -32,6 +34,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -855,5 +858,44 @@ public class QuerierTest {
         long newEmitTime = (Long) windowMeta.get(mapping.get(Meta.Concept.WINDOW_EMIT_TIME.getName()));
         Assert.assertEquals(windowMeta.get(mapping.get(Meta.Concept.WINDOW_NUMBER.getName())), 2L);
         Assert.assertTrue(newEmitTime >  windowEmitTime);
+    }
+
+    @Test
+    public void testPostAggregationWithErrors() {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        PostAggregation postAggregation = new PostAggregation();
+        query.setPostAggregations(singletonList(postAggregation));
+        query.configure(config);
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        Optional<List<BulletError>> errors = querier.initialize();
+
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get(), singletonList(OrderBy.ORDERBY_REQUIRES_FIELDS_ERROR));
+    }
+
+    @Test
+    public void testPostAggregation() {
+        BulletConfig config = new BulletConfig();
+        Query query = new Query();
+        PostAggregation postAggregation = new PostAggregation();
+        postAggregation.setType(PostAggregation.Type.ORDER_BY);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("fields", singletonList("a"));
+        attributes.put("direction", "DESC");
+        postAggregation.setAttributes(attributes);
+        query.setPostAggregations(singletonList(postAggregation));
+        query.configure(config);
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        querier.initialize();
+
+        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).getRecord()));
+
+        List<BulletRecord> result = querier.getResult().getRecords();
+        Assert.assertEquals(result.size(), 4);
+        Assert.assertEquals(result.get(0).get("a"), 3);
+        Assert.assertEquals(result.get(1).get("a"), 2);
+        Assert.assertEquals(result.get(2).get("a"), 1);
+        Assert.assertEquals(result.get(3).get("a"), 0);
     }
 }

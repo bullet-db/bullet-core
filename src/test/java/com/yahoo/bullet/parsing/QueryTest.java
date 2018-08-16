@@ -195,6 +195,7 @@ public class QueryTest {
                 "{" +
                 "filters: null, projection: null, " +
                 "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                "post_aggregations: null, " +
                 "window: null, " +
                 "duration: 30000" +
                 "}");
@@ -208,6 +209,7 @@ public class QueryTest {
                             "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                            "post_aggregations: null, " +
                             "window: null, " +
                             "duration: 30000" +
                             "}");
@@ -219,6 +221,7 @@ public class QueryTest {
                             "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
+                            "post_aggregations: null, " +
                             "window: {emit: {type=TIME, every=4000}, include: null}, " +
                             "duration: 30000" +
                             "}");
