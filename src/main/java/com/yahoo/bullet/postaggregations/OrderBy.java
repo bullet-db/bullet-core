@@ -12,7 +12,6 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
+import static com.yahoo.bullet.common.Utilities.getCasted;
 
 @Getter
 public class OrderBy implements PostStrategy {
@@ -65,12 +65,10 @@ public class OrderBy implements PostStrategy {
     public OrderBy(PostAggregation aggregation) {
         Map<String, Object> attributes = aggregation.getAttributes();
         if (attributes != null) {
-            try {
-                fields = (List<String>) attributes.getOrDefault(FIELDS_NAME, new ArrayList<>());
-                direction = Direction.of((String) attributes.getOrDefault(DIRECTION_NAME, Direction.ASC.name()));
-            } catch (RuntimeException e) {
-                fields = null;
-                direction = Direction.ASC;
+            fields = getCasted(attributes, FIELDS_NAME, List.class);
+            String d = getCasted(attributes, DIRECTION_NAME, String.class);
+            if (d != null) {
+                direction = Direction.of(d);
             }
         }
     }
