@@ -59,7 +59,7 @@ public class OrderBy implements PostStrategy {
     /**
      * Constructor takes a {@link PostAggregation}.
      *
-     * @param aggregation An {@link PostAggregation} for this post aggregation type.
+     * @param aggregation The {@link PostAggregation} for this post aggregation type.
      */
     @SuppressWarnings("unchecked")
     public OrderBy(PostAggregation aggregation) {
