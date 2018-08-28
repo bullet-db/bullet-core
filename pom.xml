@@ -182,6 +182,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.7.201606060606</version>
+                <configuration>
+                    <!--excludes generated files from ANTLR4-->
+                    <excludes>
+                        <exclude>**/Expression*.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
