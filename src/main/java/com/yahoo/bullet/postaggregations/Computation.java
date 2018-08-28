@@ -91,6 +91,8 @@ public class Computation implements PostStrategy {
                         case STRING:
                             r.setString(newFieldName, (String) result.getValue());
                             break;
+                        default:
+                            r.setString(newFieldName, "N/A");
                     }
                 } catch (RuntimeException e) {
                     r.setString(newFieldName, "N/A");

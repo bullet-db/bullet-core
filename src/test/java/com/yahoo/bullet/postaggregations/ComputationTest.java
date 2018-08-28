@@ -193,4 +193,15 @@ public class ComputationTest {
         Assert.assertEquals(result.getRecords().get(0).get("newName"), "N/A");
         Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof String);
     }
+
+    @Test
+    public void testNonExistingFieldComputation() {
+        Computation computation = makeComputation("FIELD(a)", "newName");
+        Clip clip = new Clip();
+        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
+        Clip result = computation.execute(clip);
+
+        Assert.assertEquals(result.getRecords().get(0).get("newName"), "N/A");
+        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof String);
+    }
 }
