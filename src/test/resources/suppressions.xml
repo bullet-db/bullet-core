@@ -4,4 +4,5 @@
 
 <suppressions>
     <suppress checks="Javadoc.*" files="src[\\/]test[\\/]java[\\/].+.java"/>
+    <suppress checks="." files="target[\\/]generated-sources[\\/]antlr4[\\/]com[\\/]yahoo[\\/]bullet[\\/]expressionparser[\\/].*\.java$"/>
 </suppressions>

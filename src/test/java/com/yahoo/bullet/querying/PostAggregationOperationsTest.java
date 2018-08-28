@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.PostAggregation;
+import com.yahoo.bullet.postaggregations.Computation;
 import com.yahoo.bullet.postaggregations.OrderBy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -23,5 +24,13 @@ public class PostAggregationOperationsTest {
         PostAggregation aggregation = new PostAggregation();
 
         Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), OrderBy.class);
+    }
+
+    @Test
+    public void testComputationPostStrategy() {
+        PostAggregation aggregation = new PostAggregation();
+        aggregation.setType(PostAggregation.Type.COMPUTATION);
+
+        Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), Computation.class);
     }
 }

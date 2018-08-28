@@ -23,7 +23,10 @@ public class PostAggregation implements Configurable, Initializable {
     /** Represents the type of the PostAggregation. */
     public enum Type {
         @SerializedName("ORDERBY")
-        ORDER_BY
+        ORDER_BY,
+        @SerializedName("COMPUTATION")
+        COMPUTATION
+
     }
 
     @Expose

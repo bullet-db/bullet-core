@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.PostAggregation;
+import com.yahoo.bullet.postaggregations.Computation;
 import com.yahoo.bullet.postaggregations.OrderBy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 
@@ -23,6 +24,9 @@ public class PostAggregationOperations {
         switch (aggregation.getType()) {
             case ORDER_BY:
                 postStrategy  = new OrderBy(aggregation);
+                break;
+            case COMPUTATION:
+                postStrategy  = new Computation(aggregation);
                 break;
         }
         return postStrategy;
