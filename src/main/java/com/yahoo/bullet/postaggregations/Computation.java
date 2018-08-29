@@ -49,7 +49,6 @@ public class Computation implements PostStrategy {
 
     private String expression;
     private String newFieldName;
-    // private ParseTree parseTree;
 
     /**
      * Constructor takes a {@link PostAggregation}.
@@ -110,6 +109,7 @@ public class Computation implements PostStrategy {
             return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_NEW_FIELD_ERROR));
         }
         try {
+            // Try to create the parsing tree to check grammar errors.
             createParsingTree();
         } catch (Exception e) {
             return Optional.of(Collections.singletonList(makeError(COMPUTATION_PARSING_ERROR_MESSAGE_PREFIX + e, COMPUTATION_PARSING_ERROR_RESOLUTION)));
