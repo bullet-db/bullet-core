@@ -96,7 +96,7 @@ public class TypedExpressionVisitor extends ExpressionBaseVisitor<TypedObject> {
 
     @Override
     public TypedObject visitField(ExpressionParser.FieldContext ctx) {
-        String filedName = ctx.referenceExpression().getText();
+        String filedName = ctx.referenceExpression().getText().replaceAll("^\"|\"$", "");
         return extractTypedObject(filedName, bulletRecord);
     }
 

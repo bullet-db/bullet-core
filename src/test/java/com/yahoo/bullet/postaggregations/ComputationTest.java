@@ -100,7 +100,7 @@ public class ComputationTest {
 
     @Test
     public void testComputation() {
-        Computation computation = makeComputation("(1 / 1.0e1) * 1.0e1 + cast(2.0, DOUBLE) * FIELD(a) - SIZEOF(FIELD(b))", "newName");
+        Computation computation = makeComputation("(1 / 1.0e1) * 1.0e1 + cast(2.0, DOUBLE) * FIELD(\"a\") - SIZEOF(FIELD(b))", "newName");
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", "").getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", "1").getRecord());

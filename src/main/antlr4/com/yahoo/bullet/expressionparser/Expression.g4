@@ -38,8 +38,7 @@ value
 
 identifier
     : IDENTIFIER
-    | '"' IDENTIFIER '"'
-    | '\'' IDENTIFIER '\''
+    | QUOTED_IDENTIFIER
     ;
 
 number
@@ -72,6 +71,10 @@ IDENTIFIER
     : (LETTER | '_') (LETTER | DIGIT | '_' | '@' | ':')*
     ;
 
+QUOTED_IDENTIFIER
+    : '"' IDENTIFIER '"'
+    ;
+
 INTEGER_VALUE
     : DIGIT+
     ;
@@ -88,7 +91,6 @@ DOUBLE_VALUE
 
 STRING
     : '\'' ( ~'\'' | '\'\'' )* '\''
-    | '"' ( ~'"' | '""' )* '"'
     ;
 
 fragment EXPONENT
