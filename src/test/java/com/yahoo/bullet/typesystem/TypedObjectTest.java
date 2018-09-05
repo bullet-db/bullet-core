@@ -8,12 +8,13 @@ package com.yahoo.bullet.typesystem;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 public class TypedObjectTest {
     @Test
     public void testTypedObjectWithUnsupportedType() {
-        TypedObject object = new TypedObject(Collections.emptyList());
+        TypedObject object = new TypedObject(Type.UNKNOWN, Collections.emptyList());
         Assert.assertEquals(object.getType(), Type.UNKNOWN);
         Assert.assertEquals(object.getValue(), Collections.emptyList());
     }
@@ -145,7 +146,7 @@ public class TypedObjectTest {
 
     @Test
     public void testUnknownComparison() {
-        TypedObject objectA = new TypedObject(Collections.emptyList());
+        TypedObject objectA = new TypedObject(Type.UNKNOWN, null);
         TypedObject objectB = new TypedObject(42.1);
         Assert.assertEquals(objectA.compareTo(objectB), Integer.MIN_VALUE);
         Assert.assertEquals(objectA.compareTo(objectA), Integer.MIN_VALUE);
@@ -214,5 +215,124 @@ public class TypedObjectTest {
         TypedObject objectF = TypedObject.makeNumber(null);
         Assert.assertEquals(objectF.getType(), Type.UNKNOWN);
         Assert.assertNull(objectF.getValue());
+    }
+
+    @Test
+    public void testExtractPrimitiveType() {
+        TypedObject objectA = new TypedObject("");
+        TypedObject objectB = new TypedObject(Arrays.asList("1", "2"));
+        TypedObject objectC = new TypedObject(Collections.emptyList());
+        TypedObject objectD = new TypedObject(Collections.emptyMap());
+        TypedObject objectE = new TypedObject(Collections.singletonMap("1", "2"));
+        TypedObject objectF = new TypedObject(Collections.singletonMap("11", Collections.singletonMap("1", "2")));
+        Assert.assertEquals(objectA.getPrimitiveType(), Type.UNKNOWN);
+        Assert.assertEquals(objectB.getPrimitiveType(), Type.STRING);
+        Assert.assertEquals(objectC.getPrimitiveType(), Type.UNKNOWN);
+        Assert.assertEquals(objectD.getPrimitiveType(), Type.UNKNOWN);
+        Assert.assertEquals(objectE.getPrimitiveType(), Type.STRING);
+        Assert.assertEquals(objectF.getPrimitiveType(), Type.STRING);
+    }
+
+    @Test
+    public void testSize() {
+        TypedObject objectA = new TypedObject(Arrays.asList("1", "2"));
+        TypedObject objectB = new TypedObject(Collections.emptyList());
+        TypedObject objectC = new TypedObject("");
+        TypedObject objectD = new TypedObject("11");
+        Assert.assertEquals(objectA.size(), 2);
+        Assert.assertEquals(objectB.size(), 0);
+        Assert.assertEquals(objectC.size(), 0);
+        Assert.assertEquals(objectD.size(), 2);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support size of.*")
+    public void testUnsupportedTypeSize() {
+        TypedObject object = new TypedObject(1);
+        object.size();
+    }
+
+    @Test
+    public void testContainsKey() {
+        TypedObject objectB = new TypedObject(Collections.emptyList());
+        TypedObject objectC = new TypedObject(Arrays.asList(Collections.emptyMap()));
+        TypedObject objectD = new TypedObject(Arrays.asList(Collections.singletonMap("1", "2")));
+        TypedObject objectE = new TypedObject(Collections.emptyMap());
+        TypedObject objectF = new TypedObject(Collections.singletonMap("1", "2"));
+        TypedObject objectG = new TypedObject(Collections.singletonMap("11", Collections.singletonMap("1", "2")));
+        Assert.assertFalse(objectB.containsKey("1"));
+        Assert.assertFalse(objectC.containsKey("1"));
+        Assert.assertTrue(objectD.containsKey("1"));
+        Assert.assertFalse(objectE.containsKey("1"));
+        Assert.assertTrue(objectF.containsKey("1"));
+        Assert.assertFalse(objectF.containsKey("2"));
+        Assert.assertTrue(objectG.containsKey("1"));
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support contains key.*")
+    public void testUnsupportedTypeContainsKey() {
+        TypedObject object = new TypedObject(1);
+        object.containsKey("1");
+    }
+
+    @Test
+    public void testContainsValue() {
+        TypedObject objectA = new TypedObject(Arrays.asList("1", "2"));
+        TypedObject objectB = new TypedObject(Collections.emptyList());
+        TypedObject objectC = new TypedObject(Arrays.asList(Collections.emptyMap()));
+        TypedObject objectD = new TypedObject(Arrays.asList(Collections.singletonMap("1", "2")));
+        TypedObject objectE = new TypedObject(Collections.emptyMap());
+        TypedObject objectF = new TypedObject(Collections.singletonMap("1", "2"));
+        TypedObject objectG = new TypedObject(Collections.singletonMap("11", Collections.singletonMap("1", "2")));
+        Assert.assertFalse(objectA.containsValue(new TypedObject("3")));
+        Assert.assertTrue(objectA.containsValue(new TypedObject("1")));
+        Assert.assertFalse(objectB.containsValue(new TypedObject("1")));
+        Assert.assertFalse(objectC.containsValue(new TypedObject("1")));
+        Assert.assertFalse(objectD.containsValue(new TypedObject("1")));
+        Assert.assertTrue(objectD.containsValue(new TypedObject("2")));
+        Assert.assertFalse(objectE.containsValue(new TypedObject("1")));
+        Assert.assertFalse(objectF.containsValue(new TypedObject("1")));
+        Assert.assertTrue(objectF.containsValue(new TypedObject("2")));
+        Assert.assertFalse(objectG.containsValue(new TypedObject("1")));
+        Assert.assertTrue(objectG.containsValue(new TypedObject("2")));
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*This type of field does not support contains value.*")
+    public void testUnsupportedTypeContainsValue() {
+        TypedObject object = new TypedObject(1);
+        object.containsValue(new TypedObject("1"));
+    }
+
+    @Test
+    public void testTypeCastFromObject() {
+        TypedObject object = new TypedObject(42L);
+        Long longNum = 50L;
+        TypedObject casted = object.typeCastFromObject(longNum);
+        Assert.assertEquals(casted.getType(), Type.LONG);
+        Assert.assertEquals(casted.getValue(), 50L);
+
+        object = new TypedObject("str");
+        String str = "test";
+        casted = object.typeCastFromObject(str);
+        Assert.assertEquals(casted.getType(), Type.STRING);
+        Assert.assertEquals(casted.getValue(), "test");
+
+        object = new TypedObject(42L);
+        Integer integer = 50;
+        casted = object.typeCastFromObject(integer);
+        Assert.assertEquals(casted.getType(), Type.LONG);
+        Assert.assertEquals(casted.getValue(), 50L);
+
+        object = new TypedObject(Type.DOUBLE, 20.5);
+        Float f = 50.0f;
+        casted = object.typeCastFromObject(f);
+        Assert.assertEquals(casted.getType(), Type.DOUBLE);
+        Assert.assertEquals(casted.getValue(), 50.0);
+
+        casted = object.typeCastFromObject(null);
+        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
+
+        object = new TypedObject(42);
+        casted = object.typeCastFromObject(longNum);
+        Assert.assertEquals(casted.getType(), Type.UNKNOWN);
     }
 }

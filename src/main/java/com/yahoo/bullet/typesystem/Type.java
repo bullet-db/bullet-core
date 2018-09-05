@@ -27,6 +27,7 @@ public enum Type {
 
     public static final String NULL_EXPRESSION = "null";
     public static List<Type> PRIMITIVES = Arrays.asList(BOOLEAN, INTEGER, LONG, FLOAT, DOUBLE, STRING);
+    public static List<Type> SUPPORTED_TYPES = Arrays.asList(BOOLEAN, INTEGER, LONG, FLOAT, DOUBLE, STRING, LIST, MAP);
     public static List<Type> NUMERICS = Arrays.asList(INTEGER, LONG, FLOAT, DOUBLE);
 
     private final Class underlyingType;
@@ -41,7 +42,7 @@ public enum Type {
     }
 
     /**
-     * Tries to get the type of a given object from {@link #PRIMITIVES}.
+     * Tries to get the type of a given object from {@link #SUPPORTED_TYPES}.
      *
      * @param object The object whose type is to be determined.
      * @return {@link Type} for this object, the {@link Type#NULL} if the object was null or {@link Type#UNKNOWN}
@@ -52,8 +53,7 @@ public enum Type {
             return Type.NULL;
         }
 
-        // Only support the atomic, primitive types for now since all our operations are on atomic types.
-        for (Type type : PRIMITIVES) {
+        for (Type type : SUPPORTED_TYPES) {
             if (type.getUnderlyingType().isInstance(object)) {
                 return type;
             }
@@ -85,14 +85,28 @@ public enum Type {
                 return value;
             case NULL:
                 return value == null || NULL_EXPRESSION.compareToIgnoreCase(value) == 0 ? null : value;
-            case UNKNOWN:
-                return value;
             // We won't support the rest for castability. This wouldn't happen if getType was used to create
-            // TypedObjects because because we only support PRIMITIVES and UNKNOWN
+            // TypedObjects because because we only support cast operation on PRIMITIVES and NULL.
             default:
                 throw new ClassCastException("Cannot cast " + value + " to type " + this);
         }
     }
 
+    /**
+     * Takes an object and casts it to this type.
+     *
+     * @param object The object that is being cast.
+     * @return The casted object.
+     * @throws ClassCastException if the cast cannot be done.
+     */
+    public Object castObject(Object object) throws ClassCastException {
+        if (this == LONG && object instanceof Integer) {
+            return ((Integer) object).longValue();
+        } else if (this == DOUBLE && object instanceof Float) {
+            return ((Float) object).doubleValue();
+        } else {
+            return underlyingType.cast(object);
+        }
+    }
 }
 
