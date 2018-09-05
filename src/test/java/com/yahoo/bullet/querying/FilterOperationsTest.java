@@ -37,7 +37,7 @@ import static com.yahoo.bullet.parsing.Clause.Operation.NOT;
 import static com.yahoo.bullet.parsing.Clause.Operation.NOT_EQUALS;
 import static com.yahoo.bullet.parsing.Clause.Operation.OR;
 import static com.yahoo.bullet.parsing.Clause.Operation.REGEX_LIKE;
-import static com.yahoo.bullet.parsing.Clause.Operation.SIZE_OF;
+import static com.yahoo.bullet.parsing.Clause.Operation.SIZE_IS;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.FilterUtils.getObjectFieldFilter;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
@@ -361,7 +361,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testSizeOf() {
-        FilterClause clause = getFieldFilter("id", SIZE_OF, "1", "2");
+        FilterClause clause = getFieldFilter("id", SIZE_IS, "1", "2");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", 1).getRecord(), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));

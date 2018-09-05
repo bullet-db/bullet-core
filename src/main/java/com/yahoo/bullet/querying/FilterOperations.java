@@ -63,7 +63,7 @@ public class FilterOperations {
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> sizeOf(t) == i.getValue());
+    private static final Comparator<TypedObject> SIZEIS = (t, s) -> s.anyMatch(i -> sizeOf(t) == i.getValue());
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
     private static final LogicalOperator OR = (r, s) -> s.anyMatch(Boolean::valueOf);
     private static final LogicalOperator NOT = (r, s) -> !s.findFirst().get();
@@ -78,7 +78,7 @@ public class FilterOperations {
         COMPARATORS.put(Clause.Operation.LESS_EQUALS, isNotNullAnd(LE));
     }
     static final Comparator<Pattern> REGEX_LIKE = isNotNullAnd(RLIKE);
-    static final Comparator<TypedObject> SIZE_OF = isNotNullAnd(SIZEOF);
+    static final Comparator<TypedObject> SIZE_IS = isNotNullAnd(SIZEIS);
     static final Map<Clause.Operation, LogicalOperator> LOGICAL_OPERATORS = new EnumMap<>(Clause.Operation.class);
     static {
         LOGICAL_OPERATORS.put(Clause.Operation.AND, AND);
@@ -138,8 +138,8 @@ public class FilterOperations {
         switch (operator) {
             case REGEX_LIKE:
                 return REGEX_LIKE.compare(object, clause.getPatterns().stream());
-            case SIZE_OF:
-                return SIZE_OF.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
+            case SIZE_IS:
+                return SIZE_IS.compare(object, cast(record, new TypedObject(Type.INTEGER, 0), clause.getValues()));
             default:
                 return COMPARATORS.get(operator).compare(object, cast(record, object, clause.getValues()));
         }
