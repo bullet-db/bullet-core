@@ -39,8 +39,8 @@ public abstract class Clause implements Configurable, Initializable {
         LESS_EQUALS,
         @SerializedName("RLIKE")
         REGEX_LIKE,
-        @SerializedName("SIZEOF")
-        SIZE_OF,
+        @SerializedName("SIZEIS")
+        SIZE_IS,
         @SerializedName("CONTAINSKEY")
         CONTAINS_KEY,
         @SerializedName("CONTAINSVALUE")
@@ -53,7 +53,7 @@ public abstract class Clause implements Configurable, Initializable {
         NOT;
 
         public static final List<String> LOGICALS = asList("AND", "OR", "NOT");
-        public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE", "SIZEOF", "CONTAINSKEY", "CONTAINSVALUE");
+        public static final List<String> RELATIONALS = asList("==", "!=", ">=", "<=", ">", "<", "RLIKE", "SIZEIS", "CONTAINSKEY", "CONTAINSVALUE");
     }
 
     @Expose
