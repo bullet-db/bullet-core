@@ -64,7 +64,7 @@ public class FilterOperations {
     private static final Comparator<TypedObject> GE = (t, s) -> s.anyMatch(i -> t.compareTo(i) >= 0);
     private static final Comparator<TypedObject> LE = (t, s) -> s.anyMatch(i -> t.compareTo(i) <= 0);
     private static final Comparator<Pattern> RLIKE = (t, s) -> s.map(p -> p.matcher(t.toString())).anyMatch(Matcher::matches);
-    private static final Comparator<TypedObject> SIZEOF = (t, s) -> s.anyMatch(i -> i.equalTo(t.size()));
+    private static final Comparator<TypedObject> SIZEIS = (t, s) -> s.anyMatch(i -> i.equalTo(t.size()));
     private static final Comparator<TypedObject> CONTAINSKEY = (t, s) -> s.anyMatch(i -> t.containsKey((String) i.getValue()));
     private static final Comparator<TypedObject> CONTAINSVALUE = (t, s) -> s.anyMatch(t::containsValue);
     private static final LogicalOperator AND = (r, s) -> s.allMatch(Boolean::valueOf);
@@ -79,7 +79,7 @@ public class FilterOperations {
         COMPARATORS.put(Clause.Operation.LESS_THAN, isNotNullAnd(LT));
         COMPARATORS.put(Clause.Operation.GREATER_EQUALS, isNotNullAnd(GE));
         COMPARATORS.put(Clause.Operation.LESS_EQUALS, isNotNullAnd(LE));
-        COMPARATORS.put(Clause.Operation.SIZE_OF, isNotNullAnd(SIZEOF));
+        COMPARATORS.put(Clause.Operation.SIZE_IS, isNotNullAnd(SIZEIS));
         COMPARATORS.put(Clause.Operation.CONTAINS_KEY, isNotNullAnd(CONTAINSKEY));
         COMPARATORS.put(Clause.Operation.CONTAINS_VALUE, isNotNullAnd(CONTAINSVALUE));
     }
@@ -130,8 +130,9 @@ public class FilterOperations {
             return REGEX_LIKE.compare(object, clause.getPatterns().stream());
         }
 
+
         Type type;
-        if (operator == Clause.Operation.SIZE_OF) {
+        if (operator == Clause.Operation.SIZE_IS) {
             type = Type.INTEGER;
         } else if (operator == Clause.Operation.CONTAINS_KEY) {
             type = Type.STRING;
