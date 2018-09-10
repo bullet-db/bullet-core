@@ -46,4 +46,3 @@ public class CastExpression extends Expression {
         return "{" + super.toString() + ", expression" + ": " + expression + ", " + "type: " + type + "}";
     }
 }
-
