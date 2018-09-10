@@ -8,8 +8,8 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
-import com.yahoo.bullet.parsing.ObjectFilterClause;
 import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.querying.FilterOperations.Comparator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
@@ -50,7 +50,7 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        List<ObjectFilterClause.Value> values = asList(items).stream().map(s -> new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, s)).collect(Collectors.toList());
+        List<Value> values = asList(items).stream().map(s -> new Value(Value.Kind.VALUE, s)).collect(Collectors.toList());
         return FilterOperations.cast(null, source.getType(), values);
     }
 
@@ -634,7 +634,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testCompareToFields() {
-        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new Value(Value.Kind.FIELD, "b"));
 
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", "1").add("b", "2").getRecord(), clause));
@@ -644,7 +644,7 @@ public class FilterOperationsTest {
 
     @Test
     public void testCompareToFieldsWithCastException() {
-        FilterClause clause = getObjectFieldFilter("a", EQUALS, new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b"));
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new Value(Value.Kind.FIELD, "b"));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", 1).add("b", 1L).getRecord(), clause));
     }
 }

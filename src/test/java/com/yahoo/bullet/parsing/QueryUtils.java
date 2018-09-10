@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
@@ -191,11 +192,11 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeObjectFilter(String field, List<ObjectFilterClause.Value> values, Clause.Operation operation) {
+    public static String makeObjectFilter(String field, List<Value> values, Clause.Operation operation) {
         return "{" +
                  "'field' : " + makeString(field) + ", " +
                  "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                 "'values' : [" + values.stream().map(v -> makeFilterValue(v)).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
+                 "'values' : [" + values.stream().map(v -> makeValue(v)).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
                "}";
     }
 
@@ -283,6 +284,30 @@ public class QueryUtils {
                  "'field' : " + makeString(operation.getField()) + ", " +
                  "'newName' : " + makeString(operation.getNewName()) +
                "}";
+    }
+
+    public static String makeOrderBy(OrderBy.Direction direction, String... fields) {
+        return "{" +
+                 "'postAggregations': [" +
+                     "{" +
+                       "'type': 'ORDERBY', " +
+                       "'fields': ['" + Arrays.stream(fields).reduce((a, b) -> a + " , " + b).orElse("") + "'], " +
+                       "'direction': '" + direction + "'" +
+                     "}" +
+                 "]" +
+               "}";
+    }
+
+    public static String makeComputation(Expression expression, String newName) {
+        return "{" +
+                "'postAggregations': [" +
+                "{" +
+                "'type': 'COMPUTATION', " +
+                "'expression': " + makeExpression(expression) + ", " +
+                "'newFieldName': '" + newName + "'" +
+                "}" +
+                "]" +
+                "}";
     }
 
     public static String makeString(String field) {
@@ -381,11 +406,42 @@ public class QueryUtils {
         return window + "}";
     }
 
-    private static String makeFilterValue(ObjectFilterClause.Value value) {
+    private static String makeValue(Value value) {
         return "{" +
-                 "'kind' : " + value.getKind().name() + ", " +
-                 "'value': '" + value.getValue() + "'" +
+                 "'kind' : '" + value.getKind().name() + "', " +
+                 "'value' : '" + value.getValue() + "'" +
                "}";
+    }
+
+    private static String makeExpression(Expression expression) {
+        if (expression instanceof LeafExpression) {
+            LeafExpression leafExpression = (LeafExpression) expression;
+            return "{" +
+                     "'value': " + makeValue(leafExpression.getValue()) +
+                   "}";
+        } else if (expression instanceof CastExpression) {
+            CastExpression castExpression = (CastExpression) expression;
+            return "{" +
+                     "'operation': '" + getExpressionOperationFor(Expression.Operation.CAST) + "', " +
+                     "'expression': " + makeExpression(castExpression.getExpression()) + ", " +
+                     "'type': '" + castExpression.getType() + "'" +
+                   "}";
+        } else {
+            BinaryExpression binaryExpression = (BinaryExpression) expression;
+            return "{" +
+                     "'operation': '" + getExpressionOperationFor(binaryExpression.getOperation())  + "', " +
+                     "'leftExpression': " + makeExpression(binaryExpression.getLeftExpression()) + ", " +
+                     "'rightExpression': " + makeExpression(binaryExpression.getRightExpression()) +
+                   "}";
+        }
+    }
+
+    private static String getExpressionOperationFor(Expression.Operation operation) {
+        try {
+            return operation.getClass().getField(operation.name()).getAnnotation(SerializedName.class).value();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static String getOperationFor(Clause.Operation operation) {

@@ -13,12 +13,16 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.parsing.CastExpression;
 import com.yahoo.bullet.parsing.Clause;
+import com.yahoo.bullet.parsing.Expression;
+import com.yahoo.bullet.parsing.ExpressionUtils;
+import com.yahoo.bullet.parsing.OrderBy;
 import com.yahoo.bullet.parsing.PostAggregation;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.parsing.WindowUtils;
-import com.yahoo.bullet.postaggregations.OrderBy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -34,7 +38,6 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +49,9 @@ import static com.google.common.primitives.Booleans.asList;
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
+import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
 import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
+import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
 import static java.util.Collections.emptyList;
@@ -537,13 +542,13 @@ public class QuerierTest {
 
     @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected STRING but was BEGIN_OBJECT at.*")
     public void testStringFilterClauseMixWithObjectFilterCaluse() {
-        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: ['1', {kind: VALUE, value: '2'}]}]}";
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', 'values': ['1', {'kind': 'VALUE', 'value': '2'}]}]}";
         make(Querier.Mode.PARTITION, query);
     }
 
     @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected BEGIN_OBJECT but was STRING at.*")
     public void testObjectFilterClauseMixWithStringFilterCaluse() {
-        String query = "{'filters' : [{'operation': '==', 'field': 'field', values: [{kind: VALUE, value: '2'}, '1']}]}";
+        String query = "{'filters' : [{'operation': '==', 'field': 'field', 'values': [{'kind': 'VALUE', 'value': '2'}, '1']}]}";
         make(Querier.Mode.PARTITION, query);
     }
 
@@ -864,7 +869,8 @@ public class QuerierTest {
     public void testPostAggregationWithErrors() {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
-        PostAggregation postAggregation = new PostAggregation();
+        PostAggregation postAggregation = new OrderBy();
+        postAggregation.setType(PostAggregation.Type.ORDER_BY);
         query.setPostAggregations(singletonList(postAggregation));
         query.configure(config);
         Querier querier = new Querier(new RunningQuery("", query), config);
@@ -875,18 +881,9 @@ public class QuerierTest {
     }
 
     @Test
-    public void testPostAggregation() {
-        BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        PostAggregation postAggregation = new PostAggregation();
-        postAggregation.setType(PostAggregation.Type.ORDER_BY);
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("fields", singletonList("a"));
-        attributes.put("direction", "DESC");
-        postAggregation.setAttributes(attributes);
-        query.setPostAggregations(singletonList(postAggregation));
-        query.configure(config);
-        Querier querier = new Querier(new RunningQuery("", query), config);
+    public void testOrderBy() {
+        String query = makeOrderBy(OrderBy.Direction.DESC, "a");
+        Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 
         IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).getRecord()));
@@ -897,5 +894,24 @@ public class QuerierTest {
         Assert.assertEquals(result.get(1).get("a"), 2);
         Assert.assertEquals(result.get(2).get("a"), 1);
         Assert.assertEquals(result.get(3).get("a"), 0);
+    }
+
+    @Test
+    public void testComputation() {
+        Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
+                                                                     ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a")), CastExpression.CastType.INTEGER),
+                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2")));
+        String query = makeComputation(expression, "newName");
+        Querier querier = make(Querier.Mode.ALL, query);
+        querier.initialize();
+
+        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).getRecord()));
+
+        List<BulletRecord> result = querier.getResult().getRecords();
+        Assert.assertEquals(result.size(), 4);
+        Assert.assertEquals(result.get(0).get("newName"), 2L);
+        Assert.assertEquals(result.get(1).get("newName"), 3L);
+        Assert.assertEquals(result.get(2).get("newName"), 4L);
+        Assert.assertEquals(result.get(3).get("newName"), 5L);
     }
 }

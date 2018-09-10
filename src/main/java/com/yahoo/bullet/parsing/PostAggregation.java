@@ -15,44 +15,44 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static com.yahoo.bullet.common.BulletError.makeError;
+import static java.util.Collections.singletonList;
+
 @Getter @Setter
-public class PostAggregation implements Configurable, Initializable {
+public abstract class PostAggregation implements Configurable, Initializable {
     /** Represents the type of the PostAggregation. */
     public enum Type {
         @SerializedName("ORDERBY")
         ORDER_BY,
         @SerializedName("COMPUTATION")
         COMPUTATION
-
     }
 
-    @Expose
+    @Expose @SerializedName(TYPE_FIELD)
     protected Type type;
-    @Expose
-    private Map<String, Object> attributes;
+
+    public static final String TYPE_FIELD = "type";
+    public static final BulletError TYPE_MISSING =
+            makeError("Missing post aggregation type", "You must specify a type for post aggregation");
 
     /**
      * Default constructor. GSON recommended
      */
     public PostAggregation() {
-        type = Type.ORDER_BY;
+        type = null;
     }
 
     @Override
     public Optional<List<BulletError>> initialize() {
+        if (type == null) {
+            return Optional.of(singletonList(TYPE_MISSING));
+        }
         return Optional.empty();
     }
 
     @Override
     public void configure(BulletConfig configuration) {
-
-    }
-
-    @Override
-    public String toString() {
-        return "{type: " + type + ", attributes: " + attributes + "}";
     }
 }

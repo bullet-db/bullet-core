@@ -9,6 +9,7 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.ObjectFilterClause;
 import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -97,7 +98,7 @@ public class FilterOperations {
      * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(BulletRecord record, Type type, List<ObjectFilterClause.Value> values) {
+    static Stream<TypedObject> cast(BulletRecord record, Type type, List<Value> values) {
         return values.stream().filter(Objects::nonNull).map(v -> getTypedValue(record, type, v)).filter(IS_PRIMITIVE_OR_NULL);
     }
 
@@ -105,7 +106,7 @@ public class FilterOperations {
         return (t, s) -> IS_NOT_NULL.test(t) && comparator.compare(t, s);
     }
 
-    private static TypedObject getTypedValue(BulletRecord record, Type type, ObjectFilterClause.Value value) {
+    private static TypedObject getTypedValue(BulletRecord record, Type type, Value value) {
         switch (value.getKind()) {
             case FIELD:
                 return TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));

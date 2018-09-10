@@ -6,7 +6,6 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
@@ -37,7 +36,6 @@ public class Query implements Configurable, Initializable {
     @Expose
     private Long duration;
     @Expose
-    @SerializedName("post_aggregations")
     private List<PostAggregation> postAggregations;
 
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
@@ -122,6 +120,6 @@ public class Query implements Configurable, Initializable {
     @Override
     public String toString() {
         return "{filters: " + filters + ", projection: " + projection + ", aggregation: " + aggregation +
-                ", post_aggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + "}";
+                ", postAggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + "}";
     }
 }
