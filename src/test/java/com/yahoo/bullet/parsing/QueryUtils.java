@@ -300,14 +300,14 @@ public class QueryUtils {
 
     public static String makeComputation(Expression expression, String newName) {
         return "{" +
-                "'postAggregations': [" +
-                "{" +
-                "'type': 'COMPUTATION', " +
-                "'expression': " + makeExpression(expression) + ", " +
-                "'newFieldName': '" + newName + "'" +
-                "}" +
-                "]" +
-                "}";
+                 "'postAggregations': [" +
+                     "{" +
+                       "'type': 'COMPUTATION', " +
+                       "'expression': " + makeExpression(expression) + ", " +
+                       "'newFieldName': '" + newName + "'" +
+                     "}" +
+                 "]" +
+               "}";
     }
 
     public static String makeString(String field) {
