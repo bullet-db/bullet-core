@@ -174,6 +174,7 @@ public class ComputationStrategyTest {
         Assert.assertEquals(result.getRecords().get(0).get("newName"), true);
         Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Boolean);
     }
+
     @Test
     public void testStringComputation() {
         ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "abc", Type.STRING)), "newName");
