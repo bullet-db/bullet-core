@@ -73,7 +73,7 @@ public class ComputationStrategy implements PostStrategy {
                 result = extractTypedObject(valueString, record);
                 break;
             case VALUE:
-                result = (new TypedObject(Type.STRING, valueString)).forceCast(value.getType());
+                result = TypedObject.forceCast(value.getType(), valueString);
                 break;
         }
         return result;
