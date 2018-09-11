@@ -26,7 +26,7 @@ public class OrderBy extends PostAggregation {
     @Expose
     private List<String> fields;
     @Expose
-    Direction direction;
+    private Direction direction;
 
     public static final BulletError ORDERBY_REQUIRES_FIELDS_ERROR =
             makeError("The ORDERBY post aggregation needs at least one field", "Please add fields.");

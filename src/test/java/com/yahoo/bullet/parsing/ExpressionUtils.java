@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.typesystem.Type;
+
 public class ExpressionUtils {
     public static Expression makeLeafExpression(Value value) {
         LeafExpression expression = new LeafExpression();
@@ -12,7 +14,7 @@ public class ExpressionUtils {
         return expression;
     }
 
-    public static Expression makeCastExpression(Expression expression, CastExpression.CastType type) {
+    public static Expression makeCastExpression(Expression expression, Type type) {
         CastExpression castExpression = new CastExpression();
         castExpression.setOperation(Expression.Operation.CAST);
         castExpression.setExpression(expression);
@@ -23,8 +25,8 @@ public class ExpressionUtils {
     public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression) {
         BinaryExpression binaryExpression = new BinaryExpression();
         binaryExpression.setOperation(op);
-        binaryExpression.setLeftExpression(leftExpression);
-        binaryExpression.setRightExpression(rightExpression);
+        binaryExpression.setLeft(leftExpression);
+        binaryExpression.setRight(rightExpression);
         return binaryExpression;
     }
 }

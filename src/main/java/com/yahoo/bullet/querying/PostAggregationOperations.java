@@ -17,7 +17,6 @@ public class PostAggregationOperations {
      * Returns a new {@link PostStrategy} instance that can handle this post aggregation.
      *
      * @param aggregation The non-null, initialized {@link PostAggregation} instance.
-     *
      * @return The created instance of a post strategy that can implement the PostAggregation.
      */
     public static PostStrategy findPostStrategy(PostAggregation aggregation) {

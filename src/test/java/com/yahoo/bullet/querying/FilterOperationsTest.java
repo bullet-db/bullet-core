@@ -647,4 +647,18 @@ public class FilterOperationsTest {
         FilterClause clause = getObjectFieldFilter("a", EQUALS, new Value(Value.Kind.FIELD, "b"));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", 1).add("b", 1L).getRecord(), clause));
     }
+
+    @Test
+    public void testForceCast() {
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new Value(Value.Kind.VALUE, "1.2", Type.INTEGER));
+
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("a", 1).getRecord(), clause));
+    }
+
+    @Test
+    public void testForceCastWithCastException() {
+        FilterClause clause = getObjectFieldFilter("a", EQUALS, new Value(Value.Kind.VALUE, "1.2", Type.LIST));
+
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("a", 1).getRecord(), clause));
+    }
 }

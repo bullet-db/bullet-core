@@ -6,31 +6,28 @@
 package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static com.yahoo.bullet.common.BulletError.makeError;
+
 @Getter @Setter
 public class CastExpression extends Expression {
-    public enum CastType {
-        @SerializedName("INTEGER")
-        INTEGER,
-        @SerializedName("LONG")
-        LONG,
-        @SerializedName("FLOAT")
-        FLOAT,
-        @SerializedName("DOUBLE")
-        DOUBLE,
-        @SerializedName("BOOLEAN")
-        BOOLEAN,
-        @SerializedName("STRING")
-        STRING
-    }
+    public static final BulletError CAST_EXPRESSION_REQUIRES_VALID_EXPRESSION_ERROR =
+            makeError("The CastExpression needs an valid expression field", "Please add an valid expression.");
+    public static final BulletError CAST_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR =
+            makeError("The CastExpression needs a primitive type", "Please provide a primitive type.");
 
     @Expose
     private Expression expression;
     @Expose
-    private CastType type;
+    private Type type;
 
     /**
      * Default Constructor. GSON recommended.
@@ -43,6 +40,21 @@ public class CastExpression extends Expression {
 
     @Override
     public String toString() {
-        return "{" + super.toString() + ", expression" + ": " + expression + ", " + "type: " + type + "}";
+        return "{" + super.toString() + ", expression" + ": " + expression + ", type: " + type + "}";
+    }
+
+    @Override
+    public Optional<List<BulletError>> initialize() {
+        if (expression == null) {
+            return Optional.of(Collections.singletonList(CAST_EXPRESSION_REQUIRES_VALID_EXPRESSION_ERROR));
+        }
+        Optional<List<BulletError>> errors = expression.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
+        if (type == null || !Type.PRIMITIVES.contains(type)) {
+            return Optional.of(Collections.singletonList(CAST_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR));
+        }
+        return Optional.empty();
     }
 }

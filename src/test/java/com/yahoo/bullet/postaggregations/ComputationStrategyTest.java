@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.CastExpression;
 import com.yahoo.bullet.parsing.Computation;
 import com.yahoo.bullet.parsing.Expression;
 import com.yahoo.bullet.parsing.PostAggregation;
@@ -13,6 +12,7 @@ import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.typesystem.Type;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -29,7 +29,7 @@ public class ComputationStrategyTest {
         Computation postAggregation = new Computation();
         postAggregation.setType(PostAggregation.Type.COMPUTATION);
         postAggregation.setExpression(expression);
-        postAggregation.setNewFieldName(newName);
+        postAggregation.setNewName(newName);
         postAggregation.initialize();
         ComputationStrategy computationStrategy = new ComputationStrategy(postAggregation);
         computationStrategy.initialize();
@@ -44,14 +44,14 @@ public class ComputationStrategyTest {
                                      makeBinaryExpression(Expression.Operation.ADD,
                                                           makeBinaryExpression(Expression.Operation.MUL,
                                                                                makeBinaryExpression(Expression.Operation.DIV,
-                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1")),
-                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1.0"))),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "1.0"))),
+                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
+                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE))),
+                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE))),
                                                           makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2.0")),
-                                                                                                  CastExpression.CastType.DOUBLE),
+                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
+                                                                                                  Type.DOUBLE),
                                                                                makeLeafExpression(new Value(Value.Kind.FIELD, "a")))),
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "3"))),
+                                     makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.LONG))),
                 "newName");
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).getRecord());
@@ -73,18 +73,18 @@ public class ComputationStrategyTest {
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.ADD,
                                      makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2")),
-                                                                             CastExpression.CastType.INTEGER),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)),
+                                                                             Type.INTEGER),
                                                           makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "5")),
-                                                                                                  CastExpression.CastType.INTEGER),
-                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "3")),
-                                                                                                  CastExpression.CastType.INTEGER))),
+                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "5", Type.LONG)),
+                                                                                                  Type.INTEGER),
+                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.LONG)),
+                                                                                                  Type.INTEGER))),
                                      makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1")),
-                                                                             CastExpression.CastType.INTEGER),
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1")),
-                                                                             CastExpression.CastType.INTEGER))),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
+                                                                             Type.INTEGER),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
+                                                                             Type.INTEGER))),
                 "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
@@ -100,13 +100,13 @@ public class ComputationStrategyTest {
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.ADD,
                                      makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2")),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)),
                                                           makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5")),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3")))),
+                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5", Type.LONG)),
+                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.LONG)))),
                                      makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1")),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1")))),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)))),
                 "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
@@ -122,18 +122,18 @@ public class ComputationStrategyTest {
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.ADD,
                                      makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2.0")),
-                                                                             CastExpression.CastType.FLOAT),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
+                                                                             Type.FLOAT),
                                                           makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "5.0")),
-                                                                                                  CastExpression.CastType.FLOAT),
-                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "3.0")),
-                                                                                                  CastExpression.CastType.FLOAT))),
+                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "5.0", Type.DOUBLE)),
+                                                                                                  Type.FLOAT),
+                                                                               makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "3.0", Type.DOUBLE)),
+                                                                                                  Type.FLOAT))),
                                      makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1.0")),
-                                                                             CastExpression.CastType.FLOAT),
-                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1.0")),
-                                                                             CastExpression.CastType.FLOAT))),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)),
+                                                                             Type.FLOAT),
+                                                          makeCastExpression(makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)),
+                                                                             Type.FLOAT))),
                 "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
@@ -149,13 +149,13 @@ public class ComputationStrategyTest {
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.ADD,
                                      makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2.0")),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
                                                           makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5.0")),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3.0")))),
+                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5.0", Type.DOUBLE)),
+                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3.0", Type.DOUBLE)))),
                                      makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0")),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0")))),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)),
+                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)))),
                 "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
@@ -167,7 +167,7 @@ public class ComputationStrategyTest {
 
     @Test
     public void testBooleanComputation() {
-        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "true")), "newName");
+        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "true", Type.BOOLEAN)), "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
         Clip result = computation.execute(clip);
@@ -176,7 +176,7 @@ public class ComputationStrategyTest {
     }
     @Test
     public void testStringComputation() {
-        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "'abc'")), "newName");
+        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "abc", Type.STRING)), "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
         Clip result = computation.execute(clip);
@@ -188,15 +188,14 @@ public class ComputationStrategyTest {
     public void testUnsupportedComputation() {
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.ADD,
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "1")),
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "true"))),
+                                     makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
+                                     makeLeafExpression(new Value(Value.Kind.VALUE, "true", Type.BOOLEAN))),
                 "newName");
         Clip clip = new Clip();
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
         Clip result = computation.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), "N/A");
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof String);
+        Assert.assertFalse(result.getRecords().get(0).hasField("newName"));
     }
 
     @Test
@@ -206,7 +205,6 @@ public class ComputationStrategyTest {
         clip.add(Collections.singletonList(RecordBox.get().getRecord()));
         Clip result = computation.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), "N/A");
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof String);
+        Assert.assertFalse(result.getRecords().get(0).hasField("newName"));
     }
 }

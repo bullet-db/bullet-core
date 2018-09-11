@@ -33,7 +33,7 @@ public class ObjectFilterClauseTest {
         Value value1 = new Value(Value.Kind.VALUE, "a");
         Value value2 = new Value(Value.Kind.FIELD, "b");
         filterClause.setValues(asList(value1, value2));
-        Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: foo, values: [{kind: VALUE, value: a}, {kind: FIELD, value: b}]}");
+        Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: foo, values: [{kind: VALUE, value: a, type: null}, {kind: FIELD, value: b, type: null}]}");
     }
 
     @Test

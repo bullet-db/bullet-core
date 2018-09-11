@@ -157,28 +157,24 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
-     * Force cast to the {@link TypedObject} with given {@link Type}.
+     * Force cast to the {@link TypedObject} with given {@link Type} castedType.
      *
      * @param castedType The {@link Type} to be casted to
      * @return The casted {@link TypedObject}
      */
     public TypedObject forceCast(Type castedType) {
-        switch (castedType) {
-            case INTEGER:
-                return new TypedObject(castedType, castToInteger(this));
-            case BOOLEAN:
-                return new TypedObject(castedType, castToBoolean(this));
-            case STRING:
-                return new TypedObject(castedType, value.toString());
-            case LONG:
-                return new TypedObject(castedType, castToLong(this));
-            case FLOAT:
-                return new TypedObject(castedType, castToFloat(this));
-            case DOUBLE:
-                return new TypedObject(castedType, castToDouble(this));
-            default:
-                throw new UnsupportedOperationException("Unsupported type cannot be casted: " + castedType);
-        }
+        return new TypedObject(castedType, type.forceCast(castedType, value));
+    }
+
+    /**
+     * Force cast the value String to the {@link TypedObject} with given {@link Type} castedType.
+     *
+     * @param castedType The {@link Type} to be casted to
+     * @param value The value String to be casted.
+     * @return The casted {@link TypedObject}
+     */
+    public static TypedObject forceCast(Type castedType, String value) {
+        return new TypedObject(castedType, Type.STRING.forceCast(castedType, value));
     }
 
     /**
@@ -292,101 +288,5 @@ public class TypedObject implements Comparable<TypedObject> {
             return innerMap.isEmpty() ? Type.UNKNOWN : Type.getType(innerMap.values().stream().findAny().get());
         }
         return Type.getType(firstValue);
-    }
-
-
-    private Integer castToInteger(TypedObject object) {
-        switch (object.getType()) {
-            case INTEGER:
-                return (Integer) object.getValue();
-            case LONG:
-                return ((Long) object.getValue()).intValue();
-            case FLOAT:
-                return (int) (((Float) object.getValue()).floatValue());
-            case DOUBLE:
-                return (int) (((Double) object.getValue()).doubleValue());
-            case STRING:
-                return (int) (Double.parseDouble((String) object.getValue()));
-            case BOOLEAN:
-                return ((Boolean) object.getValue()) ? 1 : 0;
-            default:
-                throw new UnsupportedOperationException("Can not cast to Integer from Type: " + object.getType());
-        }
-    }
-
-    private Long castToLong(TypedObject object) {
-        switch (object.getType()) {
-            case INTEGER:
-                return ((Integer) object.getValue()).longValue();
-            case LONG:
-                return (Long) object.getValue();
-            case FLOAT:
-                return (long) (((Float) object.getValue()).floatValue());
-            case DOUBLE:
-                return (long) (((Double) object.getValue()).doubleValue());
-            case STRING:
-                return (long) (Double.parseDouble((String) object.getValue()));
-            case BOOLEAN:
-                return ((Boolean) object.getValue()) ? 1L : 0L;
-            default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + object.getType());
-        }
-    }
-
-    private Float castToFloat(TypedObject object) {
-        switch (object.getType()) {
-            case INTEGER:
-                return (float) (Integer) object.getValue();
-            case LONG:
-                return (float) (Long) object.getValue();
-            case FLOAT:
-                return (Float) object.getValue();
-            case DOUBLE:
-                return ((Double) object.getValue()).floatValue();
-            case STRING:
-                return (float) (Double.parseDouble((String) object.getValue()));
-            case BOOLEAN:
-                return ((Boolean) object.getValue()) ? 1.0f : 0.0f;
-            default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + object.getType());
-        }
-    }
-
-    private Double castToDouble(TypedObject object) {
-        switch (object.getType()) {
-            case INTEGER:
-                return (double) (Integer) object.getValue();
-            case LONG:
-                return (double) (Long) object.getValue();
-            case FLOAT:
-                return ((Float) object.getValue()).doubleValue();
-            case DOUBLE:
-                return (Double) object.getValue();
-            case STRING:
-                return Double.parseDouble((String) object.getValue());
-            case BOOLEAN:
-                return ((Boolean) object.getValue()) ? 1.0 : 0.0;
-            default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + object.getType());
-        }
-    }
-
-    private Boolean castToBoolean(TypedObject object) {
-        switch (object.getType()) {
-            case INTEGER:
-                return (Integer) object.getValue() != 0;
-            case LONG:
-                return ((Long) object.getValue()) != 0;
-            case FLOAT:
-                return ((Float) object.getValue()) != 0;
-            case DOUBLE:
-                return ((Double) object.getValue()) != 0;
-            case STRING:
-                return Boolean.parseBoolean((String) object.getValue());
-            case BOOLEAN:
-                return (Boolean) object.getValue();
-            default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + object.getType());
-        }
     }
 }

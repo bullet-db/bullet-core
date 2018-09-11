@@ -21,10 +21,10 @@ public class Computation extends PostAggregation {
     @Expose
     private Expression expression;
     @Expose
-    private String newFieldName;
+    private String newName;
 
-    public static final BulletError COMPUTATION_REQUIRES_EXPRESSION_ERROR =
-            makeError("The COMPUTATION post aggregation needs an expression field", "Please add an expression.");
+    public static final BulletError COMPUTATION_REQUIRES_VALID_EXPRESSION_ERROR =
+            makeError("The COMPUTATION post aggregation needs a valid expression field", "Please add a valid expression.");
     public static final BulletError COMPUTATION_REQUIRES_NEW_FIELD_ERROR =
             makeError("The COMPUTATION post aggregation needs a non-empty new field name", "Please provide a non-empty new field name.");
 
@@ -37,7 +37,7 @@ public class Computation extends PostAggregation {
 
     @Override
     public String toString() {
-        return "{type: " + type + ", expression: " + expression + ", newFieldName: " + newFieldName + "}";
+        return "{type: " + type + ", expression: " + expression + ", newName: " + newName + "}";
     }
 
     @Override
@@ -47,12 +47,15 @@ public class Computation extends PostAggregation {
             return errors;
         }
         if (expression == null) {
-            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_EXPRESSION_ERROR));
+            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_VALID_EXPRESSION_ERROR));
         }
-        if (newFieldName == null || newFieldName.isEmpty()) {
+        errors = expression.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
+        if (newName == null || newName.isEmpty()) {
             return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_NEW_FIELD_ERROR));
         }
         return Optional.empty();
     }
-
 }

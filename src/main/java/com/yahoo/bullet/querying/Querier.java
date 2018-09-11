@@ -462,7 +462,7 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Get the result emitted so far after the last window.
+     * Get the result emitted so far after the last window. Post aggregations are NOT applied.
      *
      * @return The byte[] representation of the serialized result.
      */
@@ -488,7 +488,10 @@ public class Querier implements Monoidal {
     public List<BulletRecord> getRecords() {
         try {
             incrementRate();
-            return window.getRecords();
+            Clip result = new Clip();
+            result.add(window.getRecords());
+            result = postAggregation(result);
+            return result.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
             return null;

@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import static com.yahoo.bullet.common.Utilities.extractField;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
-import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_PRIMITIVE_OR_NULL;
 
@@ -107,17 +106,20 @@ public class FilterOperations {
     }
 
     private static TypedObject getTypedValue(BulletRecord record, Type type, Value value) {
+        TypedObject result = null;
         switch (value.getKind()) {
             case FIELD:
-                return TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
+                result = TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
+                break;
             case VALUE:
-                // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
-                // In the future, we might want to support providing non-String values.
-                return TypedObject.typeCast(type, value.getValue());
-            default:
-                log.error("Unsupported value kind: " + value.getKind().name());
-                return GENERIC_UNKNOWN;
+                if (value.getType() != null) {
+                    result = TypedObject.forceCast(value.getType(), value.getValue());
+                } else {
+                    result = TypedObject.typeCast(type, value.getValue());
+                }
+                break;
         }
+        return result;
     }
 
     private static boolean performRelational(BulletRecord record, ObjectFilterClause clause) {

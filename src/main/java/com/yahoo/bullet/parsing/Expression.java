@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.common.Initializable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 @Getter @Setter
-public abstract class Expression {
+public abstract class Expression implements Initializable {
     /** The type of the operation in the expression. */
     public enum Operation {
         @SerializedName("+")

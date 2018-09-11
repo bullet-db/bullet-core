@@ -10,16 +10,25 @@ import com.yahoo.bullet.parsing.OrderBy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
-@AllArgsConstructor
 public class OrderByStrategy implements PostStrategy {
     private OrderBy postAggregation;
+    private int multiplyingFactor;
+
+    /**
+     * Contructor takes a {@link OrderBy} object.
+     *
+     * @param postAggregation The {@link OrderBy} object.
+     */
+    public OrderByStrategy(OrderBy postAggregation) {
+        this.postAggregation = postAggregation;
+        multiplyingFactor = postAggregation.getDirection() == OrderBy.Direction.ASC ? 1 : -1;
+    }
 
     @Override
     public Clip execute(Clip clip) {
@@ -31,7 +40,7 @@ public class OrderByStrategy implements PostStrategy {
                     try {
                         int compareValue = typedObjectA.compareTo(typedObjectB);
                         if (compareValue != 0) {
-                            return postAggregation.getDirection() == OrderBy.Direction.ASC ? compareValue : -1 * compareValue;
+                            return multiplyingFactor * compareValue;
                         }
                     } catch (RuntimeException e) {
                         // Ignore the exception and skip this field.

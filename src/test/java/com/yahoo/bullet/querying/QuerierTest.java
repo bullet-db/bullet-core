@@ -13,7 +13,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.CastExpression;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Expression;
 import com.yahoo.bullet.parsing.ExpressionUtils;
@@ -27,6 +26,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
@@ -899,8 +899,8 @@ public class QuerierTest {
     @Test
     public void testComputation() {
         Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                     ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a")), CastExpression.CastType.INTEGER),
-                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2")));
+                                                                     ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a")), Type.INTEGER),
+                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)));
         String query = makeComputation(expression, "newName");
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();

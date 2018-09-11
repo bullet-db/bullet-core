@@ -304,7 +304,7 @@ public class QueryUtils {
                      "{" +
                        "'type': 'COMPUTATION', " +
                        "'expression': " + makeExpression(expression) + ", " +
-                       "'newFieldName': '" + newName + "'" +
+                       "'newName': '" + newName + "'" +
                      "}" +
                  "]" +
                "}";
@@ -409,7 +409,8 @@ public class QueryUtils {
     private static String makeValue(Value value) {
         return "{" +
                  "'kind' : '" + value.getKind().name() + "', " +
-                 "'value' : '" + value.getValue() + "'" +
+                 "'value' : '" + value.getValue() + "', " +
+                 "'type' : '" + value.getType() + "' " +
                "}";
     }
 
@@ -430,8 +431,8 @@ public class QueryUtils {
             BinaryExpression binaryExpression = (BinaryExpression) expression;
             return "{" +
                      "'operation': '" + getExpressionOperationFor(binaryExpression.getOperation())  + "', " +
-                     "'leftExpression': " + makeExpression(binaryExpression.getLeftExpression()) + ", " +
-                     "'rightExpression': " + makeExpression(binaryExpression.getRightExpression()) +
+                     "'left': " + makeExpression(binaryExpression.getLeft()) + ", " +
+                     "'right': " + makeExpression(binaryExpression.getRight()) +
                    "}";
         }
     }

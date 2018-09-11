@@ -34,28 +34,26 @@ public class ComputationStrategy implements PostStrategy {
                     TypedObject result = calculate(postAggregation.getExpression(), r);
                     switch (result.getType()) {
                         case INTEGER:
-                            r.setInteger(postAggregation.getNewFieldName(), (Integer) result.getValue());
+                            r.setInteger(postAggregation.getNewName(), (Integer) result.getValue());
                             break;
                         case LONG:
-                            r.setLong(postAggregation.getNewFieldName(), (Long) result.getValue());
+                            r.setLong(postAggregation.getNewName(), (Long) result.getValue());
                             break;
                         case DOUBLE:
-                            r.setDouble(postAggregation.getNewFieldName(), (Double) result.getValue());
+                            r.setDouble(postAggregation.getNewName(), (Double) result.getValue());
                             break;
                         case FLOAT:
-                            r.setFloat(postAggregation.getNewFieldName(), (Float) result.getValue());
+                            r.setFloat(postAggregation.getNewName(), (Float) result.getValue());
                             break;
                         case BOOLEAN:
-                            r.setBoolean(postAggregation.getNewFieldName(), (Boolean) result.getValue());
+                            r.setBoolean(postAggregation.getNewName(), (Boolean) result.getValue());
                             break;
                         case STRING:
-                            r.setString(postAggregation.getNewFieldName(), (String) result.getValue());
+                            r.setString(postAggregation.getNewName(), (String) result.getValue());
                             break;
-                        default:
-                            r.setString(postAggregation.getNewFieldName(), "N/A");
                     }
                 } catch (RuntimeException e) {
-                    r.setString(postAggregation.getNewFieldName(), "N/A");
+                    // Ignore the exception and skip setting the field.
                 }
             });
         return clip;
@@ -75,23 +73,15 @@ public class ComputationStrategy implements PostStrategy {
                 result = extractTypedObject(valueString, record);
                 break;
             case VALUE:
-                if (valueString.equals("true") || valueString.equals("false")) {
-                    result = TypedObject.typeCast(Type.BOOLEAN, valueString);
-                } else if (valueString.matches("^'.*'$")) {
-                    result = TypedObject.typeCast(Type.STRING, valueString.substring(1, valueString.length() - 1));
-                } else if (valueString.contains(".")) {
-                    result = TypedObject.typeCast(Type.DOUBLE, valueString);
-                } else {
-                    result = TypedObject.typeCast(Type.LONG, valueString);
-                }
+                result = (new TypedObject(Type.STRING, valueString)).forceCast(value.getType());
                 break;
         }
         return result;
     }
 
     private TypedObject calculateBinaryExpression(BinaryExpression expression, BulletRecord record) {
-        TypedObject left = calculate(expression.getLeftExpression(), record);
-        TypedObject right = calculate(expression.getRightExpression(), record);
+        TypedObject left = calculate(expression.getLeft(), record);
+        TypedObject right = calculate(expression.getRight(), record);
         Type resultType = getResultType(left.getType(), right.getType());
         TypedObject castedLeft = left.forceCast(resultType);
         TypedObject castedRight = right.forceCast(resultType);
