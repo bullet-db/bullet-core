@@ -52,6 +52,7 @@ import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
 import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
+import static com.yahoo.bullet.parsing.QueryUtils.makePostAggregationsQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
 import static java.util.Collections.emptyList;
@@ -882,7 +883,7 @@ public class QuerierTest {
 
     @Test
     public void testOrderBy() {
-        String query = makeOrderBy(OrderBy.Direction.DESC, "a");
+        String query = makePostAggregationsQuery(makeOrderBy(OrderBy.Direction.DESC, "a"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 
@@ -901,7 +902,7 @@ public class QuerierTest {
         Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                      ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a")), Type.INTEGER),
                                                                      ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)));
-        String query = makeComputation(expression, "newName");
+        String query = makePostAggregationsQuery(makeComputation(expression, "newName"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 
