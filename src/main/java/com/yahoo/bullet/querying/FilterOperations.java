@@ -107,12 +107,14 @@ public class FilterOperations {
 
     private static TypedObject getTypedValue(BulletRecord record, Type type, Value value) {
         TypedObject result = null;
+        String valueString = value.getValue();
         switch (value.getKind()) {
             case FIELD:
-                result = TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
+                result = TypedObject.typeCastFromObject(type, extractField(valueString, record));
                 break;
             case VALUE:
-                result = value.getType() == null ? TypedObject.typeCast(type, value.getValue()) : TypedObject.forceCast(value.getType(), value.getValue());
+                Type newType = value.getType();
+                result = newType == null ? TypedObject.typeCast(type, valueString) : TypedObject.forceCast(newType, valueString);
                 break;
         }
         return result;
