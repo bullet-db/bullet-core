@@ -19,7 +19,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 @Getter @Setter
 public class BinaryExpression extends Expression {
     public static final BulletError BINARY_EXPRESSION_REQUIRES_VALID_EXPRESSIONS_ERROR =
-            makeError("The BinaryExpression needs 2 valid operands", "Please add 2 valid operands.");
+            makeError("This Expression needs 2 valid operands", "Please add an expression for 'left' and 'right'.");
 
     @Expose
     private Expression left;

@@ -51,7 +51,7 @@ public class ComputationTest {
     }
 
     @Test
-    public void testInitializeWithoutNONValidBinaryExpression() {
+    public void testInitializeWithInvalidBinaryExpression() {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
         BinaryExpression binaryExpression = new BinaryExpression();
@@ -62,7 +62,7 @@ public class ComputationTest {
     }
 
     @Test
-    public void testInitializeWithoutNONValidCastExpression() {
+    public void testInitializeWithInvalidCastExpression() {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
@@ -81,7 +81,7 @@ public class ComputationTest {
     }
 
     @Test
-    public void testInitializeWithoutNONValidLeafExpression() {
+    public void testInitializeWithInvalidLeafExpression() {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,

@@ -20,9 +20,9 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 @Getter @Setter
 public class CastExpression extends Expression {
     public static final BulletError CAST_EXPRESSION_REQUIRES_VALID_EXPRESSION_ERROR =
-            makeError("The CastExpression needs an valid expression field", "Please add an valid expression.");
+            makeError("Casting needs a valid expression field", "Please add a valid expression.");
     public static final BulletError CAST_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR =
-            makeError("The CastExpression needs a primitive type", "Please provide a primitive type.");
+            makeError("Casting needs a primitive type", "Please provide a primitive type.");
 
     @Expose
     private Expression expression;

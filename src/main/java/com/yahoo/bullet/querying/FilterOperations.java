@@ -112,11 +112,7 @@ public class FilterOperations {
                 result = TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
                 break;
             case VALUE:
-                if (value.getType() != null) {
-                    result = TypedObject.forceCast(value.getType(), value.getValue());
-                } else {
-                    result = TypedObject.typeCast(type, value.getValue());
-                }
+                result = value.getType() == null ? TypedObject.typeCast(type, value.getValue()) : TypedObject.forceCast(value.getType(), value.getValue());
                 break;
         }
         return result;
