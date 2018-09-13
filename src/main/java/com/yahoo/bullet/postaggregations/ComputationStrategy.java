@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.BinaryExpression;
 import com.yahoo.bullet.parsing.CastExpression;
 import com.yahoo.bullet.parsing.Computation;
@@ -17,13 +16,11 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.AllArgsConstructor;
-
-import java.util.List;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
-@AllArgsConstructor
+@Slf4j @AllArgsConstructor
 public class ComputationStrategy implements PostStrategy {
     private Computation postAggregation;
 
@@ -54,14 +51,11 @@ public class ComputationStrategy implements PostStrategy {
                     }
                 } catch (RuntimeException e) {
                     // Ignore the exception and skip setting the field.
+                    log.error("Unable to calculate the expression: " + postAggregation.getExpression());
+                    log.error("Skip it due to: " + e);
                 }
             });
         return clip;
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        return Optional.empty();
     }
 
     private TypedObject calculateLeafExpression(LeafExpression expression, BulletRecord record) {

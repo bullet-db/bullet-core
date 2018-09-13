@@ -5,8 +5,12 @@
  */
 package com.yahoo.bullet.postaggregations;
 
+import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.result.Clip;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface PostStrategy extends Initializable {
     /**
@@ -16,4 +20,13 @@ public interface PostStrategy extends Initializable {
      * @return The output {@link Clip}.
      */
     Clip execute(Clip clip);
+
+    /**
+     * Default implementation for {@link Initializable}.
+     *
+     * @return An empty {@link Optional}.
+     */
+    default Optional<List<BulletError>> initialize() {
+        return Optional.empty();
+    }
 }
