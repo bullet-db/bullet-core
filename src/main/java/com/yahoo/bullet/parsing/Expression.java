@@ -26,9 +26,7 @@ public abstract class Expression implements Initializable {
         @SerializedName("*")
         MUL,
         @SerializedName("/")
-        DIV,
-        @SerializedName("CAST")
-        CAST;
+        DIV;
 
         public static final List<String> BINARY_OPERATION = asList("+", "-", "*", "/");
     }

@@ -25,7 +25,6 @@ public class Parser {
     private static final FieldTypeAdapterFactory<Expression> EXPRESSION_FACTORY =
             FieldTypeAdapterFactory.of(Expression.class)
                                    .registerSubType(LeafExpression.class, Parser::isLeafExpression)
-                                   .registerSubType(CastExpression.class, Parser::isCastExpression)
                                    .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
@@ -72,11 +71,6 @@ public class Parser {
     private static Boolean isBinaryExpression(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(Expression.OPERATION_FIELD);
         return jsonElement != null && Expression.Operation.BINARY_OPERATION.contains(jsonElement.getAsString());
-    }
-
-    private static Boolean isCastExpression(JsonObject jsonObject) {
-        JsonElement jsonElement = jsonObject.get(Expression.OPERATION_FIELD);
-        return jsonElement != null && jsonElement.getAsString().equals("CAST");
     }
 
     private static Boolean isLeafExpression(JsonObject jsonObject) {

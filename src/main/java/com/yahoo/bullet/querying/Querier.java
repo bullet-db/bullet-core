@@ -490,7 +490,7 @@ public class Querier implements Monoidal {
             incrementRate();
             Clip result = new Clip();
             result.add(window.getRecords());
-            result = postAggregation(result);
+            result = postAggregate(result);
             return result.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -527,7 +527,7 @@ public class Querier implements Monoidal {
         try {
             incrementRate();
             result = window.getResult();
-            result = postAggregation(result);
+            result = postAggregate(result);
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -653,6 +653,15 @@ public class Querier implements Monoidal {
         return projection != null ? ProjectionOperations.project(record, projection, config.getBulletRecordProvider()) : record;
     }
 
+    private Clip postAggregate(Clip clip) {
+        if (postStrategies != null) {
+            for (PostStrategy postStrategy : postStrategies) {
+                clip = postStrategy.execute(clip);
+            }
+        }
+        return clip;
+    }
+
     private Meta getResultMetadata() {
         String metaKey = getMetaKey();
         if (metaKey == null) {
@@ -690,14 +699,5 @@ public class Querier implements Monoidal {
 
     private String getMetaKey() {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
-    }
-
-    private Clip postAggregation(Clip clip) {
-        if (postStrategies != null) {
-            for (PostStrategy postStrategy : postStrategies) {
-                clip = postStrategy.execute(clip);
-            }
-        }
-        return clip;
     }
 }

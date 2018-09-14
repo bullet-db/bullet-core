@@ -505,19 +505,13 @@ public class QueryUtils {
             return "{" +
                      "'value': " + makeValue(leafExpression.getValue()) +
                    "}";
-        } else if (expression instanceof CastExpression) {
-            CastExpression castExpression = (CastExpression) expression;
-            return "{" +
-                     "'operation': '" + getExpressionOperationFor(Expression.Operation.CAST) + "', " +
-                     "'expression': " + makeExpression(castExpression.getExpression()) + ", " +
-                     "'type': '" + castExpression.getType() + "'" +
-                   "}";
         } else {
             BinaryExpression binaryExpression = (BinaryExpression) expression;
             return "{" +
                      "'operation': '" + getExpressionOperationFor(binaryExpression.getOperation())  + "', " +
                      "'left': " + makeExpression(binaryExpression.getLeft()) + ", " +
-                     "'right': " + makeExpression(binaryExpression.getRight()) +
+                     "'right': " + makeExpression(binaryExpression.getRight()) + ", " +
+                     "'type': '" + binaryExpression.getType() + "'" +
                    "}";
         }
     }
