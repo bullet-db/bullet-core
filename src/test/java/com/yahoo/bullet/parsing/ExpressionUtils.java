@@ -14,19 +14,16 @@ public class ExpressionUtils {
         return expression;
     }
 
-    public static Expression makeCastExpression(Expression expression, Type type) {
-        CastExpression castExpression = new CastExpression();
-        castExpression.setOperation(Expression.Operation.CAST);
-        castExpression.setExpression(expression);
-        castExpression.setType(type);
-        return castExpression;
+    public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression) {
+        return makeBinaryExpression(op, leftExpression, rightExpression, null);
     }
 
-    public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression) {
+    public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression, Type type) {
         BinaryExpression binaryExpression = new BinaryExpression();
         binaryExpression.setOperation(op);
         binaryExpression.setLeft(leftExpression);
         binaryExpression.setRight(rightExpression);
+        binaryExpression.setType(type);
         return binaryExpression;
     }
 }

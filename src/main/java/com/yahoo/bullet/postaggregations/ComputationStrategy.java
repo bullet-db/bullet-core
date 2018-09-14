@@ -6,7 +6,6 @@
 package com.yahoo.bullet.postaggregations;
 
 import com.yahoo.bullet.parsing.BinaryExpression;
-import com.yahoo.bullet.parsing.CastExpression;
 import com.yahoo.bullet.parsing.Computation;
 import com.yahoo.bullet.parsing.Expression;
 import com.yahoo.bullet.parsing.LeafExpression;
@@ -95,26 +94,23 @@ public class ComputationStrategy implements PostStrategy {
                 result = div(resultType, castedLeft, castedRight);
                 break;
         }
+
+        Type newType = expression.getType();
+        if (newType != null) {
+            result = result.forceCast(newType);
+        }
         return result;
     }
 
-    private TypedObject calculateCastExpression(CastExpression expression, BulletRecord record) {
-        TypedObject value = calculate(expression.getExpression(), record);
-        String typeString = expression.getType().name();
-        return value.forceCast(Type.valueOf(typeString));
-    }
-
     private TypedObject calculate(Expression expression, BulletRecord record) {
-        // Rather than define another hierarchy of Expression -> LeafExpression, BinaryExpression, CastExpression calculators, we'll eat the
+        // Rather than define another hierarchy of Expression -> LeafExpression or BinaryExpression calculators, we'll eat the
         // cost of violating polymorphism in this one spot.
-        // We do not want processing logic in LeafExpression, BinaryExpression or CastExpression, otherwise we could put the appropriate
+        // We do not want processing logic in LeafExpression or BinaryExpression, otherwise we could put the appropriate
         // methods in those classes.
         if (expression instanceof LeafExpression) {
             return calculateLeafExpression((LeafExpression) expression, record);
-        } else if (expression instanceof BinaryExpression) {
-            return calculateBinaryExpression((BinaryExpression) expression, record);
         } else {
-            return calculateCastExpression((CastExpression) expression, record);
+            return calculateBinaryExpression((BinaryExpression) expression, record);
         }
     }
 

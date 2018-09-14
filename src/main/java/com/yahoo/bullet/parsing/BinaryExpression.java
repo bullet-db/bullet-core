@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,6 +26,9 @@ public class BinaryExpression extends Expression {
     private Expression left;
     @Expose
     private Expression right;
+    // If type is not null, cast the result to this type.
+    @Expose
+    private Type type;
 
     /**
      * Default Constructor. GSON recommended.
@@ -37,7 +41,7 @@ public class BinaryExpression extends Expression {
 
     @Override
     public String toString() {
-        return "{" + super.toString() + ", left: " + left + ", right: " + right + "}";
+        return "{" + super.toString() + ", left: " + left + ", right: " + right + ", type: " + type + "}";
     }
 
     @Override

@@ -24,13 +24,16 @@ public class ComputationTest {
         Assert.assertEquals(aggregation.toString(), "{type: COMPUTATION, expression: null, newName: newName}");
 
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)), Type.INTEGER),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER))));
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)),
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)),
+                                                                       Type.DOUBLE));
         Assert.assertEquals(aggregation.toString(),
                             "{type: COMPUTATION, " +
                                      "expression: {operation: ADD, " +
-                                                  "left: {operation: CAST, expression: {operation: null, value: {kind: VALUE, value: 1, type: INTEGER}}, type: INTEGER}, " +
-                                                  "right: {operation: null, value: {kind: VALUE, value: 2, type: INTEGER}}}, newName: newName}");
+                                                  "left: {operation: null, value: {kind: VALUE, value: 1, type: INTEGER}}, " +
+                                                  "right: {operation: null, value: {kind: VALUE, value: 2, type: INTEGER}}, " +
+                                                  "type: DOUBLE}, " +
+                                     "newName: newName}");
     }
 
     @Test
@@ -62,30 +65,11 @@ public class ComputationTest {
     }
 
     @Test
-    public void testInitializeWithInvalidCastExpression() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeCastExpression(null, Type.INTEGER),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER))));
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), CastExpression.CAST_EXPRESSION_REQUIRES_VALID_EXPRESSION_ERROR);
-
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)), Type.MAP),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER))));
-        errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), CastExpression.CAST_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR);
-    }
-
-    @Test
     public void testInitializeWithInvalidLeafExpression() {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.MAP)), Type.INTEGER),
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.MAP)),
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2"))));
         Optional<List<BulletError>> errors = aggregation.initialize();
         Assert.assertTrue(errors.isPresent());
@@ -107,7 +91,7 @@ public class ComputationTest {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeCastExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)), Type.INTEGER),
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)),
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER))));
         aggregation.setNewName("newName");
         Optional<List<BulletError>> errors = aggregation.initialize();
