@@ -5,36 +5,10 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ObjectFilterClause extends FilterClause<ObjectFilterClause.Value> {
-    @Getter @AllArgsConstructor
-    public static class Value {
-        public enum Kind {
-            @SerializedName("VALUE")
-            VALUE,
-            @SerializedName("FIELD")
-            FIELD,
-            @SerializedName("CAST")
-            CAST
-        }
-        @Expose
-        private Kind kind;
-        @Expose
-        private String value;
-
-        @Override
-        public String toString() {
-            return "{kind: " + kind + ", " + "value: " + value + "}";
-        }
-    }
-
+public class ObjectFilterClause extends FilterClause<Value> {
     /**
      * Default Constructor. GSON recommended.
      */

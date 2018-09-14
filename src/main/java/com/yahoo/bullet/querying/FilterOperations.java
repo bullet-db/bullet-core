@@ -9,6 +9,7 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.ObjectFilterClause;
 import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -26,7 +27,6 @@ import java.util.stream.Stream;
 import static com.yahoo.bullet.common.Utilities.extractField;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
-import static com.yahoo.bullet.typesystem.TypedObject.GENERIC_UNKNOWN;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_PRIMITIVE_OR_NULL;
 
@@ -97,7 +97,7 @@ public class FilterOperations {
      * @param values The {@link List} of values to try and cast to the object.
      * @return A {@link Stream} of casted {@link TypedObject}.
      */
-    static Stream<TypedObject> cast(BulletRecord record, Type type, List<ObjectFilterClause.Value> values) {
+    static Stream<TypedObject> cast(BulletRecord record, Type type, List<Value> values) {
         return values.stream().filter(Objects::nonNull).map(v -> getTypedValue(record, type, v)).filter(IS_PRIMITIVE_OR_NULL);
     }
 
@@ -105,18 +105,19 @@ public class FilterOperations {
         return (t, s) -> IS_NOT_NULL.test(t) && comparator.compare(t, s);
     }
 
-    private static TypedObject getTypedValue(BulletRecord record, Type type, ObjectFilterClause.Value value) {
+    private static TypedObject getTypedValue(BulletRecord record, Type type, Value value) {
+        TypedObject result = null;
+        String valueString = value.getValue();
         switch (value.getKind()) {
             case FIELD:
-                return TypedObject.typeCastFromObject(type, extractField(value.getValue(), record));
+                result = TypedObject.typeCastFromObject(type, extractField(valueString, record));
+                break;
             case VALUE:
-                // Right now, we cast the filter values which are lists of strings to the value being filtered on's type.
-                // In the future, we might want to support providing non-String values.
-                return TypedObject.typeCast(type, value.getValue());
-            default:
-                log.error("Unsupported value kind: " + value.getKind().name());
-                return GENERIC_UNKNOWN;
+                Type newType = value.getType();
+                result = newType == null ? TypedObject.typeCast(type, valueString) : TypedObject.forceCast(newType, valueString);
+                break;
         }
+        return result;
     }
 
     private static boolean performRelational(BulletRecord record, ObjectFilterClause clause) {

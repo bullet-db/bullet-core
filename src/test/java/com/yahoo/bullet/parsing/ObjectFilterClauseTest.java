@@ -30,17 +30,17 @@ public class ObjectFilterClauseTest {
         Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: null, values: []}");
         filterClause.setField("foo");
         Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: foo, values: []}");
-        ObjectFilterClause.Value value1 = new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, "a");
-        ObjectFilterClause.Value value2 = new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.FIELD, "b");
+        Value value1 = new Value(Value.Kind.VALUE, "a");
+        Value value2 = new Value(Value.Kind.FIELD, "b");
         filterClause.setValues(asList(value1, value2));
-        Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: foo, values: [{kind: VALUE, value: a}, {kind: FIELD, value: b}]}");
+        Assert.assertEquals(filterClause.toString(), "{operation: EQUALS, field: foo, values: [{kind: VALUE, value: a, type: null}, {kind: FIELD, value: b, type: null}]}");
     }
 
     @Test
     public void testConfigureForPatterns() {
         FilterClause filterClause = new ObjectFilterClause();
         filterClause.setOperation(Clause.Operation.REGEX_LIKE);
-        filterClause.setValues(singletonList(new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, ".g.*")));
+        filterClause.setValues(singletonList(new Value(Value.Kind.VALUE, ".g.*")));
         Assert.assertNull(filterClause.getPatterns());
         filterClause.configure(new BulletConfig());
         Assert.assertFalse(filterClause.initialize().isPresent());
@@ -54,7 +54,7 @@ public class ObjectFilterClauseTest {
     public void testConfigureForBadPatterns() {
         FilterClause filterClause = new ObjectFilterClause();
         filterClause.setOperation(Clause.Operation.REGEX_LIKE);
-        filterClause.setValues(singletonList(new ObjectFilterClause.Value(ObjectFilterClause.Value.Kind.VALUE, "*TEST*")));
+        filterClause.setValues(singletonList(new Value(Value.Kind.VALUE, "*TEST*")));
         Assert.assertNull(filterClause.getPatterns());
         filterClause.configure(new BulletConfig());
         Assert.assertFalse(filterClause.initialize().isPresent());

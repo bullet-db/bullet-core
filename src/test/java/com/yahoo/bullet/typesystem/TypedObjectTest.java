@@ -335,4 +335,156 @@ public class TypedObjectTest {
         casted = object.typeCastFromObject(longNum);
         Assert.assertEquals(casted.getType(), Type.UNKNOWN);
     }
+
+    @Test
+    public void testForceCastInteger() {
+        TypedObject object = new TypedObject(2);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), 2);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), 2L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getValue(), 2.0f);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getValue(), 2.0);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "2");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), true);
+    }
+
+    @Test
+    public void testForceCastLong() {
+        TypedObject object = new TypedObject(Long.MAX_VALUE);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), -1);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), Long.MAX_VALUE);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue() - Long.MAX_VALUE) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue() - Long.MAX_VALUE) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "9223372036854775807");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), true);
+    }
+
+    @Test
+    public void testForceCastFloat() {
+        TypedObject object = new TypedObject(3.2f);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), 3);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), 3L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue() - 3.2f) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue() - 3.2) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "3.2");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), true);
+    }
+
+    @Test
+    public void testForceCastDouble() {
+        TypedObject object = new TypedObject(-5.2);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), -5);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), -5L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue() + 5.2f) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue() + 5.2) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "-5.2");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), true);
+    }
+
+    @Test
+    public void testForceCastBoolean() {
+        TypedObject object = new TypedObject(true);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), 1);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), 1L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue() - 1.0f) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue() - 1.0) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "true");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), true);
+
+        object = new TypedObject(false);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), 0);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), 0L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue()) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue()) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "false");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), false);
+    }
+
+    @Test
+    public void testForceCastString() {
+        TypedObject object = new TypedObject("0.0");
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getType(), Type.INTEGER);
+        Assert.assertEquals(object.forceCast(Type.INTEGER).getValue(), 0);
+        Assert.assertEquals(object.forceCast(Type.LONG).getType(), Type.LONG);
+        Assert.assertEquals(object.forceCast(Type.LONG).getValue(), 0L);
+        Assert.assertEquals(object.forceCast(Type.FLOAT).getType(), Type.FLOAT);
+        Assert.assertTrue(Math.abs((Float) object.forceCast(Type.FLOAT).getValue()) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.DOUBLE).getType(), Type.DOUBLE);
+        Assert.assertTrue(Math.abs((Double) object.forceCast(Type.DOUBLE).getValue()) <= 1e-07);
+        Assert.assertEquals(object.forceCast(Type.STRING).getType(), Type.STRING);
+        Assert.assertEquals(object.forceCast(Type.STRING).getValue(), "0.0");
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getType(), Type.BOOLEAN);
+        Assert.assertEquals(object.forceCast(Type.BOOLEAN).getValue(), false);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastToUnsupportedType() {
+        TypedObject object = new TypedObject(1);
+        object.forceCast(Type.LIST);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastUnsupportedTypeToInteger() {
+        TypedObject object = new TypedObject(Type.LIST, Collections.singletonList(1));
+        object.forceCast(Type.INTEGER);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastUnsupportedTypeToLong() {
+        TypedObject object = new TypedObject(Type.LIST, Collections.singletonList(1));
+        object.forceCast(Type.LONG);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastUnsupportedTypeToDouble() {
+        TypedObject object = new TypedObject(Type.LIST, Collections.singletonList(1));
+        object.forceCast(Type.DOUBLE);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastUnsupportedTypeToFloat() {
+        TypedObject object = new TypedObject(Type.LIST, Collections.singletonList(1));
+        object.forceCast(Type.FLOAT);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCastUnsupportedTypeToBoolean() {
+        TypedObject object = new TypedObject(Type.LIST, Collections.singletonList(1));
+        object.forceCast(Type.BOOLEAN);
+    }
 }

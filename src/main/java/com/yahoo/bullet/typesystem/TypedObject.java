@@ -157,6 +157,27 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
+     * Force cast to the {@link TypedObject} with given {@link Type} castedType.
+     *
+     * @param castedType The {@link Type} to be casted to
+     * @return The casted {@link TypedObject}
+     */
+    public TypedObject forceCast(Type castedType) {
+        return new TypedObject(castedType, type.forceCast(castedType, value));
+    }
+
+    /**
+     * Force cast the value String to the {@link TypedObject} with given {@link Type} castedType.
+     *
+     * @param castedType The {@link Type} to be casted to
+     * @param value The value String to be casted.
+     * @return The casted {@link TypedObject}
+     */
+    public static TypedObject forceCast(Type castedType, String value) {
+        return new TypedObject(castedType, Type.STRING.forceCast(castedType, value));
+    }
+
+    /**
      * Get the size of the value. Currently only LIST, MAP and STRING are supported.
      *
      * @return the size of the value.
