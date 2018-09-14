@@ -693,12 +693,11 @@ public class Querier implements Monoidal {
     }
 
     private Clip postAggregation(Clip clip) {
-        Clip result = clip;
         if (postStrategies != null) {
             for (PostStrategy postStrategy : postStrategies) {
-                result = postStrategy.execute(result);
+                clip = postStrategy.execute(clip);
             }
         }
-        return result;
+        return clip;
     }
 }
