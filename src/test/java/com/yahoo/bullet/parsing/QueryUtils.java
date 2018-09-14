@@ -511,7 +511,7 @@ public class QueryUtils {
                      "'operation': '" + getExpressionOperationFor(binaryExpression.getOperation())  + "', " +
                      "'left': " + makeExpression(binaryExpression.getLeft()) + ", " +
                      "'right': " + makeExpression(binaryExpression.getRight()) + ", " +
-                    "'type': '" + binaryExpression.getType() + "'" +
+                     "'type': '" + binaryExpression.getType() + "'" +
                    "}";
         }
     }
