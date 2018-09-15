@@ -37,7 +37,7 @@ public class ComputationStrategyTest {
 
     @Test
     public void testComputation() {
-        // (1 / 1.0) * 1.0 + 2.0 * FIELD("a") - 3
+        // (1 / 1.0) * 1.0 + 2.0 * FIELD("a") - cast(FIELD("a", "LONG")
         ComputationStrategy computation = makeComputation(
                 makeBinaryExpression(Expression.Operation.SUB,
                                      makeBinaryExpression(Expression.Operation.ADD,
@@ -49,7 +49,7 @@ public class ComputationStrategyTest {
                                                           makeBinaryExpression(Expression.Operation.MUL,
                                                                                makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
                                                                                makeLeafExpression(new Value(Value.Kind.FIELD, "a")))),
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.LONG)),
+                                     makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.LONG)),
                                      Type.FLOAT),
                 "newName");
         List<BulletRecord> records = new ArrayList<>();
@@ -60,10 +60,10 @@ public class ComputationStrategyTest {
         clip.add(records);
         Clip result = computation.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), 8.0f);
+        Assert.assertEquals(result.getRecords().get(0).get("newName"), 6.0f);
         Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Float);
-        Assert.assertEquals(result.getRecords().get(1).get("newName"), 2.0f);
-        Assert.assertEquals(result.getRecords().get(2).get("newName"), 0.0f);
+        Assert.assertEquals(result.getRecords().get(1).get("newName"), 3.0f);
+        Assert.assertEquals(result.getRecords().get(2).get("newName"), 2.0f);
     }
 
     @Test

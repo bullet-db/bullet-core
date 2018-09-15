@@ -61,12 +61,16 @@ public class ComputationStrategy implements PostStrategy {
         Value value = expression.getValue();
         TypedObject result = null;
         String valueString = value.getValue();
+        Type type = value.getType();
         switch (value.getKind()) {
             case FIELD:
                 result = extractTypedObject(valueString, record);
+                if (type != null) {
+                    result = result.forceCast(type);
+                }
                 break;
             case VALUE:
-                result = TypedObject.forceCast(value.getType(), valueString);
+                result = TypedObject.forceCast(type, valueString);
                 break;
         }
         return result;

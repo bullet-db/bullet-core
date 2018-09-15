@@ -23,7 +23,6 @@ public class Value {
     private Kind kind;
     @Expose
     private String value;
-    // The type field is only used when Kind is VALUE.
     @Expose
     private Type type;
 

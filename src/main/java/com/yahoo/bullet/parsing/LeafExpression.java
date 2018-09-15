@@ -40,7 +40,7 @@ public class LeafExpression extends Expression {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        if (value == null || value.getKind() == Value.Kind.VALUE && !Type.PRIMITIVES.contains(value.getType())) {
+        if (value == null || (value.getKind() == Value.Kind.VALUE || value.getType() != null) && !Type.PRIMITIVES.contains(value.getType())) {
             return Optional.of(Collections.singletonList(LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR));
         }
         return Optional.empty();
