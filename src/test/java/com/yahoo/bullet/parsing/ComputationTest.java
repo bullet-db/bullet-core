@@ -83,7 +83,12 @@ public class ComputationTest {
         aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(null, "1", Type.DOUBLE)));
         errors = aggregation.initialize();
         Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_NOT_NULL_KIND_ERROR);
+        Assert.assertEquals(errors.get().get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_KIND_ERROR);
+
+        aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, null, Type.DOUBLE)));
+        errors = aggregation.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_VALUE_ERROR);
 
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),

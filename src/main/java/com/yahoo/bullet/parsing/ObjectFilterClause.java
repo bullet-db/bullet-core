@@ -5,7 +5,10 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.common.BulletError;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ObjectFilterClause extends FilterClause<Value> {
@@ -34,5 +37,24 @@ public class ObjectFilterClause extends FilterClause<Value> {
     @Override
     public String getValue(Value value) {
         return value.getValue();
+    }
+
+    @Override
+    public Optional<List<BulletError>> initialize() {
+        Optional<List<BulletError>> errors = super.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
+
+        if (values != null) {
+            for (Value value : values) {
+                errors = value.initialize();
+                if (errors.isPresent()) {
+                    return errors;
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 }

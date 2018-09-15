@@ -23,8 +23,6 @@ public class LeafExpression extends Expression {
             makeError("The expression needs a value field", "Please provide a value field.");
     public static final BulletError LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR =
             makeError("The expression needs type set to only a primitive type", "Please provide a primitive type.");
-    public static final BulletError LEAF_EXPRESSION_REQUIRES_NOT_NULL_KIND_ERROR =
-            makeError("The value of the expression needs a non-null kind", "Please provide a non-null kind value.");
     public static final BulletError LEAF_EXPRESSION_VALUE_KIND_REQUIRES_TYPE_ERROR =
             makeError("The expression needs a non-null type if the kind of value is 'VALUE'", "Please provide a non-null type.");
 
@@ -49,11 +47,12 @@ public class LeafExpression extends Expression {
         if (value == null) {
             return Optional.of(Collections.singletonList(LEAF_EXPRESSION_REQUIRES_VALUE_FIELD_ERROR));
         }
+        Optional<List<BulletError>> errors = value.initialize();
+        if (errors.isPresent()) {
+            return errors;
+        }
         if (value.getType() != null && !Type.PRIMITIVES.contains(value.getType())) {
             return Optional.of(Collections.singletonList(LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR));
-        }
-        if (value.getKind() == null) {
-            return Optional.of(Collections.singletonList(LEAF_EXPRESSION_REQUIRES_NOT_NULL_KIND_ERROR));
         }
         if (value.getKind() == Value.Kind.VALUE && value.getType() == null) {
             return Optional.of(Collections.singletonList(LEAF_EXPRESSION_VALUE_KIND_REQUIRES_TYPE_ERROR));
