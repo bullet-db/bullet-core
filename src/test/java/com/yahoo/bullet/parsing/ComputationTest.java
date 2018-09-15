@@ -71,7 +71,7 @@ public class ComputationTest {
         aggregation.setExpression(ExpressionUtils.makeLeafExpression(null));
         Optional<List<BulletError>> errors = aggregation.initialize();
         Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_VALUE_FILED_ERROR);
+        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_VALUE_FIELD_ERROR);
 
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.MAP)),
@@ -79,6 +79,11 @@ public class ComputationTest {
         errors = aggregation.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR);
+
+        aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(null, "1", Type.DOUBLE)));
+        errors = aggregation.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_NOT_NULL_KIND_ERROR);
 
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
