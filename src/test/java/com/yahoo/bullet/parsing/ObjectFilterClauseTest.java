@@ -10,6 +10,7 @@ import com.yahoo.bullet.common.BulletError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -70,6 +71,26 @@ public class ObjectFilterClauseTest {
         List<BulletError> errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
         Assert.assertEquals(errors.get(0), Clause.OPERATION_MISSING);
+    }
+
+    @Test
+    public void testInitializeWithInvalidValue() {
+        FilterClause filterClause = new ObjectFilterClause();
+        filterClause.setOperation(Clause.Operation.EQUALS);
+        Value value = new Value(null, "1");
+        filterClause.setValues(Collections.singletonList(value));
+        Optional<List<BulletError>> optionalErrors = filterClause.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        List<BulletError> errors = optionalErrors.get();
+        Assert.assertEquals(errors.get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_KIND_ERROR);
+
+        value = new Value(Value.Kind.VALUE, null);
+        filterClause.setValues(Collections.singletonList(value));
+        optionalErrors = filterClause.initialize();
+        Assert.assertTrue(optionalErrors.isPresent());
+        errors = optionalErrors.get();
+        Assert.assertEquals(errors.get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_VALUE_ERROR);
+
     }
 
     @Test
