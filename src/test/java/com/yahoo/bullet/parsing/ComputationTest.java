@@ -68,12 +68,24 @@ public class ComputationTest {
     public void testInitializeWithInvalidLeafExpression() {
         Computation aggregation = new Computation();
         aggregation.setType(PostAggregation.Type.COMPUTATION);
+        aggregation.setExpression(ExpressionUtils.makeLeafExpression(null));
+        Optional<List<BulletError>> errors = aggregation.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_VALUE_FILED_ERROR);
+
         aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.MAP)),
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2"))));
-        Optional<List<BulletError>> errors = aggregation.initialize();
+        errors = aggregation.initialize();
         Assert.assertTrue(errors.isPresent());
         Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR);
+
+        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2"))));
+        errors = aggregation.initialize();
+        Assert.assertTrue(errors.isPresent());
+        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_VALUE_KIND_REQUIRES_TYPE_ERROR);
     }
 
     @Test
