@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.result.Meta;
 
@@ -24,13 +23,13 @@ public class RateLimitError extends BulletError {
 
     /**
     /**
-     * Creates an instance of this from a given absolute exceeded rate and a {@link BulletConfig}.
+     * Creates an instance of this from a given absolute exceeded rate and a maximum rate limit.
      *
      * @param rate The exceeded rate that caused the error.
-     * @param config The validated BulletConfig to use.
+     * @param limit The maximum rate limit for the query.
      */
-    public RateLimitError(double rate, BulletConfig config) {
-        super(String.format(ERROR_FORMAT, getRate(config), rate * RateLimiter.SECOND), RESOLUTIONS);
+    public RateLimitError(double rate, double limit) {
+        super(String.format(ERROR_FORMAT, limit, rate * RateLimiter.SECOND), RESOLUTIONS);
     }
 
     /**
@@ -40,11 +39,5 @@ public class RateLimitError extends BulletError {
      */
     public Meta makeMeta() {
         return new Meta().addErrors(Collections.singletonList(this));
-    }
-
-    private static double getRate(BulletConfig config) {
-        int maxCount = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
-        int interval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
-        return (maxCount / (double) interval) * RateLimiter.SECOND;
     }
 }

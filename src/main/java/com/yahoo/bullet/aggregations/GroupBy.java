@@ -53,7 +53,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(operations);
         container = new CachingGroupData(null, metrics);
 
-        ResizeFactor resizeFactor = getResizeFactor(BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR);
+        ResizeFactor resizeFactor = getResizeFactor(config, BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR);
         float samplingProbability = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, Float.class);
 
         // Default at 512 gives a 13.27% error rate at 99.73% confidence (3 SD). Irrelevant since we are using this to

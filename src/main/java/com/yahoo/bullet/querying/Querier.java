@@ -16,6 +16,7 @@ import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -295,7 +296,9 @@ public class Querier implements Monoidal {
     @Getter(AccessLevel.PACKAGE)
     private RunningQuery runningQuery;
 
-    private BulletConfig config;
+    // Transient field, DO NOT use it beyond constructor and initialize methods.
+    transient private BulletConfig config;
+
     private Map<String, String> metaKeys;
     private boolean hasNewData = false;
 
@@ -306,6 +309,10 @@ public class Querier implements Monoidal {
     private Mode mode;
 
     private List<PostStrategy> postStrategies;
+
+    private BulletRecordProvider provider;
+
+    private double maxRateLimit;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -356,6 +363,7 @@ public class Querier implements Monoidal {
         this.mode = mode;
         this.runningQuery = query;
         this.config = config;
+        this.provider = config.getBulletRecordProvider();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -366,6 +374,10 @@ public class Querier implements Monoidal {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<List<BulletError>> initialize() {
+        int maxCount = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
+        int interval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
+        maxRateLimit = (maxCount / (double) interval) * RateLimiter.SECOND;
+
         // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
@@ -604,7 +616,7 @@ public class Querier implements Monoidal {
         if (rateLimit == null || !rateLimit.isExceededRate()) {
             return null;
         }
-        return new RateLimitError(rateLimit.getCurrentRate(), config);
+        return new RateLimitError(rateLimit.getCurrentRate(), maxRateLimit);
     }
 
     /**
@@ -650,7 +662,7 @@ public class Querier implements Monoidal {
 
     private BulletRecord project(BulletRecord record) {
         Projection projection = runningQuery.getQuery().getProjection();
-        return projection != null ? ProjectionOperations.project(record, projection, config.getBulletRecordProvider()) : record;
+        return projection != null ? ProjectionOperations.project(record, projection, provider) : record;
     }
 
     private Clip postAggregate(Clip clip) {

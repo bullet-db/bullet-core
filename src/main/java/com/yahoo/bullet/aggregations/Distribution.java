@@ -71,6 +71,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
 
     // Copy of the aggregation
     private Aggregation aggregation;
+    private BulletRecordProvider provider;
 
     // Validation
     public static final Map<String, Type> SUPPORTED_DISTRIBUTION_TYPES = new HashMap<>();
@@ -108,6 +109,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         int pointLimit = config.getAs(BulletConfig.DISTRIBUTION_AGGREGATION_MAX_POINTS, Integer.class);
         maxPoints = Math.min(pointLimit, aggregation.getSize());
         this.aggregation = aggregation;
+        this.provider = config.getBulletRecordProvider();
 
         // The sketch is initialized in initialize!
     }
@@ -130,7 +132,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
         }
 
         // Try to initialize sketch now
-        sketch = getSketch(entries, maxPoints, rounding, type, attributes, config.getBulletRecordProvider());
+        sketch = getSketch(entries, maxPoints, rounding, type, attributes, provider);
 
         if (sketch == null) {
             return Optional.of(type == Type.QUANTILE ?
