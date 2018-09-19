@@ -23,6 +23,7 @@ public class RateLimiter {
     private final int maximum;
     @Getter
     private final int timeInterval;
+    @Getter
     private final double absoluteRateLimit;
 
     private long count = 0;
@@ -57,6 +58,7 @@ public class RateLimiter {
         this.maximum = maximum;
         this.timeInterval = timeInterval;
         this.absoluteRateLimit = maximum / (double) timeInterval;
+
         lastCheckTime = System.currentTimeMillis();
     }
 

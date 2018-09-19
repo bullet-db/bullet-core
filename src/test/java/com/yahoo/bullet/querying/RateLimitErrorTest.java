@@ -20,7 +20,7 @@ import static com.yahoo.bullet.common.BulletConfig.DEFAULT_RATE_LIMIT_TIME_INTER
 public class RateLimitErrorTest {
     @Test
     public void testMetaAndRateConversion() {
-        double defaultRate = ((double) DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT / DEFAULT_RATE_LIMIT_TIME_INTERVAL) * RateLimiter.SECOND;
+        double defaultRate = ((double) DEFAULT_RATE_LIMIT_MAX_EMIT_COUNT / DEFAULT_RATE_LIMIT_TIME_INTERVAL);
         RateLimitError error = new RateLimitError(19.34, defaultRate);
         Map<String, Object> actual = error.makeMeta().asMap();
         Assert.assertTrue(actual.containsKey(Meta.ERROR_KEY));
@@ -28,7 +28,7 @@ public class RateLimitErrorTest {
 
         String asJSON = error.asJSON();
         double actualRate = 19.34 * RateLimiter.SECOND;
-        assertJSONEquals(asJSON, "{'error': '" + String.format(RateLimitError.ERROR_FORMAT, defaultRate, actualRate) + "', " +
+        assertJSONEquals(asJSON, "{'error': '" + String.format(RateLimitError.ERROR_FORMAT, defaultRate * RateLimiter.SECOND, actualRate) + "', " +
                                   "'resolutions': ['" + RateLimitError.NARROW_FILTER + "', '" + RateLimitError.TIME_WINDOW + "']" +
                                  "}");
     }

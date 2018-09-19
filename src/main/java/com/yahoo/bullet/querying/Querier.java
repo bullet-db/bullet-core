@@ -297,7 +297,7 @@ public class Querier implements Monoidal {
     private RunningQuery runningQuery;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.
-    transient private BulletConfig config;
+    private transient BulletConfig config;
 
     private Map<String, String> metaKeys;
     private boolean hasNewData = false;
@@ -311,8 +311,6 @@ public class Querier implements Monoidal {
     private List<PostStrategy> postStrategies;
 
     private BulletRecordProvider provider;
-
-    private double maxRateLimit;
 
     /**
      * Constructor that takes a String representation of the query and a configuration to use. This also starts the
@@ -374,10 +372,6 @@ public class Querier implements Monoidal {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<List<BulletError>> initialize() {
-        int maxCount = config.getAs(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, Integer.class);
-        int interval = config.getAs(BulletConfig.RATE_LIMIT_TIME_INTERVAL, Integer.class);
-        maxRateLimit = (maxCount / (double) interval) * RateLimiter.SECOND;
-
         // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
@@ -616,7 +610,7 @@ public class Querier implements Monoidal {
         if (rateLimit == null || !rateLimit.isExceededRate()) {
             return null;
         }
-        return new RateLimitError(rateLimit.getCurrentRate(), maxRateLimit);
+        return new RateLimitError(rateLimit.getCurrentRate(), rateLimit.getAbsoluteRateLimit());
     }
 
     /**

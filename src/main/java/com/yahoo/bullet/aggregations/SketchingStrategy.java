@@ -56,10 +56,10 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     public SketchingStrategy(Aggregation aggregation, BulletConfig config) {
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
         separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
+        shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
 
         fieldsToNames = aggregation.getFields();
         fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());
-        shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
     }
 
     @Override

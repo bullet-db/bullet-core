@@ -29,7 +29,7 @@ public class RateLimitError extends BulletError {
      * @param limit The maximum rate limit for the query.
      */
     public RateLimitError(double rate, double limit) {
-        super(String.format(ERROR_FORMAT, limit, rate * RateLimiter.SECOND), RESOLUTIONS);
+        super(String.format(ERROR_FORMAT, limit * RateLimiter.SECOND, rate * RateLimiter.SECOND), RESOLUTIONS);
     }
 
     /**
