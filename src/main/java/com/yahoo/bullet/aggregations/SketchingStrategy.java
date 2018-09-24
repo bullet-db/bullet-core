@@ -33,8 +33,6 @@ import static com.yahoo.bullet.common.Utilities.extractField;
 public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     // The metadata concept to key mapping
     protected final Map<String, String> metadataKeys;
-    // A copy of the configuration
-    protected final BulletConfig config;
 
     // Separator for multiple fields when inserting into the Sketch
     protected final String separator;
@@ -46,6 +44,8 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     // The Sketch that should be initialized by a child class
     protected S sketch;
 
+    private boolean shouldMeta;
+
     /**
      * The constructor for creating a Sketch based strategy.
      *
@@ -54,9 +54,9 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      */
     @SuppressWarnings("unchecked")
     public SketchingStrategy(Aggregation aggregation, BulletConfig config) {
-        this.config = config;
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
         separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
+        shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
 
         fieldsToNames = aggregation.getFields();
         fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());
@@ -123,7 +123,6 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     }
 
     private String getMetaKey() {
-        boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
         return shouldMeta ? metadataKeys.getOrDefault(Meta.Concept.SKETCH_METADATA.getName(), null) : null;
     }
 }

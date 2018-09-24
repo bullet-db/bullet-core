@@ -24,8 +24,8 @@ import java.util.Map;
 public abstract class Scheme implements Monoidal {
     protected Strategy aggregation;
     protected Window window;
-    protected BulletConfig config;
     protected Map<String, String> metadataKeys;
+    private  boolean shouldMeta;
 
     /**
      * Creates an instance of this windowing scheme with the provided {@link Strategy}, {@link Window} and
@@ -38,8 +38,8 @@ public abstract class Scheme implements Monoidal {
     public Scheme(Strategy aggregation, Window window, BulletConfig config) {
         this.aggregation = aggregation;
         this.window = window;
-        this.config = config;
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
+        shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
     }
 
     /**
@@ -73,7 +73,6 @@ public abstract class Scheme implements Monoidal {
     @Override
     public Meta getMetadata() {
         Meta meta = new Meta();
-        boolean shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
         if (shouldMeta) {
             String key = getMetaKey();
             if (key != null) {

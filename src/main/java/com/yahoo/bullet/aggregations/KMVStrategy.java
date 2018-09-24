@@ -28,11 +28,12 @@ abstract class KMVStrategy<S extends KMVSketch> extends SketchingStrategy<S> {
     /**
      * Converts a integer representing the resizing for Sketches into a {@link ResizeFactor}.
      *
+     * @param config The config that has relevant configs for this strategy.
      * @param key The key to get the configured resize factor from the configuration.
      * @return A {@link ResizeFactor} represented by the integer or {@link ResizeFactor#X8} otherwise.
      */
     @SuppressWarnings("unchecked")
-    ResizeFactor getResizeFactor(String key) {
+    ResizeFactor getResizeFactor(BulletConfig config, String key) {
         return getResizeFactor(config.getAs(key, Integer.class));
     }
     /**
