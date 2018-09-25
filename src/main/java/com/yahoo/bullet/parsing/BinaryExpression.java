@@ -12,8 +12,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -37,6 +39,13 @@ public class BinaryExpression extends Expression {
         super();
         left = null;
         right = null;
+    }
+
+    @Override
+    public Set<String> getRequiredFields() {
+        Set<String> result = new HashSet<>(left.getRequiredFields());
+        result.addAll(right.getRequiredFields());
+        return result;
     }
 
     @Override

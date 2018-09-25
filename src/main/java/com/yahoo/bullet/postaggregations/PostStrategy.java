@@ -11,6 +11,7 @@ import com.yahoo.bullet.result.Clip;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PostStrategy extends Initializable {
     /**
@@ -29,4 +30,11 @@ public interface PostStrategy extends Initializable {
     default Optional<List<BulletError>> initialize() {
         return Optional.empty();
     }
+
+    /**
+     * Get the list of required fields.
+     *
+     * @return An @{link List} of fields.
+     */
+    Set<String> getRequiredFields();
 }

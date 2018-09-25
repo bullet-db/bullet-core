@@ -14,6 +14,7 @@ import lombok.Setter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -35,6 +36,11 @@ public class LeafExpression extends Expression {
     public LeafExpression() {
         super();
         value = null;
+    }
+
+    @Override
+    public Set<String> getRequiredFields() {
+        return value.getKind() == Value.Kind.FIELD ? Collections.singleton(value.getValue()) : Collections.emptySet();
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
@@ -309,6 +310,8 @@ public class Querier implements Monoidal {
     private Mode mode;
 
     private List<PostStrategy> postStrategies;
+    // Fields which are required by post aggregations and will not shown in final result.
+    private Map<String, String> transientFields;
 
     private BulletRecordProvider provider;
 
@@ -362,6 +365,7 @@ public class Querier implements Monoidal {
         this.runningQuery = query;
         this.config = config;
         this.provider = config.getBulletRecordProvider();
+        this.transientFields = new HashMap<>();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -405,6 +409,7 @@ public class Querier implements Monoidal {
                 if (errors.isPresent()) {
                     return errors;
                 }
+                addTransientFieldsFor(postStrategy);
             }
         }
 
@@ -656,14 +661,18 @@ public class Querier implements Monoidal {
 
     private BulletRecord project(BulletRecord record) {
         Projection projection = runningQuery.getQuery().getProjection();
-        return projection != null ? ProjectionOperations.project(record, projection, provider) : record;
+        return projection != null ? ProjectionOperations.project(record, projection, transientFields, provider) : record;
     }
 
     private Clip postAggregate(Clip clip) {
-        if (postStrategies != null) {
-            for (PostStrategy postStrategy : postStrategies) {
-                clip = postStrategy.execute(clip);
-            }
+        if (postStrategies == null) {
+            return clip;
+        }
+        for (PostStrategy postStrategy : postStrategies) {
+            clip = postStrategy.execute(clip);
+        }
+        for (String field : transientFields.keySet()) {
+            clip.getRecords().forEach(record -> record.remove(field));
         }
         return clip;
     }
@@ -705,5 +714,17 @@ public class Querier implements Monoidal {
 
     private String getMetaKey() {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
+    }
+
+    private void addTransientFieldsFor(PostStrategy postStrategy) {
+        Projection projection = runningQuery.getQuery().getProjection();
+        Aggregation aggregation = runningQuery.getQuery().getAggregation();
+        if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
+            Map<String, String> projectionFields = projection.getFields();
+            if (projectionFields != null) {
+                postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
+                            .forEach(field -> transientFields.put(field, field));
+            }
+        }
     }
 }

@@ -379,11 +379,10 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeOrderBy(OrderBy.Direction direction, String... fields) {
+    public static String makeOrderBy(OrderBy.SortItem... sortItems) {
         return "{" +
                  "'type': 'ORDERBY', " +
-                 "'fields': ['" + Arrays.stream(fields).reduce((a, b) -> a + " , " + b).orElse("") + "'], " +
-                 "'direction': '" + direction + "'" +
+                 "'fields': [" + Arrays.stream(sortItems).map(QueryUtils::makeSortItem).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
                "}";
     }
 
@@ -496,6 +495,13 @@ public class QueryUtils {
                  "'kind' : '" + value.getKind().name() + "', " +
                  "'value' : '" + value.getValue() + "', " +
                  "'type' : '" + value.getType() + "' " +
+               "}";
+    }
+
+    private static String makeSortItem(OrderBy.SortItem sortItem) {
+        return "{" +
+                 "'field': '" + sortItem.getField() + "', " +
+                 "'direction': '" + sortItem.getDirection() + "'" +
                "}";
     }
 

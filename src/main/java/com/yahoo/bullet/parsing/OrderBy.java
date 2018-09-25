@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,25 +24,45 @@ public class OrderBy extends PostAggregation {
         DESC
     }
 
+    @Getter @AllArgsConstructor
+    public static class SortItem {
+        @Expose
+        private String field;
+        @Expose
+        private Direction direction;
+
+        /**
+         * Default constructor. GSON recommended
+         */
+        public SortItem() {
+            field = null;
+            direction = Direction.ASC;
+        }
+
+        @Override
+        public String toString() {
+            return "{field: " + field + ", direction: " + direction + "}";
+        }
+    }
+
     @Expose
-    private List<String> fields;
-    @Expose
-    private Direction direction;
+    private List<SortItem> fields;
 
     public static final BulletError ORDERBY_REQUIRES_FIELDS_ERROR =
             makeError("The ORDERBY post aggregation needs at least one field", "Please add fields.");
+    public static final BulletError ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR =
+            makeError("The fields in ORDERBY post aggregation must not be empty", "Please add non-empty fields.");
 
     /**
      * Default constructor. GSON recommended
      */
     public OrderBy() {
         fields = null;
-        direction = Direction.ASC;
     }
 
     @Override
     public String toString() {
-        return "{type: " + type + ", fields: " + fields + ", direction: " + direction + "}";
+        return "{type: " + type + ", fields: " + fields + "}";
     }
 
     @Override
@@ -52,6 +73,9 @@ public class OrderBy extends PostAggregation {
         }
         if (fields == null || fields.isEmpty()) {
             return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_FIELDS_ERROR));
+        }
+        if (fields.stream().anyMatch(sortItem -> sortItem.getField() == null || sortItem.getField().isEmpty())) {
+            return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR));
         }
         return Optional.empty();
     }

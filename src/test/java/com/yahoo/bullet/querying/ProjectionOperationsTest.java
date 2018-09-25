@@ -28,7 +28,7 @@ public class ProjectionOperationsTest {
         Assert.assertNull(projection.getFields());
 
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
-        BulletRecord actual = ProjectionOperations.project(record, projection, provider);
+        BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
         BulletRecord expected = RecordBox.get().add("foo", "bar").getRecord();
         Assert.assertEquals(actual, expected);
     }
@@ -37,7 +37,7 @@ public class ProjectionOperationsTest {
     public void testProjection() {
         Projection projection = makeProjection("map_field.foo", "bar");
         RecordBox box = RecordBox.get().addMap("map_field", Pair.of("foo", "baz"));
-        BulletRecord actual = ProjectionOperations.project(box.getRecord(), projection, provider);
+        BulletRecord actual = ProjectionOperations.project(box.getRecord(), projection, null, provider);
         BulletRecord expected = RecordBox.get().add("bar", "baz").getRecord();
         Assert.assertEquals(actual, expected);
     }
@@ -49,7 +49,7 @@ public class ProjectionOperationsTest {
         BulletRecord record = RecordBox.get().addList("list_field", emptyMap(), singletonMap("foo", "bar"))
                                              .add("field", "123")
                                              .getRecord();
-        BulletRecord actual = ProjectionOperations.project(record, projection, provider);
+        BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
         BulletRecord expected = RecordBox.get().add("foo", "123").getRecord();
         Assert.assertEquals(actual, expected);
     }
@@ -62,7 +62,7 @@ public class ProjectionOperationsTest {
 
         BulletRecord expected = RecordBox.get().addList("foo", emptyMap(), singletonMap("foo", "baz")).getRecord();
 
-        BulletRecord actual = ProjectionOperations.project(record, projection, provider);
+        BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
         Assert.assertEquals(actual, expected);
     }
 
@@ -74,8 +74,8 @@ public class ProjectionOperationsTest {
         RecordBox box = RecordBox.get().add("field", "test").addMap("map_field", Pair.of("foo", "baz"));
 
         BulletRecord record = box.getRecord();
-        BulletRecord firstProjection = ProjectionOperations.project(record, first, provider);
-        BulletRecord secondProjection = ProjectionOperations.project(record, second, provider);
+        BulletRecord firstProjection = ProjectionOperations.project(record, first, null, provider);
+        BulletRecord secondProjection = ProjectionOperations.project(record, second, null, provider);
 
         box = RecordBox.get().add("field", "test").addMap("map_field", Pair.of("foo", "baz"));
         BulletRecord expectedOriginal = box.getRecord();
@@ -96,7 +96,7 @@ public class ProjectionOperationsTest {
 
         BulletRecord record = RecordBox.get().add("field", "test").addMap("map_field", Pair.of("foo", "baz")).getRecord();
 
-        BulletRecord actual = ProjectionOperations.project(record, projection, provider);
+        BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
         BulletRecord expected = RecordBox.get().add("foo", "baz").getRecord();
         Assert.assertEquals(actual, expected);
     }

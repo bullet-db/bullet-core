@@ -11,6 +11,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -167,9 +169,17 @@ public class QueryTest {
         when(mockProjection.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("quux", new ArrayList<>()))));
         query.setProjection(mockProjection);
 
+        OrderBy orderByA = new OrderBy();
+        orderByA.setType(PostAggregation.Type.ORDER_BY);
+        orderByA.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
+        OrderBy orderByB = new OrderBy();
+        orderByB.setType(PostAggregation.Type.ORDER_BY);
+        orderByB.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
+        query.setPostAggregations(Arrays.asList(orderByA, orderByB));
+
         Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertTrue(errorList.isPresent());
-        Assert.assertEquals(errorList.get().size(), 5);
+        Assert.assertEquals(errorList.get().size(), 6);
     }
 
     @Test

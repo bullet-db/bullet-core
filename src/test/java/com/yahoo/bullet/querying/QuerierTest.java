@@ -52,7 +52,6 @@ import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
 import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
 import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
-import static com.yahoo.bullet.parsing.QueryUtils.makePostAggregationsQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
 import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
 import static java.util.Collections.emptyList;
@@ -883,18 +882,23 @@ public class QuerierTest {
 
     @Test
     public void testOrderBy() {
-        String query = makePostAggregationsQuery(makeOrderBy(OrderBy.Direction.DESC, "a"));
+        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.Type.RAW, 500,
+                                        Collections.singletonList(makeOrderBy(new OrderBy.SortItem("a", OrderBy.Direction.DESC))), Pair.of("b", "b"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 
-        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).getRecord()));
+        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", 10 - i).add("b", i + 10).getRecord()));
 
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 4);
-        Assert.assertEquals(result.get(0).get("a"), 3);
-        Assert.assertEquals(result.get(1).get("a"), 2);
-        Assert.assertEquals(result.get(2).get("a"), 1);
-        Assert.assertEquals(result.get(3).get("a"), 0);
+        Assert.assertEquals(result.get(0).get("b"), 10);
+        Assert.assertFalse(result.get(0).hasField("a"));
+        Assert.assertEquals(result.get(1).get("b"), 11);
+        Assert.assertFalse(result.get(1).hasField("a"));
+        Assert.assertEquals(result.get(2).get("b"), 12);
+        Assert.assertFalse(result.get(2).hasField("a"));
+        Assert.assertEquals(result.get(3).get("b"), 13);
+        Assert.assertFalse(result.get(3).hasField("a"));
     }
 
     @Test
@@ -902,17 +906,25 @@ public class QuerierTest {
         Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
                                                                      ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
                                                                      ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)));
-        String query = makePostAggregationsQuery(makeComputation(expression, "newName"));
+        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.Type.RAW, 500, Collections.singletonList(makeComputation(expression, "newName")), Pair.of("b", "b"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 
-        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).getRecord()));
+        IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).add("b", i).getRecord()));
 
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 4);
         Assert.assertEquals(result.get(0).get("newName"), 2L);
+        Assert.assertFalse(result.get(0).hasField("a"));
+        Assert.assertEquals(result.get(0).get("b"), 0);
         Assert.assertEquals(result.get(1).get("newName"), 3L);
+        Assert.assertFalse(result.get(1).hasField("a"));
+        Assert.assertEquals(result.get(1).get("b"), 1);
         Assert.assertEquals(result.get(2).get("newName"), 4L);
+        Assert.assertFalse(result.get(2).hasField("a"));
+        Assert.assertEquals(result.get(2).get("b"), 2);
         Assert.assertEquals(result.get(3).get("newName"), 5L);
+        Assert.assertFalse(result.get(3).hasField("a"));
+        Assert.assertEquals(result.get(3).get("b"), 3);
     }
 }
