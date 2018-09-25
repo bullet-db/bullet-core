@@ -9,6 +9,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.result.Clip;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,5 +29,14 @@ public interface PostStrategy extends Initializable {
      */
     default Optional<List<BulletError>> initialize() {
         return Optional.empty();
+    }
+
+    /**
+     * Get the list of required fields.
+     *
+     * @return An @{link List} of fields.
+     */
+    default List<String> getRequiredFields() {
+        return Collections.emptyList();
     }
 }

@@ -17,6 +17,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j @AllArgsConstructor
@@ -55,6 +57,11 @@ public class ComputationStrategy implements PostStrategy {
                 }
             });
         return clip;
+    }
+
+    @Override
+    public List<String> getRequiredFields() {
+        return postAggregation.getExpression().getRequiredFields();
     }
 
     private TypedObject calculateLeafExpression(LeafExpression expression, BulletRecord record) {

@@ -10,6 +10,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.yahoo.bullet.common.Utilities.splitField;
@@ -17,17 +18,25 @@ import static com.yahoo.bullet.common.Utilities.splitField;
 @Slf4j
 public class ProjectionOperations {
     /**
-     * Projects the given {@link BulletRecord} based on the given {@link Projection}.
+     * Projects the given {@link BulletRecord} based on the given fields.
      *
      * @param record The record to project.
      * @param projection The projection to apply.
+     * @param transientFields The map of fields to apply.
      * @param provider A BulletRecordProvider to generate BulletRecords.
      * @return The projected record.
      */
-    public static BulletRecord project(BulletRecord record, Projection projection, BulletRecordProvider provider) {
-        Map<String, String> fields = projection.getFields();
+    public static BulletRecord project(BulletRecord record, Projection projection, Map<String, String> transientFields, BulletRecordProvider provider) {
+        Map<String, String> fields = new HashMap<>();
+        Map<String, String> projectionFields = projection.getFields();
+        if (projectionFields != null) {
+            fields.putAll(projectionFields);
+        }
+        if (transientFields != null) {
+            fields.putAll(transientFields);
+        }
         // Returning the record itself if no projections. The record itself should never be modified so it's ok.
-        if (fields == null) {
+        if (fields.isEmpty()) {
             return record;
         }
         // More efficient if fields << the fields in the BulletRecord

@@ -11,6 +11,7 @@ import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,15 @@ public class LeafExpression extends Expression {
     public LeafExpression() {
         super();
         value = null;
+    }
+
+    @Override
+    public List<String> getRequiredFields() {
+        List<String> result = new ArrayList<>();
+        if (value.getKind() == Value.Kind.FIELD) {
+            result.add(value.getValue());
+        }
+        return result;
     }
 
     @Override

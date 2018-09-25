@@ -10,6 +10,7 @@ import com.yahoo.bullet.typesystem.Type;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,5 +120,16 @@ public class ComputationTest {
         Optional<List<BulletError>> errors = aggregation.initialize();
         Assert.assertFalse(errors.isPresent());
         Assert.assertEquals(aggregation.getNewName(), "newName");
+    }
+
+    @Test void testGetRequiredFields() {
+        Computation aggregation = new Computation();
+        aggregation.setType(PostAggregation.Type.COMPUTATION);
+        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
+                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "b", Type.INTEGER))));
+        aggregation.setNewName("newName");
+        aggregation.initialize();
+        Assert.assertEquals(aggregation.getExpression().getRequiredFields(), Arrays.asList("a", "b"));
     }
 }

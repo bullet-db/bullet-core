@@ -11,6 +11,7 @@ import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,18 @@ public class BinaryExpression extends Expression {
         super();
         left = null;
         right = null;
+    }
+
+    @Override
+    public List<String> getRequiredFields() {
+        List<String> result = new ArrayList<>(left.getRequiredFields());
+        List<String> rightRequired = right.getRequiredFields();
+        for (String s : rightRequired) {
+            if (!result.contains(s)) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 
     @Override

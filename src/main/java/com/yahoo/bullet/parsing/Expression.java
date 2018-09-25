@@ -36,6 +36,13 @@ public abstract class Expression implements Initializable {
 
     public static final String OPERATION_FIELD = "operation";
 
+    /**
+     * Return a {@link List} of required fields to compute this expression.
+     *
+     * @return A {@link List} of required fields.
+     */
+    abstract public List<String> getRequiredFields();
+
     @Override
     public String toString() {
         return OPERATION_FIELD + ": " + operation;
