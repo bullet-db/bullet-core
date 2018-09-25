@@ -12,13 +12,14 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j
 public class OrderByStrategy implements PostStrategy {
     private OrderBy postAggregation;
-    private int multiplyingFactor;
 
     /**
      * Contructor takes a {@link OrderBy} object.
@@ -27,29 +28,33 @@ public class OrderByStrategy implements PostStrategy {
      */
     public OrderByStrategy(OrderBy postAggregation) {
         this.postAggregation = postAggregation;
-        multiplyingFactor = postAggregation.getDirection() == OrderBy.Direction.ASC ? 1 : -1;
     }
 
     @Override
     public Clip execute(Clip clip) {
         List<BulletRecord> records = clip.getRecords();
         records.sort((a, b) -> {
-                for (String field : postAggregation.getFields()) {
-                    TypedObject typedObjectA = extractTypedObject(field, a);
-                    TypedObject typedObjectB = extractTypedObject(field, b);
+                for (OrderBy.SortItem sortItem : postAggregation.getSortItems()) {
+                    TypedObject typedObjectA = extractTypedObject(sortItem.getField(), a);
+                    TypedObject typedObjectB = extractTypedObject(sortItem.getField(), b);
                     try {
                         int compareValue = typedObjectA.compareTo(typedObjectB);
                         if (compareValue != 0) {
-                            return multiplyingFactor * compareValue;
+                            return (sortItem.getDirection() == OrderBy.Direction.ASC ? 1 : -1) * compareValue;
                         }
                     } catch (RuntimeException e) {
                         // Ignore the exception and skip this field.
-                        log.error("Unable to compare field " + field);
+                        log.error("Unable to compare field " + sortItem.getField());
                         log.error("Skip it due to: " + e);
                     }
                 }
                 return 0;
             });
         return clip;
+    }
+
+    @Override
+    public Set<String> getRequiredFields() {
+        return postAggregation.getSortItems().stream().map(OrderBy.SortItem::getField).collect(Collectors.toSet());
     }
 }

@@ -18,21 +18,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OrderByStrategyTest {
-    private OrderByStrategy makeOrderBy(List<String> fields) {
-        return makeOrderBy(fields, OrderBy.Direction.ASC);
-    }
-
-    private OrderByStrategy makeOrderBy(List<String> fields, OrderBy.Direction direction) {
+    private OrderByStrategy makeOrderBy(List<OrderBy.SortItem> sortItems) {
         OrderBy orderBy = new OrderBy();
         orderBy.setType(PostAggregation.Type.ORDER_BY);
-        orderBy.setFields(fields);
-        orderBy.setDirection(direction);
+        orderBy.setSortItems(sortItems);
         return new OrderByStrategy(orderBy);
     }
 
     @Test
     public void testOrderByAscending() {
-        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList("a", "b"));
+        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem("a", OrderBy.Direction.ASC), new OrderBy.SortItem("b", OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2).getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", 4).getRecord());
@@ -54,7 +49,7 @@ public class OrderByStrategyTest {
 
     @Test
     public void testOrderByDescending() {
-        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList("a", "b"), OrderBy.Direction.DESC);
+        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem("a", OrderBy.Direction.DESC), new OrderBy.SortItem("b", OrderBy.Direction.DESC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2).getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", 4).getRecord());
@@ -76,7 +71,7 @@ public class OrderByStrategyTest {
 
     @Test
     public void testOrderByAscendingWithDifferentType() {
-        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList("a", "b"));
+        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem("a", OrderBy.Direction.ASC), new OrderBy.SortItem("b", OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2.0).getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", 4).getRecord());
@@ -98,7 +93,7 @@ public class OrderByStrategyTest {
 
     @Test
     public void testOrderByAscendingWithNonExistingField() {
-        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList("a", "c"));
+        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem("a", OrderBy.Direction.ASC), new OrderBy.SortItem("c", OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2.0).getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", 4).getRecord());
@@ -120,7 +115,7 @@ public class OrderByStrategyTest {
 
     @Test
     public void testOrderByAscendingWithSomeMissingField() {
-        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList("a", "c"));
+        OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem("a", OrderBy.Direction.ASC), new OrderBy.SortItem("c", OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2).getRecord());
         records.add(RecordBox.get().add("a", 2).add("b", 4).getRecord());
