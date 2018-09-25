@@ -719,7 +719,7 @@ public class Querier implements Monoidal {
     private void addTransientFieldsFor(PostStrategy postStrategy) {
         Projection projection = runningQuery.getQuery().getProjection();
         Aggregation aggregation = runningQuery.getQuery().getAggregation();
-        if (aggregation.getType() == Aggregation.Type.RAW || projection != null) {
+        if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
             Map<String, String> projectionFields = projection.getFields();
             postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
                         .forEach(field -> transientFields.put(field, field));
