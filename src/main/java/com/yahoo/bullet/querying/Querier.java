@@ -722,7 +722,7 @@ public class Querier implements Monoidal {
             Map<String, String> projectionFields = projection.getFields();
             List<String> requiredFields = postStrategy.getRequiredFields();
             for (String field : requiredFields) {
-                if (!projectionFields.containsKey(field)) {
+                if (!projectionFields.containsKey(field) || !projectionFields.containsValue(field)) {
                     transientFields.put(field, field);
                 }
             }
