@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
@@ -720,9 +721,9 @@ public class Querier implements Monoidal {
         Aggregation aggregation = runningQuery.getQuery().getAggregation();
         if (aggregation.getType() == Aggregation.Type.RAW || projection != null) {
             Map<String, String> projectionFields = projection.getFields();
-            List<String> requiredFields = postStrategy.getRequiredFields();
+            Set<String> requiredFields = postStrategy.getRequiredFields();
             for (String field : requiredFields) {
-                if (!projectionFields.containsKey(field) || !projectionFields.containsValue(field)) {
+                if (!projectionFields.containsValue(field)) {
                     transientFields.put(field, field);
                 }
             }

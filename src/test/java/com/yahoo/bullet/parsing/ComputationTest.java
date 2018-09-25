@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -130,6 +131,6 @@ public class ComputationTest {
                                                                        ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "b", Type.INTEGER))));
         aggregation.setNewName("newName");
         aggregation.initialize();
-        Assert.assertEquals(aggregation.getExpression().getRequiredFields(), Arrays.asList("a", "b"));
+        Assert.assertEquals(aggregation.getExpression().getRequiredFields(), new HashSet<>(Arrays.asList("a", "b")));
     }
 }

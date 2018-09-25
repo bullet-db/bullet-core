@@ -11,10 +11,11 @@ import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -39,8 +40,8 @@ public class LeafExpression extends Expression {
     }
 
     @Override
-    public List<String> getRequiredFields() {
-        List<String> result = new ArrayList<>();
+    public Set<String> getRequiredFields() {
+        Set<String> result = new HashSet<>();
         if (value.getKind() == Value.Kind.FIELD) {
             result.add(value.getValue());
         }

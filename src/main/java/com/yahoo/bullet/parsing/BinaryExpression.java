@@ -11,10 +11,11 @@ import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -41,14 +42,9 @@ public class BinaryExpression extends Expression {
     }
 
     @Override
-    public List<String> getRequiredFields() {
-        List<String> result = new ArrayList<>(left.getRequiredFields());
-        List<String> rightRequired = right.getRequiredFields();
-        for (String s : rightRequired) {
-            if (!result.contains(s)) {
-                result.add(s);
-            }
-        }
+    public Set<String> getRequiredFields() {
+        Set<String> result = new HashSet<>(left.getRequiredFields());
+        result.addAll(right.getRequiredFields());
         return result;
     }
 

@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -37,11 +38,11 @@ public abstract class Expression implements Initializable {
     public static final String OPERATION_FIELD = "operation";
 
     /**
-     * Return a {@link List} of required fields to compute this expression.
+     * Return a {@link Set} of required fields to compute this expression.
      *
-     * @return A {@link List} of required fields.
+     * @return A {@link Set} of required fields.
      */
-    abstract public List<String> getRequiredFields();
+    abstract public Set<String> getRequiredFields();
 
     @Override
     public String toString() {

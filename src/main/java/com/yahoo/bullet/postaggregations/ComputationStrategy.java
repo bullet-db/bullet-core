@@ -17,7 +17,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.Set;
 
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
@@ -60,7 +60,7 @@ public class ComputationStrategy implements PostStrategy {
     }
 
     @Override
-    public List<String> getRequiredFields() {
+    public Set<String> getRequiredFields() {
         return postAggregation.getExpression().getRequiredFields();
     }
 
