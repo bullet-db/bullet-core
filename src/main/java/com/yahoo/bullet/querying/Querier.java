@@ -721,8 +721,10 @@ public class Querier implements Monoidal {
         Aggregation aggregation = runningQuery.getQuery().getAggregation();
         if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
             Map<String, String> projectionFields = projection.getFields();
-            postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
-                        .forEach(field -> transientFields.put(field, field));
+            if (projectionFields != null) {
+                postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
+                            .forEach(field -> transientFields.put(field, field));
+            }
         }
     }
 }
