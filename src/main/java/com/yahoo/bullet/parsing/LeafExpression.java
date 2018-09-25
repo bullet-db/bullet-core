@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,11 +40,7 @@ public class LeafExpression extends Expression {
 
     @Override
     public Set<String> getRequiredFields() {
-        Set<String> result = new HashSet<>();
-        if (value.getKind() == Value.Kind.FIELD) {
-            result.add(value.getValue());
-        }
-        return result;
+        return value.getKind() == Value.Kind.FIELD ? Collections.singleton(value.getValue()) : Collections.emptySet();
     }
 
     @Override

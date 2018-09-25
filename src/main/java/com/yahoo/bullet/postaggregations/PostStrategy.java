@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.result.Clip;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +38,6 @@ public interface PostStrategy extends Initializable {
      * @return An @{link List} of fields.
      */
     default Set<String> getRequiredFields() {
-        return new HashSet<>();
+        return Collections.emptySet();
     }
 }

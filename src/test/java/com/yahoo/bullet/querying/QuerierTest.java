@@ -911,8 +911,15 @@ public class QuerierTest {
         Assert.assertEquals(result.size(), 4);
         Assert.assertEquals(result.get(0).get("newName"), 2L);
         Assert.assertFalse(result.get(0).hasField("a"));
+        Assert.assertEquals(result.get(0).get("b"), 0);
         Assert.assertEquals(result.get(1).get("newName"), 3L);
+        Assert.assertFalse(result.get(1).hasField("a"));
+        Assert.assertEquals(result.get(1).get("b"), 1);
         Assert.assertEquals(result.get(2).get("newName"), 4L);
+        Assert.assertFalse(result.get(2).hasField("a"));
+        Assert.assertEquals(result.get(2).get("b"), 2);
         Assert.assertEquals(result.get(3).get("newName"), 5L);
+        Assert.assertFalse(result.get(3).hasField("a"));
+        Assert.assertEquals(result.get(3).get("b"), 3);
     }
 }

@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
@@ -410,7 +409,7 @@ public class Querier implements Monoidal {
                 if (errors.isPresent()) {
                     return errors;
                 }
-                addToTransientFields(postStrategy);
+                addTransientFieldsFor(postStrategy);
             }
         }
 
@@ -666,10 +665,11 @@ public class Querier implements Monoidal {
     }
 
     private Clip postAggregate(Clip clip) {
-        if (postStrategies != null) {
-            for (PostStrategy postStrategy : postStrategies) {
-                clip = postStrategy.execute(clip);
-            }
+        if (postStrategies == null) {
+            return clip;
+        }
+        for (PostStrategy postStrategy : postStrategies) {
+            clip = postStrategy.execute(clip);
         }
         for (String field : transientFields.keySet()) {
             clip.getRecords().forEach(record -> record.remove(field));
@@ -716,17 +716,13 @@ public class Querier implements Monoidal {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
     }
 
-    private void addToTransientFields(PostStrategy postStrategy) {
+    private void addTransientFieldsFor(PostStrategy postStrategy) {
         Projection projection = runningQuery.getQuery().getProjection();
         Aggregation aggregation = runningQuery.getQuery().getAggregation();
         if (aggregation.getType() == Aggregation.Type.RAW || projection != null) {
             Map<String, String> projectionFields = projection.getFields();
-            Set<String> requiredFields = postStrategy.getRequiredFields();
-            for (String field : requiredFields) {
-                if (!projectionFields.containsValue(field)) {
-                    transientFields.put(field, field);
-                }
-            }
+            postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
+                        .forEach(field -> transientFields.put(field, field));
         }
     }
 }
