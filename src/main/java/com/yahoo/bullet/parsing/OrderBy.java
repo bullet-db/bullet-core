@@ -46,10 +46,10 @@ public class OrderBy extends PostAggregation {
     }
 
     @Expose
-    private List<SortItem> sortItems;
+    private List<SortItem> fields;
 
     public static final BulletError ORDERBY_REQUIRES_FIELDS_ERROR =
-            makeError("The ORDERBY post aggregation needs at least one sort item", "Please add sort items.");
+            makeError("The ORDERBY post aggregation needs at least one field", "Please add fields.");
     public static final BulletError ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR =
             makeError("The fields in ORDERBY post aggregation must not be empty", "Please add non-empty fields.");
 
@@ -57,12 +57,12 @@ public class OrderBy extends PostAggregation {
      * Default constructor. GSON recommended
      */
     public OrderBy() {
-        sortItems = null;
+        fields = null;
     }
 
     @Override
     public String toString() {
-        return "{type: " + type + ", sortItems: " + sortItems + "}";
+        return "{type: " + type + ", fields: " + fields + "}";
     }
 
     @Override
@@ -71,10 +71,10 @@ public class OrderBy extends PostAggregation {
         if (errors.isPresent()) {
             return errors;
         }
-        if (sortItems == null || sortItems.isEmpty()) {
+        if (fields == null || fields.isEmpty()) {
             return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_FIELDS_ERROR));
         }
-        if (sortItems.stream().anyMatch(sortItem -> sortItem.getField() == null || sortItem.getField().isEmpty())) {
+        if (fields.stream().anyMatch(sortItem -> sortItem.getField() == null || sortItem.getField().isEmpty())) {
             return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR));
         }
         return Optional.empty();

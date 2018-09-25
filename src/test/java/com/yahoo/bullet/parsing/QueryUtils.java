@@ -382,7 +382,7 @@ public class QueryUtils {
     public static String makeOrderBy(OrderBy.SortItem... sortItems) {
         return "{" +
                  "'type': 'ORDERBY', " +
-                 "'sortItems': [" + Arrays.stream(sortItems).map(QueryUtils::makeSortItem).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
+                 "'fields': [" + Arrays.stream(sortItems).map(QueryUtils::makeSortItem).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
                "}";
     }
 

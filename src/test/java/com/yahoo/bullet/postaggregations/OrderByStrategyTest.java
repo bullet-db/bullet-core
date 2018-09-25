@@ -21,7 +21,7 @@ public class OrderByStrategyTest {
     private OrderByStrategy makeOrderBy(List<OrderBy.SortItem> sortItems) {
         OrderBy orderBy = new OrderBy();
         orderBy.setType(PostAggregation.Type.ORDER_BY);
-        orderBy.setSortItems(sortItems);
+        orderBy.setFields(sortItems);
         return new OrderByStrategy(orderBy);
     }
 

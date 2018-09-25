@@ -169,13 +169,13 @@ public class QueryTest {
         when(mockProjection.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("quux", new ArrayList<>()))));
         query.setProjection(mockProjection);
 
-        OrderBy orderBy1 = new OrderBy();
-        orderBy1.setType(PostAggregation.Type.ORDER_BY);
-        orderBy1.setSortItems(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
-        OrderBy orderBy2 = new OrderBy();
-        orderBy2.setType(PostAggregation.Type.ORDER_BY);
-        orderBy2.setSortItems(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
-        query.setPostAggregations(Arrays.asList(orderBy1, orderBy2));
+        OrderBy orderByA = new OrderBy();
+        orderByA.setType(PostAggregation.Type.ORDER_BY);
+        orderByA.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
+        OrderBy orderByB = new OrderBy();
+        orderByB.setType(PostAggregation.Type.ORDER_BY);
+        orderByB.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
+        query.setPostAggregations(Arrays.asList(orderByA, orderByB));
 
         Optional<List<BulletError>> errorList = query.initialize();
         Assert.assertTrue(errorList.isPresent());

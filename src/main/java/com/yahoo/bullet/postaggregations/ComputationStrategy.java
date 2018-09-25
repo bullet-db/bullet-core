@@ -23,36 +23,36 @@ import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j @AllArgsConstructor
 public class ComputationStrategy implements PostStrategy {
-    private Computation postAggregation;
+    private Computation computation;
 
     @Override
     public Clip execute(Clip clip) {
         clip.getRecords().forEach(r -> {
                 try {
-                    TypedObject result = calculate(postAggregation.getExpression(), r);
+                    TypedObject result = calculate(computation.getExpression(), r);
                     switch (result.getType()) {
                         case INTEGER:
-                            r.setInteger(postAggregation.getNewName(), (Integer) result.getValue());
+                            r.setInteger(computation.getNewName(), (Integer) result.getValue());
                             break;
                         case LONG:
-                            r.setLong(postAggregation.getNewName(), (Long) result.getValue());
+                            r.setLong(computation.getNewName(), (Long) result.getValue());
                             break;
                         case DOUBLE:
-                            r.setDouble(postAggregation.getNewName(), (Double) result.getValue());
+                            r.setDouble(computation.getNewName(), (Double) result.getValue());
                             break;
                         case FLOAT:
-                            r.setFloat(postAggregation.getNewName(), (Float) result.getValue());
+                            r.setFloat(computation.getNewName(), (Float) result.getValue());
                             break;
                         case BOOLEAN:
-                            r.setBoolean(postAggregation.getNewName(), (Boolean) result.getValue());
+                            r.setBoolean(computation.getNewName(), (Boolean) result.getValue());
                             break;
                         case STRING:
-                            r.setString(postAggregation.getNewName(), (String) result.getValue());
+                            r.setString(computation.getNewName(), (String) result.getValue());
                             break;
                     }
                 } catch (RuntimeException e) {
                     // Ignore the exception and skip setting the field.
-                    log.error("Unable to calculate the expression: " + postAggregation.getExpression());
+                    log.error("Unable to calculate the expression: " + computation.getExpression());
                     log.error("Skip it due to: " + e);
                 }
             });
@@ -61,7 +61,7 @@ public class ComputationStrategy implements PostStrategy {
 
     @Override
     public Set<String> getRequiredFields() {
-        return postAggregation.getExpression().getRequiredFields();
+        return computation.getExpression().getRequiredFields();
     }
 
     private TypedObject calculateLeafExpression(LeafExpression expression, BulletRecord record) {
