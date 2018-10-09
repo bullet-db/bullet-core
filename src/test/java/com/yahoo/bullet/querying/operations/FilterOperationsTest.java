@@ -3,14 +3,14 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
-package com.yahoo.bullet.querying;
+package com.yahoo.bullet.querying.operations;
 
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.StringFilterClause;
 import com.yahoo.bullet.parsing.Value;
-import com.yahoo.bullet.querying.FilterOperations.Comparator;
+import com.yahoo.bullet.querying.operations.FilterOperations.Comparator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import com.yahoo.bullet.typesystem.Type;
@@ -50,7 +50,7 @@ import static java.util.Collections.singletonMap;
 
 public class FilterOperationsTest {
     private static <T> Stream<TypedObject> make(TypedObject source, String... items) {
-        List<Value> values = asList(items).stream().map(s -> new Value(Value.Kind.VALUE, s)).collect(Collectors.toList());
+        List<Value> values = Arrays.stream(items).map(s -> new Value(Value.Kind.VALUE, s)).collect(Collectors.toList());
         return FilterOperations.cast(null, source.getType(), values);
     }
 
