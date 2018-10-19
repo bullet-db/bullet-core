@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
-public interface Publisher {
+public interface Publisher extends AutoCloseable {
     /**
      * Send a message with an ID and content.
      *
@@ -24,9 +24,4 @@ public interface Publisher {
      * @throws PubSubException if the messaging system throws an error.
      */
     void send(PubSubMessage message) throws PubSubException;
-
-    /**
-     * Close Publisher and delete all related context.
-     */
-    void close();
 }

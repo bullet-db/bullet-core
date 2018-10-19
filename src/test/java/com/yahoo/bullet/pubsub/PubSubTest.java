@@ -22,6 +22,8 @@ public class PubSubTest {
 
         Assert.assertEquals(testPubSub.getClass(), MockPubSub.class);
         Assert.assertEquals(testPubSub.getSubscriber().receive().getContent(), mockMessage);
+
+        testPubSub.close();
     }
 
     @Test(expectedExceptions = PubSubException.class)
@@ -76,5 +78,7 @@ public class PubSubTest {
         pubSub.switchContext(PubSub.Context.QUERY_PROCESSING, newConfig);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
         Assert.assertEquals(pubSub.getSubscriber().receive().getContent(), "foo");
+
+        pubSub.close();
     }
 }
