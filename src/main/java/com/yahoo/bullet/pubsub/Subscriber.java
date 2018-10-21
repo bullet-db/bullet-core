@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
-public interface Subscriber {
+public interface Subscriber extends AutoCloseable {
     /**
      * Gets a new {@link PubSubMessage} from the assigned partition/partitions (Here a partition is a unit of
      * parallelism in the Pub/Sub queue, See {@link PubSub}).
@@ -14,11 +14,6 @@ public interface Subscriber {
      * @throws PubSubException when a receive fails.
      */
     PubSubMessage receive() throws PubSubException;
-
-    /**
-     * Close the Subscriber and delete all associated Context.
-     */
-    void close();
 
     /**
      * Commits allow clients to implement at least once, at most once or exactly once semantics when processing messages.
@@ -57,5 +52,4 @@ public interface Subscriber {
     default void fail(String id) {
         fail(id, -1);
     }
-
 }
