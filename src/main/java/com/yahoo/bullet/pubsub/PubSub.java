@@ -19,7 +19,7 @@ import java.util.List;
  * Publishers and Subscribers.
  */
 @Slf4j
-public abstract class PubSub {
+public abstract class PubSub implements AutoCloseable {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
      * If the Context is {@link Context#QUERY_SUBMISSION}:
@@ -104,6 +104,13 @@ public abstract class PubSub {
     public abstract List<Subscriber> getSubscribers(int n) throws PubSubException;
 
     /**
+     * Close PubSub and delete related context. Does not necessarily close publishers and subscribers.
+     */
+    @Override
+    public void close() {
+    }
+
+    /**
      * Create a PubSub instance using the class specified in the config file.
      *
      * @param config The non-null {@link BulletConfig} containing the class name and PubSub settings.
@@ -123,7 +130,7 @@ public abstract class PubSub {
      *
      * @param name The name of the required configuration.
      * @param clazz The class of the required configuration.
-     * @param <T> The type to cast the configuration to. Inferred from tClass.
+     * @param <T> The type to cast the configuration to. Inferred from clazz.
      * @return The extracted configuration of type T.
      * @throws PubSubException if the configuration is missing or cannot be cast to type T.
      */
