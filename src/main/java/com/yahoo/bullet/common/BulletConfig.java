@@ -13,11 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 @Slf4j
 public class BulletConfig extends Config {
@@ -64,6 +66,11 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
+
+    public static final String QUERY_PARTITIONER_ENABLE = "bullet.query.partitioner.enable";
+    public static final String QUERY_PARTITIONER_CLASS_NAME = "bullet.query.partitioner.class.name";
+    public static final String EQUALITY_PARTITIONER_FIELDS = "bullet.query.partitioner.equality.fields";
+    public static final String EQUALITY_PARTITIONER_DELIMITER = "bullet.query.partitioner.equality.delimiter";
 
     // Defaults
     public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
@@ -133,6 +140,11 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
     public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
+
+    public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
+    public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.EqualityPartitioner";
+    public static final List<String> DEFAULT_EQUALITY_PARTITIONER_FIELDS = null;
+    public static final String DEFAULT_EQUALITY_PARTITIONER_DELIMITER = "|";
 
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
@@ -261,8 +273,22 @@ public class BulletConfig extends Config {
                  .checkIf(Validator::isString);
 
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
-                .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
-                .checkIf(Validator::isString);
+                 .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
+                 .checkIf(Validator::isString);
+
+        VALIDATOR.define(QUERY_PARTITIONER_ENABLE)
+                 .defaultTo(DEFAULT_QUERY_PARTITIONER_ENABLE)
+                 .checkIf(Validator::isBoolean);
+        VALIDATOR.define(QUERY_PARTITIONER_CLASS_NAME)
+                 .defaultTo(DEFAULT_QUERY_PARTITIONER_CLASS_NAME)
+                 .checkIf(Validator::isString);
+        VALIDATOR.define(EQUALITY_PARTITIONER_FIELDS)
+                 .checkIf(Validator.isListOfType(String.class))
+                 .unless(Validator::isNull);
+        VALIDATOR.define(EQUALITY_PARTITIONER_DELIMITER)
+                 .defaultTo(DEFAULT_EQUALITY_PARTITIONER_DELIMITER)
+                 .checkIf(Validator::isString);
+
 
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
@@ -348,6 +374,28 @@ public class BulletConfig extends Config {
     public void merge(Config other) {
         super.merge(other);
         validate();
+    }
+
+    /**
+     * This method loads a given class name (stored in this config) with the class name key and creates an instance of
+     * it by using a constructor that has a single argument for a {@link BulletConfig}. It then passes in this config
+     * and returns the constructed instance.
+     *
+     * @param classNameKey The name of the key which stores the class name to load in this config.
+     * @param <S> The type of the class.
+     * @return A created instance of this class.
+     * @throws RuntimeException if there were issues creating an instance. It wraps the real exception.
+     */
+    @SuppressWarnings("unchecked")
+    public <S> S loadConfiguredClass(String classNameKey) {
+        try {
+            String name = (String) this.get(classNameKey);
+            Class<? extends S> className = (Class<? extends S>) Class.forName(name);
+            Constructor<? extends S> constructor = className.getConstructor(BulletConfig.class);
+            return constructor.newInstance(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")

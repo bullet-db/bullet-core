@@ -506,6 +506,16 @@ public class Validator {
     }
 
     /**
+     * Checks to see if the value is null or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was null.
+     */
+    public static boolean isNull(Object value) {
+        return value == null;
+    }
+
+    /**
      * Checks to see if the value is of the provided type or not.
      *
      * @param value The object to check type for.
@@ -661,6 +671,29 @@ public class Validator {
         double minimum = min.doubleValue();
         double maximum = max.doubleValue();
         return o -> isNumber(o) && ((T) o).doubleValue() >= minimum && ((T) o).doubleValue() <= maximum;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object  is a non-empty {@link List} of the
+     * given type.
+     *
+     * @param type The class of the contents of the list to check for.
+     * @param <T> The type of the content in the list.
+     * @return A Predicate that checks tor see if the value was a non-empty List of the given type.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<Object> isListOfType(Class<T> type) {
+        return value -> {
+            if (!isNonEmptyList(value)) {
+                return false;
+            }
+            try {
+                List list = (List) value;
+                return list.stream().allMatch(i -> isType(i, type));
+            } catch (ClassCastException e) {
+                return false;
+            }
+        };
     }
 
     // Binary Predicates.
