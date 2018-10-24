@@ -68,6 +68,8 @@ public class RecordBox {
                 record.setDoubleMap(name, asMap(Double.class, entries));
             } else if (value instanceof String) {
                 record.setStringMap(name, asMap(String.class, entries));
+            } else if (value instanceof Map) {
+                record.setMapOfStringMap(name, (Map) asMap(Map.class, entries));
             } else if (value == null) {
                 record.setStringMap(name, null);
             } else {

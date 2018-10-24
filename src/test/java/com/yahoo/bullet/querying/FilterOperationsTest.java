@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -589,13 +590,13 @@ public class FilterOperationsTest {
                                                                   clause("id", EQUALS, "1", "2")),
                                                     clause("mid", GREATER_THAN, "10"))),
                                              clause(AND,
-                                                    clause("demographic_map.age", GREATER_THAN, "65"),
-                                                    clause("filter_map.is_fake_event", EQUALS, "true")));
+                                                    clause("demographic_map.age_map.age", GREATER_THAN, "65"),
+                                                    clause("filter_list.0.is_fake_event", EQUALS, "true")));
 
 
         // second clause is true : age > 65 and is_fake_event
-        BulletRecord recordA = RecordBox.get().addMap("demographic_map", Pair.of("age", "67"))
-                                              .addMap("filter_map", Pair.of("is_fake_event", true))
+        BulletRecord recordA = RecordBox.get().addMap("demographic_map", Pair.of("age_map", Collections.singletonMap("age", "67")))
+                                              .addList("filter_list", Collections.singletonMap("is_fake_event", true))
                                               .getRecord();
         // age > 65 and is_fake_event == null
         BulletRecord recordB = RecordBox.get().addMap("demographic_map", Pair.of("age", "67")).getRecord();

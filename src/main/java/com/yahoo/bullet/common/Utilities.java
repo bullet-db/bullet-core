@@ -96,20 +96,21 @@ public class Utilities {
     /**
      * Extracts the field from the given {@link BulletRecord}.
      *
-     * @param field The field to get. It can be "." separated to look inside maps.
+     * @param field The field to get. It can be "." separated to look inside lists and maps.
      * @param record The record containing the field.
      * @return The extracted field or null if error or not found.
      */
     public static Object extractField(String field, BulletRecord record) {
-        if (field == null) {
-            return null;
-        }
-        String[] split = splitField(field);
-        try {
-            return split.length > 1 ? record.get(split[0], split[1]) : record.get(field);
-        } catch (ClassCastException cce) {
-            return null;
-        }
+        //if (field == null) {
+        //    return null;
+        //}
+        //String[] split = splitField(field);
+        //try {
+        //    return split.length > 1 ? record.get(split[0], split[1]) : record.get(field);
+        //} catch (ClassCastException cce) {
+        //    return null;
+        //}
+        return record.extract(field);
     }
 
     /**

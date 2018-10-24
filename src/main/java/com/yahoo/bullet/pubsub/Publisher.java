@@ -24,4 +24,7 @@ public interface Publisher extends AutoCloseable {
      * @throws PubSubException if the messaging system throws an error.
      */
     void send(PubSubMessage message) throws PubSubException;
+
+    @Override
+    void close();
 }

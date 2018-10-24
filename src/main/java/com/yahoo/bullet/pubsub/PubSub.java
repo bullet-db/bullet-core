@@ -107,7 +107,7 @@ public abstract class PubSub implements AutoCloseable {
      * Close PubSub and delete related context. Does not necessarily close publishers and subscribers.
      */
     @Override
-    public void close() {
+    public void close() throws Exception {
     }
 
     /**

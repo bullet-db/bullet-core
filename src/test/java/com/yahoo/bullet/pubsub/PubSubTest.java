@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class PubSubTest {
     @Test
-    public void testMockPubSubCreation() throws PubSubException {
+    public void testMockPubSubCreation() throws Exception {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         String mockMessage = UUID.randomUUID().toString();
         config.set(MockPubSub.MOCK_MESSAGE_NAME, mockMessage);
@@ -58,7 +58,7 @@ public class PubSubTest {
     }
 
     @Test
-    public void testSwitchingContext() throws PubSubException {
+    public void testSwitchingContext() throws Exception {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(MockPubSub.MOCK_MESSAGE_NAME, "");
         PubSub pubSub = PubSub.from(config);
