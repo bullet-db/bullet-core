@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
+
 /**
  * This class validates instances of {@link BulletConfig}. Use {@link Validator.Entry} to define
  * fields and {@link Validator.Relationship} to define relationships between them.
@@ -414,7 +416,7 @@ public class Validator {
         if (!missingKeys.isEmpty())  {
             throw new NullPointerException("You must evaluate entries for "  + missingKeys.stream().collect(Collectors.joining(COMMA)));
         }
-        State state = new State(description, Arrays.asList(keys));
+        State state = new State(description, asList(keys));
         states.add(state);
         return state;
     }
@@ -640,6 +642,21 @@ public class Validator {
         return isType(value, List.class) && !((List) value).isEmpty();
     }
 
+    /**
+     * Checks to see if the given object refers to a class that can be loaded.
+     *
+     * @param value The object to check if it is a class name.
+     * @return A boolean denoting whether the given value was the name of a class.
+     */
+    public static boolean isClass(Object value) {
+        try {
+            Class.forName((String) value);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     // Unary Predicate Generators
 
     /**
@@ -652,7 +669,7 @@ public class Validator {
     @SuppressWarnings("unchecked")
     public static <T> Predicate<Object> isIn(T... values) {
         Objects.requireNonNull(values);
-        Set<T> set = new HashSet<>(Arrays.asList(values));
+        Set<T> set = new HashSet<>(asList(values));
         return set::contains;
     }
 
@@ -696,7 +713,47 @@ public class Validator {
         };
     }
 
-    // Binary Predicates.
+    /**
+     * Creates a {@link Predicate} that is true if and only if all the provided predicates are true and false otherwise.
+     *
+     * @param predicates The predicates to be ANDed.
+     * @return A predicate that is the AND of all the given predicates.
+     */
+    @SafeVarargs
+    public static Predicate<Object> and(Predicate<Object>... predicates) {
+        Predicate<Object> anded = UNARY_IDENTITY;
+        for (Predicate<Object> predicate : predicates) {
+            anded.and(predicate);
+        }
+        return anded;
+    }
+
+    /**
+     * Creates a {@link Predicate} that is true if any of the provided predicates are true and false otherwise.
+     *
+     * @param predicates The predicates to be ORed.
+     * @return A predicate that is the OR of all the given predicates.
+     */
+    @SafeVarargs
+    public static Predicate<Object> or(Predicate<Object>... predicates) {
+        Predicate<Object> ored = not(UNARY_IDENTITY);
+        for (Predicate<Object> predicate : predicates) {
+            ored.or(predicate);
+        }
+        return ored;
+    }
+
+    /**
+     * Creates a {@link Predicate} that is true if the given predicate is false and false if the given predicate is true.
+     *
+     * @param predicate The predicates to be negated.
+     * @return A predicate that is the NOT of the given predicate.
+     */
+    public static Predicate<Object> not(Predicate<Object> predicate) {
+        return predicate.negate();
+    }
+
+    // Binary Predicates
 
     /**
      * Checks to see if the first numeric object is greater than or equal to the second numeric object.
@@ -709,7 +766,7 @@ public class Validator {
         return ((Number) first).doubleValue() >= ((Number) second).doubleValue();
     }
 
-    // Binary Predicate makers.
+    // Binary Predicate Generators.
 
     /**
      * Returns a {@link BiPredicate} that checks to see if the first argument is at least the given times
