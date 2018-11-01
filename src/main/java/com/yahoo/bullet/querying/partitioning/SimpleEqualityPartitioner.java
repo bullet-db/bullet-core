@@ -12,17 +12,18 @@ import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This partitioner uses a list of fields to partition. If fields A and B are used to partition, this partitioner
@@ -64,8 +65,10 @@ import java.util.stream.Collectors;
  */
 public class SimpleEqualityPartitioner implements Partitioner {
     public static final String NO_FIELD = Type.NULL_EXPRESSION;
+    public static final char FALSE_CHAR = '0';
 
-    private LinkedHashSet<String> fields;
+    private List<String> fields;
+    private Set<String> fieldSet;
     private String delimiter;
     private final List<String> defaultKeys;
 
@@ -78,8 +81,8 @@ public class SimpleEqualityPartitioner implements Partitioner {
      */
     public SimpleEqualityPartitioner(BulletConfig config) {
         delimiter = config.getAs(BulletConfig.EQUALITY_PARTITIONER_DELIMITER, String.class);
-        List<String> fieldsList = (List<String>) config.getAs(BulletConfig.EQUALITY_PARTITIONER_FIELDS, List.class);
-        fields = new LinkedHashSet<>(fieldsList);
+        fields = (List<String>) config.getAs(BulletConfig.EQUALITY_PARTITIONER_FIELDS, List.class);
+        fieldSet = new HashSet<>(fields);
         String defaultKey = Collections.nCopies(fields.size(), NO_FIELD).stream().collect(Collectors.joining(delimiter));
         defaultKeys = Collections.singletonList(defaultKey);
     }
@@ -104,7 +107,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
         // For each unique field, get all the FilterClauses that define an operation on it.
         Map<String, List<FilterClause>> fieldFilters = new HashMap<>();
-        filters.forEach(c -> this.mapEqualityFilters(c, fieldFilters));
+        filters.forEach(c -> this.mapFieldToFilters(c, fieldFilters));
 
         // If not one equality filter per field and not one value per filter, default partition
         if (fieldFilters.values().stream().anyMatch(this::hasInvalidFilterClauses)) {
@@ -119,7 +122,17 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
     @Override
     public List<String> getKeys(BulletRecord record) {
-        return generateKeyCombinations(getFieldValues(record));
+        Map<String, String> values = getFieldValues(record);
+        // If the values have NO_FIELD mapped (field not present), they get duped out with the natural binary combination
+        Set<String> keys = new HashSet<>();
+
+        int numberOfFields = fields.size();
+        int combinations = 1 << numberOfFields;
+        for (int i = 0; i < combinations; i++) {
+            String paddedBinary = StringUtils.leftPad(Integer.toBinaryString(i), numberOfFields, FALSE_CHAR);
+            keys.add(binaryToKey(paddedBinary, values));
+        }
+        return new ArrayList<>(keys);
     }
 
     private static boolean hasNonANDLogicals(List<Clause> filters) {
@@ -133,19 +146,19 @@ public class SimpleEqualityPartitioner implements Partitioner {
         return clause.getOperation() != Clause.Operation.AND || hasNonANDLogicals(((LogicalClause) clause).getClauses());
     }
 
-    private void mapEqualityFilters(Clause clause, Map<String, List<FilterClause>> mapping) {
+    private void mapFieldToFilters(Clause clause, Map<String, List<FilterClause>> mapping) {
         if (clause instanceof FilterClause) {
-            mapEqualityFilter((FilterClause) clause, mapping);
+            mapFieldToFilter((FilterClause) clause, mapping);
         }
         List<Clause> clauses = ((LogicalClause) clause).getClauses();
         if (clauses != null) {
-            clauses.forEach(c -> this.mapEqualityFilters(c, mapping));
+            clauses.forEach(c -> this.mapFieldToFilters(c, mapping));
         }
     }
 
-    private void mapEqualityFilter(FilterClause clause, Map<String, List<FilterClause>> mapping) {
+    private void mapFieldToFilter(FilterClause clause, Map<String, List<FilterClause>> mapping) {
         String field = clause.getField();
-        if (clause.getOperation() != Clause.Operation.EQUALS || !fields.contains(field)) {
+        if (clause.getOperation() != Clause.Operation.EQUALS || !fieldSet.contains(field)) {
             return;
         }
         List<FilterClause> list = mapping.getOrDefault(field, new ArrayList<>());
@@ -181,8 +194,15 @@ public class SimpleEqualityPartitioner implements Partitioner {
         return fieldValues;
     }
 
-    private List<String> generateKeyCombinations(Map<String, String> values) {
-        Set<String> keys = new HashSet<>();
-        return new ArrayList<>(keys);
+    private String binaryToKey(String binary, Map<String, String> values) {
+        // If binary is 010 and fields is [A, B.c, D], the key is [null, values[B.c], null].join(delimiter)
+
+        int fieldCount = fields.size();
+        String[] keyParts = new String[fieldCount];
+        for (int i = 0; i <= fieldCount; ++i) {
+            boolean include = binary.charAt(i) != FALSE_CHAR;
+            keyParts[i] = include ? values.get(fields.get(i)) : NO_FIELD;
+        }
+        return Stream.of(keyParts).collect(Collectors.joining(delimiter));
     }
 }
