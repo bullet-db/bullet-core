@@ -123,12 +123,14 @@ public class SimpleEqualityPartitioner implements Partitioner {
     @Override
     public List<String> getKeys(BulletRecord record) {
         Map<String, String> values = getFieldValues(record);
-        // If the values have NO_FIELD mapped (field not present), they get duped out with the natural binary combination
+        // For fields not present (NO_FIELD mapped), this de-dupes them with the binary combination that ignores them
         Set<String> keys = new HashSet<>();
 
         int numberOfFields = fields.size();
         int combinations = 1 << numberOfFields;
+        // Generate a truth table for all possible combinations of the fields when using the field value or not
         for (int i = 0; i < combinations; i++) {
+            // This makes the paddedBinary have fields.size() chars where each one represents to include or not the field
             String paddedBinary = StringUtils.leftPad(Integer.toBinaryString(i), numberOfFields, FALSE_CHAR);
             keys.add(binaryToKey(paddedBinary, values));
         }
@@ -149,6 +151,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private void mapFieldToFilters(Clause clause, Map<String, List<FilterClause>> mapping) {
         if (clause instanceof FilterClause) {
             mapFieldToFilter((FilterClause) clause, mapping);
+            return;
         }
         List<Clause> clauses = ((LogicalClause) clause).getClauses();
         if (clauses != null) {
@@ -168,11 +171,11 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
     private boolean hasInvalidFilterClauses(List<FilterClause> filters) {
         if (filters == null || filters.size() != 1)  {
-            return false;
+            return true;
         }
         FilterClause filter = filters.get(0);
         List values = filter.getValues();
-        return values != null && values.size() == 1;
+        return values == null || values.size() != 1;
     }
 
     private String getFilterValue(List<FilterClause> singletonFilters) {

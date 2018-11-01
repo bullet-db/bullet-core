@@ -6,6 +6,7 @@
 package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.pubsub.PubSub.Context;
+import com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -143,7 +144,6 @@ public class BulletConfig extends Config {
 
     public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
     public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.EqualityPartitioner";
-    public static final List<String> DEFAULT_EQUALITY_PARTITIONER_FIELDS = null;
     public static final String DEFAULT_EQUALITY_PARTITIONER_DELIMITER = "|";
 
     // Validator definitions for the configs in this class.
@@ -307,6 +307,11 @@ public class BulletConfig extends Config {
         VALIDATOR.relate("If metadata is disabled, keys should not be defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
+
+        VALIDATOR.evaluate("If the equality partitioner is used, the partitioner fields should be defined",
+                            QUERY_PARTITIONER_ENABLE, QUERY_PARTITIONER_CLASS_NAME, EQUALITY_PARTITIONER_FIELDS)
+                 .checkIf(BulletConfig::areEqualityPartitionerFieldsDefined)
+                 .orFail();
     }
 
     // Members
@@ -468,5 +473,19 @@ public class BulletConfig extends Config {
             metadataList.add(metadata);
         }
         return metadataList;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean areEqualityPartitionerFieldsDefined(List<Object> fields) {
+        boolean enabled = (Boolean) fields.get(0);
+        if (!enabled) {
+            return true;
+        }
+        String className = fields.get(1).toString();
+        if (!DEFAULT_QUERY_PARTITIONER_CLASS_NAME.equals(className)) {
+            return true;
+        }
+        List<String> partitionFields = ((List<String>) fields.get(2));
+        return  partitionFields != null && !partitionFields.isEmpty();
     }
 }
