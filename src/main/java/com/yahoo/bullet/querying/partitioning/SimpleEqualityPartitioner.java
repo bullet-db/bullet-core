@@ -138,7 +138,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     }
 
     private static boolean hasNonANDLogicals(List<Clause> filters) {
-        return filters.stream().anyMatch(SimpleEqualityPartitioner::hasNonANDLogicals);
+        return filters != null && filters.stream().anyMatch(SimpleEqualityPartitioner::hasNonANDLogicals);
     }
 
     private static boolean hasNonANDLogicals(Clause clause) {

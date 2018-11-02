@@ -62,7 +62,7 @@ public class SimpleEqualityPartitionerTest {
     @Test
     public void testDefaultPartitioningQueryWithNoLogicalFilters() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
-        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.AND))), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.OR))), singletonList("null-null"));
     }
 
     @Test
