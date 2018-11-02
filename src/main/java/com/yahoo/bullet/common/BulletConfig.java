@@ -143,10 +143,12 @@ public class BulletConfig extends Config {
     public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
     public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner";
     public static final String DEFAULT_EQUALITY_PARTITIONER_DELIMITER = "|";
+    public static final int MAXIMUM_EQUALITY_FIELDS = 10;
 
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
+
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
                  .defaultTo(DEFAULT_QUERY_DURATION)
@@ -268,21 +270,23 @@ public class BulletConfig extends Config {
                  .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
-                 .checkIf(Validator::isClass);
+                 .checkIf(Validator::isClassName);
 
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
                  .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
-                 .checkIf(Validator::isClass);
+                 .checkIf(Validator::isClassName);
 
         VALIDATOR.define(QUERY_PARTITIONER_ENABLE)
                  .defaultTo(DEFAULT_QUERY_PARTITIONER_ENABLE)
                  .checkIf(Validator::isBoolean);
         VALIDATOR.define(QUERY_PARTITIONER_CLASS_NAME)
                  .defaultTo(DEFAULT_QUERY_PARTITIONER_CLASS_NAME)
-                 .checkIf(Validator::isClass);
+                 .checkIf(Validator::isClassName);
         VALIDATOR.define(EQUALITY_PARTITIONER_FIELDS)
                  .checkIf(Validator.isListOfType(String.class))
-                 .unless(Validator::isNull);
+                 .checkIf(Validator.hasMaximumListSize(MAXIMUM_EQUALITY_FIELDS))
+                 .unless(Validator::isNull)
+                 .orFail();
         VALIDATOR.define(EQUALITY_PARTITIONER_DELIMITER)
                  .defaultTo(DEFAULT_EQUALITY_PARTITIONER_DELIMITER)
                  .checkIf(Validator::isString);

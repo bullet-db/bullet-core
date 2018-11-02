@@ -62,7 +62,7 @@ public class SimpleEqualityPartitionerTest {
     @Test
     public void testDefaultPartitioningQueryWithNoLogicalFilters() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
-        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.OR))), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.AND))), singletonList("null-null"));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SimpleEqualityPartitionerTest {
     public void testPartitioningForQueryWithMissingFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause(Clause.Operation.AND, makeClause("A", singletonList("bar"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-null"));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class SimpleEqualityPartitionerTest {
                                              makeClause("C", singletonList("qux"), Clause.Operation.EQUALS),
                                              makeClause("B", singletonList("baz"), Clause.Operation.EQUALS),
                                              makeClause("A", singletonList("bar"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar-baz-qux"));
+        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-baz.-qux."));
     }
 
     @Test
@@ -157,14 +157,14 @@ public class SimpleEqualityPartitionerTest {
                                              makeClause(Clause.Operation.AND,
                                                         makeClause("C", singletonList("qux"), Clause.Operation.EQUALS),
                                                         makeClause("A", singletonList("bar"), Clause.Operation.EQUALS))));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar-quux-qux-norf"));
+        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-quux.-qux.-norf."));
     }
 
     @Test
     public void testPartitioningForRecordWithMissingFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         BulletRecord record = RecordBox.get().add("A", "foo").getRecord();
-        Set<String> expected = new HashSet<>(asList("null-null", "foo-null"));
+        Set<String> expected = new HashSet<>(asList("null-null", "foo.-null"));
         Set<String> actual = new HashSet<>(partitioner.getKeys(record));
         Assert.assertEquals(actual, expected);
     }
@@ -173,8 +173,8 @@ public class SimpleEqualityPartitionerTest {
     public void testPartitioningForRecordWithMultiplePresentAndMissingFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C", "D");
         BulletRecord record = RecordBox.get().add("B", "foo").add("D", "baz").getRecord();
-        Set<String> expected = new HashSet<>(asList("null-foo-null-null", "null-null-null-null",
-                                                    "null-null-null-baz", "null-foo-null-baz"));
+        Set<String> expected = new HashSet<>(asList("null-foo.-null-null", "null-null-null-null",
+                                                    "null-null-null-baz.", "null-foo.-null-baz."));
         Set<String> actual = new HashSet<>(partitioner.getKeys(record));
         Assert.assertEquals(actual, expected);
     }
@@ -183,9 +183,9 @@ public class SimpleEqualityPartitionerTest {
     public void testPartitioningForRecordWithAllFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C.d");
         BulletRecord record = RecordBox.get().add("A", "foo").add("B", "bar").addMap("C", ImmutablePair.of("d", "baz")).getRecord();
-        Set<String> expected = new HashSet<>(asList("foo-bar-baz",
-                                                    "foo-bar-null", "foo-null-baz", "null-bar-baz",
-                                                    "foo-null-null", "null-null-baz", "null-bar-null",
+        Set<String> expected = new HashSet<>(asList("foo.-bar.-baz.",
+                                                    "foo.-bar.-null", "foo.-null-baz.", "null-bar.-baz.",
+                                                    "foo.-null-null", "null-null-baz.", "null-bar.-null",
                                                     "null-null-null"));
         Set<String> actual = new HashSet<>(partitioner.getKeys(record));
         Assert.assertEquals(actual, expected);

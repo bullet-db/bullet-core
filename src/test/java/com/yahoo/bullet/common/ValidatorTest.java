@@ -13,8 +13,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +21,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 
 public class ValidatorTest {
     private BulletConfig empty;
@@ -223,17 +223,17 @@ public class ValidatorTest {
 
     @Test
     public void testIsNonEmptyList() {
-        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList(0)));
-        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList(0, 1)));
-        Assert.assertTrue(Validator.isNonEmptyList(Arrays.asList("string")));
+        Assert.assertTrue(Validator.isNonEmptyList(asList(0)));
+        Assert.assertTrue(Validator.isNonEmptyList(asList(0, 1)));
+        Assert.assertTrue(Validator.isNonEmptyList(asList("string")));
         Assert.assertFalse(Validator.isNonEmptyList("string"));
         Assert.assertFalse(Validator.isNonEmptyList(null));
-        Assert.assertFalse(Validator.isNonEmptyList(Collections.emptyList()));
+        Assert.assertFalse(Validator.isNonEmptyList(emptyList()));
     }
 
     @Test
     public void testIsMap() {
-        Assert.assertTrue(Validator.isMap(Collections.singletonMap("foo", "bar")));
+        Assert.assertTrue(Validator.isMap(singletonMap("foo", "bar")));
         Assert.assertFalse(Validator.isMap("foo"));
     }
 
@@ -619,36 +619,67 @@ public class ValidatorTest {
         Predicate<Object> stringChecker = Validator.isListOfType(String.class);
 
         Assert.assertFalse(stringChecker.test(null));
-        Assert.assertFalse(stringChecker.test(Collections.emptyList()));
-        Assert.assertTrue(stringChecker.test(Collections.singletonList("a")));
-        Assert.assertTrue(stringChecker.test(Arrays.asList("a", "b")));
-        Assert.assertFalse(stringChecker.test(Collections.singletonList(1)));
-        Assert.assertFalse(stringChecker.test(Arrays.asList(1, 2)));
+        Assert.assertFalse(stringChecker.test(emptyList()));
+        Assert.assertTrue(stringChecker.test(singletonList("a")));
+        Assert.assertTrue(stringChecker.test(asList("a", "b")));
+        Assert.assertFalse(stringChecker.test(singletonList(1)));
+        Assert.assertFalse(stringChecker.test(asList(1, 2)));
     }
 
     @Test
-    public void testIsClass() {
-        Assert.assertTrue(Validator.isClass(Validator.class.getName()));
-        Assert.assertTrue(Validator.isClass(MockPubSub.class.getName()));
-        Assert.assertFalse(Validator.isClass("fake.class.path.foo"));
-        Assert.assertFalse(Validator.isClass(null));
-        Assert.assertFalse(Validator.isClass(Arrays.asList("foo", "bar")));
+    public void testIsClassName() {
+        Assert.assertTrue(Validator.isClassName(Validator.class.getName()));
+        Assert.assertTrue(Validator.isClassName(MockPubSub.class.getName()));
+        Assert.assertFalse(Validator.isClassName("fake.class.path.foo"));
+        Assert.assertFalse(Validator.isClassName(null));
+        Assert.assertFalse(Validator.isClassName(asList("foo", "bar")));
+    }
+
+    @Test
+    public void testHasMinimumListSize() {
+        Predicate<Object> hasThreeOrMore = Validator.hasMinimumListSize(3);
+        Assert.assertFalse(hasThreeOrMore.test(null));
+        Assert.assertFalse(hasThreeOrMore.test(emptyList()));
+        Assert.assertFalse(hasThreeOrMore.test(singletonList("a")));
+        Assert.assertFalse(hasThreeOrMore.test(asList("a", "b")));
+        Assert.assertTrue(hasThreeOrMore.test(asList("a", "b", "c")));
+        Assert.assertTrue(hasThreeOrMore.test(asList("a", "b", "c", "d")));
+
+        Assert.assertTrue(hasThreeOrMore.test(asList(1, 2, 3, 4)));
+        Assert.assertFalse(hasThreeOrMore.test(asList(1, 2)));
+
+        Assert.assertTrue(Validator.hasMinimumListSize(0).test(emptyList()));
+    }
+
+    @Test
+    public void testHasMaximumListSize() {
+        Predicate<Object> hasThreeOrLess = Validator.hasMaximumListSize(3);
+        Assert.assertFalse(hasThreeOrLess.test(null));
+        Assert.assertTrue(hasThreeOrLess.test(emptyList()));
+        Assert.assertTrue(hasThreeOrLess.test(singletonList("a")));
+        Assert.assertTrue(hasThreeOrLess.test(asList("a", "b")));
+        Assert.assertTrue(hasThreeOrLess.test(asList("a", "b", "c")));
+
+        Assert.assertFalse(hasThreeOrLess.test(asList("a", "b", "c", "d")));
+        Assert.assertTrue(hasThreeOrLess.test(asList(1, 2)));
+
+        Assert.assertTrue(Validator.hasMaximumListSize(0).test(emptyList()));
     }
 
     @Test
     public void testANDing() {
         Predicate<Object> notNullAndNotEmptyList = Validator.and(Objects::nonNull, a -> !(((List) a).isEmpty()));
         Assert.assertFalse(notNullAndNotEmptyList.test(null));
-        Assert.assertFalse(notNullAndNotEmptyList.test(Collections.emptyList()));
-        Assert.assertTrue(notNullAndNotEmptyList.test(Collections.singletonList("a")));
+        Assert.assertFalse(notNullAndNotEmptyList.test(emptyList()));
+        Assert.assertTrue(notNullAndNotEmptyList.test(singletonList("a")));
     }
 
     @Test
     public void testORing() {
         Predicate<Object> nullOrEmptyList = Validator.or(Objects::isNull, a -> ((List) a).isEmpty());
         Assert.assertTrue(nullOrEmptyList.test(null));
-        Assert.assertTrue(nullOrEmptyList.test(Collections.emptyList()));
-        Assert.assertFalse(nullOrEmptyList.test(Collections.singletonList("a")));
+        Assert.assertTrue(nullOrEmptyList.test(emptyList()));
+        Assert.assertFalse(nullOrEmptyList.test(singletonList("a")));
     }
 
     @Test

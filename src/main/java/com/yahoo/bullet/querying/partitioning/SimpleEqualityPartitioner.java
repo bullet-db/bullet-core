@@ -66,6 +66,8 @@ import java.util.stream.Stream;
 public class SimpleEqualityPartitioner implements Partitioner {
     public static final String NO_FIELD = Type.NULL_EXPRESSION;
     public static final char FALSE_CHAR = '0';
+    // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
+    public static final char DISAMBIGUATOR = '.';
 
     private List<String> fields;
     private Set<String> fieldSet;
@@ -154,9 +156,8 @@ public class SimpleEqualityPartitioner implements Partitioner {
             return;
         }
         List<Clause> clauses = ((LogicalClause) clause).getClauses();
-        if (clauses != null) {
-            clauses.forEach(c -> this.mapFieldToFilters(c, mapping));
-        }
+        // Cannot have null non-AND logicals as it is checked for.
+        clauses.forEach(c -> this.mapFieldToFilters(c, mapping));
     }
 
     private void mapFieldToFilter(FilterClause clause, Map<String, List<FilterClause>> mapping) {
@@ -185,14 +186,14 @@ public class SimpleEqualityPartitioner implements Partitioner {
         // Otherwise, it's a list of size 1 with a singular value, which has been already validated
         FilterClause filter = singletonFilters.get(0);
         Object value = filter.getValues().get(0);
-        return filter.getValue(value);
+        return makeKeyEntry(filter.getValue(value));
     }
 
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
             Object value = record.extractField(field);
-            fieldValues.put(field, value == null ? NO_FIELD : value.toString());
+            fieldValues.put(field, value == null ? NO_FIELD : makeKeyEntry(value.toString()));
         }
         return fieldValues;
     }
@@ -206,5 +207,9 @@ public class SimpleEqualityPartitioner implements Partitioner {
             keyParts[i] = include ? values.get(fields.get(i)) : NO_FIELD;
         }
         return Stream.of(keyParts).collect(Collectors.joining(delimiter));
+    }
+
+    private String makeKeyEntry(String value) {
+        return new StringBuilder(value).append(DISAMBIGUATOR).toString();
     }
 }

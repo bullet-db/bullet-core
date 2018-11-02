@@ -643,12 +643,12 @@ public class Validator {
     }
 
     /**
-     * Checks to see if the given object refers to a class that can be loaded.
+     * Checks to see if the given object refers to a class name that can be loaded.
      *
      * @param value The object to check if it is a class name.
      * @return A boolean denoting whether the given value was the name of a class.
      */
-    public static boolean isClass(Object value) {
+    public static boolean isClassName(Object value) {
         try {
             Class.forName((String) value);
         } catch (Exception e) {
@@ -671,6 +671,28 @@ public class Validator {
         Objects.requireNonNull(values);
         Set<T> set = new HashSet<>(asList(values));
         return set::contains;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is a {@link List} and has at least n items
+     * in it. Note that the object must be a List even if n is 0.
+     *
+     * @param n The minimum number of items that can be in the List.
+     * @return A boolean denoting if the {@link List} has a size of at least the given parameter.
+     */
+    public static Predicate<Object> hasMinimumListSize(int n) {
+        return o -> isList(o) && ((List) o).size() >= n;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is a {@link List} and has at most n items
+     * in it. Note that the object must be a List even if n is 0.
+     *
+     * @param n The maximum number of items that can be in the List.
+     * @return A boolean denoting if the {@link List} has a size of at most the given parameter.
+     */
+    public static Predicate<Object> hasMaximumListSize(int n) {
+        return o -> isList(o) && ((List) o).size() <= n;
     }
 
     /**

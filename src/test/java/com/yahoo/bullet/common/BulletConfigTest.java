@@ -14,7 +14,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
+import static java.util.Arrays.asList;
 
 public class BulletConfigTest {
     public static Map<String, String> allMetadataAsMap() {
@@ -99,7 +99,7 @@ public class BulletConfigTest {
         config.set("foo", "bar");
         config.set("true", true);
 
-        Optional<Set<String>> keys = Optional.of(new HashSet<>(Arrays.asList("1", "true")));
+        Optional<Set<String>> keys = Optional.of(new HashSet<>(asList("1", "true")));
         Map<String, Object> mappings = config.getAll(keys);
         Assert.assertEquals(mappings.size(), 2);
         Assert.assertEquals(mappings.get("1"), 1);
@@ -122,7 +122,7 @@ public class BulletConfigTest {
         config.set("foo", "bar");
         config.set("true", true);
 
-        Optional<Set<String>> keys = Optional.of(new HashSet<>(Arrays.asList("1", "true")));
+        Optional<Set<String>> keys = Optional.of(new HashSet<>(asList("1", "true")));
         Map<String, Object> mappings = config.getAllBut(keys);
         Assert.assertEquals(mappings.size(), 2);
         Assert.assertEquals(mappings.get("foo"), "bar");
@@ -227,8 +227,8 @@ public class BulletConfigTest {
         String defaulted = config.getOrDefaultAs("foo", "value", String.class);
         Assert.assertEquals(defaulted, "value");
 
-        List anotherDefaulted = config.getOrDefaultAs("foo", Arrays.asList("foo", "bar"), List.class);
-        Assert.assertEquals(anotherDefaulted, Arrays.asList("foo", "bar"));
+        List anotherDefaulted = config.getOrDefaultAs("foo", asList("foo", "bar"), List.class);
+        Assert.assertEquals(anotherDefaulted, asList("foo", "bar"));
     }
 
     @Test
@@ -272,7 +272,7 @@ public class BulletConfigTest {
     public void testUnknownMetadata() {
         List<Map<String, String>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
+        for (Concept concept : asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, String> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);
@@ -303,7 +303,7 @@ public class BulletConfigTest {
     public void testBadMetadata() {
         List<Map<String, Object>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
+        for (Concept concept : asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, Object> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);
@@ -334,7 +334,7 @@ public class BulletConfigTest {
     public void testIncompleteMetadata() {
         List<Map<String, String>> metadata = new ArrayList<>();
         Map<String, String> expected = new HashMap<>();
-        for (Concept concept : Arrays.asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
+        for (Concept concept : asList(Concept.QUERY_ID, Concept.SKETCH_ITEMS_SEEN)) {
             Map<String, String> entry = new HashMap<>();
             String name = concept.getName();
             String key = concept.getName().substring(0, 3);
@@ -476,6 +476,24 @@ public class BulletConfigTest {
         config.validate();
     }
 
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testEqualityPartitioningWithTooManyFieldsValidation() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
+        config.set(BulletConfig.EQUALITY_PARTITIONER_FIELDS, asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"));
+        config.validate();
+    }
+
+    @Test
+    public void testEqualityPartitioningValidation() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
+        config.set(BulletConfig.EQUALITY_PARTITIONER_FIELDS, asList("A", "B"));
+        config.validate();
+
+        Assert.assertEquals(config.get(BulletConfig.EQUALITY_PARTITIONER_FIELDS), asList("A", "B"));
+    }
+
     @Test
     public void testCustomPartitionerValidation() {
         BulletConfig config = new BulletConfig();
@@ -484,15 +502,5 @@ public class BulletConfigTest {
         config.validate();
 
         Assert.assertEquals(config.get(BulletConfig.QUERY_PARTITIONER_CLASS_NAME), MockPartitioner.class.getName());
-    }
-
-    @Test
-    public void testEqualityPartitioningValidation() {
-        BulletConfig config = new BulletConfig();
-        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
-        config.set(BulletConfig.EQUALITY_PARTITIONER_FIELDS, Arrays.asList("A", "B"));
-        config.validate();
-
-        Assert.assertEquals(config.get(BulletConfig.EQUALITY_PARTITIONER_FIELDS), Arrays.asList("A", "B"));
     }
 }
