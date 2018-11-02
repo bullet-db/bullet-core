@@ -6,7 +6,6 @@
 package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.pubsub.PubSub.Context;
-import com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -20,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 @Slf4j
 public class BulletConfig extends Config {

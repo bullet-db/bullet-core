@@ -9,7 +9,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ import java.util.List;
  * Publishers and Subscribers.
  */
 @Slf4j
-public abstract class PubSub implements AutoCloseable {
+public abstract class PubSub {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
      * If the Context is {@link Context#QUERY_SUBMISSION}:
@@ -102,13 +101,6 @@ public abstract class PubSub implements AutoCloseable {
      * @throws PubSubException if Subscribers could not be created.
      */
     public abstract List<Subscriber> getSubscribers(int n) throws PubSubException;
-
-    /**
-     * Close PubSub and delete related context. Does not necessarily close publishers and subscribers.
-     */
-    @Override
-    public void close() {
-    }
 
     /**
      * Create a PubSub instance using the class specified in the config file.

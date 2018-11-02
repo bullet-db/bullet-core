@@ -61,6 +61,12 @@ public class SimpleEqualityPartitionerTest {
     }
 
     @Test
+    public void testDefaultPartitioningQueryWithNoLogicalFilters() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
+        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.AND))), singletonList("null-null"));
+    }
+
+    @Test
     public void testDefaultPartitioningQueryWithUnrelatedFilters() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause("C", singletonList("bar"), Clause.Operation.EQUALS),
@@ -169,7 +175,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C", "D");
         BulletRecord record = RecordBox.get().add("B", "foo").add("D", "baz").getRecord();
         Set<String> expected = new HashSet<>(asList("null-foo-null-null", "null-null-null-null",
-                                                    "null-null-null-baz","null-foo-null-baz"));
+                                                    "null-null-null-baz", "null-foo-null-baz"));
         Set<String> actual = new HashSet<>(partitioner.getKeys(record));
         Assert.assertEquals(actual, expected);
     }
