@@ -704,12 +704,8 @@ public class Validator {
             if (!isNonEmptyList(value)) {
                 return false;
             }
-            try {
-                List list = (List) value;
-                return list.stream().allMatch(i -> isType(i, type));
-            } catch (ClassCastException e) {
-                return false;
-            }
+            List list = (List) value;
+            return list.stream().allMatch(i -> isType(i, type));
         };
     }
 
@@ -723,7 +719,7 @@ public class Validator {
     public static Predicate<Object> and(Predicate<Object>... predicates) {
         Predicate<Object> anded = UNARY_IDENTITY;
         for (Predicate<Object> predicate : predicates) {
-            anded.and(predicate);
+            anded = anded.and(predicate);
         }
         return anded;
     }
@@ -738,7 +734,7 @@ public class Validator {
     public static Predicate<Object> or(Predicate<Object>... predicates) {
         Predicate<Object> ored = not(UNARY_IDENTITY);
         for (Predicate<Object> predicate : predicates) {
-            ored.or(predicate);
+            ored = ored.or(predicate);
         }
         return ored;
     }

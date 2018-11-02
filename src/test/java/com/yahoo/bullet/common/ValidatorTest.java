@@ -8,6 +8,7 @@ package com.yahoo.bullet.common;
 import com.yahoo.bullet.common.Validator.Entry;
 import com.yahoo.bullet.common.Validator.Relationship;
 import com.yahoo.bullet.common.Validator.State;
+import com.yahoo.bullet.pubsub.MockPubSub;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -610,5 +612,49 @@ public class ValidatorTest {
         Assert.assertEquals(empty.get("foo"), 0);
         Assert.assertEquals(empty.get("bar"), -1.4);
         Assert.assertEquals(empty.get("baz"), false);
+    }
+
+    @Test
+    public void testIsListOfType() {
+        Predicate<Object> stringChecker = Validator.isListOfType(String.class);
+
+        Assert.assertFalse(stringChecker.test(null));
+        Assert.assertFalse(stringChecker.test(Collections.emptyList()));
+        Assert.assertTrue(stringChecker.test(Collections.singletonList("a")));
+        Assert.assertTrue(stringChecker.test(Arrays.asList("a", "b")));
+        Assert.assertFalse(stringChecker.test(Collections.singletonList(1)));
+        Assert.assertFalse(stringChecker.test(Arrays.asList(1, 2)));
+    }
+
+    @Test
+    public void testIsClass() {
+        Assert.assertTrue(Validator.isClass(Validator.class.getName()));
+        Assert.assertTrue(Validator.isClass(MockPubSub.class.getName()));
+        Assert.assertFalse(Validator.isClass("fake.class.path.foo"));
+        Assert.assertFalse(Validator.isClass(null));
+        Assert.assertFalse(Validator.isClass(Arrays.asList("foo", "bar")));
+    }
+
+    @Test
+    public void testANDing() {
+        Predicate<Object> notNullAndNotEmptyList = Validator.and(Objects::nonNull, a -> !(((List) a).isEmpty()));
+        Assert.assertFalse(notNullAndNotEmptyList.test(null));
+        Assert.assertFalse(notNullAndNotEmptyList.test(Collections.emptyList()));
+        Assert.assertTrue(notNullAndNotEmptyList.test(Collections.singletonList("a")));
+    }
+
+    @Test
+    public void testORing() {
+        Predicate<Object> nullOrEmptyList = Validator.or(Objects::isNull, a -> ((List) a).isEmpty());
+        Assert.assertTrue(nullOrEmptyList.test(null));
+        Assert.assertTrue(nullOrEmptyList.test(Collections.emptyList()));
+        Assert.assertFalse(nullOrEmptyList.test(Collections.singletonList("a")));
+    }
+
+    @Test
+    public void testNOTing() {
+        Predicate<Object> isNotNull = Validator.not(Validator::isNull);
+        Assert.assertTrue(isNotNull.test("a"));
+        Assert.assertFalse(isNotNull.test(null));
     }
 }

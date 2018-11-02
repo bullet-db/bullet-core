@@ -32,9 +32,8 @@ public class SimpleEqualityPartitionerTest {
     public void setup() {
         config = new BulletConfig();
         config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
-        config.set(BulletConfig.QUERY_PARTITIONER_CLASS_NAME, SimpleEqualityPartitioner.class.getName());
+        config.set(BulletConfig.QUERY_PARTITIONER_CLASS_NAME, BulletConfig.DEFAULT_QUERY_PARTITIONER_CLASS_NAME);
         config.set(BulletConfig.EQUALITY_PARTITIONER_DELIMITER, "-");
-        config.validate();
     }
 
     private SimpleEqualityPartitioner createPartitioner(String... fields) {

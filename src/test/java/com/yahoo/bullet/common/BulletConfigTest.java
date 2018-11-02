@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.common;
 
+import com.yahoo.bullet.querying.partitioning.MockPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
@@ -466,5 +467,32 @@ public class BulletConfigTest {
         recordB.setString("someField", "someValue");
         Assert.assertEquals(recordB.get("someField"), "someValue");
         Assert.assertNull(recordA.get("someField"));
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testEqualityPartitioningWithNoFieldsValidation() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
+        config.validate();
+    }
+
+    @Test
+    public void testCustomPartitionerValidation() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
+        config.set(BulletConfig.QUERY_PARTITIONER_CLASS_NAME, MockPartitioner.class.getName());
+        config.validate();
+
+        Assert.assertEquals(config.get(BulletConfig.QUERY_PARTITIONER_CLASS_NAME), MockPartitioner.class.getName());
+    }
+
+    @Test
+    public void testEqualityPartitioningValidation() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.QUERY_PARTITIONER_ENABLE, true);
+        config.set(BulletConfig.EQUALITY_PARTITIONER_FIELDS, Arrays.asList("A", "B"));
+        config.validate();
+
+        Assert.assertEquals(config.get(BulletConfig.EQUALITY_PARTITIONER_FIELDS), Arrays.asList("A", "B"));
     }
 }

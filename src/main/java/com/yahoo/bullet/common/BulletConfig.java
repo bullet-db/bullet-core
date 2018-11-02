@@ -141,7 +141,7 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
 
     public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
-    public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.EqualityPartitioner";
+    public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner";
     public static final String DEFAULT_EQUALITY_PARTITIONER_DELIMITER = "|";
 
     // Validator definitions for the configs in this class.
@@ -268,18 +268,18 @@ public class BulletConfig extends Config {
                  .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isClass);
 
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
                  .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isClass);
 
         VALIDATOR.define(QUERY_PARTITIONER_ENABLE)
                  .defaultTo(DEFAULT_QUERY_PARTITIONER_ENABLE)
                  .checkIf(Validator::isBoolean);
         VALIDATOR.define(QUERY_PARTITIONER_CLASS_NAME)
                  .defaultTo(DEFAULT_QUERY_PARTITIONER_CLASS_NAME)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isClass);
         VALIDATOR.define(EQUALITY_PARTITIONER_FIELDS)
                  .checkIf(Validator.isListOfType(String.class))
                  .unless(Validator::isNull);
