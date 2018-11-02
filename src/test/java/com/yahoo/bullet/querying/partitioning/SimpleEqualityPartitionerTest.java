@@ -11,9 +11,15 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.result.RecordBox;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
@@ -147,5 +153,36 @@ public class SimpleEqualityPartitionerTest {
                                                         makeClause("C", singletonList("qux"), Clause.Operation.EQUALS),
                                                         makeClause("A", singletonList("bar"), Clause.Operation.EQUALS))));
         Assert.assertEquals(partitioner.getKeys(query), singletonList("bar-quux-qux-norf"));
+    }
+
+    @Test
+    public void testPartitioningForRecordWithMissingFields() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
+        BulletRecord record = RecordBox.get().add("A", "foo").getRecord();
+        Set<String> expected = new HashSet<>(asList("null-null", "foo-null"));
+        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        Assert.assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testPartitioningForRecordWithMultiplePresentAndMissingFields() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C", "D");
+        BulletRecord record = RecordBox.get().add("B", "foo").add("D", "baz").getRecord();
+        Set<String> expected = new HashSet<>(asList("null-foo-null-null", "null-null-null-null",
+                                                    "null-null-null-baz","null-foo-null-baz"));
+        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        Assert.assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testPartitioningForRecordWithAllFields() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C.d");
+        BulletRecord record = RecordBox.get().add("A", "foo").add("B", "bar").addMap("C", ImmutablePair.of("d", "baz")).getRecord();
+        Set<String> expected = new HashSet<>(asList("foo-bar-baz",
+                                                    "foo-bar-null", "foo-null-baz", "null-bar-baz",
+                                                    "foo-null-null", "null-null-baz", "null-bar-null",
+                                                    "null-null-null"));
+        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        Assert.assertEquals(actual, expected);
     }
 }

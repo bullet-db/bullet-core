@@ -191,7 +191,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            Object value = record.get(field);
+            Object value = record.extractField(field);
             fieldValues.put(field, value == null ? NO_FIELD : value.toString());
         }
         return fieldValues;
@@ -199,10 +199,9 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
     private String binaryToKey(String binary, Map<String, String> values) {
         // If binary is 010 and fields is [A, B.c, D], the key is [null, values[B.c], null].join(delimiter)
-
         int fieldCount = fields.size();
         String[] keyParts = new String[fieldCount];
-        for (int i = 0; i <= fieldCount; ++i) {
+        for (int i = 0; i < fieldCount; ++i) {
             boolean include = binary.charAt(i) != FALSE_CHAR;
             keyParts[i] = include ? values.get(fields.get(i)) : NO_FIELD;
         }

@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
 
-class MockPubSub extends PubSub {
+public class MockPubSub extends PubSub {
     public static final String MOCK_MESSAGE_NAME = "MOCK_MESSAGE";
     private String mockMessage;
 
