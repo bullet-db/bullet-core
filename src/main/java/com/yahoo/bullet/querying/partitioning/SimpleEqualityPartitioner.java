@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * This partitioner uses a list of fields to partition. If fields A and B are used to partition, this partitioner
@@ -64,12 +63,11 @@ import java.util.stream.Stream;
  * seen by exactly only the queries that need to see it.
  */
 public class SimpleEqualityPartitioner implements Partitioner {
-    public static final String NO_FIELD = Type.NULL_EXPRESSION;
-    public static final char FALSE_CHAR = '0';
-    public static final int LOWEST_BIT_MASK = 1;
-    public static final int ZERO = 0;
+    private static final String NO_FIELD = Type.NULL_EXPRESSION;
+    private static final int LOWEST_BIT_MASK = 1;
+    private static final int ZERO = 0;
     // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
-    public static final char DISAMBIGUATOR = '.';
+    private static final char DISAMBIGUATOR = '.';
 
     private List<String> fields;
     private Set<String> fieldSet;
