@@ -12,7 +12,6 @@ import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -66,6 +66,8 @@ import java.util.stream.Stream;
 public class SimpleEqualityPartitioner implements Partitioner {
     public static final String NO_FIELD = Type.NULL_EXPRESSION;
     public static final char FALSE_CHAR = '0';
+    public static final int LOWEST_BIT_MASK = 1;
+    public static final int ZERO = 0;
     // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
     public static final char DISAMBIGUATOR = '.';
 
@@ -130,13 +132,9 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
         int numberOfFields = fields.size();
         int combinations = 1 << numberOfFields;
-        // Generate a truth table for all possible combinations of the fields when using the field value or not
-        for (int i = 0; i < combinations; i++) {
-            // This makes the paddedBinary have fields.size() chars where each one represents to include or not the field
-            String paddedBinary = StringUtils.leftPad(Integer.toBinaryString(i), numberOfFields, FALSE_CHAR);
-            keys.add(binaryToKey(paddedBinary, values));
-        }
-        return new ArrayList<>(keys);
+        // Generate a truth table for all possible combinations of the fields when using the field value or not using
+        // an integer to represent a binary of fields.size() chars where each one represents to include or not the field
+        return IntStream.range(0, 1 << numberOfFields).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toList());
     }
 
     private static boolean hasNonANDLogicals(List<Clause> filters) {
@@ -198,15 +196,15 @@ public class SimpleEqualityPartitioner implements Partitioner {
         return fieldValues;
     }
 
-    private String binaryToKey(String binary, Map<String, String> values) {
-        // If binary is 010 and fields is [A, B.c, D], the key is [null, values[B.c], null].join(delimiter)
-        int fieldCount = fields.size();
-        String[] keyParts = new String[fieldCount];
-        for (int i = 0; i < fieldCount; ++i) {
-            boolean include = binary.charAt(i) != FALSE_CHAR;
-            keyParts[i] = include ? values.get(fields.get(i)) : NO_FIELD;
-        }
-        return Stream.of(keyParts).collect(Collectors.joining(delimiter));
+    private String binaryToKey(int number, Map<String, String> values) {
+        // If binary is 011 and fields is [A, B.c, D], the key is [values[A], values[B.c], null].join(delimiter)
+        return IntStream.range(0, fields.size()).mapToObj(i -> getValueForIndex(number, i, values))
+                        .collect(Collectors.joining(delimiter));
+    }
+
+    private String getValueForIndex(int number, int index, Map<String, String> values) {
+        boolean shouldPick = ((number >> index) & LOWEST_BIT_MASK) != ZERO;
+        return shouldPick ? values.get(fields.get(index)) : NO_FIELD;
     }
 
     private String makeKeyEntry(String value) {

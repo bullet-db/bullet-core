@@ -15,7 +15,7 @@ public interface Partitioner {
      * Returns the partitioning keys for this {@link Query} instance.
      *
      * @param query The query to partition for.
-     * @return A {@link List} of Strings representing the keys for this query.
+     * @return A non-null {@link List} of Strings representing the keys for this query.
      */
     List<String> getKeys(Query query);
 
@@ -23,7 +23,7 @@ public interface Partitioner {
      * Returns the partitioning keys for this {@link BulletRecord} instance.
      *
      * @param record The record to partition.
-     * @return A {@link List} of Strings representing the keys for this record.
+     * @return A non-null {@link List} of Strings representing the keys for this record.
      */
     List<String> getKeys(BulletRecord record);
 }
