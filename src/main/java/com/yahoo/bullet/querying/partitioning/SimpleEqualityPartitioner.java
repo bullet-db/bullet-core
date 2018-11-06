@@ -182,6 +182,9 @@ public class SimpleEqualityPartitioner implements Partitioner {
         // Otherwise, it's a list of size 1 with a singular value, which has been already validated
         FilterClause filter = singletonFilters.get(0);
         Object value = filter.getValues().get(0);
+        if (filter.hasNull(value)) {
+            return NO_FIELD;
+        }
         return makeKeyEntry(filter.getValue(value));
     }
 

@@ -8,7 +8,6 @@ package com.yahoo.bullet.querying.operations;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.ObjectFilterClause;
-import com.yahoo.bullet.parsing.StringFilterClause;
 import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
@@ -145,10 +144,6 @@ public class FilterOperations {
         return COMPARATORS.get(operator).compare(object, cast(record, type, clause.getValues()));
     }
 
-    private static boolean performRelational(BulletRecord record, StringFilterClause clause) {
-        return performRelational(record, new ObjectFilterClause(clause));
-    }
-
     private static boolean performLogical(BulletRecord record, LogicalClause clause) {
         List<Clause> clauses = clause.getClauses();
         if (isEmpty(clauses)) {
@@ -166,15 +161,14 @@ public class FilterOperations {
      * @return The result of th
      */
     public static boolean perform(BulletRecord record, Clause clause) {
-        // Rather than define another hierarchy of Clause -> StringFilterClause, ObjectFilterClause, LogicalClause evaluators, we'll eat the
-        // cost of violating polymorphism in this one spot.
+        // Rather than define another hierarchy of Clause -> ObjectFilterClause, LogicalClause evaluators, we'll eat
+        // the cost of violating polymorphism in this one spot.
         // We do not want processing logic in FilterClause or LogicalClause, otherwise we could put the appropriate
         // methods in those classes.
         try {
+            // All StringFilterClauses have been rewritten at Query configuration.
             if (clause instanceof ObjectFilterClause) {
                 return performRelational(record, (ObjectFilterClause) clause);
-            } else if (clause instanceof StringFilterClause) {
-                return performRelational(record, (StringFilterClause) clause);
             } else {
                 return performLogical(record, (LogicalClause) clause);
             }

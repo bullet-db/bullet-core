@@ -295,15 +295,15 @@ public class BulletConfig extends Config {
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Raw max should be <= Aggregation max", AGGREGATION_MAX_SIZE, RAW_AGGREGATION_MAX_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Group max should be <= Aggregation max", AGGREGATION_MAX_SIZE, GROUP_AGGREGATION_MAX_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Distribution points should be <= Aggregation max", AGGREGATION_MAX_SIZE, DISTRIBUTION_AGGREGATION_MAX_POINTS)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max duration should be >= min window emit interval", QUERY_MAX_DURATION, WINDOW_MIN_EMIT_EVERY)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("If metadata is enabled, keys should be defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataConfigured);
         VALIDATOR.relate("If metadata is disabled, keys should not be defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)

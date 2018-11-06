@@ -69,7 +69,7 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
-     * Takes a String value and returns a casted TypedObject according to this type.
+     * Takes a String value and returns a casted TypedObject according to the given type.
      *
      * @param type The {@link Type} to cast the values to.
      * @param value The string value that is being cast.
@@ -90,7 +90,7 @@ public class TypedObject implements Comparable<TypedObject> {
      * @param type The {@link Type} to cast the values to.
      * @param object The Object that is being cast.
      * @return The casted TypedObject with the type set to the appropriate {@link Type} or
-     *         {@link TypedObject#GENERIC_UNKNOWN} if it cannot.
+     * {@link TypedObject#GENERIC_UNKNOWN} if it cannot.
      */
     public static TypedObject typeCastFromObject(Type type, Object object) {
         if (object == null) {

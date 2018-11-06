@@ -62,6 +62,16 @@ public enum Type {
     }
 
     /**
+     * Checks to see if a given string is the {@link #NULL_EXPRESSION}.
+     *
+     * @param string The string to check if it is null.
+     * @return A boolean denoting whether the given string represented a null.
+     */
+    public static boolean isNullExpression(String string) {
+        return NULL_EXPRESSION.compareToIgnoreCase(string) == 0;
+    }
+
+    /**
      * Takes a value and casts it to this type.
      *
      * @param value The string value that is being cast.
@@ -84,7 +94,7 @@ public enum Type {
             case STRING:
                 return value;
             case NULL:
-                return value == null || NULL_EXPRESSION.compareToIgnoreCase(value) == 0 ? null : value;
+                return value == null || isNullExpression(value) ? null : value;
             // We won't support the rest for castability. This wouldn't happen if getType was used to create
             // TypedObjects because because we only support cast operation on PRIMITIVES and NULL.
             default:

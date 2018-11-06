@@ -784,6 +784,19 @@ public class Validator {
         return ((Number) first).doubleValue() >= ((Number) second).doubleValue();
     }
 
+    /**
+     * Checks to see if the first boolean object implies the second boolean object. In other words, does the first imply
+     * the second. If first is true and second is false, this check is false. Otherwise, it is true.
+     *
+     * @param first The first boolean object.
+     * @param second The second boolean object.
+     * @return A boolean denoting whether the second is implied by the first.
+     */
+    public static boolean isImplied(Object first, Object second) {
+        // first -> second === ~first or second
+        return !((Boolean) first) || ((Boolean) second);
+    }
+
     // Binary Predicate Generators.
 
     /**
