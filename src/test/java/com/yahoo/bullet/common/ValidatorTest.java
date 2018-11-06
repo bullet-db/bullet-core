@@ -146,6 +146,22 @@ public class ValidatorTest {
     }
 
     @Test
+    public void testIsTrue() {
+        Assert.assertFalse(Validator.isTrue("foo"));
+        Assert.assertFalse(Validator.isTrue(null));
+        Assert.assertFalse(Validator.isTrue(false));
+        Assert.assertTrue(Validator.isTrue(true));
+    }
+
+    @Test
+    public void testIsFalse() {
+        Assert.assertFalse(Validator.isFalse("foo"));
+        Assert.assertFalse(Validator.isFalse(null));
+        Assert.assertFalse(Validator.isFalse(true));
+        Assert.assertTrue(Validator.isFalse(false));
+    }
+
+    @Test
     public void testisType() {
         Assert.assertTrue(Validator.isType("foo", String.class));
         Assert.assertTrue(Validator.isType(1, Integer.class));
@@ -695,5 +711,23 @@ public class ValidatorTest {
         Predicate<Object> isNotNull = Validator.not(Validator::isNull);
         Assert.assertTrue(isNotNull.test("a"));
         Assert.assertFalse(isNotNull.test(null));
+    }
+
+    @Test
+    public void testIfTrueThenCheck() {
+        BiPredicate<Object, Object> isEnabledAndCheck = Validator.ifTrueThenCheck(Validator::isList);
+        Assert.assertTrue(isEnabledAndCheck.test(true, emptyList()));
+        Assert.assertTrue(isEnabledAndCheck.test(false, null));
+        Assert.assertTrue(isEnabledAndCheck.test(false, null));
+        Assert.assertFalse(isEnabledAndCheck.test(true, 8));
+    }
+
+    @Test
+    public void testIsImpliedBy() {
+        BiPredicate<Object, Object> isEnabledAndCheck = Validator.isImpliedBy(Validator::isTrue, Validator::isList);
+        Assert.assertTrue(isEnabledAndCheck.test(true, emptyList()));
+        Assert.assertTrue(isEnabledAndCheck.test(false, null));
+        Assert.assertTrue(isEnabledAndCheck.test(false, null));
+        Assert.assertFalse(isEnabledAndCheck.test(true, 8));
     }
 }

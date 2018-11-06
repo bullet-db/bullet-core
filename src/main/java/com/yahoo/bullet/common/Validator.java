@@ -518,6 +518,26 @@ public class Validator {
     }
 
     /**
+     * Checks to see if the value is true or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was true.
+     */
+    public static boolean isTrue(Object value) {
+        return isBoolean(value) && ((Boolean) value);
+    }
+
+    /**
+     * Checks to see if the value is false or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was false.
+     */
+    public static boolean isFalse(Object value) {
+        return isBoolean(value) && !((Boolean) value);
+    }
+
+    /**
      * Checks to see if the value is of the provided type or not.
      *
      * @param value The object to check type for.
@@ -808,5 +828,32 @@ public class Validator {
      */
     public static BiPredicate<Object, Object> isAtleastNTimes(double n) {
         return (greater, smaller) -> ((Number) greater).doubleValue() >= n * ((Number) smaller).doubleValue();
+    }
+
+    /**
+     * Returns a {@link BiPredicate} that checks to see if the first boolean argument implies the second
+     * {@link Predicate}. In other words, if the first argument is true and the second argument evaluates to false
+     * on the given {@link Predicate}, this check is false. Else, it is true.
+     *
+     * @param predicate The {@link Predicate} to test the second argument to the returned {@link BiPredicate} with.
+     * @return The created {@link BiPredicate}.
+     */
+    public static BiPredicate<Object, Object> ifTrueThenCheck(Predicate<Object> predicate) {
+        // Can use isImplied(bool, predicate.test(object)) but is not lazy anymore
+        return (bool, object) -> !((Boolean) bool) || predicate.test(object);
+    }
+
+    /**
+     * Returns a {@link BiPredicate} that checks to see if the first {@link Predicate} implies the second. In other
+     * words, if the first one evaluates to true on the first object in the BiPredicate and the second evaluates to
+     * false on the second object, this check is false. Else, it is true. Analogous to
+     * {@link Validator#isImplied(Object, Object)}.
+     *
+     * @param firstTest The first {@link Predicate}.
+     * @param secondTest The second {@link Predicate}.
+     * @return The created {@link BiPredicate}.
+     */
+    public static BiPredicate<Object, Object> isImpliedBy(Predicate<Object> firstTest, Predicate<Object> secondTest) {
+        return (first, second) -> !(firstTest.test(first)) || secondTest.test(second);
     }
 }
