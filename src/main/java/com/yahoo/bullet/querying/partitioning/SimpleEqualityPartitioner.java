@@ -128,11 +128,10 @@ public class SimpleEqualityPartitioner implements Partitioner {
         // For fields not present (NO_FIELD mapped), this de-dupes them with the binary combination that ignores them
         Set<String> keys = new HashSet<>();
 
-        int numberOfFields = fields.size();
-        int combinations = 1 << numberOfFields;
         // Generate a truth table for all possible combinations of the fields when using the field value or not using
         // an integer to represent a binary of fields.size() chars where each one represents to include or not the field
-        return IntStream.range(0, 1 << numberOfFields).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toList());
+        IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).forEach(keys::add);
+        return new ArrayList<>(keys);
     }
 
     private static boolean hasNonANDLogicals(List<Clause> filters) {
@@ -209,6 +208,6 @@ public class SimpleEqualityPartitioner implements Partitioner {
     }
 
     private String makeKeyEntry(String value) {
-        return new StringBuilder(value).append(DISAMBIGUATOR).toString();
+        return value + DISAMBIGUATOR;
     }
 }
