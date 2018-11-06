@@ -11,17 +11,22 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.StringFilterClause;
+import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.typesystem.Type;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
+import static com.yahoo.bullet.parsing.FilterUtils.makeObjectClause;
+import static com.yahoo.bullet.parsing.FilterUtils.makeStringClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -138,6 +143,17 @@ public class SimpleEqualityPartitionerTest {
     }
 
     @Test
+    public void testPartitioningForQueryWithNullCheckedFields() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
+        // Has an ObjectFilterClause with type forced to STRING (so a == "null" as opposed to is not null)
+        Query query = createQuery(makeClause(Clause.Operation.AND,
+                                             makeObjectClause("A", singletonList(new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, Type.STRING)), Clause.Operation.EQUALS),
+                                             makeStringClause("B", null, Clause.Operation.EQUALS)));
+
+        Assert.assertEquals(partitioner.getKeys(query), singletonList("null.-null"));
+    }
+
+    @Test
     public void testPartitioningForQueryWithAllFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C");
         Query query = createQuery(makeClause(Clause.Operation.AND,
@@ -165,7 +181,20 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         BulletRecord record = RecordBox.get().add("A", "foo").getRecord();
         Set<String> expected = new HashSet<>(asList("null-null", "foo.-null"));
-        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        List<String> actualList = partitioner.getKeys(record);
+        Set<String> actual = new HashSet<>(actualList);
+        Assert.assertEquals(actualList.size(), expected.size());
+        Assert.assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testPartitioningForRecordWithNulledFields() {
+        SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
+        BulletRecord record = RecordBox.get().add("A", "null").getRecord();
+        Set<String> expected = new HashSet<>(asList("null.-null", "null-null"));
+        List<String> actualList = partitioner.getKeys(record);
+        Set<String> actual = new HashSet<>(actualList);
+        Assert.assertEquals(actualList.size(), expected.size());
         Assert.assertEquals(actual, expected);
     }
 
@@ -175,7 +204,9 @@ public class SimpleEqualityPartitionerTest {
         BulletRecord record = RecordBox.get().add("B", "foo").add("D", "baz").getRecord();
         Set<String> expected = new HashSet<>(asList("null-foo.-null-null", "null-null-null-null",
                                                     "null-null-null-baz.", "null-foo.-null-baz."));
-        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        List<String> actualList = partitioner.getKeys(record);
+        Set<String> actual = new HashSet<>(actualList);
+        Assert.assertEquals(actualList.size(), expected.size());
         Assert.assertEquals(actual, expected);
     }
 
@@ -187,7 +218,9 @@ public class SimpleEqualityPartitionerTest {
                                                     "foo.-bar.-null", "foo.-null-baz.", "null-bar.-baz.",
                                                     "foo.-null-null", "null-null-baz.", "null-bar.-null",
                                                     "null-null-null"));
-        Set<String> actual = new HashSet<>(partitioner.getKeys(record));
+        List<String> actualList = partitioner.getKeys(record);
+        Set<String> actual = new HashSet<>(actualList);
+        Assert.assertEquals(actualList.size(), expected.size());
         Assert.assertEquals(actual, expected);
     }
 }

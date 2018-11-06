@@ -42,7 +42,11 @@ public class FilterUtils {
     }
 
     public static Clause makeClause(String field, List<String> values, Clause.Operation operation) {
-        FilterClause clause = new StringFilterClause();
+        return new ObjectFilterClause((StringFilterClause) makeStringClause(field, values, operation));
+    }
+
+    public static Clause makeStringClause(String field, List<String> values, Clause.Operation operation) {
+        StringFilterClause clause = new StringFilterClause();
         clause.setField(field);
         clause.setValues(values == null ? Collections.singletonList(Type.NULL_EXPRESSION) : values);
         clause.setOperation(operation);

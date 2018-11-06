@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.typesystem.Type;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -216,7 +217,7 @@ public class QueryTest {
 
         Assert.assertEquals(query.toString(),
                             "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
+                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo, type: null}, {kind: VALUE, value: bar, type: null}]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
                             "postAggregations: null, " +
@@ -228,12 +229,51 @@ public class QueryTest {
         query.configure(config);
         Assert.assertEquals(query.toString(),
                             "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [foo, bar]}], " +
+                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo, type: null}, {kind: VALUE, value: bar, type: null}]}], " +
                             "projection: {fields: {field=bid}}, " +
                             "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
                             "postAggregations: null, " +
                             "window: {emit: {type=TIME, every=4000}, include: null}, " +
                             "duration: 30000" +
                             "}");
+    }
+
+    @Test
+    public void testRewritingClauses() {
+        Query query = new Query();
+        LogicalClause and = new LogicalClause();
+        and.setOperation(Clause.Operation.AND);
+
+        LogicalClause or = new LogicalClause();
+        or.setOperation(Clause.Operation.OR);
+        StringFilterClause equals = new StringFilterClause();
+        equals.setOperation(Clause.Operation.EQUALS);
+        equals.setField("A");
+        equals.setValues(singletonList(Type.NULL_EXPRESSION));
+        and.setClauses(asList(or, equals));
+
+        query.setFilters(singletonList(and));
+        query.configure(new BulletConfig());
+
+        List<Clause> filters = query.getFilters();
+        Assert.assertEquals(filters.size(), 1);
+        LogicalClause rewrittenAnd = (LogicalClause) filters.get(0);
+        Assert.assertEquals(rewrittenAnd.getClauses().size(), 2);
+
+        LogicalClause rewrittenOr = (LogicalClause) rewrittenAnd.getClauses().get(0);
+        Assert.assertNull(rewrittenOr.getClauses());
+        Assert.assertEquals(rewrittenOr.getOperation(), Clause.Operation.OR);
+
+        Clause rewrittenStringFilterClause = rewrittenAnd.getClauses().get(1);
+        Assert.assertTrue(rewrittenStringFilterClause instanceof ObjectFilterClause);
+        ObjectFilterClause rewritten = (ObjectFilterClause) rewrittenStringFilterClause;
+        Assert.assertEquals(rewritten.getField(), "A");
+        Assert.assertEquals(rewritten.getOperation(), Clause.Operation.EQUALS);
+        Assert.assertEquals(rewritten.getValues().size(), 1);
+        Value expectedValue = new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, null);
+        Value actualValue = rewritten.getValues().get(0);
+        Assert.assertEquals(actualValue.getType(), expectedValue.getType());
+        Assert.assertEquals(actualValue.getValue(), expectedValue.getValue());
+        Assert.assertEquals(actualValue.getKind(), expectedValue.getKind());
     }
 }

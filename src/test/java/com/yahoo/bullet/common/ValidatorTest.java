@@ -667,6 +667,14 @@ public class ValidatorTest {
     }
 
     @Test
+    public void testIsImplied() {
+        Assert.assertTrue(Validator.isImplied(true, true));
+        Assert.assertTrue(Validator.isImplied(false, true));
+        Assert.assertTrue(Validator.isImplied(false, false));
+        Assert.assertFalse(Validator.isImplied(true, false));
+    }
+
+    @Test
     public void testANDing() {
         Predicate<Object> notNullAndNotEmptyList = Validator.and(Objects::nonNull, a -> !(((List) a).isEmpty()));
         Assert.assertFalse(notNullAndNotEmptyList.test(null));
