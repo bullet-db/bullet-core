@@ -37,6 +37,11 @@ public class QueryManager {
         }
     }
 
+    /**
+     * The constructor that takes a non-null {@link BulletConfig} instance that contains partitioning settings.
+     *
+     * @param config The non-null config.
+     */
     public QueryManager(BulletConfig config) {
         boolean enable = config.getAs(BulletConfig.QUERY_PARTITIONER_ENABLE, Boolean.class);
         if (enable) {
@@ -49,6 +54,11 @@ public class QueryManager {
         queries = new HashMap<>();
     }
 
+    /**
+     * Adds a query instance to
+     * @param id
+     * @param querier
+     */
     public void addQuery(String id, Querier querier) {
         Query query = querier.getRunningQuery().getQuery();
         List<String> keys = partitioner.getKeys(query);
@@ -72,6 +82,10 @@ public class QueryManager {
         return querier;
     }
 
+    public Querier getQuery(String id) {
+        return queries.get(id);
+    }
+
     public Map<String, Querier> getQueries(BulletRecord record) {
         List<String> keys = partitioner.getKeys(record);
         Map<String, Querier> queriers = new HashMap<>();
@@ -81,6 +95,7 @@ public class QueryManager {
                 queryIDs.forEach(id -> queriers.put(id, queries.get(id)));
             }
         }
+        log.debug("Retrieved %d/%d queries for record: %s", queriers.size(), queries.size(), record);
         return queriers;
     }
 }
