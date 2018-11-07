@@ -8,16 +8,16 @@ package com.yahoo.bullet.querying.partitioning;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 
-import java.util.List;
+import java.util.Set;
 
 public class MockPartitioner implements Partitioner {
     @Override
-    public List<String> getKeys(Query query) {
+    public Set<String> getKeys(Query query) {
         return null;
     }
 
     @Override
-    public List<String> getKeys(BulletRecord record) {
+    public Set<String> getKeys(BulletRecord record) {
         return null;
     }
 }

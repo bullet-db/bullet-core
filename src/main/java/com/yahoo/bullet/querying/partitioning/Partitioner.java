@@ -8,22 +8,22 @@ package com.yahoo.bullet.querying.partitioning;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.record.BulletRecord;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Partitioner {
     /**
      * Returns the partitioning keys for this {@link Query} instance.
      *
      * @param query The query to partition for.
-     * @return A non-null {@link List} of Strings representing the keys for this query.
+     * @return A non-null {@link Set} of Strings representing the keys for this query.
      */
-    List<String> getKeys(Query query);
+    Set<String> getKeys(Query query);
 
     /**
      * Returns the partitioning keys for this {@link BulletRecord} instance.
      *
      * @param record The record to partition.
-     * @return A non-null {@link List} of Strings representing the keys for this record.
+     * @return A non-null {@link Set} of Strings representing the keys for this record.
      */
-    List<String> getKeys(BulletRecord record);
+    Set<String> getKeys(BulletRecord record);
 }
