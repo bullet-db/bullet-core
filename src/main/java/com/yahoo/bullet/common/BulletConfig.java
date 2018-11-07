@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +65,11 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
+
+    public static final String QUERY_PARTITIONER_ENABLE = "bullet.query.partitioner.enable";
+    public static final String QUERY_PARTITIONER_CLASS_NAME = "bullet.query.partitioner.class.name";
+    public static final String EQUALITY_PARTITIONER_FIELDS = "bullet.query.partitioner.equality.fields";
+    public static final String EQUALITY_PARTITIONER_DELIMITER = "bullet.query.partitioner.equality.delimiter";
 
     // Defaults
     public static final long DEFAULT_QUERY_DURATION = (long) Double.POSITIVE_INFINITY;
@@ -134,9 +140,15 @@ public class BulletConfig extends Config {
 
     public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
 
+    public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
+    public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner";
+    public static final String DEFAULT_EQUALITY_PARTITIONER_DELIMITER = "|";
+    public static final int MAXIMUM_EQUALITY_FIELDS = 10;
+
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
+
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
                  .defaultTo(DEFAULT_QUERY_DURATION)
@@ -258,29 +270,50 @@ public class BulletConfig extends Config {
                  .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
-                 .checkIf(Validator::isString);
+                 .checkIf(Validator::isClassName);
 
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
-                .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
-                .checkIf(Validator::isString);
+                 .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
+                 .checkIf(Validator::isClassName);
+
+        VALIDATOR.define(QUERY_PARTITIONER_ENABLE)
+                 .defaultTo(DEFAULT_QUERY_PARTITIONER_ENABLE)
+                 .checkIf(Validator::isBoolean);
+        VALIDATOR.define(QUERY_PARTITIONER_CLASS_NAME)
+                 .defaultTo(DEFAULT_QUERY_PARTITIONER_CLASS_NAME)
+                 .checkIf(Validator::isClassName);
+        VALIDATOR.define(EQUALITY_PARTITIONER_FIELDS)
+                 .checkIf(Validator.isListOfType(String.class))
+                 .checkIf(Validator.hasMaximumListSize(MAXIMUM_EQUALITY_FIELDS))
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(EQUALITY_PARTITIONER_DELIMITER)
+                 .defaultTo(DEFAULT_EQUALITY_PARTITIONER_DELIMITER)
+                 .checkIf(Validator::isString);
+
 
         VALIDATOR.relate("Max should be >= default", QUERY_MAX_DURATION, QUERY_DEFAULT_DURATION)
                  .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max should be >= default", AGGREGATION_MAX_SIZE, AGGREGATION_DEFAULT_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Raw max should be <= Aggregation max", AGGREGATION_MAX_SIZE, RAW_AGGREGATION_MAX_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Group max should be <= Aggregation max", AGGREGATION_MAX_SIZE, GROUP_AGGREGATION_MAX_SIZE)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Distribution points should be <= Aggregation max", AGGREGATION_MAX_SIZE, DISTRIBUTION_AGGREGATION_MAX_POINTS)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("Max duration should be >= min window emit interval", QUERY_MAX_DURATION, WINDOW_MIN_EMIT_EVERY)
-                .checkIf(Validator::isGreaterOrEqual);
+                 .checkIf(Validator::isGreaterOrEqual);
         VALIDATOR.relate("If metadata is enabled, keys should be defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataConfigured);
         VALIDATOR.relate("If metadata is disabled, keys should not be defined", RESULT_METADATA_ENABLE, RESULT_METADATA_METRICS)
                  .checkIf(BulletConfig::isMetadataNecessary)
                  .orElseUse(false, Collections.emptyMap());
+
+        VALIDATOR.evaluate("If the equality partitioner is used, the partitioner fields should be defined",
+                            QUERY_PARTITIONER_ENABLE, QUERY_PARTITIONER_CLASS_NAME, EQUALITY_PARTITIONER_FIELDS)
+                 .checkIf(BulletConfig::areEqualityPartitionerFieldsDefined)
+                 .orFail();
     }
 
     // Members
@@ -348,6 +381,28 @@ public class BulletConfig extends Config {
     public void merge(Config other) {
         super.merge(other);
         validate();
+    }
+
+    /**
+     * This method loads a given class name (stored in this config) with the class name key and creates an instance of
+     * it by using a constructor that has a single argument for a {@link BulletConfig}. It then passes in this config
+     * and returns the constructed instance.
+     *
+     * @param classNameKey The name of the key which stores the class name to load in this config.
+     * @param <S> The type of the class.
+     * @return A created instance of this class.
+     * @throws RuntimeException if there were issues creating an instance. It wraps the real exception.
+     */
+    @SuppressWarnings("unchecked")
+    public <S> S loadConfiguredClass(String classNameKey) {
+        try {
+            String name = (String) this.get(classNameKey);
+            Class<? extends S> className = (Class<? extends S>) Class.forName(name);
+            Constructor<? extends S> constructor = className.getConstructor(BulletConfig.class);
+            return constructor.newInstance(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -420,5 +475,19 @@ public class BulletConfig extends Config {
             metadataList.add(metadata);
         }
         return metadataList;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean areEqualityPartitionerFieldsDefined(List<Object> fields) {
+        boolean enabled = (Boolean) fields.get(0);
+        if (!enabled) {
+            return true;
+        }
+        String className = fields.get(1).toString();
+        if (!DEFAULT_QUERY_PARTITIONER_CLASS_NAME.equals(className)) {
+            return true;
+        }
+        List<String> partitionFields = ((List<String>) fields.get(2));
+        return  partitionFields != null && !partitionFields.isEmpty();
     }
 }

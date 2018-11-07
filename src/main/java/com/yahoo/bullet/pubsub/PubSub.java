@@ -9,7 +9,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ import java.util.List;
  * Publishers and Subscribers.
  */
 @Slf4j
-public abstract class PubSub implements AutoCloseable {
+public abstract class PubSub {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
      * If the Context is {@link Context#QUERY_SUBMISSION}:
@@ -104,27 +103,17 @@ public abstract class PubSub implements AutoCloseable {
     public abstract List<Subscriber> getSubscribers(int n) throws PubSubException;
 
     /**
-     * Close PubSub and delete related context. Does not necessarily close publishers and subscribers.
-     */
-    @Override
-    public void close() {
-    }
-
-    /**
      * Create a PubSub instance using the class specified in the config file.
      *
-     * @param config The {@link BulletConfig} containing the class name and PubSub settings.
+     * @param config The non-null {@link BulletConfig} containing the class name and PubSub settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.
      * @throws PubSubException if PubSub creation fails.
      */
     public static PubSub from(BulletConfig config) throws PubSubException {
         try {
-            String pubSubClassName = (String) config.get(BulletConfig.PUBSUB_CLASS_NAME);
-            Class<? extends PubSub> pubSubClass = (Class<? extends PubSub>) Class.forName(pubSubClassName);
-            Constructor<? extends PubSub> constructor = pubSubClass.getConstructor(BulletConfig.class);
-            return constructor.newInstance(config);
-        } catch (Exception e) {
-            throw new PubSubException("Cannot create PubSub instance.", e);
+            return config.loadConfiguredClass(BulletConfig.PUBSUB_CLASS_NAME);
+        } catch (RuntimeException e) {
+            throw new PubSubException("Cannot create PubSub instance.", e.getCause());
         }
     }
 

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.typesystem.Type;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,11 @@ public class ObjectFilterClause extends FilterClause<Value> {
     @Override
     public String getValue(Value value) {
         return value.getValue();
+    }
+
+    @Override
+    public boolean hasNull(Value value) {
+        return (value.getType() == null || value.getType() == Type.NULL) && Type.isNullExpression(getValue(value));
     }
 
     @Override

@@ -218,12 +218,31 @@ bullet.query.rate.limit.max.emit.count: 50
 # This is the smallest interval in ms at which the check for whether the rate limit is being exceeded check is done if your backend uses rate limiting.
 bullet.query.rate.limit.time.interval: 100
 
+# Factory class to create new BulletRecords while doing GroupData, Sketch operations, etc. This can be changed to force
+# Bullet to use a particular type of BulletRecord everywhere.
+bullet.record.provider.class.name: "com.yahoo.bullet.record.AvroBulletRecordProvider"
+
+## Partitioner
+# Configure whether you want to use a partitioner for your queries. In the Filtering stage, generally all queries see
+# all the records coming into each component. If you use a partitioner and depending on your partitioner used, the goal
+# is to minimize the number of queries seen by each record to improve performance.
+bullet.query.partitioner.enable: false
+# Choose the partitioner class you should use. It should implement com.yahoo.bullet.querying.partitioning.Partitioner.
+# If partitioning is enabled, by default, the SimpleEqualityPartitioner is used. This partitioner uses a list of fields
+# to partition and works to artition only query that contain ANDed equality filters on fields against a single value.
+# If fields A and B are used to partition, this partitioner tries to make sure that queries with equality filters on A
+# and/or B are partitioned appropriately and makes sure  that records with values for A and/or B end up seeing a
+# subset of queries that have ANDed, equality filters for those  values.
+bullet.query.partitioner.class.name: "com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner"
+# If the SimpleEqualityPartitioner is used, you should provide the list of fields to partition on here. These are the
+# fields in the queries that are seen most commonly in your instance.
+bullet.query.partitioner.equality.fields: null
+# This is the delimiter to use to separate values for each field in the keys used by the partitioner. This should be
+# something that is not seen naturally in the fields used to partition.
+bullet.query.partitioner.equality.delimiter: "|"
+
 ## PubSub default settings
 # This should point to the implementation of your PubSub.
 bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.rest.RESTPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
-
-# Factory class to get new BulletRecords while doing group-data operations, sketch operations, etc. This can be changed
-# if a user wants to force Bullet to use a particular type of BulletRecord everywhere.
-bullet.record.provider.class.name: "com.yahoo.bullet.record.AvroBulletRecordProvider"

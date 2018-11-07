@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
+
 /**
  * This class validates instances of {@link BulletConfig}. Use {@link Validator.Entry} to define
  * fields and {@link Validator.Relationship} to define relationships between them.
@@ -414,7 +416,7 @@ public class Validator {
         if (!missingKeys.isEmpty())  {
             throw new NullPointerException("You must evaluate entries for "  + missingKeys.stream().collect(Collectors.joining(COMMA)));
         }
-        State state = new State(description, Arrays.asList(keys));
+        State state = new State(description, asList(keys));
         states.add(state);
         return state;
     }
@@ -503,6 +505,36 @@ public class Validator {
      */
     public static boolean isNotNull(Object value) {
         return value != null;
+    }
+
+    /**
+     * Checks to see if the value is null or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was null.
+     */
+    public static boolean isNull(Object value) {
+        return value == null;
+    }
+
+    /**
+     * Checks to see if the value is true or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was true.
+     */
+    public static boolean isTrue(Object value) {
+        return isBoolean(value) && ((Boolean) value);
+    }
+
+    /**
+     * Checks to see if the value is false or not.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was false.
+     */
+    public static boolean isFalse(Object value) {
+        return isBoolean(value) && !((Boolean) value);
     }
 
     /**
@@ -630,6 +662,21 @@ public class Validator {
         return isType(value, List.class) && !((List) value).isEmpty();
     }
 
+    /**
+     * Checks to see if the given object refers to a class name that can be loaded.
+     *
+     * @param value The object to check if it is a class name.
+     * @return A boolean denoting whether the given value was the name of a class.
+     */
+    public static boolean isClassName(Object value) {
+        try {
+            Class.forName((String) value);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     // Unary Predicate Generators
 
     /**
@@ -642,8 +689,30 @@ public class Validator {
     @SuppressWarnings("unchecked")
     public static <T> Predicate<Object> isIn(T... values) {
         Objects.requireNonNull(values);
-        Set<T> set = new HashSet<>(Arrays.asList(values));
+        Set<T> set = new HashSet<>(asList(values));
         return set::contains;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is a {@link List} and has at least n items
+     * in it. Note that the object must be a List even if n is 0.
+     *
+     * @param n The minimum number of items that can be in the List.
+     * @return A boolean denoting if the {@link List} has a size of at least the given parameter.
+     */
+    public static Predicate<Object> hasMinimumListSize(int n) {
+        return o -> isList(o) && ((List) o).size() >= n;
+    }
+
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object is a {@link List} and has at most n items
+     * in it. Note that the object must be a List even if n is 0.
+     *
+     * @param n The maximum number of items that can be in the List.
+     * @return A boolean denoting if the {@link List} has a size of at most the given parameter.
+     */
+    public static Predicate<Object> hasMaximumListSize(int n) {
+        return o -> isList(o) && ((List) o).size() <= n;
     }
 
     /**
@@ -663,7 +732,66 @@ public class Validator {
         return o -> isNumber(o) && ((T) o).doubleValue() >= minimum && ((T) o).doubleValue() <= maximum;
     }
 
-    // Binary Predicates.
+    /**
+     * Creates a {@link Predicate} that checks to see if the given object  is a non-empty {@link List} of the
+     * given type.
+     *
+     * @param type The class of the contents of the list to check for.
+     * @param <T> The type of the content in the list.
+     * @return A Predicate that checks tor see if the value was a non-empty List of the given type.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<Object> isListOfType(Class<T> type) {
+        return value -> {
+            if (!isNonEmptyList(value)) {
+                return false;
+            }
+            List list = (List) value;
+            return list.stream().allMatch(i -> isType(i, type));
+        };
+    }
+
+    /**
+     * Creates a {@link Predicate} that is true if and only if all the provided predicates are true and false otherwise.
+     *
+     * @param predicates The predicates to be ANDed.
+     * @return A predicate that is the AND of all the given predicates.
+     */
+    @SafeVarargs
+    public static Predicate<Object> and(Predicate<Object>... predicates) {
+        Predicate<Object> anded = UNARY_IDENTITY;
+        for (Predicate<Object> predicate : predicates) {
+            anded = anded.and(predicate);
+        }
+        return anded;
+    }
+
+    /**
+     * Creates a {@link Predicate} that is true if any of the provided predicates are true and false otherwise.
+     *
+     * @param predicates The predicates to be ORed.
+     * @return A predicate that is the OR of all the given predicates.
+     */
+    @SafeVarargs
+    public static Predicate<Object> or(Predicate<Object>... predicates) {
+        Predicate<Object> ored = not(UNARY_IDENTITY);
+        for (Predicate<Object> predicate : predicates) {
+            ored = ored.or(predicate);
+        }
+        return ored;
+    }
+
+    /**
+     * Creates a {@link Predicate} that is true if the given predicate is false and false if the given predicate is true.
+     *
+     * @param predicate The predicates to be negated.
+     * @return A predicate that is the NOT of the given predicate.
+     */
+    public static Predicate<Object> not(Predicate<Object> predicate) {
+        return predicate.negate();
+    }
+
+    // Binary Predicates
 
     /**
      * Checks to see if the first numeric object is greater than or equal to the second numeric object.
@@ -676,7 +804,20 @@ public class Validator {
         return ((Number) first).doubleValue() >= ((Number) second).doubleValue();
     }
 
-    // Binary Predicate makers.
+    /**
+     * Checks to see if the first boolean object implies the second boolean object. In other words, does the first imply
+     * the second. If first is true and second is false, this check is false. Otherwise, it is true.
+     *
+     * @param first The first boolean object.
+     * @param second The second boolean object.
+     * @return A boolean denoting whether the second is implied by the first.
+     */
+    public static boolean isImplied(Object first, Object second) {
+        // first -> second === ~first or second
+        return !((Boolean) first) || ((Boolean) second);
+    }
+
+    // Binary Predicate Generators.
 
     /**
      * Returns a {@link BiPredicate} that checks to see if the first argument is at least the given times
@@ -687,5 +828,32 @@ public class Validator {
      */
     public static BiPredicate<Object, Object> isAtleastNTimes(double n) {
         return (greater, smaller) -> ((Number) greater).doubleValue() >= n * ((Number) smaller).doubleValue();
+    }
+
+    /**
+     * Returns a {@link BiPredicate} that checks to see if the first boolean argument implies the second
+     * {@link Predicate}. In other words, if the first argument is true and the second argument evaluates to false
+     * on the given {@link Predicate}, this check is false. Else, it is true.
+     *
+     * @param predicate The {@link Predicate} to test the second argument to the returned {@link BiPredicate} with.
+     * @return The created {@link BiPredicate}.
+     */
+    public static BiPredicate<Object, Object> ifTrueThenCheck(Predicate<Object> predicate) {
+        // Can use isImplied(bool, predicate.test(object)) but is not lazy anymore
+        return (bool, object) -> !((Boolean) bool) || predicate.test(object);
+    }
+
+    /**
+     * Returns a {@link BiPredicate} that checks to see if the first {@link Predicate} implies the second. In other
+     * words, if the first one evaluates to true on the first object in the BiPredicate and the second evaluates to
+     * false on the second object, this check is false. Else, it is true. Analogous to
+     * {@link Validator#isImplied(Object, Object)}.
+     *
+     * @param firstTest The first {@link Predicate}.
+     * @param secondTest The second {@link Predicate}.
+     * @return The created {@link BiPredicate}.
+     */
+    public static BiPredicate<Object, Object> isImpliedBy(Predicate<Object> firstTest, Predicate<Object> secondTest) {
+        return (first, second) -> !(firstTest.test(first)) || secondTest.test(second);
     }
 }

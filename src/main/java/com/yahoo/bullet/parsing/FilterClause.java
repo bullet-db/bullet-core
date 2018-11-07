@@ -54,6 +54,14 @@ public abstract class FilterClause<T> extends Clause {
      */
     public abstract String getValue(T value);
 
+    /**
+     * Checks to see if this operates on a null value.
+     *
+     * @param value The value to check if it has a check on null.
+     * @return A boolean denoting whether a value includes a comparison to null.
+     */
+    public abstract boolean hasNull(T value);
+
     @Override
     public void configure(BulletConfig configuration) {
         if (operation == REGEX_LIKE) {

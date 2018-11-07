@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.parsing;
 
+import com.yahoo.bullet.typesystem.Type;
+
 public class StringFilterClause extends FilterClause<String> {
     /**
      * Default Constructor. GSON recommended.
@@ -16,5 +18,10 @@ public class StringFilterClause extends FilterClause<String> {
     @Override
     public String getValue(String value) {
         return value;
+    }
+
+    @Override
+    public boolean hasNull(String value) {
+        return Type.isNullExpression(value);
     }
 }

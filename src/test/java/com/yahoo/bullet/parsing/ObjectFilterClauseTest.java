@@ -7,6 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.typesystem.Type;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -107,5 +108,20 @@ public class ObjectFilterClauseTest {
         Assert.assertNull(filterClause.getOperation());
         Assert.assertNull(filterClause.getField());
         Assert.assertNull(filterClause.getValues());
+    }
+
+    @Test
+    public void testHasNull() {
+        ObjectFilterClause filterClause = new ObjectFilterClause();
+        Value valueA = new Value(null, Type.NULL_EXPRESSION);
+        Assert.assertTrue(filterClause.hasNull(valueA));
+        Value valueB = new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION);
+        Assert.assertTrue(filterClause.hasNull(valueB));
+        Value valueC = new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, Type.NULL);
+        Assert.assertTrue(filterClause.hasNull(valueC));
+        Value valueD = new Value(Value.Kind.FIELD, Type.NULL_EXPRESSION);
+        Assert.assertTrue(filterClause.hasNull(valueD));
+        Value valueE = new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, Type.STRING);
+        Assert.assertFalse(filterClause.hasNull(valueE));
     }
 }
