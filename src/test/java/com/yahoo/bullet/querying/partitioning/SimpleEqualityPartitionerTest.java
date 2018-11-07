@@ -21,13 +21,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static com.yahoo.bullet.parsing.FilterUtils.makeObjectClause;
 import static com.yahoo.bullet.parsing.FilterUtils.makeStringClause;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 
 public class SimpleEqualityPartitionerTest {
@@ -61,13 +61,13 @@ public class SimpleEqualityPartitionerTest {
     @Test
     public void testDefaultPartitioningQueryWithNoFilters() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
-        Assert.assertEquals(partitioner.getKeys(createQuery()), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(createQuery()), singleton("null-null"));
     }
 
     @Test
     public void testDefaultPartitioningQueryWithNoLogicalFilters() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
-        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.AND))), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(createQuery(makeClause(Clause.Operation.AND))), singleton("null-null"));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause("C", singletonList("bar"), Clause.Operation.EQUALS),
                                   makeClause("D", singletonList("baz"), Clause.Operation.EQUALS));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null-null"));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause("A", singletonList("bar"), Clause.Operation.REGEX_LIKE),
                                   makeClause("B", singletonList("baz"), Clause.Operation.CONTAINS_KEY));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null-null"));
     }
 
     @Test
@@ -92,14 +92,14 @@ public class SimpleEqualityPartitionerTest {
         Query query = createQuery(makeClause(Clause.Operation.OR,
                                              makeClause("A", singletonList("bar"), Clause.Operation.EQUALS),
                                              makeClause("B", singletonList("baz"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null-null"));
     }
 
     @Test
     public void testDefaultPartitioningQueryWithNOT() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause(Clause.Operation.NOT, makeClause("A", singletonList("bar"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null-null"));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class SimpleEqualityPartitionerTest {
         clause.setValues(null);
         clause.setOperation(Clause.Operation.EQUALS);
         Query query = createQuery(clause);
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null"));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SimpleEqualityPartitionerTest {
         Query query = createQuery(makeClause(Clause.Operation.AND,
                                              makeClause("A", asList("foo", "bar"), Clause.Operation.EQUALS),
                                              makeClause("B", singletonList("baz"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null-null"));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class SimpleEqualityPartitionerTest {
     public void testPartitioningForQueryWithMissingFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         Query query = createQuery(makeClause(Clause.Operation.AND, makeClause("A", singletonList("bar"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("bar.-null"));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SimpleEqualityPartitionerTest {
                                              makeObjectClause("A", singletonList(new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, Type.STRING)), Clause.Operation.EQUALS),
                                              makeStringClause("B", null, Clause.Operation.EQUALS)));
 
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("null.-null"));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("null.-null"));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class SimpleEqualityPartitionerTest {
                                              makeClause("C", singletonList("qux"), Clause.Operation.EQUALS),
                                              makeClause("B", singletonList("baz"), Clause.Operation.EQUALS),
                                              makeClause("A", singletonList("bar"), Clause.Operation.EQUALS)));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-baz.-qux."));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("bar.-baz.-qux."));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class SimpleEqualityPartitionerTest {
                                              makeClause(Clause.Operation.AND,
                                                         makeClause("C", singletonList("qux"), Clause.Operation.EQUALS),
                                                         makeClause("A", singletonList("bar"), Clause.Operation.EQUALS))));
-        Assert.assertEquals(partitioner.getKeys(query), singletonList("bar.-quux.-qux.-norf."));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("bar.-quux.-qux.-norf."));
     }
 
     @Test
@@ -181,9 +181,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         BulletRecord record = RecordBox.get().add("A", "foo").getRecord();
         Set<String> expected = new HashSet<>(asList("null-null", "foo.-null"));
-        List<String> actualList = partitioner.getKeys(record);
-        Set<String> actual = new HashSet<>(actualList);
-        Assert.assertEquals(actualList.size(), expected.size());
+        Set<String> actual = partitioner.getKeys(record);
         Assert.assertEquals(actual, expected);
     }
 
@@ -192,9 +190,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         BulletRecord record = RecordBox.get().add("A", "null").getRecord();
         Set<String> expected = new HashSet<>(asList("null.-null", "null-null"));
-        List<String> actualList = partitioner.getKeys(record);
-        Set<String> actual = new HashSet<>(actualList);
-        Assert.assertEquals(actualList.size(), expected.size());
+        Set<String> actual = partitioner.getKeys(record);
         Assert.assertEquals(actual, expected);
     }
 
@@ -204,9 +200,7 @@ public class SimpleEqualityPartitionerTest {
         BulletRecord record = RecordBox.get().add("B", "foo").add("D", "baz").getRecord();
         Set<String> expected = new HashSet<>(asList("null-foo.-null-null", "null-null-null-null",
                                                     "null-null-null-baz.", "null-foo.-null-baz."));
-        List<String> actualList = partitioner.getKeys(record);
-        Set<String> actual = new HashSet<>(actualList);
-        Assert.assertEquals(actualList.size(), expected.size());
+        Set<String> actual = partitioner.getKeys(record);
         Assert.assertEquals(actual, expected);
     }
 
@@ -218,9 +212,7 @@ public class SimpleEqualityPartitionerTest {
                                                     "foo.-bar.-null", "foo.-null-baz.", "null-bar.-baz.",
                                                     "foo.-null-null", "null-null-baz.", "null-bar.-null",
                                                     "null-null-null"));
-        List<String> actualList = partitioner.getKeys(record);
-        Set<String> actual = new HashSet<>(actualList);
-        Assert.assertEquals(actualList.size(), expected.size());
+        Set<String> actual = partitioner.getKeys(record);
         Assert.assertEquals(actual, expected);
     }
 }

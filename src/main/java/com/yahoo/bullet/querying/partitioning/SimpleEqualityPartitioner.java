@@ -72,7 +72,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private List<String> fields;
     private Set<String> fieldSet;
     private String delimiter;
-    private final List<String> defaultKeys;
+    private final Set<String> defaultKeys;
 
     /**
      * Constructor that takes a {@link BulletConfig} instance with definitions for the various settings this needs.
@@ -86,7 +86,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         fields = (List<String>) config.getAs(BulletConfig.EQUALITY_PARTITIONER_FIELDS, List.class);
         fieldSet = new HashSet<>(fields);
         String defaultKey = Collections.nCopies(fields.size(), NO_FIELD).stream().collect(Collectors.joining(delimiter));
-        defaultKeys = Collections.singletonList(defaultKey);
+        defaultKeys = Collections.singleton(defaultKey);
     }
 
     /**
@@ -95,11 +95,11 @@ public class SimpleEqualityPartitioner implements Partitioner {
      * This partitioner ensures that queries are not stored in duplicate by returning only key for a query (the list
      * that is returned is of size 1).
      *
-     * @param query The query to partition.
-     * @return The {@link List} containing the one key for this query.
+     * @param query {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public List<String> getKeys(Query query) {
+    public Set<String> getKeys(Query query) {
         Objects.requireNonNull(query);
         List<Clause> filters = query.getFilters();
         // If no filters or has non ANDs, default partition
@@ -119,19 +119,19 @@ public class SimpleEqualityPartitioner implements Partitioner {
         // Generate key in fields order and pad with NO_FIELD if no mapping present
         String key = fields.stream().map(fieldFilters::get).map(this::getFilterValue).collect(Collectors.joining(delimiter));
         // For the SimpleEqualityPartitioner, the query is mapped to exactly one key only.
-        return Collections.singletonList(key);
+        return Collections.singleton(key);
     }
 
     @Override
-    public List<String> getKeys(BulletRecord record) {
+    public Set<String> getKeys(BulletRecord record) {
         Map<String, String> values = getFieldValues(record);
-        // For fields not present (NO_FIELD mapped), this de-dupes them with the binary combination that ignores them
-        Set<String> keys = new HashSet<>();
-
-        // Generate a truth table for all possible combinations of the fields when using the field value or not using
-        // an integer to represent a binary of fields.size() chars where each one represents to include or not the field
-        IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).forEach(keys::add);
-        return new ArrayList<>(keys);
+        /*
+         * Generate a truth table for all possible combinations of the fields when using the field value or not using
+         * an integer to represent a binary of fields.size() chars where each one represents to include or not the field
+         * For fields not present (NO_FIELD mapped), the final set de-dupes them with the binary combination that
+         * ignores them
+         */
+        return IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toSet());
     }
 
     private static boolean hasNonANDLogicals(List<Clause> filters) {
