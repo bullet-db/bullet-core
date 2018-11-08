@@ -158,7 +158,7 @@ public class FilterOperations {
      *
      * @param record The BulletRecord that is the subject of this clause.
      * @param clause The Clause that is being applied.
-     * @return The result of th
+     * @return The resulting boolean from applying the clause on the record.
      */
     public static boolean perform(BulletRecord record, Clause clause) {
         // Rather than define another hierarchy of Clause -> ObjectFilterClause, LogicalClause evaluators, we'll eat
