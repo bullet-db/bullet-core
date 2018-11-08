@@ -193,6 +193,7 @@ public class QueryManager {
     /**
      * Categorizes only the queries for the {@link BulletRecord} after partitioning using the {@link QueryCategorizer}.
      *
+     * @param record The {@link BulletRecord} to consume for the partitioned queries.
      * @return The {@link QueryCategorizer} instance with the categorized queries in the manager after partitioning.
      */
     public QueryCategorizer categorize(BulletRecord record) {
