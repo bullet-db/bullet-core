@@ -179,7 +179,7 @@ public class QueryManager {
             Set<String> queryIDs = partitioning.getOrDefault(key, Collections.emptySet());
             queryIDs.forEach(id -> queriers.put(id, queries.get(id)));
         }
-        log.debug("Retrieved %d/%d queries for record: %s", queriers.size(), queries.size(), record);
+        log.trace("Retrieved %d/%d queries for record: %s", queriers.size(), queries.size(), record);
         return queriers;
     }
 
