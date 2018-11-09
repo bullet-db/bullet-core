@@ -79,7 +79,6 @@ public class QueryManagerTest {
 
     private static String makePartition(String rawName, int count) {
         return rawName + SimpleEqualityPartitioner.DISAMBIGUATOR + QueryManager.Partition.DELIMITER + String.valueOf(count);
-
     }
 
     @Test
