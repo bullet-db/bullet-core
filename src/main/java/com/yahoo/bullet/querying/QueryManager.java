@@ -36,18 +36,21 @@ public class QueryManager {
     private Map<String, Set<String>> partitioning;
     private Map<String, Querier> queries;
     private Partitioner partitioner;
+    private long queriesSeen = 0;
+    private long expectedQueriesSeen = 0;
 
     public static final int QUANTILE_STEP = 10;
 
     public enum PartitionStat {
-        QUERIES, COUNT, STDDEV, LARGEST, SMALLEST, DISTRIBUTION
+        QUERY_COUNT, PARTITION_COUNT, ACTUAL_QUERIES_SEEN, EXPECTED_QUERIES_SEEN,
+        STDDEV_PARTITION_SIZE, LARGEST_PARTITION, SMALLEST_PARTITION, DISTRIBUTION
     }
 
     // Exposed for testing.
     static class Partition implements Comparable<Partition> {
-        public final String name;
-        public final int count;
-        public static final String DELIMITER = " -> ";
+        private final String name;
+        private final int count;
+        static final String DELIMITER = " -> ";
 
         private Partition(Map.Entry<String, Set<String>> partition) {
             name = partition.getKey();
@@ -179,7 +182,11 @@ public class QueryManager {
             Set<String> queryIDs = partitioning.getOrDefault(key, Collections.emptySet());
             queryIDs.forEach(id -> queriers.put(id, queries.get(id)));
         }
-        log.trace("Retrieved %d/%d queries for record: %s", queriers.size(), queries.size(), record);
+        int queriesSeen = queriers.size();
+        int allQueries = queries.size();
+        this.queriesSeen += queriesSeen;
+        expectedQueriesSeen += allQueries;
+        log.trace("Retrieved %d/%d queries for record: %s", queriesSeen, allQueries, record);
         return queriers;
     }
 
@@ -211,13 +218,15 @@ public class QueryManager {
         Map<PartitionStat, Object> stats = new HashMap<>();
         List<Partition> sorted = partitioning.entrySet().stream().map(Partition::new).sorted().collect(Collectors.toList());
         int size = sorted.size();
-        stats.put(PartitionStat.COUNT, size);
-        stats.put(PartitionStat.QUERIES, queries.size());
+        stats.put(PartitionStat.QUERY_COUNT, queries.size());
+        stats.put(PartitionStat.PARTITION_COUNT, size);
+        stats.put(PartitionStat.ACTUAL_QUERIES_SEEN, queriesSeen);
+        stats.put(PartitionStat.EXPECTED_QUERIES_SEEN, expectedQueriesSeen);
         if (size > 0) {
-            stats.put(PartitionStat.LARGEST, sorted.get(size - 1).toString());
-            stats.put(PartitionStat.SMALLEST, sorted.get(0).toString());
+            stats.put(PartitionStat.LARGEST_PARTITION, sorted.get(size - 1).toString());
+            stats.put(PartitionStat.SMALLEST_PARTITION, sorted.get(0).toString());
             double[] sizes = sorted.stream().mapToDouble(p -> (double) p.count).toArray();
-            stats.put(PartitionStat.STDDEV, new StandardDeviation().evaluate(sizes));
+            stats.put(PartitionStat.STDDEV_PARTITION_SIZE, new StandardDeviation().evaluate(sizes));
             stats.put(PartitionStat.DISTRIBUTION, getDistributions(sorted));
         }
         return stats;
