@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 public class QueryCategorizerTest {
-    private static Querier makeQuerier(boolean isDone, boolean isRateLimited, boolean isClosed) {
+    public static Querier makeQuerier(boolean isDone, boolean isRateLimited, boolean isClosed) {
         Querier querier = mock(Querier.class);
         // querier.consume returns void and does nothing. No need to mock.
         doReturn(isRateLimited).when(querier).isExceedingRateLimit();

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -120,7 +121,7 @@ public class QueryManager {
      * @return The removed {@link Querier} instance.
      */
     public Querier removeAndGetQuery(String id) {
-        Querier querier = queries.get(id);
+        Querier querier = queries.remove(id);
         if (querier != null) {
             Query query = querier.getRunningQuery().getQuery();
             Set<String> keys = partitioner.getKeys(query);
@@ -140,7 +141,7 @@ public class QueryManager {
      * @return The removed {@link List} of {@link Querier} instances.
      */
     public List<Querier> removeAndGetQueries(Set<String> ids) {
-        return ids.stream().map(this::removeAndGetQuery).collect(Collectors.toList());
+        return ids.stream().map(this::removeAndGetQuery).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**
@@ -197,7 +198,7 @@ public class QueryManager {
      * @return The {@link QueryCategorizer} instance with the categorized queries in the manager after partitioning.
      */
     public QueryCategorizer categorize(BulletRecord record) {
-        return categorize(partition(record));
+        return categorize(record, partition(record));
     }
 
     /**
@@ -232,5 +233,9 @@ public class QueryManager {
 
     private QueryCategorizer categorize(Map<String, Querier> queries) {
         return new QueryCategorizer().categorize(queries);
+    }
+
+    private QueryCategorizer categorize(BulletRecord record, Map<String, Querier> queries) {
+        return new QueryCategorizer().categorize(record, queries);
     }
 }
