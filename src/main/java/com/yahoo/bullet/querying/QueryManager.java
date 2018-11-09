@@ -43,7 +43,7 @@ public class QueryManager {
 
     public enum PartitionStat {
         QUERY_COUNT, PARTITION_COUNT, ACTUAL_QUERIES_SEEN, EXPECTED_QUERIES_SEEN,
-        STDDEV_PARTITION_SIZE, LARGEST_PARTITION, SMALLEST_PARTITION, DISTRIBUTION
+        STDDEV_PARTITION_SIZE, LARGEST_PARTITION, SMALLEST_PARTITION, DISTRIBUTION_PARTITION_SIZE
     }
 
     // Exposed for testing.
@@ -227,7 +227,7 @@ public class QueryManager {
             stats.put(PartitionStat.SMALLEST_PARTITION, sorted.get(0).toString());
             double[] sizes = sorted.stream().mapToDouble(p -> (double) p.count).toArray();
             stats.put(PartitionStat.STDDEV_PARTITION_SIZE, new StandardDeviation().evaluate(sizes));
-            stats.put(PartitionStat.DISTRIBUTION, getDistributions(sorted));
+            stats.put(PartitionStat.DISTRIBUTION_PARTITION_SIZE, getDistributions(sorted));
         }
         return stats;
     }

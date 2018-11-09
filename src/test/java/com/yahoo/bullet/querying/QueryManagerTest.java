@@ -287,7 +287,7 @@ public class QueryManagerTest {
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
         Assert.assertNotNull(stats.get(QueryManager.PartitionStat.STDDEV_PARTITION_SIZE));
 
-        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION);
+        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION_PARTITION_SIZE);
 
         Assert.assertEquals(distribution.size(), 5);
         Assert.assertEquals(distribution.get(0), makePartition(String.valueOf("1"), 1));
@@ -321,7 +321,7 @@ public class QueryManagerTest {
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
         Assert.assertNotNull(stats.get(QueryManager.PartitionStat.STDDEV_PARTITION_SIZE));
 
-        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION);
+        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION_PARTITION_SIZE);
 
         int step = max / QueryManager.QUANTILE_STEP;
         // If max > QUANTILE_STEP, distribution has QUANTILE_STEP points
