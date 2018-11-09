@@ -67,7 +67,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private static final int LOWEST_BIT_MASK = 1;
     private static final int ZERO = 0;
     // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
-    private static final char DISAMBIGUATOR = '.';
+    public static final char DISAMBIGUATOR = '.';
 
     private List<String> fields;
     private Set<String> fieldSet;

@@ -37,16 +37,17 @@ public class QueryManager {
     private Map<String, Querier> queries;
     private Partitioner partitioner;
 
-    private static final int QUANTILE_STEP = 10;
+    public static final int QUANTILE_STEP = 10;
 
     public enum PartitionStat {
         COUNT, STDDEV, LARGEST, SMALLEST, DISTRIBUTION
     }
 
-    private static class Partition implements Comparable<Partition> {
+    // Exposed for testing.
+    static class Partition implements Comparable<Partition> {
         public final String name;
         public final int count;
-        public static final String DELIMITER = ": ";
+        public static final String DELIMITER = " -> ";
 
         private Partition(Map.Entry<String, Set<String>> partition) {
             name = partition.getKey();
@@ -225,7 +226,7 @@ public class QueryManager {
         int size = sorted.size();
         int step = size <= QUANTILE_STEP ? 1 : size / QUANTILE_STEP;
         List<Partition> quantiles = new ArrayList<>();
-        for (int i = 0; i <= size; i += step) {
+        for (int i = 0; i < size; i += step) {
             quantiles.add(sorted.get(i));
         }
         return quantiles.stream().map(Partition::toString).collect(Collectors.toList());
