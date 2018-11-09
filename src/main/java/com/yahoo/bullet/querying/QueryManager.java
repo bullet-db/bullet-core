@@ -106,7 +106,7 @@ public class QueryManager {
      * @param querier A fully initialized (using {@link Querier#initialize()} {@link Querier} instance.
      */
     public void addQuery(String id, Querier querier) {
-        Query query = querier.getRunningQuery().getQuery();
+        Query query = querier.getQuery();
         Set<String> keys = partitioner.getKeys(query);
         for (String key : keys) {
             Set<String> partition = partitioning.getOrDefault(key, new HashSet<>());
@@ -127,7 +127,7 @@ public class QueryManager {
     public Querier removeAndGetQuery(String id) {
         Querier querier = queries.remove(id);
         if (querier != null) {
-            Query query = querier.getRunningQuery().getQuery();
+            Query query = querier.getQuery();
             Set<String> keys = partitioner.getKeys(query);
             for (String key : keys) {
                 partitioning.get(key).remove(id);

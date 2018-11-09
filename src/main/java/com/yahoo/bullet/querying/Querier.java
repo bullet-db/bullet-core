@@ -298,8 +298,7 @@ public class Querier implements Monoidal {
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private Scheme window;
 
-    // For testing convenience
-    @Getter(AccessLevel.PACKAGE)
+    @Getter
     private RunningQuery runningQuery;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.
@@ -578,6 +577,15 @@ public class Querier implements Monoidal {
     }
 
     // ********************************* Public helpers *********************************
+
+    /**
+     * Gets the {@link Query} instance for this Query.
+     *
+     * @return The {@link Query} instance for this object.
+     */
+    public Query getQuery() {
+        return runningQuery.getQuery();
+    }
 
     /**
      * Returns true if the query has expired and will never accept any more data.

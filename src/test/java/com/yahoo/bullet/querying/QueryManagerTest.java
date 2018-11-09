@@ -29,7 +29,6 @@ import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,9 +37,7 @@ import static org.mockito.Mockito.when;
 public class QueryManagerTest {
     private static Querier getQuerier(Query query) {
         Querier querier = QueryCategorizerTest.makeQuerier(false, false, false);
-        RunningQuery runningQuery = mock(RunningQuery.class);
-        when(runningQuery.getQuery()).thenReturn(query);
-        when(querier.getRunningQuery()).thenReturn(runningQuery);
+        when(querier.getQuery()).thenReturn(query);
         return querier;
     }
 
