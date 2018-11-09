@@ -280,6 +280,7 @@ public class QueryManagerTest {
         }
         Assert.assertEquals(queries.size(), 15);
         Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERIES), 15);
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.COUNT), 5);
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST), makePartition("5", 5));
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST), makePartition("1", 1));
@@ -308,8 +309,10 @@ public class QueryManagerTest {
                 addQuerier(manager, i, j, queries);
             }
         }
-        Assert.assertEquals(queries.size(), (max * (max + 1)) / 2);
+        int queryCount = (max * (max + 1)) / 2;
+        Assert.assertEquals(queries.size(), queryCount);
         Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERIES), queryCount);
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.COUNT), max);
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST), makePartition(String.valueOf(max), max));
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST), makePartition("1", 1));

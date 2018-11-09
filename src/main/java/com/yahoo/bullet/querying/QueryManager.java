@@ -40,7 +40,7 @@ public class QueryManager {
     public static final int QUANTILE_STEP = 10;
 
     public enum PartitionStat {
-        COUNT, STDDEV, LARGEST, SMALLEST, DISTRIBUTION
+        QUERIES, COUNT, STDDEV, LARGEST, SMALLEST, DISTRIBUTION
     }
 
     // Exposed for testing.
@@ -212,6 +212,7 @@ public class QueryManager {
         List<Partition> sorted = partitioning.entrySet().stream().map(Partition::new).sorted().collect(Collectors.toList());
         int size = sorted.size();
         stats.put(PartitionStat.COUNT, size);
+        stats.put(PartitionStat.QUERIES, queries.size());
         if (size > 0) {
             stats.put(PartitionStat.LARGEST, sorted.get(size - 1).toString());
             stats.put(PartitionStat.SMALLEST, sorted.get(0).toString());
