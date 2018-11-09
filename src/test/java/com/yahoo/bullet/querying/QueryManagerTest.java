@@ -300,25 +300,25 @@ public class QueryManagerTest {
         QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A"));
         Map<String, Querier> queries = new HashMap<>();
 
-        // Make MAX > QUANTILE_STEP
-        final int MAX = 20;
-        // Adds i partitions from 1 to MAX with i copies of the query that looks for A == i
-        for (int i = 1; i <= MAX; ++i) {
+        // Make max > QUANTILE_STEP
+        final int max = 20;
+        // Adds i partitions from 1 to max with i copies of the query that looks for A == i
+        for (int i = 1; i <= max; ++i) {
             for (int j = 1; j <= i; ++j) {
                 addQuerier(manager, i, j, queries);
             }
         }
-        Assert.assertEquals(queries.size(), (MAX * (MAX + 1)) / 2);
+        Assert.assertEquals(queries.size(), (max * (max + 1)) / 2);
         Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.COUNT), MAX);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST), makePartition(String.valueOf(MAX), MAX));
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.COUNT), max);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST), makePartition(String.valueOf(max), max));
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST), makePartition("1", 1));
         Assert.assertNotNull(stats.get(QueryManager.PartitionStat.STDDEV));
 
         List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION);
 
-        int step = MAX / QueryManager.QUANTILE_STEP;
-        // If MAX > QUANTILE_STEP, distribution has QUANTILE_STEP points
+        int step = max / QueryManager.QUANTILE_STEP;
+        // If max > QUANTILE_STEP, distribution has QUANTILE_STEP points
         Assert.assertEquals(distribution.size(), QueryManager.QUANTILE_STEP);
         for (int i = 0; i < QueryManager.QUANTILE_STEP; ++i) {
             // Each i represents the 1+(i * step)th partition. Adding one because partitions were generated from 1 not 0.
