@@ -220,7 +220,9 @@ public class QuerierTest {
     public void testDefaults() {
         Querier querier = make(Querier.Mode.ALL, new Query());
 
-        Query query = querier.getRunningQuery().getQuery();
+        RunningQuery runningQuery = querier.getRunningQuery();
+        Query query = querier.getQuery();
+        Assert.assertSame(runningQuery.getQuery(), query);
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
         Assert.assertEquals(query.getAggregation().getType(), Aggregation.Type.RAW);
         Assert.assertFalse(querier.isClosed());

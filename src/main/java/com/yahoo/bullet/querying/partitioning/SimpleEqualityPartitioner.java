@@ -42,10 +42,10 @@ import java.util.stream.IntStream;
  * of foo, bar and null for those fields, will be seen only by those queries that are have those filters (or subsets
  * of it), including queries with no filters on these fields (and queries with no filters at all).
  *
- * The {@link #getKeys(Query)} returns a list of size 1. This means the queries need not be duplicated after
- * partitioning. However, {@link #getKeys(BulletRecord)} will return a list of keys representing the queries that this
- * record needs to presented to. The size of this can be up to 2^(# of fields), where each of the keys is the list
- * of all combinations of null and the actual value in the record for each field.
+ * The {@link #getKeys(Query)} returns a set of size 1. This means the queries need not be duplicated after
+ * partitioning. However, {@link #getKeys(BulletRecord)} will return a set of keys representing the queries that this
+ * record needs to presented to. The size of this can be up to 2^(# of fields), where each of the keys is the join
+ * of all combinations of null and the actual value in the record for each field in field order with the delimiter.
  *
  * Ex: If fields are [A, B.c, D] and a record has these values: [A: foo, B.c: bar, D: baz, ...], the keys will be the
  * the concatenation of the following items in each tuple using the configured delimiter (not necessarily in this order):
@@ -67,7 +67,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private static final int LOWEST_BIT_MASK = 1;
     private static final int ZERO = 0;
     // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
-    private static final char DISAMBIGUATOR = '.';
+    public static final char DISAMBIGUATOR = '.';
 
     private List<String> fields;
     private Set<String> fieldSet;
