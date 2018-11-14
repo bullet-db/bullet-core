@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
  * This class wraps the concept of the {@link Partitioner} and allows you to control using your configured (or not)
  * partitioner, what queries (wrapped in the given {@link QueryWrapper}) are seen for each {@link BulletRecord}.  You
  * can get the queries relevant to your record (after applying any partitioner) using {@link #partition(BulletRecord)}.
- * You can use the {@link #addQuery(String, S)} to add a query to the manager and the {@link #removeAndGetQuery(String)}
- * and {@link #removeQueries(Set)} methods to remove a query from the manager.
+ * You can use the {@link #addQuery(String, QueryWrapper)} to add a query to the manager and the
+ * {@link #removeAndGetQuery(String)} and {@link #removeQueries(Set)} methods to remove a query from the manager.
  */
 @Slf4j
 public class QueryManager<S extends QueryWrapper> {

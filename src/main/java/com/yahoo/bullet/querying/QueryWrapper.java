@@ -8,5 +8,10 @@ package com.yahoo.bullet.querying;
 import com.yahoo.bullet.parsing.Query;
 
 public interface QueryWrapper {
+    /**
+     * Get a {@link Query} instance from this wrapper object.
+     *
+     * @return The wrapped {@link Query}.
+     */
     Query getQuery();
 }

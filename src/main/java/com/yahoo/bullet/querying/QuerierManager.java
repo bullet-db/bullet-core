@@ -17,7 +17,9 @@ import java.util.Map;
  */
 public class QuerierManager extends QueryManager<Querier> {
     /**
-     * {@inheritDoc}
+     * {@inheritDoc}.
+     *
+     * @param config {@inheritDoc}.
      */
     public QuerierManager(BulletConfig config) {
         super(config);
