@@ -9,6 +9,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.querying.QueryManager.PartitionStat;
 import com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
 import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
+import static com.yahoo.bullet.querying.QueryManager.Partition.DELIMITER;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.never;
@@ -34,7 +36,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class QueryManagerTest {
+public class QuerierManagerTest {
     private static Querier getQuerier(Query query) {
         Querier querier = QueryCategorizerTest.makeQuerier(false, false, false);
         when(querier.getQuery()).thenReturn(query);
@@ -65,7 +67,7 @@ public class QueryManagerTest {
         return config.validate();
     }
 
-    private static void addQuerier(QueryManager manager, int i, int j, Map<String, Querier> queriers) {
+    private static void addQuerier(QuerierManager manager, int i, int j, Map<String, Querier> queriers) {
         String value = String.valueOf(i);
         String id = String.valueOf((i * 100) + j);
         Query query = getQuery(ImmutablePair.of("A", value));
@@ -75,12 +77,12 @@ public class QueryManagerTest {
     }
 
     private static String makePartition(String rawName, int count) {
-        return rawName + SimpleEqualityPartitioner.DISAMBIGUATOR + QueryManager.Partition.DELIMITER + String.valueOf(count);
+        return rawName + SimpleEqualityPartitioner.DISAMBIGUATOR + DELIMITER + String.valueOf(count);
     }
 
     @Test
     public void testAddingAndRemovingQueries() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A", "B"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A", "B"));
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Querier querierA = getQuerier(queryA);
@@ -120,7 +122,7 @@ public class QueryManagerTest {
 
     @Test
     public void testNoPartitioning() {
-        QueryManager manager = new QueryManager(new BulletConfig());
+        QuerierManager manager = new QuerierManager(new BulletConfig());
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Query queryC = getQuery();
@@ -155,7 +157,7 @@ public class QueryManagerTest {
 
     @Test
     public void testPartitioning() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A", "B"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A", "B"));
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Query queryC = getQuery();
@@ -187,7 +189,7 @@ public class QueryManagerTest {
 
     @Test
     public void testCategorizingAll() {
-        QueryManager manager = new QueryManager(new BulletConfig());
+        QuerierManager manager = new QuerierManager(new BulletConfig());
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Querier querierA = getQuerier(queryA);
@@ -209,7 +211,7 @@ public class QueryManagerTest {
 
     @Test
     public void testCategorizingNoPartitioning() {
-        QueryManager manager = new QueryManager(new BulletConfig());
+        QuerierManager manager = new QuerierManager(new BulletConfig());
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Querier querierA = getQuerier(queryA);
@@ -237,7 +239,7 @@ public class QueryManagerTest {
 
     @Test
     public void testCategorizingPartitioning() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A", "B"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A", "B"));
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Querier querierA = getQuerier(queryA);
@@ -265,7 +267,7 @@ public class QueryManagerTest {
 
     @Test
     public void testSmallStatistics() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A"));
         Map<String, Querier> queries = new HashMap<>();
 
         // Adds i partitions from 1 to 5 with i copies of the query that looks for A == i
@@ -275,16 +277,16 @@ public class QueryManagerTest {
             }
         }
         Assert.assertEquals(queries.size(), 15);
-        Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 15);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 5);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 0L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 0L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST_PARTITION), makePartition("5", 5));
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
-        Assert.assertNotNull(stats.get(QueryManager.PartitionStat.STDDEV_PARTITION_SIZE));
+        Map<PartitionStat, Object> stats = manager.getStats();
+        Assert.assertEquals(stats.get(PartitionStat.QUERY_COUNT), 15);
+        Assert.assertEquals(stats.get(PartitionStat.PARTITION_COUNT), 5);
+        Assert.assertEquals(stats.get(PartitionStat.ACTUAL_QUERIES_SEEN), 0L);
+        Assert.assertEquals(stats.get(PartitionStat.EXPECTED_QUERIES_SEEN), 0L);
+        Assert.assertEquals(stats.get(PartitionStat.LARGEST_PARTITION), makePartition("5", 5));
+        Assert.assertEquals(stats.get(PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
+        Assert.assertNotNull(stats.get(PartitionStat.STDDEV_PARTITION_SIZE));
 
-        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION_PARTITION_SIZE);
+        List<String> distribution = (List<String>) stats.get(PartitionStat.DISTRIBUTION_PARTITION_SIZE);
 
         Assert.assertEquals(distribution.size(), 5);
         Assert.assertEquals(distribution.get(0), makePartition(String.valueOf("1"), 1));
@@ -296,7 +298,7 @@ public class QueryManagerTest {
 
     @Test
     public void testLargeStatistics() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A"));
         Map<String, Querier> queries = new HashMap<>();
 
         // Make max > QUANTILE_STEP
@@ -309,16 +311,16 @@ public class QueryManagerTest {
         }
         int queryCount = (max * (max + 1)) / 2;
         Assert.assertEquals(queries.size(), queryCount);
-        Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), queryCount);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), max);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 0L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 0L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.LARGEST_PARTITION), makePartition(String.valueOf(max), max));
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
-        Assert.assertNotNull(stats.get(QueryManager.PartitionStat.STDDEV_PARTITION_SIZE));
+        Map<PartitionStat, Object> stats = manager.getStats();
+        Assert.assertEquals(stats.get(PartitionStat.QUERY_COUNT), queryCount);
+        Assert.assertEquals(stats.get(PartitionStat.PARTITION_COUNT), max);
+        Assert.assertEquals(stats.get(PartitionStat.ACTUAL_QUERIES_SEEN), 0L);
+        Assert.assertEquals(stats.get(PartitionStat.EXPECTED_QUERIES_SEEN), 0L);
+        Assert.assertEquals(stats.get(PartitionStat.LARGEST_PARTITION), makePartition(String.valueOf(max), max));
+        Assert.assertEquals(stats.get(PartitionStat.SMALLEST_PARTITION), makePartition("1", 1));
+        Assert.assertNotNull(stats.get(PartitionStat.STDDEV_PARTITION_SIZE));
 
-        List<String> distribution = (List<String>) stats.get(QueryManager.PartitionStat.DISTRIBUTION_PARTITION_SIZE);
+        List<String> distribution = (List<String>) stats.get(PartitionStat.DISTRIBUTION_PARTITION_SIZE);
 
         int step = max / QueryManager.QUANTILE_STEP;
         // If max > QUANTILE_STEP, distribution has QUANTILE_STEP points
@@ -332,7 +334,7 @@ public class QueryManagerTest {
 
     @Test
     public void testQuerySeeingStatistics() {
-        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A", "B"));
+        QuerierManager manager = new QuerierManager(getEqualityPartitionerConfig("A", "B"));
         Query queryA = getQuery(ImmutablePair.of("A", "foo"));
         Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
         Query queryC = getQuery();
@@ -347,21 +349,21 @@ public class QueryManagerTest {
         BulletRecord recordB = RecordBox.get().add("A", "foo").getRecord();
         BulletRecord recordC = RecordBox.get().getRecord();
 
-        Map<QueryManager.PartitionStat, Object> stats;
+        Map<PartitionStat, Object> stats;
 
         manager.categorize(recordA);
         stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 3L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 3L);
+        Assert.assertEquals(stats.get(PartitionStat.ACTUAL_QUERIES_SEEN), 3L);
+        Assert.assertEquals(stats.get(PartitionStat.EXPECTED_QUERIES_SEEN), 3L);
 
         manager.categorize(recordB);
         stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 5L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 6L);
+        Assert.assertEquals(stats.get(PartitionStat.ACTUAL_QUERIES_SEEN), 5L);
+        Assert.assertEquals(stats.get(PartitionStat.EXPECTED_QUERIES_SEEN), 6L);
 
         manager.categorize(recordC);
         stats = manager.getStats();
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 6L);
-        Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 9L);
+        Assert.assertEquals(stats.get(PartitionStat.ACTUAL_QUERIES_SEEN), 6L);
+        Assert.assertEquals(stats.get(PartitionStat.EXPECTED_QUERIES_SEEN), 9L);
     }
 }

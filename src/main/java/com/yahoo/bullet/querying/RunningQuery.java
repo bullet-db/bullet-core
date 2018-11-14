@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * A wrapper for a running query.
  */
-public class RunningQuery implements Initializable {
+public class RunningQuery implements QueryWrapper, Initializable {
     @Getter
     private final String id;
     @Getter

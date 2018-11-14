@@ -12,7 +12,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.doReturn;
@@ -109,7 +111,6 @@ public class QueryCategorizerTest {
         Assert.assertTrue(closed.containsKey("3"));
     }
 
-
     @Test
     public void testConsuming() {
         Map<String, Querier> queries;
@@ -135,6 +136,37 @@ public class QueryCategorizerTest {
         // Test record was consumed by all the queries, including the one that was not categorized
         for (Querier querier : queries.values()) {
             Mockito.verify(querier, times(1)).consume(record);
+        }
+    }
+
+    @Test
+    public void testConsumingMultipleQueries() {
+        Map<String, Querier> queries;
+        queries = make(makeQuerier(true, false, false), makeQuerier(false, true, false),
+                       makeQuerier(false, false, true), makeQuerier(false, false, false));
+
+        List<BulletRecord> records = IntStream.range(0, 5).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
+                                              .collect(Collectors.toList());
+
+        QueryCategorizer categorized = new QueryCategorizer().categorize(records, queries);
+        Map<String, Querier> done = categorized.getDone();
+        Map<String, Querier> rateLimited = categorized.getRateLimited();
+        Map<String, Querier> closed = categorized.getClosed();
+
+        Assert.assertEquals(done.size(), 1);
+        Assert.assertTrue(done.containsKey("0"));
+
+        Assert.assertEquals(rateLimited.size(), 1);
+        Assert.assertTrue(rateLimited.containsKey("1"));
+
+        Assert.assertEquals(closed.size(), 1);
+        Assert.assertTrue(closed.containsKey("2"));
+
+        // Test records were consumed by all the queries, including the one that was not categorized
+        for (Querier querier : queries.values()) {
+            for (BulletRecord record : records) {
+                Mockito.verify(querier, times(1)).consume(record);
+            }
         }
     }
 }

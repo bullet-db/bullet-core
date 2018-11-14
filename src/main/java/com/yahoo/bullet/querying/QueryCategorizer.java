@@ -10,14 +10,16 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * This categorizes running queries into whether they are done, closed or have exceeded the rate limits. Running queries
  * are provided as a {@link Map} of String query IDs to non-null, valid, initialized {@link Querier} objects.
  *
- * Use {@link #categorize(Map)} and {@link #categorize(BulletRecord, Map)}for categorizing queries. The latter
- * categorizes after making the Querier instances {@link Querier#consume(BulletRecord)}.
+ * Use {@link #categorize(Map)} and {@link #categorize(BulletRecord, Map)} and {@link #categorize(List, Map)} for
+ * categorizing queries. The latter methods categorizes after making the Querier instances
+ * {@link Querier#consume(BulletRecord)}.
  */
 @Getter @Slf4j
 public class QueryCategorizer {
@@ -48,6 +50,19 @@ public class QueryCategorizer {
             query.getValue().consume(record);
             classify(query);
         }
+        return this;
+    }
+
+    /**
+     * Categorize the given {@link Map} of query IDs to {@link Querier} instances after consuming the given {@link List}
+     * records. Invokes {@link #categorize(BulletRecord, Map)} for each record.
+     *
+     * @param records The {@link List} of {@link BulletRecord} to consume.
+     * @param queries The queries to categorize.
+     * @return This object for chaining.
+     */
+    public QueryCategorizer categorize(List<BulletRecord> records, Map<String, Querier> queries) {
+        records.forEach(r -> this.categorize(r, queries));
         return this;
     }
 

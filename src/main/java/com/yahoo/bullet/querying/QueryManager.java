@@ -23,18 +23,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * @param <S> Any wrapper object around a {@link Query} that extends {@link QueryWrapper}.
+ *
  * This class wraps the concept of the {@link Partitioner} and allows you to control using your configured (or not)
- * partitioner, what queries are seen for each {@link BulletRecord}. It also uses the {@link QueryCategorizer} to
- * categorize your queries for you if you use the {@link #categorize()} (for categorizing all queries) or
- * {@link #categorize(BulletRecord)} (for categorizing all partitioned queries for a record). You can get the queries
- * relevant to your record (after applying any partitioner) using {@link #partition(BulletRecord)}. You can use the
- * {@link #addQuery(String, Querier)} to add a query to the manager and the {@link #removeAndGetQuery(String)} and
- * {@link #removeQueries(Set)} methods to remove a query from the manager.
+ * partitioner, what queries (wrapped in the given {@link QueryWrapper}) are seen for each {@link BulletRecord}.  You
+ * can get the queries relevant to your record (after applying any partitioner) using {@link #partition(BulletRecord)}.
+ * You can use the {@link #addQuery(String, S)} to add a query to the manager and the {@link #removeAndGetQuery(String)}
+ * and {@link #removeQueries(Set)} methods to remove a query from the manager.
  */
 @Slf4j
-public class QueryManager {
-    private Map<String, Set<String>> partitioning;
-    private Map<String, Querier> queries;
+public class QueryManager<S extends QueryWrapper> {
+    protected Map<String, Set<String>> partitioning;
+    protected Map<String, S> queries;
     private Partitioner partitioner;
     private long queriesSeen = 0;
     private long expectedQueriesSeen = 0;
@@ -100,51 +100,51 @@ public class QueryManager {
     }
 
     /**
-     * Adds a configured, initialized query instance {@link Querier} to the manager.
+     * Adds a {@link QueryWrapper} to the manager.
      *
      * @param id The query ID.
-     * @param querier A fully initialized (using {@link Querier#initialize()} {@link Querier} instance.
+     * @param query A {@link QueryWrapper} instance.
      */
-    public void addQuery(String id, Querier querier) {
-        Query query = querier.getQuery();
-        Set<String> keys = partitioner.getKeys(query);
+    public void addQuery(String id, S query) {
+        Query wrappedQuery = query.getQuery();
+        Set<String> keys = partitioner.getKeys(wrappedQuery);
         for (String key : keys) {
             Set<String> partition = partitioning.getOrDefault(key, new HashSet<>());
             partition.add(id);
             partitioning.put(key, partition);
             log.debug("Added query: %s to partition: %s", id, key);
         }
-        queries.put(id, querier);
+        queries.put(id, query);
     }
 
     /**
-     * Removes and returns a {@link Querier} from the manager. The manager does not have any information pertaining to
-     * the query any longer.
+     * Removes and returns a {@link QueryWrapper} from the manager. The manager does not have any information
+     * pertaining to the query any longer.
      *
      * @param id The query ID to remove.
-     * @return The removed {@link Querier} instance.
+     * @return The removed {@link QueryWrapper} instance.
      */
-    public Querier removeAndGetQuery(String id) {
-        Querier querier = queries.remove(id);
-        if (querier != null) {
-            Query query = querier.getQuery();
-            Set<String> keys = partitioner.getKeys(query);
+    public S removeAndGetQuery(String id) {
+        S query = queries.remove(id);
+        if (query != null) {
+            Query wrappedQuery = query.getQuery();
+            Set<String> keys = partitioner.getKeys(wrappedQuery);
             for (String key : keys) {
                 partitioning.get(key).remove(id);
                 log.debug("Removed query: %s from partition: %s", id, key);
             }
         }
-        return querier;
+        return query;
     }
 
     /**
-     * Removes and returns the {@link List} of {@link Querier} instances for the given non-null query IDs. The manager
-     * does not have any information pertaining to these queries after.
+     * Removes and returns the {@link List} of {@link QueryWrapper} instances for the given non-null query IDs. The
+     * manager does not have any information pertaining to these queries after.
      *
      * @param ids The non-null {@link Set} of query IDs to remove.
-     * @return The removed {@link List} of {@link Querier} instances.
+     * @return The removed {@link List} of {@link QueryWrapper} instances.
      */
-    public List<Querier> removeAndGetQueries(Set<String> ids) {
+    public List<S> removeAndGetQueries(Set<String> ids) {
         return ids.stream().map(this::removeAndGetQuery).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -162,51 +162,32 @@ public class QueryManager {
      * Retrieves a query stored in the manager or null, if not found.
      *
      * @param id The ID of the query.
-     * @return The {@link Querier} instance or null, if not present.
+     * @return The {@link QueryWrapper} instance or null, if not present.
      */
-    public Querier getQuery(String id) {
+    public S getQuery(String id) {
         return queries.get(id);
     }
 
     /**
      * Takes a {@link BulletRecord} instance and returns the matching queries (according to the {@link Partitioner})
-     * for it as as {@link Map} of query IDs to the {@link Querier} instances.
+     * for it as as {@link Map} of query IDs to the {@link QueryWrapper} instances.
      *
      * @param record The non-null {@link BulletRecord} instance.
      * @return The non-null {@link Map} of matching queries for the record.
      */
-    public Map<String, Querier> partition(BulletRecord record) {
+    public Map<String, S> partition(BulletRecord record) {
         Set<String> keys = partitioner.getKeys(record);
-        Map<String, Querier> queriers = new HashMap<>();
+        Map<String, S> queriesToSee = new HashMap<>();
         for (String key : keys) {
             Set<String> queryIDs = partitioning.getOrDefault(key, Collections.emptySet());
-            queryIDs.forEach(id -> queriers.put(id, queries.get(id)));
+            queryIDs.forEach(id -> queriesToSee.put(id, queries.get(id)));
         }
-        int queriesSeen = queriers.size();
+        int queriesSeen = queriesToSee.size();
         int allQueries = queries.size();
         this.queriesSeen += queriesSeen;
         expectedQueriesSeen += allQueries;
         log.trace("Retrieved %d/%d queries for record: %s", queriesSeen, allQueries, record);
-        return queriers;
-    }
-
-    /**
-     * Categorizes all the queries in the manager regardless of partitioning, using a {@link QueryCategorizer}.
-     *
-     * @return The {@link QueryCategorizer} instance with all the categorized queries in the manager.
-     */
-    public QueryCategorizer categorize() {
-        return categorize(queries);
-    }
-
-    /**
-     * Categorizes only the queries for the {@link BulletRecord} after partitioning using the {@link QueryCategorizer}.
-     *
-     * @param record The {@link BulletRecord} to consume for the partitioned queries.
-     * @return The {@link QueryCategorizer} instance with the categorized queries in the manager after partitioning.
-     */
-    public QueryCategorizer categorize(BulletRecord record) {
-        return categorize(record, partition(record));
+        return queriesToSee;
     }
 
     /**
@@ -240,13 +221,5 @@ public class QueryManager {
             quantiles.add(sorted.get(i));
         }
         return quantiles.stream().map(Partition::toString).collect(Collectors.toList());
-    }
-
-    private QueryCategorizer categorize(Map<String, Querier> queries) {
-        return new QueryCategorizer().categorize(queries);
-    }
-
-    private QueryCategorizer categorize(BulletRecord record, Map<String, Querier> queries) {
-        return new QueryCategorizer().categorize(record, queries);
     }
 }

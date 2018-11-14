@@ -277,7 +277,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * </pre>
  */
 @Slf4j
-public class Querier implements Monoidal {
+public class Querier implements QueryWrapper, Monoidal {
     /**
      * This is used to determine if this operates in partitioned mode or not. If the Querier is operating in
      * {@link Mode#PARTITION}, it is assumed there are multiple queriers running in parallel and consuming parts of the
