@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This categorizes running queries into whether they are done, closed or have exceeded the rate limits. Running queries
+ * This categorizes running queries into whether they are done, closed, have exceeded the rate limits or have new data.
+ * Running queries
  * are provided as a {@link Map} of String query IDs to non-null, valid, initialized {@link Querier} objects.
  *
  * Use {@link #categorize(Map)} and {@link #categorize(BulletRecord, Map)}for categorizing queries. The latter
@@ -24,6 +25,7 @@ public class QueryCategorizer {
     private Map<String, Querier> rateLimited = new HashMap<>();
     private Map<String, Querier> closed = new HashMap<>();
     private Map<String, Querier> done = new HashMap<>();
+    private Map<String, Querier> hasData = new HashMap<>();
 
     /**
      * Categorize the given {@link Map} of query IDs to {@link Querier} instances.
@@ -60,6 +62,8 @@ public class QueryCategorizer {
             rateLimited.put(id, querier);
         } else if (querier.isClosed()) {
             closed.put(id, querier);
+        } else if (querier.hasNewData()) {
+            hasData.put(id, querier);
         }
     }
 }

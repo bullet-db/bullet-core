@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 
 public class QueryManagerTest {
     private static Querier getQuerier(Query query) {
-        Querier querier = QueryCategorizerTest.makeQuerier(false, false, false);
+        Querier querier = QueryCategorizerTest.makeQuerier(false, false, false, false);
         when(querier.getQuery()).thenReturn(query);
         return querier;
     }
