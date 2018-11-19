@@ -11,7 +11,8 @@ Bullet is a streaming query engine that can be plugged into any singular data st
 - [Usage](#usage)
 - [Documentation](#documentation)
 - [Links](#links)
-- [Contributing](#contribute)
+    - [Useful Links](#useful-links)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Background
