@@ -175,7 +175,7 @@ public class QueryManager {
      * @return A boolean denoting whether this query is in the manager.
      */
     public boolean hasQuery(String id) {
-        return getQuery(id) != null;
+        return queries.containsKey(id);
     }
 
     /**
