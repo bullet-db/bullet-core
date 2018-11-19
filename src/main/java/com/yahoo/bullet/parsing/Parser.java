@@ -26,9 +26,16 @@ public class Parser {
             FieldTypeAdapterFactory.of(Expression.class)
                                    .registerSubType(LeafExpression.class, Parser::isLeafExpression)
                                    .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
+    private static final FieldTypeAdapterFactory<LazyValue> LAZY_VALUE_FACTORY =
+            FieldTypeAdapterFactory.of(LazyValue.class)
+            .registerSubType(LazyPrimitive.class, )
+            .registerSubType(LazyField.class, )
+            .registerSubType(LazyBinOp.class, )
+            .registerSubType(LazyNull.class, );
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
                                                       .registerTypeAdapterFactory(EXPRESSION_FACTORY)
+                                                      .registerTypeAdapterFactory(LAZY_VALUE_FACTORY)
                                                       .excludeFieldsWithoutExposeAnnotation()
                                                       .create();
 

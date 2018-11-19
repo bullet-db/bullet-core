@@ -14,22 +14,21 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
-    /**
-     * The map of source field names to their new projected names.
-     */
     @Expose
-    private Map<String, String> fields;
+    private String name;
+
+    @Expose
+    private LazyValue value;
 
     /**
      * Default constructor. GSON recommended.
      */
     public Projection() {
-        fields = null;
+        name = null;
     }
 
     @Override
@@ -39,6 +38,10 @@ public class Projection implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "{fields: " + fields + "}";
+        return "{name: " + getName() + ", value: " + value + "}";
+    }
+
+    private String getName() {
+        return name != null ? name : value.toString();
     }
 }
