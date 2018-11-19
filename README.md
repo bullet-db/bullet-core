@@ -2,9 +2,20 @@
 
 [![Build Status](https://travis-ci.org/bullet-db/bullet-core.svg?branch=master)](https://travis-ci.org/bullet-db/bullet-core) [![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-core/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-core?branch=master) [![Download](https://api.bintray.com/packages/yahoo/maven/bullet-core/images/download.svg) ](https://bintray.com/yahoo/maven/bullet-core/_latestVersion)
 
+Bullet is a streaming query engine that can be plugged into any singular data stream using a Stream Processing framework like Apache [Storm](https://storm.apache.org), [Spark](https://spark.apache.org) or [Flink](https://flink.apache.org). It lets you run queries on this data stream - including hard queries like Count Distincts, Top K etc.
+
+## Table of Contents
+
+- [Background](#background)
+- [Install](#install)
+- [Usage](#usage)
+- [Documentation](#documentation)
+- [Links](#links)
+- [Contributing](#contribute)
+- [License](#license)
+
 ## Background
 
-Bullet is a streaming query engine that can be plugged into any singular data stream using a Stream Processing framework like Apache [Storm](https://storm.apache.org), [Spark](https://spark.apache.org) or [Flink](https://flink.apache.org). It lets you run queries on this data stream - including hard queries like Count Distincts, Top K etc.
 In Bullet, both the queries and the data flow through the system. There is absolutely no persistence layer! Queries live as long as their duration and operate on data in-memory only. So, the queries in Bullet look *forward* in time, which is pretty unique for most querying systems.
 
 We created Bullet initially as a simple distributed grep like tool to find events in a click stream (containing high volume - 1 million events per sec -- user interaction data) at Yahoo. In particular, we use it for validating instrumentation that generates these events by interacting with the pages ourselves and finding our own events in this data stream and validate it for the proper key/value pairs. There was nothing as light-weight and cheap as Bullet to do this task.
@@ -46,5 +57,6 @@ All documentation is available at **[Github Pages here](https://bullet-db.github
 
 All contributions are welcomed! Feel free to submit PRs for bug fixes, improvements or anything else you like! Submit issues, ask questions using Github issues as normal and we will classify it accordingly. See [Contributing](Contributing.md) for a more in-depth policy. We just ask you to respect our [Code of Conduct](Code-of-Conduct.md) while you're here.
 
+## License
 
-Code licensed under the Apache 2 license. See LICENSE file for terms.
+Code licensed under the Apache 2 license. See the [LICENSE](LICENSE) for terms.
