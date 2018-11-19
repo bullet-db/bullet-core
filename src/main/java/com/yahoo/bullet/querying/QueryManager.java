@@ -169,6 +169,25 @@ public class QueryManager {
     }
 
     /**
+     * Checks to see if the given ID is stored in the manager.
+     *
+     * @param id The ID of the query.
+     * @return A boolean denoting whether this query is in the manager.
+     */
+    public boolean hasQuery(String id) {
+        return getQuery(id) != null;
+    }
+
+    /**
+     * Returns the size of the queries in the manager.
+     *
+     * @return An int representing the number of queries in the manager.
+     */
+    public int size() {
+        return queries.size();
+    }
+
+    /**
      * Takes a {@link BulletRecord} instance and returns the matching queries (according to the {@link Partitioner})
      * for it as as {@link Map} of query IDs to the {@link Querier} instances.
      *
