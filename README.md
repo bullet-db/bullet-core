@@ -11,7 +11,7 @@ Bullet is a streaming query engine that can be plugged into any singular data st
 - [Usage](#usage)
 - [Documentation](#documentation)
 - [Links](#links)
-    - [Useful Links](#useful-links)
+    - [Quick Links](#quick-links)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -42,7 +42,7 @@ All documentation is available at **[Github Pages here](https://bullet-db.github
 * [Main Documentation](https://bullet-db.github.io/) to see documentation.
 * [Bullet Core Releases](https://bullet-db.github.io/releases/#bullet-core) to see Bullet Core releases.
 
-### Useful Links
+### Quick Links
 
 * [Spark Quick Start](https://bullet-db.github.io/quick-start/spark) to start with a Bullet instance running locally on Spark.
 * [Storm Quick Start](https://bullet-db.github.io/quick-start/storm) to start with a Bullet instance running locally on Storm.
