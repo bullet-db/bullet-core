@@ -9,6 +9,7 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.parsing.expressions.LazyExpression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class Projection implements Configurable, Initializable {
     private String name;
 
     @Expose
-    private LazyValue value;
+    private LazyExpression value;
 
     /**
      * Default constructor. GSON recommended.

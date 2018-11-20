@@ -11,6 +11,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.parsing.expressions.LazyBinary;
+import com.yahoo.bullet.parsing.expressions.LazyExpression;
+import com.yahoo.bullet.parsing.expressions.LazyField;
+import com.yahoo.bullet.parsing.expressions.LazyList;
+import com.yahoo.bullet.parsing.expressions.LazyNull;
+import com.yahoo.bullet.parsing.expressions.LazyUnary;
+import com.yahoo.bullet.parsing.expressions.LazyValue;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
@@ -26,16 +33,18 @@ public class Parser {
             FieldTypeAdapterFactory.of(Expression.class)
                                    .registerSubType(LeafExpression.class, Parser::isLeafExpression)
                                    .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
-    private static final FieldTypeAdapterFactory<LazyValue> LAZY_VALUE_FACTORY =
-            FieldTypeAdapterFactory.of(LazyValue.class)
-            .registerSubType(LazyPrimitive.class, )
-            .registerSubType(LazyField.class, )
-            .registerSubType(LazyBinOp.class, )
-            .registerSubType(LazyNull.class, );
+    private static final FieldTypeAdapterFactory<LazyExpression> LAZY_EXPRESSION_FACTORY =
+            FieldTypeAdapterFactory.of(LazyExpression.class)
+                                   .registerSubType(LazyValue.class, )
+                                   .registerSubType(LazyField.class, )
+                                   .registerSubType(LazyBinary.class, )
+                                   .registerSubType(LazyUnary.class, )
+                                   .registerSubType(LazyList.class, )
+                                   .registerSubType(LazyNull.class, );
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
                                                       .registerTypeAdapterFactory(EXPRESSION_FACTORY)
-                                                      .registerTypeAdapterFactory(LAZY_VALUE_FACTORY)
+                                                      .registerTypeAdapterFactory(LAZY_EXPRESSION_FACTORY)
                                                       .excludeFieldsWithoutExposeAnnotation()
                                                       .create();
 

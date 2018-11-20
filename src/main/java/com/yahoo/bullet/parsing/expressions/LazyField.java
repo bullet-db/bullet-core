@@ -1,4 +1,4 @@
-package com.yahoo.bullet.parsing;
+package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
-public class LazyField extends LazyValue {
+public class LazyField extends LazyExpression {
     private static final BulletError LAZY_FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
 
     @Expose
@@ -29,6 +29,6 @@ public class LazyField extends LazyValue {
 
     @Override
     public String toString() {
-        return "{field: " + field + "}";
+        return "{field: " + field + ", " + super.toString() + "}";
     }
 }
