@@ -94,25 +94,6 @@ public class Utilities {
     }
 
     /**
-     * Extracts the field from the given {@link BulletRecord}.
-     *
-     * @param field The field to get. It can be "." separated to look inside maps.
-     * @param record The record containing the field.
-     * @return The extracted field or null if error or not found.
-     */
-    public static Object extractField(String field, BulletRecord record) {
-        if (field == null) {
-            return null;
-        }
-        String[] split = splitField(field);
-        try {
-            return split.length > 1 ? record.get(split[0], split[1]) : record.get(field);
-        } catch (ClassCastException cce) {
-            return null;
-        }
-    }
-
-    /**
      * Extracts this field as a {@link TypedObject}.
      *
      * @param field The field name to extract.
@@ -120,7 +101,7 @@ public class Utilities {
      * @return The created TypedObject from the value for the field in the record.
      */
     public static TypedObject extractTypedObject(String field, BulletRecord record) {
-        return new TypedObject(extractField(field, record));
+        return new TypedObject(record.extractField(field));
     }
 
     /**
@@ -131,7 +112,7 @@ public class Utilities {
      * @return The value of the field as a {@link Number} or null if it cannot be forced to one.
      */
     public static Number extractFieldAsNumber(String field, BulletRecord record) {
-        Object value = extractField(field, record);
+        Object value = record.extractField(field);
         // Also checks for null
         if (value instanceof Number) {
             return (Number) value;
