@@ -11,6 +11,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,21 +79,72 @@ public class RecordBox {
     }
 
     @SafeVarargs
-    public final RecordBox addList(String name, Map<String, Object>... entries) {
+    public final RecordBox addMapOfMaps(String name, Pair<String, Map<String, Object>>... entries) {
+        if (entries != null && entries.length != 0) {
+            Map<String, Object>[] sampleEntries = (Map<String, Object>[]) Arrays.stream(entries).map(Pair::getRight).toArray();
+            Object value = findObject(sampleEntries);
+            if (value instanceof Boolean) {
+                record.setMapOfBooleanMap(name, asMapOfMaps(Boolean.class, entries));
+            } else if (value instanceof Integer) {
+                record.setMapOfIntegerMap(name, asMapOfMaps(Integer.class, entries));
+            } else if (value instanceof Long) {
+                record.setMapOfLongMap(name, asMapOfMaps(Long.class, entries));
+            } else if (value instanceof Float) {
+                record.setMapOfFloatMap(name, asMapOfMaps(Float.class, entries));
+            } else if (value instanceof Double) {
+                record.setMapOfDoubleMap(name, asMapOfMaps(Double.class, entries));
+            } else if (value instanceof String) {
+                record.setMapOfStringMap(name, asMapOfMaps(String.class, entries));
+            } else if (value == null) {
+                record.setMapOfStringMap(name, null);
+            } else {
+                throw new RuntimeException("Unsupported type cannot be added in test code to BulletRecord " + value);
+            }
+        }
+        return this;
+    }
+
+    public final RecordBox addList(String name, Object... entries) {
+        if (entries != null && entries.length != 0) {
+            Object value = entries[0];
+            if (value instanceof Boolean) {
+                record.setBooleanList(name, asList(Boolean.class, entries));
+            } else if (value instanceof Integer) {
+                record.setIntegerList(name, asList(Integer.class, entries));
+            } else if (value instanceof Long) {
+                record.setLongList(name, asList(Long.class, entries));
+            } else if (value instanceof Float) {
+                record.setFloatList(name, asList(Float.class, entries));
+            } else if (value instanceof Double) {
+                record.setDoubleList(name, asList(Double.class, entries));
+            } else if (value instanceof String) {
+                record.setStringList(name, asList(String.class, entries));
+            } else if (value == null) {
+                record.setStringList(name, null);
+            } else {
+                throw new RuntimeException("Unsupported type cannot be added in test code to BulletRecord " + value);
+            }
+        }
+        return this;
+    }
+
+
+    @SafeVarargs
+    public final RecordBox addListOfMaps(String name, Map<String, Object>... entries) {
         if (entries != null && entries.length != 0) {
             Object value = findObject(entries);
             if (value instanceof Boolean) {
-                record.setListOfBooleanMap(name, asList(Boolean.class, entries));
+                record.setListOfBooleanMap(name, asListOfMaps(Boolean.class, entries));
             } else if (value instanceof Integer) {
-                record.setListOfIntegerMap(name, asList(Integer.class, entries));
+                record.setListOfIntegerMap(name, asListOfMaps(Integer.class, entries));
             } else if (value instanceof Long) {
-                record.setListOfLongMap(name, asList(Long.class, entries));
+                record.setListOfLongMap(name, asListOfMaps(Long.class, entries));
             } else if (value instanceof Float) {
-                record.setListOfFloatMap(name, asList(Float.class, entries));
+                record.setListOfFloatMap(name, asListOfMaps(Float.class, entries));
             } else if (value instanceof Double) {
-                record.setListOfDoubleMap(name, asList(Double.class, entries));
+                record.setListOfDoubleMap(name, asListOfMaps(Double.class, entries));
             } else if (value instanceof String) {
-                record.setListOfStringMap(name, asList(String.class, entries));
+                record.setListOfStringMap(name, asListOfMaps(String.class, entries));
             } else if (value == null) {
                 record.setListOfStringMap(name, null);
             } else {
@@ -100,6 +152,10 @@ public class RecordBox {
             }
         }
         return this;
+    }
+
+    private <T> boolean isNotInstance(Class<T> clazz, Object object) {
+        return object != null && !clazz.isInstance(object);
     }
 
     private Object findObject(Pair<String, Object>... entries) {
@@ -133,7 +189,49 @@ public class RecordBox {
         return newMap;
     }
 
-    private <T> List<Map<String, T>> asList(Class<T> clazz, Map<String, Object>... entries) {
+    private <T> Map<String, T> asMap(Class<T> clazz, Map<String, Object> map) {
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(map);
+        Map<String, T> newMap = new LinkedHashMap<>(map.size());
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object object = entry.getValue();
+            if (isNotInstance(clazz, object)) {
+                throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
+            }
+            newMap.put(entry.getKey(), (T) entry.getValue());
+        }
+        return newMap;
+    }
+
+    private <T> Map<String, Map<String, T>> asMapOfMaps(Class<T> clazz, Pair<String, Map<String, Object>>... entries) {
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(entries);
+        Map<String, Map<String, T>> newMap = new LinkedHashMap<>(entries.length);
+        for (Pair<String, Map<String, Object>> entry : entries) {
+            String key = entry.getKey();
+            Map<String, T> casted = asMap(clazz, entry.getValue());
+            if (casted == null) {
+                throw new RuntimeException("Object " + casted + " is not an instance of class " + clazz.getName());
+            }
+            newMap.put(entry.getKey(), (Map<String, T>) entry.getValue());
+        }
+        return newMap;
+    }
+
+    private <T> List<T> asList(Class<T> clazz, Object... entries) {
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(entries);
+        List<T> newList = new ArrayList<>(entries.length);
+        for (Object entry : entries) {
+            if (isNotInstance(clazz, entry)) {
+                throw new RuntimeException("Object " + entry + " is not an instance of class " + clazz.getName());
+            }
+            newList.add((T) entry);
+        }
+        return newList;
+    }
+
+    private <T> List<Map<String, T>> asListOfMaps(Class<T> clazz, Map<String, Object>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         List<Map<String, T>> newList = new ArrayList<>(entries.length);
@@ -144,5 +242,4 @@ public class RecordBox {
         }
         return newList;
     }
-
 }

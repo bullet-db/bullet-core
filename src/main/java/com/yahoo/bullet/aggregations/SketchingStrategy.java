@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.yahoo.bullet.common.Utilities.extractField;
-
 /**
  * The parent class for all {@link Strategy} that use Sketches.
  *
@@ -99,7 +97,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @return A string representing the composite field.
      */
     String composeField(BulletRecord record) {
-        return composeField(fields.stream().map(field -> Objects.toString(extractField(field, record))));
+        return composeField(fields.stream().map(field -> Objects.toString(record.extractField(field))));
     }
 
     /**

@@ -79,21 +79,6 @@ public class UtilitiesTest {
         Assert.assertEquals(String.valueOf(Utilities.round(1.4499999999999, 1)), "1.4");
     }
 
-
-    @Test
-    public void testExtractField() {
-        BulletRecord record = RecordBox.get().add("field", "foo").add("map_field.foo", "bar")
-                                             .addMap("map_field", Pair.of("foo", "baz"))
-                                             .addList("list_field", singletonMap("foo", "baz"))
-                                             .getRecord();
-
-        Assert.assertNull(Utilities.extractField(null, record));
-        Assert.assertNull(Utilities.extractField("", record));
-        Assert.assertNull(Utilities.extractField("id", record));
-        Assert.assertEquals(Utilities.extractField("map_field.foo", record), "baz");
-        Assert.assertNull(Utilities.extractField("list_field.bar", record));
-    }
-
     @Test
     public void testNumericExtraction() {
         BulletRecord record = RecordBox.get().add("foo", "1.20").add("bar", 42L)

@@ -46,7 +46,7 @@ public class ProjectionOperationsTest {
     public void testUnsupportedProjection() {
         Projection projection = makeProjection(ImmutablePair.of("list_field.1.foo", "bar"),
                                                ImmutablePair.of("field", "foo"));
-        BulletRecord record = RecordBox.get().addList("list_field", emptyMap(), singletonMap("foo", "bar"))
+        BulletRecord record = RecordBox.get().addListOfMaps("list_field", emptyMap(), singletonMap("foo", "bar"))
                                              .add("field", "123")
                                              .getRecord();
         BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
@@ -58,9 +58,9 @@ public class ProjectionOperationsTest {
     public void testMapList() {
         Projection projection = makeProjection("list_field", "foo");
 
-        BulletRecord record = RecordBox.get().addList("list_field", emptyMap(), singletonMap("foo", "baz")).getRecord();
+        BulletRecord record = RecordBox.get().addListOfMaps("list_field", emptyMap(), singletonMap("foo", "baz")).getRecord();
 
-        BulletRecord expected = RecordBox.get().addList("foo", emptyMap(), singletonMap("foo", "baz")).getRecord();
+        BulletRecord expected = RecordBox.get().addListOfMaps("foo", emptyMap(), singletonMap("foo", "baz")).getRecord();
 
         BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
         Assert.assertEquals(actual, expected);
