@@ -94,44 +94,25 @@ public class Utilities {
     }
 
     /**
-     * Extracts the field from the given {@link BulletRecord}.
+     * Extracts this identifier as a {@link TypedObject}.
      *
-     * @param field The field to get. It can be "." separated to look inside maps.
-     * @param record The record containing the field.
-     * @return The extracted field or null if error or not found.
-     */
-    public static Object extractField(String field, BulletRecord record) {
-        if (field == null) {
-            return null;
-        }
-        String[] split = splitField(field);
-        try {
-            return split.length > 1 ? record.get(split[0], split[1]) : record.get(field);
-        } catch (ClassCastException cce) {
-            return null;
-        }
-    }
-
-    /**
-     * Extracts this field as a {@link TypedObject}.
-     *
-     * @param field The field name to extract.
+     * @param identifier The identifier name to extract. It can be "." separated to look inside maps and arrays.
      * @param record The {@link BulletRecord} to extract it from.
-     * @return The created TypedObject from the value for the field in the record.
+     * @return The created TypedObject from the value for the identifier in the record.
      */
-    public static TypedObject extractTypedObject(String field, BulletRecord record) {
-        return new TypedObject(extractField(field, record));
+    public static TypedObject extractTypedObject(String identifier, BulletRecord record) {
+        return new TypedObject(record.extractField(identifier));
     }
 
     /**
-     * Extracts the field from the given (@link BulletRecord} as a {@link Number}, if possible.
+     * Extracts the identifier from the given (@link BulletRecord} as a {@link Number}, if possible.
      *
-     * @param field The field containing a numeric value to get. It can be "." separated to look inside maps.
-     * @param record The record containing the field.
-     * @return The value of the field as a {@link Number} or null if it cannot be forced to one.
+     * @param identifier The identifier of a number to get. It can be "." separated to look inside maps and arrays.
+     * @param record The record containing the identifier.
+     * @return The value of the identifier as a {@link Number} or null if it cannot be forced to one.
      */
-    public static Number extractFieldAsNumber(String field, BulletRecord record) {
-        Object value = extractField(field, record);
+    public static Number extractFieldAsNumber(String identifier, BulletRecord record) {
+        Object value = record.extractField(identifier);
         // Also checks for null
         if (value instanceof Number) {
             return (Number) value;

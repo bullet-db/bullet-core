@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.yahoo.bullet.common.Utilities.extractField;
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 import static com.yahoo.bullet.common.Utilities.isEmpty;
 import static com.yahoo.bullet.typesystem.TypedObject.IS_NOT_NULL;
@@ -110,7 +109,7 @@ public class FilterOperations {
         Type newType = value.getType();
         switch (value.getKind()) {
             case FIELD:
-                result = newType == null ? TypedObject.typeCastFromObject(type, extractField(valueString, record))
+                result = newType == null ? TypedObject.typeCastFromObject(type, record.extractField(valueString))
                                          : extractTypedObject(valueString, record).forceCast(newType);
                 break;
             case VALUE:
