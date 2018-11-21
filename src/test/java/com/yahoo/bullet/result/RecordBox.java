@@ -128,7 +128,6 @@ public class RecordBox {
         return this;
     }
 
-
     @SafeVarargs
     public final RecordBox addListOfMaps(String name, Map<String, Object>... entries) {
         if (entries != null && entries.length != 0) {
@@ -152,10 +151,6 @@ public class RecordBox {
             }
         }
         return this;
-    }
-
-    private <T> boolean isNotInstance(Class<T> clazz, Object object) {
-        return object != null && !clazz.isInstance(object);
     }
 
     private Object findObject(Pair<String, Object>... entries) {
@@ -195,7 +190,7 @@ public class RecordBox {
         Map<String, T> newMap = new LinkedHashMap<>(map.size());
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object object = entry.getValue();
-            if (isNotInstance(clazz, object)) {
+            if (!clazz.isInstance(entry)) {
                 throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
             }
             newMap.put(entry.getKey(), (T) entry.getValue());
@@ -213,7 +208,7 @@ public class RecordBox {
             if (casted == null) {
                 throw new RuntimeException("Object " + casted + " is not an instance of class " + clazz.getName());
             }
-            newMap.put(entry.getKey(), (Map<String, T>) entry.getValue());
+            newMap.put(key, casted);
         }
         return newMap;
     }
@@ -223,7 +218,7 @@ public class RecordBox {
         Objects.requireNonNull(entries);
         List<T> newList = new ArrayList<>(entries.length);
         for (Object entry : entries) {
-            if (isNotInstance(clazz, entry)) {
+            if (!clazz.isInstance(entry)) {
                 throw new RuntimeException("Object " + entry + " is not an instance of class " + clazz.getName());
             }
             newList.add((T) entry);
