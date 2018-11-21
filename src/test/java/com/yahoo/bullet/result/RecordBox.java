@@ -190,7 +190,7 @@ public class RecordBox {
         Map<String, T> newMap = new LinkedHashMap<>(map.size());
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object object = entry.getValue();
-            if (!clazz.isInstance(entry)) {
+            if (!clazz.isInstance(object)) {
                 throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
             }
             newMap.put(entry.getKey(), (T) entry.getValue());
@@ -217,11 +217,11 @@ public class RecordBox {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         List<T> newList = new ArrayList<>(entries.length);
-        for (Object entry : entries) {
-            if (!clazz.isInstance(entry)) {
-                throw new RuntimeException("Object " + entry + " is not an instance of class " + clazz.getName());
+        for (Object object : entries) {
+            if (!clazz.isInstance(object)) {
+                throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
             }
-            newList.add((T) entry);
+            newList.add((T) object);
         }
         return newList;
     }
