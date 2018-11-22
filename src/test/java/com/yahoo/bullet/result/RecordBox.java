@@ -81,7 +81,7 @@ public class RecordBox {
     @SafeVarargs
     public final RecordBox addMapOfMaps(String name, Pair<String, Map<String, Object>>... entries) {
         if (entries != null && entries.length != 0) {
-            Map<String, Object>[] sampleEntries = (Map<String, Object>[]) Arrays.stream(entries).map(Pair::getRight).toArray();
+            Map<String, Object>[] sampleEntries = (Map<String, Object>[]) Arrays.stream(entries).map(Pair::getRight).toArray(Map[]::new);
             Object value = findObject(sampleEntries);
             if (value instanceof Boolean) {
                 record.setMapOfBooleanMap(name, asMapOfMaps(Boolean.class, entries));

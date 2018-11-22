@@ -427,6 +427,21 @@ public class FilterOperationsTest {
     }
 
     @Test
+    public void testComparisonEverMoreNestedField() {
+        FilterClause clause = getFieldFilter("map_of_maps.demog.age", GREATER_THAN, "30");
+
+        // "null" is not > 30
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        RecordBox box = RecordBox.get();
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 3)), Pair.of("foo", singletonMap("bar", 50)));
+        Assert.assertFalse(FilterOperations.perform(box.getRecord(), clause));
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 30)), Pair.of("foo", singletonMap("bar", 50)));
+        Assert.assertFalse(FilterOperations.perform(box.getRecord(), clause));
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 31)), Pair.of("foo", singletonMap("bar", 50)));
+        Assert.assertTrue(FilterOperations.perform(box.getRecord(), clause));
+    }
+
+    @Test
     public void testComparisonBooleanMap() {
         FilterClause clause = getFieldFilter("filter_map.is_fake_event", EQUALS, "true");
 

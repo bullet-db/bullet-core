@@ -14,8 +14,6 @@ import java.util.Collection;
 import java.util.Map;
 
 public class Utilities {
-    public static final String SUB_KEY_SEPERATOR = "\\.";
-
    /**
     * Tries to get the object casted as the target type. If it is generic, the captured types cannot not be
     * validated. Only the base object type is validated.
@@ -122,15 +120,5 @@ public class Utilities {
             return null;
         }
         return (Number) asNumber.getValue();
-    }
-
-    /**
-     * Takes a field and returns it split into subfields if necessary.
-     *
-     * @param field The non-null field to get.
-     * @return The field split into field or subfield if it was a map field, or just the field itself.
-     */
-    public static String[] splitField(String field) {
-        return field.split(SUB_KEY_SEPERATOR, 2);
     }
 }

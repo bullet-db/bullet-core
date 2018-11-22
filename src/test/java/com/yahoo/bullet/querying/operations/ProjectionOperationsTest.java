@@ -18,6 +18,9 @@ import org.testng.annotations.Test;
 import static com.yahoo.bullet.parsing.ProjectionUtils.makeProjection;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 public class ProjectionOperationsTest {
     private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
@@ -43,15 +46,25 @@ public class ProjectionOperationsTest {
     }
 
     @Test
-    public void testUnsupportedProjection() {
+    public void testNestedProjections() {
         Projection projection = makeProjection(ImmutablePair.of("list_field.1.foo", "bar"),
+                                               ImmutablePair.of("map_field.foo.bar", "baz"),
                                                ImmutablePair.of("field", "foo"));
-        BulletRecord record = RecordBox.get().addListOfMaps("list_field", emptyMap(), singletonMap("foo", "bar"))
+        BulletRecord record = RecordBox.get().addListOfMaps("list_field", emptyMap(), singletonMap("foo", "qux"))
+                                             .addMapOfMaps("map_field", ImmutablePair.of("foo", singletonMap("bar", "foo.bar")))
                                              .add("field", "123")
                                              .getRecord();
         BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
-        BulletRecord expected = RecordBox.get().add("foo", "123").getRecord();
+        BulletRecord expected = RecordBox.get().add("foo", "123").add("bar", "qux").add("baz", "foo.bar").getRecord();
         Assert.assertEquals(actual, expected);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Testing.*")
+    public void testFailingProjection() {
+        Projection projection = makeProjection(ImmutablePair.of("foo", "bar"));
+        BulletRecord record = spy(RecordBox.get().add("foo", "123").getRecord());
+        doThrow(new RuntimeException("Testing")).when(record).extractField(anyString());
+        ProjectionOperations.project(record, projection, null, provider);
     }
 
     @Test
