@@ -449,8 +449,8 @@ public class Querier implements Monoidal {
             return;
         }
 
-        BulletRecord projected = project(record);
         try {
+            BulletRecord projected = project(record);
             window.consume(projected);
             hasNewData = true;
         } catch (RuntimeException e) {

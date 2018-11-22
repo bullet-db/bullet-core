@@ -42,11 +42,8 @@ public class ProjectionOperations {
         for (Map.Entry<String, String> e : fields.entrySet()) {
             String field = e.getKey();
             String newName = e.getValue();
-            try {
-                if (field != null) {
-                    projected.forceSet(newName, record.extractField(field));
-                }
-            } catch (RuntimeException ignored) {
+            if (field != null) {
+                projected.forceSet(newName, record.extractField(field));
             }
         }
         return projected;

@@ -59,15 +59,12 @@ public class ProjectionOperationsTest {
         Assert.assertEquals(actual, expected);
     }
 
-    @Test
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Testing.*")
     public void testFailingProjection() {
         Projection projection = makeProjection(ImmutablePair.of("foo", "bar"));
         BulletRecord record = spy(RecordBox.get().add("foo", "123").getRecord());
         doThrow(new RuntimeException("Testing")).when(record).extractField(anyString());
-
-        BulletRecord actual = ProjectionOperations.project(record, projection, null, provider);
-        BulletRecord expected = RecordBox.get().getRecord();
-        Assert.assertEquals(actual, expected);
+        ProjectionOperations.project(record, projection, null, provider);
     }
 
     @Test
