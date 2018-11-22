@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class Utilities {
-    /**
+   /**
     * Tries to get the object casted as the target type. If it is generic, the captured types cannot not be
     * validated. Only the base object type is validated.
     *
