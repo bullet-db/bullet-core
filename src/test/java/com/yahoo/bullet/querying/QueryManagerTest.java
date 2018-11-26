@@ -99,23 +99,31 @@ public class QueryManagerTest {
         Assert.assertSame(manager.getQuery("idD"), querierD);
         Assert.assertSame(manager.getQuery("idB"), querierB);
         Assert.assertSame(manager.getQuery("idE"), querierE);
+        Assert.assertTrue(manager.hasQuery("idA"));
+        Assert.assertFalse(manager.hasQuery("foo"));
+        Assert.assertEquals(manager.size(), 5);
 
         Assert.assertNull(manager.removeAndGetQuery("fake"));
         Assert.assertSame(manager.removeAndGetQuery("idC"), querierC);
+        Assert.assertEquals(manager.size(), 4);
         List<Querier> removed = manager.removeAndGetQueries(new LinkedHashSet<>(asList("idE", "idB", "idC")));
         Assert.assertEquals(removed.size(), 2);
         Assert.assertSame(removed.get(0), querierE);
         Assert.assertSame(removed.get(1), querierB);
+        Assert.assertEquals(manager.size(), 2);
 
         Assert.assertNotNull(manager.getQuery("idA"));
         Assert.assertNotNull(manager.getQuery("idD"));
         Assert.assertNull(manager.getQuery("idB"));
         Assert.assertNull(manager.getQuery("idC"));
         Assert.assertNull(manager.getQuery("idE"));
+        Assert.assertEquals(manager.size(), 2);
 
         manager.removeQueries(new HashSet<>(asList("idD", "idA")));
         Assert.assertNull(manager.getQuery("idA"));
         Assert.assertNull(manager.getQuery("idD"));
+        Assert.assertFalse(manager.hasQuery("idA"));
+        Assert.assertEquals(manager.size(), 0);
     }
 
     @Test

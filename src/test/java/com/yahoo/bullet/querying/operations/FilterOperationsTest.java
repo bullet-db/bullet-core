@@ -369,9 +369,9 @@ public class FilterOperationsTest {
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().add("id", "12").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "123").getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", new ArrayList<>()), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1)).getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1), singletonMap("2", 2)).getRecord(), clause));
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1), singletonMap("2", 2), singletonMap("3", 3)).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", 1)).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", 1), singletonMap("2", 2)).getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", 1), singletonMap("2", 2), singletonMap("3", 3)).getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setStringMap("id", new HashMap<>()), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
     }
@@ -381,8 +381,8 @@ public class FilterOperationsTest {
         FilterClause clause = getFieldFilter("id", CONTAINS_KEY, "1", "2");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1)).getRecord(), clause));
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("3", 1)).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", 1)).getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("3", 1)).getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", new ArrayList<>()), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setStringMap("id", new HashMap<>()), clause));
         Assert.assertTrue(FilterOperations.perform(RecordBox.get().addMap("id", Pair.of("1", 1), Pair.of("2", 2)).getRecord(), clause));
@@ -395,9 +395,9 @@ public class FilterOperationsTest {
         FilterClause clause = getFieldFilter("id", CONTAINS_VALUE, "1", "2");
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().add("id", "1").getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", "1")).getRecord(), clause));
-        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("1", 1)).getRecord(), clause));
-        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addList("id", singletonMap("3", "3")).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", "1")).getRecord(), clause));
+        Assert.assertTrue(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("1", 1)).getRecord(), clause));
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().addListOfMaps("id", singletonMap("3", "3")).getRecord(), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", new ArrayList<>()), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setListOfStringMap("id", singletonList(new HashMap<>())), clause));
         Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord().setStringMap("id", new HashMap<>()), clause));
@@ -423,6 +423,21 @@ public class FilterOperationsTest {
         box.addMap("demographic_map", Pair.of("age", "30"));
         Assert.assertFalse(FilterOperations.perform(box.getRecord(), clause));
         box.addMap("demographic_map", Pair.of("age", "31"));
+        Assert.assertTrue(FilterOperations.perform(box.getRecord(), clause));
+    }
+
+    @Test
+    public void testComparisonEverMoreNestedField() {
+        FilterClause clause = getFieldFilter("map_of_maps.demog.age", GREATER_THAN, "30");
+
+        // "null" is not > 30
+        Assert.assertFalse(FilterOperations.perform(RecordBox.get().getRecord(), clause));
+        RecordBox box = RecordBox.get();
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 3)), Pair.of("foo", singletonMap("bar", 50)));
+        Assert.assertFalse(FilterOperations.perform(box.getRecord(), clause));
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 30)), Pair.of("foo", singletonMap("bar", 50)));
+        Assert.assertFalse(FilterOperations.perform(box.getRecord(), clause));
+        box.addMapOfMaps("map_of_maps", Pair.of("demog", singletonMap("age", 31)), Pair.of("foo", singletonMap("bar", 50)));
         Assert.assertTrue(FilterOperations.perform(box.getRecord(), clause));
     }
 
