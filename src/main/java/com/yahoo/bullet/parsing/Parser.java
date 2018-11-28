@@ -35,12 +35,12 @@ public class Parser {
                                    .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
     private static final FieldTypeAdapterFactory<LazyExpression> LAZY_EXPRESSION_FACTORY =
             FieldTypeAdapterFactory.of(LazyExpression.class)
-                                   .registerSubType(LazyValue.class, )
-                                   .registerSubType(LazyField.class, )
-                                   .registerSubType(LazyBinary.class, )
-                                   .registerSubType(LazyUnary.class, )
-                                   .registerSubType(LazyList.class, )
-                                   .registerSubType(LazyNull.class, );
+                                   .registerSubType(LazyNull.class, Parser::isLazyNull)
+                                   .registerSubType(LazyValue.class, Parser::isLazyValue)
+                                   .registerSubType(LazyField.class, Parser::isLazyField)
+                                   .registerSubType(LazyUnary.class, Parser::isLazyUnary)
+                                   .registerSubType(LazyBinary.class, Parser::isLazyBinary)
+                                   .registerSubType(LazyList.class, Parser::isLazyList);
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
                                                       .registerTypeAdapterFactory(EXPRESSION_FACTORY)
@@ -93,6 +93,43 @@ public class Parser {
         return !jsonObject.has(Expression.OPERATION_FIELD);
     }
 
+    private static Boolean isLazyNull(JsonObject jsonObject) {
+        return jsonObject.size() == 0;
+    }
+
+    private static Boolean isLazyValue(JsonObject jsonObject) {
+        return jsonObject.size() == 2 &&
+               jsonObject.has("value") &&
+               jsonObject.has("type");
+    }
+
+    private static Boolean isLazyField(JsonObject jsonObject) {
+        return jsonObject.size() == 2 &&
+               jsonObject.has("field") &&
+               jsonObject.has("type");
+    }
+
+    private static Boolean isLazyUnary(JsonObject jsonObject) {
+        return jsonObject.size() == 3 &&
+               jsonObject.has("operand") &&
+               jsonObject.has("op") &&
+               jsonObject.has("type");
+    }
+
+    private static Boolean isLazyBinary(JsonObject jsonObject) {
+        return jsonObject.size() == 4 &&
+               jsonObject.has("left") &&
+               jsonObject.has("right") &&
+               jsonObject.has("op") &&
+               jsonObject.has("type");
+    }
+
+    private static Boolean isLazyList(JsonObject jsonObject) {
+        return jsonObject.size() == 2 &&
+               jsonObject.has("values") &&
+               jsonObject.has("type");
+    }
+
     /**
      * Parses a Query out of the query string.
      *
@@ -106,6 +143,13 @@ public class Parser {
         Query query = GSON.fromJson(queryString, Query.class);
         query.configure(config);
         return query;
+    }
+
+    public static void main(String[] args) {
+        String queryString = "{ \"filter\": {\"left\": { \"field\": \"hello\", \"type\": \"LIST\"}, \"right\": { \"values\": [{},{ \"value\":\"herro\", \"type\": \"INTEGER\"}], \"type\": \"LIST\"}, \"type\":\"STRING\", \"op\": \"SIZE_OF\"}}";
+        Query query = GSON.fromJson(queryString, Query.class);
+        System.out.println(query);
+        System.out.println(query.getFilter().getName());
     }
 }
 

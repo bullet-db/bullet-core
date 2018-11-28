@@ -110,13 +110,13 @@ public class FieldTypeAdapterFactory<T> implements TypeAdapterFactory {
             adapter.write(out, value);
         }
 
-        private TypeAdapter<R> getAdapterFor(JsonElement element) {
+        private TypeAdapter<R> getAdapterFor(JsonElement element) throws IOException {
             for (Map.Entry<Class<?>, Predicate<JsonObject>> entry : types.entrySet()) {
                 if (entry.getValue().test(element.getAsJsonObject())) {
                     return (TypeAdapter<R>) adapters.get(entry.getKey());
                 }
             }
-            return null;
+            throw new IOException("Adapter not found for deserializing" + element);
         }
 
         @Override

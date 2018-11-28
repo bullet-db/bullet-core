@@ -42,7 +42,7 @@ public class Projection implements Configurable, Initializable {
         return "{name: " + getName() + ", value: " + value + "}";
     }
 
-    private String getName() {
-        return name != null ? name : value.toString();
+    public String getName() {
+        return name != null ? name : value.getName();
     }
 }

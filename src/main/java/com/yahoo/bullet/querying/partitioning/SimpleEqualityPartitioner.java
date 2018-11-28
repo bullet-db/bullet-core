@@ -101,6 +101,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     @Override
     public Set<String> getKeys(Query query) {
         Objects.requireNonNull(query);
+        /*
         List<Clause> filters = query.getFilters();
         // If no filters or has non ANDs, default partition
         if (filters == null || filters.isEmpty() || hasNonANDLogicals(filters)) {
@@ -120,6 +121,8 @@ public class SimpleEqualityPartitioner implements Partitioner {
         String key = fields.stream().map(fieldFilters::get).map(this::getFilterValue).collect(Collectors.joining(delimiter));
         // For the SimpleEqualityPartitioner, the query is mapped to exactly one key only.
         return Collections.singleton(key);
+        */
+        return Collections.singleton("");
     }
 
     @Override

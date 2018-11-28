@@ -198,7 +198,7 @@ public enum Type {
             case BOOLEAN:
                 return ((Boolean) object) ? 1.0f : 0.0f;
             default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + this);
+                throw new UnsupportedOperationException("Can not cast to Float from Type: " + this);
         }
     }
 
@@ -217,7 +217,7 @@ public enum Type {
             case BOOLEAN:
                 return ((Boolean) object) ? 1.0 : 0.0;
             default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + this);
+                throw new UnsupportedOperationException("Can not cast to Double from Type: " + this);
         }
     }
 
@@ -236,7 +236,7 @@ public enum Type {
             case BOOLEAN:
                 return (Boolean) object;
             default:
-                throw new UnsupportedOperationException("Can not cast to Long from Type: " + this);
+                throw new UnsupportedOperationException("Can not cast to Boolean from Type: " + this);
         }
     }
 }

@@ -25,6 +25,7 @@ public class ProjectionOperations {
      * @return The projected record.
      */
     public static BulletRecord project(BulletRecord record, Projection projection, Map<String, String> transientFields, BulletRecordProvider provider) {
+        /*
         Map<String, String> fields = new HashMap<>();
         Map<String, String> projectionFields = projection.getFields();
         if (projectionFields != null) {
@@ -33,7 +34,7 @@ public class ProjectionOperations {
         if (transientFields != null) {
             fields.putAll(transientFields);
         }
-        // Returning the record itself if no projections. The record itself should never be modified so it's ok.
+        // Returning the record itself if no projection. The record itself should never be modified so it's ok.
         if (fields.isEmpty()) {
             return record;
         }
@@ -47,5 +48,7 @@ public class ProjectionOperations {
             }
         }
         return projected;
+        */
+        return null;
     }
 }

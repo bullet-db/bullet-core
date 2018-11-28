@@ -23,9 +23,12 @@ public class RunningQuery implements Initializable {
     private final String id;
     @Getter
     private final Query query;
-
     @Getter
     private long startTime;
+    @Getter
+    private Filter filter;
+    @Getter
+    private Projection projection;
     private String queryString;
 
     /**
@@ -52,6 +55,8 @@ public class RunningQuery implements Initializable {
     RunningQuery(String id, Query query) {
         this.id = id;
         this.query = query;
+        this.filter = new Filter(query.getFilter());
+        this.projection = new Projection(query.getProjection());
     }
 
     @Override

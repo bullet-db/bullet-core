@@ -10,16 +10,11 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.Projection;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.querying.operations.AggregationOperations;
-import com.yahoo.bullet.querying.operations.FilterOperations;
 import com.yahoo.bullet.querying.operations.PostAggregationOperations;
-import com.yahoo.bullet.querying.operations.ProjectionOperations;
 import com.yahoo.bullet.querying.operations.WindowingOperations;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
@@ -445,11 +440,10 @@ public class Querier implements Monoidal {
     @Override
     public void consume(BulletRecord record) {
         // Ignore if query is expired, or doesn't match filters. But consume if the window is closed (partition or otherwise)
-        if (isDone() || !filter(record)) {
-            return;
-        }
-
         try {
+            if (isDone() || !filter(record)) {
+                return;
+            }
             BulletRecord projected = project(record);
             window.consume(projected);
             hasNewData = true;
@@ -663,18 +657,19 @@ public class Querier implements Monoidal {
     // ********************************* Private helpers *********************************
 
     private boolean filter(BulletRecord record) {
-        List<Clause> filters = runningQuery.getQuery().getFilters();
-        // Add the record if we have no filters
-        if (filters == null) {
+        Filter filter = runningQuery.getFilter();
+        if (filter == null) {
             return true;
         }
-        // Otherwise short circuit evaluate till the first filter fails. Filters are ANDed.
-        return filters.stream().allMatch(c -> FilterOperations.perform(record, c));
+        return filter.match(record); // Boolean ... -> boolean ...
     }
 
     private BulletRecord project(BulletRecord record) {
-        Projection projection = runningQuery.getQuery().getProjection();
-        return projection != null ? ProjectionOperations.project(record, projection, transientFields, provider) : record;
+        Projection projection = runningQuery.getProjection();
+        if (projection == null) {
+            return record;
+        }
+        return projection.project(record, provider);
     }
 
     private Clip postAggregate(Clip clip) {
@@ -730,6 +725,7 @@ public class Querier implements Monoidal {
     }
 
     private void addTransientFieldsFor(PostStrategy postStrategy) {
+        /*
         Projection projection = runningQuery.getQuery().getProjection();
         Aggregation aggregation = runningQuery.getQuery().getAggregation();
         if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
@@ -739,5 +735,6 @@ public class Querier implements Monoidal {
                             .forEach(field -> transientFields.put(field, field));
             }
         }
+        */
     }
 }

@@ -5,14 +5,14 @@ import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.typesystem.Type;
+import lombok.Getter;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
 
+@Getter
 public abstract class LazyExpression implements Configurable, Initializable {
     /** The type of the operation in binary/unary lazy expressions. */
     public enum Operation {
@@ -55,7 +55,7 @@ public abstract class LazyExpression implements Configurable, Initializable {
         @SerializedName(value = "~", alternate = { "NOT" })
         NOT,
         @SerializedName("SIZEOF")
-        SIZEOF;
+        SIZE_OF;
 
         public static final Set<Operation> BINARY_OPERATIONS =
                 new HashSet<>(asList(ADD, SUB, MUL, DIV,
@@ -64,7 +64,7 @@ public abstract class LazyExpression implements Configurable, Initializable {
                                      AND, OR, XOR,
                                      FILTER));
         public static final Set<Operation> UNARY_OPERATIONS =
-                new HashSet<>(asList(NOT, SIZEOF));
+                new HashSet<>(asList(NOT, SIZE_OF));
         public static final Set<Operation> LOGICALS =
                 new HashSet<>(asList(AND, OR, XOR, NOT));
         public static final Set<Operation> RELATIONALS =
@@ -79,6 +79,6 @@ public abstract class LazyExpression implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "type: " + type.toString();
+        return "type: " + (type == null ? "" : type.toString());
     }
 }

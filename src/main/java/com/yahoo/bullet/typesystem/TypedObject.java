@@ -163,6 +163,9 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return The casted {@link TypedObject}
      */
     public TypedObject forceCast(Type castedType) {
+        if (castedType == type) {
+            return this;
+        }
         return new TypedObject(castedType, type.forceCast(castedType, value));
     }
 
@@ -186,11 +189,11 @@ public class TypedObject implements Comparable<TypedObject> {
     public int size() {
         switch (type) {
             case LIST:
-                return List.class.cast(value).size();
+                return ((List) value).size();
             case MAP:
-                return Map.class.cast(value).size();
+                return ((Map) value).size();
             case STRING:
-                return String.class.cast(value).length();
+                return ((String) value).length();
             default:
                 throw new UnsupportedOperationException("This type of field does not support size of: " + type);
         }

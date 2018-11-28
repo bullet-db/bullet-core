@@ -1,23 +1,21 @@
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.Projection;
+import com.yahoo.bullet.parsing.expressions.LazyExpression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class Projector {
+public class Projection {
     private Map<String, Evaluator> evaluators;
 
-    public Projector(List<Projection> projections) {
-        if (projections != null && !projections.isEmpty()) {
+    public Projection(Map<String, LazyExpression> projection) {
+        if (projection != null && !projection.isEmpty()) {
             evaluators = new HashMap<>();
-            for (Projection projection : projections) {
-                evaluators.put(projection.getName(), Evaluator.build(projection.getValue()));
-            }
+            projection.forEach((key, value) -> evaluators.put(key, Evaluator.build(value)));
         }
     }
 
@@ -26,7 +24,12 @@ public class Projector {
             return record;
         }
         BulletRecord projected = provider.getInstance();
-
+        evaluators.forEach((name, evaluator) -> {
+            TypedObject value = evaluator.evaluate(record);
+            if (value != null && value.getValue() != null) {
+                projected.forceSet(name, value.getValue());
+            }
+        });
         return projected;
     }
 }

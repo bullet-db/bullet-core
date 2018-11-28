@@ -362,7 +362,7 @@ public class QuerierTest {
     @Test
     public void testFiltering() {
         Query query = new Query();
-        query.setFilters(singletonList(getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
+        //query.setFilters(singletonList(getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
         query.setWindow(WindowUtils.makeSlidingWindow(1));
         Querier querier = make(Querier.Mode.PARTITION, query);
 
