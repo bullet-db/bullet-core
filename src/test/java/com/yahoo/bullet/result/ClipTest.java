@@ -53,7 +53,7 @@ public class ClipTest {
     @Test
     public void testRecordAddition() {
         BulletRecord record = new RecordBox().add("field", "sample").addMap("map_field", Pair.of("foo", "bar"))
-                                             .addList("list_field", new HashMap<>(), singletonMap("foo", 1L))
+                                             .addListOfMaps("list_field", new HashMap<>(), singletonMap("foo", 1L))
                                              .getRecord();
         assertJSONEquals(Clip.of(record).asJSON(), makeJSON("[{'list_field':[{},{'foo':1}],'field':'sample','map_field':{'foo':'bar'}}]"));
     }
@@ -61,7 +61,7 @@ public class ClipTest {
     @Test
     public void testRecordsAddition() {
         BulletRecord record = new RecordBox().add("field", "sample").addMap("map_field", Pair.of("foo", "bar"))
-                                             .addList("list_field", new HashMap<>(), singletonMap("foo", 1L))
+                                             .addListOfMaps("list_field", new HashMap<>(), singletonMap("foo", 1L))
                                              .getRecord();
 
         BulletRecord another = new RecordBox().add("field", "another").getRecord();

@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.yahoo.bullet.common.Utilities.splitField;
-
 @Slf4j
 public class ProjectionOperations {
     /**
@@ -44,24 +42,10 @@ public class ProjectionOperations {
         for (Map.Entry<String, String> e : fields.entrySet()) {
             String field = e.getKey();
             String newName = e.getValue();
-            try {
-                copyInto(projected, newName, record, field);
-            } catch (ClassCastException cce) {
-                log.warn("Skipping copying {} as {} as it is not a field that can be extracted", field, newName);
+            if (field != null) {
+                projected.forceSet(newName, record.extractField(field));
             }
         }
         return projected;
-    }
-
-    private static void copyInto(BulletRecord record, String newName, BulletRecord source, String field) throws ClassCastException {
-        if (field == null) {
-            return;
-        }
-        String[] split = splitField(field);
-        if (split.length > 1) {
-            record.set(newName, source, split[0], split[1]);
-        } else {
-            record.set(newName, source, field);
-        }
     }
 }
