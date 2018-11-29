@@ -12,9 +12,12 @@ import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public abstract class Evaluator {
     protected Type type;
@@ -51,6 +54,23 @@ public abstract class Evaluator {
 
     public abstract TypedObject evaluate(BulletRecord record);
 
+    protected TypedObject cast(TypedObject object) {
+        if (type == null || object.getType() != Type.LIST || object.getType() != Type.MAP || object.getPrimitiveType() == type) {
+            return object;
+        }
+        if (object.getType() == Type.LIST) {
+            List<Object> objects = (List<Object>) object.getValue();
+            return new TypedObject(Type.LIST, objects.stream().map(o -> TypedObject.typeCastFromObject(type, o).getValue()).collect(Collectors.toList()));
+        }
+        if (object.getType() == Type.MAP) {
+            Map<String, Object> map = (Map<String, Object>) object.getValue();
+            Map<String, Object> newMap = new HashMap<>();
+            map.forEach((key, value) -> newMap.put(key, TypedObject.typeCastFromObject(type, value).getValue()));
+            return new TypedObject(Type.MAP, newMap);
+        }
+        return object.forceCast(type);
+    }
+
     public static Evaluator build(LazyExpression expression) {
         if (expression instanceof LazyNull) {
             return new NullEvaluator((LazyNull) expression);
@@ -65,6 +85,6 @@ public abstract class Evaluator {
         } else if (expression instanceof LazyList) {
             return new ListEvaluator((LazyList) expression);
         }
-        return null;
+        throw new RuntimeException("Could not build evaluator.");
     }
 }

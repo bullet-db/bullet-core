@@ -104,9 +104,8 @@ public class Parser {
     }
 
     private static Boolean isLazyField(JsonObject jsonObject) {
-        return jsonObject.size() == 2 &&
-               jsonObject.has("field") &&
-               jsonObject.has("type");
+        return (jsonObject.size() == 1 && jsonObject.has("field")) ||
+               (jsonObject.size() == 2 && jsonObject.has("field") && jsonObject.has("type"));
     }
 
     private static Boolean isLazyUnary(JsonObject jsonObject) {
@@ -143,13 +142,6 @@ public class Parser {
         Query query = GSON.fromJson(queryString, Query.class);
         query.configure(config);
         return query;
-    }
-
-    public static void main(String[] args) {
-        String queryString = "{ \"filter\": {\"left\": { \"field\": \"hello\", \"type\": \"LIST\"}, \"right\": { \"values\": [{},{ \"value\":\"herro\", \"type\": \"INTEGER\"}], \"type\": \"LIST\"}, \"type\":\"STRING\", \"op\": \"SIZE_OF\"}}";
-        Query query = GSON.fromJson(queryString, Query.class);
-        System.out.println(query);
-        System.out.println(query.getFilter().getName());
     }
 }
 

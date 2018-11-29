@@ -14,11 +14,6 @@ public class ValueEvaluator extends Evaluator {
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        // placeholder
-        try {
-            return TypedObject.forceCast(type, value);
-        } catch (Exception e) {
-            return null;
-        }
+        return TypedObject.forceCast(type, value);
     }
 }

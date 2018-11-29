@@ -17,8 +17,8 @@ public class ListEvaluator extends Evaluator {
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        // type?
-        // subtype?
+        //TypedObject result = new TypedObject(Type.LIST, evaluators.stream().map(e -> e.evaluate(record)).collect(Collectors.toList()));
+        //return cast(result);
         return new TypedObject(evaluators.stream().map(e -> e.evaluate(record).forceCast(type).getValue()).collect(Collectors.toList()));
     }
 }

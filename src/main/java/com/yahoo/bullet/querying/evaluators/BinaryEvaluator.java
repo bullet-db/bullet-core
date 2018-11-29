@@ -20,22 +20,9 @@ public class BinaryEvaluator extends Evaluator {
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        // null != TypedObject NULL
-        // null => evaluation error
-
         TypedObject leftValue = left.evaluate(record);
-        if (leftValue == null) {
-            return null;
-        }
-
         TypedObject rightValue = right.evaluate(record);
-        if (rightValue == null) {
-            return null;
-        }
-
-        if (type != null) {
-            return op.apply(leftValue, rightValue).forceCast(type);
-        }
-        return op.apply(leftValue, rightValue);
+        TypedObject result = op.apply(leftValue, rightValue);
+        return cast(result);
     }
 }

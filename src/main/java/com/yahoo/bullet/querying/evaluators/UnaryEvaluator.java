@@ -19,9 +19,7 @@ public class UnaryEvaluator extends Evaluator {
     @Override
     public TypedObject evaluate(BulletRecord record) {
         TypedObject value = operand.evaluate(record);
-        if (type != null) {
-            return op.apply(value).forceCast(type);
-        }
-        return op.apply(value);
+        TypedObject result = op.apply(value);
+        return cast(result);
     }
 }

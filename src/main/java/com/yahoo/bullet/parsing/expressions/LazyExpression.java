@@ -48,7 +48,7 @@ public abstract class LazyExpression implements Configurable, Initializable {
         AND,
         @SerializedName(value = "||", alternate = { "OR" })
         OR,
-        @SerializedName(value = "^^", alternate = { "XOR" })
+        @SerializedName(value = "^", alternate = { "XOR" })
         XOR,
         @SerializedName("FILTER")
         FILTER,
@@ -79,6 +79,6 @@ public abstract class LazyExpression implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "type: " + (type == null ? "" : type.toString());
+        return "type: " + (type == null ? "null" : type.toString());
     }
 }
