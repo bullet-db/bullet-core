@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 public class ProjectionOperationsTest {
+    /*
     private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
 
     @Test
@@ -113,4 +114,5 @@ public class ProjectionOperationsTest {
         BulletRecord expected = RecordBox.get().add("foo", "baz").getRecord();
         Assert.assertEquals(actual, expected);
     }
+    */
 }

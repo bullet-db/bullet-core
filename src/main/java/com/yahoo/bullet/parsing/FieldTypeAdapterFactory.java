@@ -116,7 +116,7 @@ public class FieldTypeAdapterFactory<T> implements TypeAdapterFactory {
                     return (TypeAdapter<R>) adapters.get(entry.getKey());
                 }
             }
-            throw new IOException("Adapter not found for deserializing" + element);
+            throw new IOException("Adapter not found for deserializing " + element);
         }
 
         @Override

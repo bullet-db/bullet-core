@@ -85,6 +85,6 @@ public abstract class Evaluator {
         } else if (expression instanceof LazyList) {
             return new ListEvaluator((LazyList) expression);
         }
-        throw new RuntimeException("Could not build evaluator.");
+        return null;
     }
 }

@@ -12,9 +12,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -83,11 +85,10 @@ public class FieldTypeAdapterFactoryTest {
         Assert.assertEquals(castedA.baz, "test");
     }
 
-    @Test
+    @Test(expectedExceptions = JsonSyntaxException.class)
     public void testDeserializationFail() {
         Gson gson = getGSON(getFactory(t -> t.get("bar").getAsString().contains("A"), t -> t.get("bar").getAsString().contains("B")));
-        Base deserialized = gson.fromJson(makeJSON(1, "garbage", "a"), Base.class);
-        Assert.assertNull(deserialized);
+        gson.fromJson(makeJSON(1, "garbage", "a"), Base.class);
     }
 
     @Test
