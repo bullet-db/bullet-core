@@ -25,11 +25,14 @@ public class Projection {
         }
         BulletRecord projected = provider.getInstance();
         evaluators.forEach((name, evaluator) -> {
-            TypedObject value = evaluator.evaluate(record);
-            if (value != null && value.getValue() != null) {
-                projected.forceSet(name, value.getValue());
-            }
-        });
+                try {
+                    TypedObject value = evaluator.evaluate(record);
+                    if (value != null && value.getValue() != null) {
+                        projected.forceSet(name, value.getValue());
+                    }
+                } catch (Exception ignored) {
+                }
+            });
         return projected;
     }
 }

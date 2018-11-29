@@ -41,10 +41,8 @@ public class Query implements Configurable, Initializable {
     @Expose
     private List<PostAggregation> postAggregations;
 
-    public static final BulletError NO_DELIMITERS = makeError("Projection field names cannot contain delimiters.",
-                                                              "Change your projection field names to not contain delimiters.");
-    public static final BulletError BOOLEAN_FILTER_ONLY = makeError("The filter expression must have type BOOLEAN.",
-                                                               "Change your filter expression to type BOOLEAN.");
+    public static final BulletError NO_DELIMITERS = makeError("Projection fields cannot contain delimiters.",
+                                                              "Change your projection fields to not contain delimiters.");
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
     public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
@@ -104,9 +102,6 @@ public class Query implements Configurable, Initializable {
             projection.values().forEach(p -> p.initialize().ifPresent(errors::addAll));
         }
         if (filter != null) {
-            if (filter.getType() != Type.BOOLEAN) {
-                errors.add(BOOLEAN_FILTER_ONLY);
-            }
             filter.initialize().ifPresent(errors::addAll);
         }
 

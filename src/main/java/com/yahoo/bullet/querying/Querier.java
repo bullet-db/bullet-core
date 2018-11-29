@@ -440,10 +440,10 @@ public class Querier implements Monoidal {
     @Override
     public void consume(BulletRecord record) {
         // Ignore if query is expired, or doesn't match filters. But consume if the window is closed (partition or otherwise)
+        if (isDone() || !filter(record)) {
+            return;
+        }
         try {
-            if (isDone() || !filter(record)) {
-                return;
-            }
             BulletRecord projected = project(record);
             window.consume(projected);
             hasNewData = true;
@@ -661,7 +661,7 @@ public class Querier implements Monoidal {
         if (filter == null) {
             return true;
         }
-        return filter.match(record); // Boolean ... -> boolean ...
+        return filter.match(record);
     }
 
     private BulletRecord project(BulletRecord record) {
