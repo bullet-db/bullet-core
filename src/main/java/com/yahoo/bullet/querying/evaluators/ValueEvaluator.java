@@ -5,10 +5,10 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Not so lazy.
+ * Not so lazy. Need to make sure TypedObjects are properly immutable.
  */
 public class ValueEvaluator extends Evaluator {
-    private TypedObject value;
+    private final TypedObject value;
 
     public ValueEvaluator(LazyValue lazyValue) {
         super(lazyValue);

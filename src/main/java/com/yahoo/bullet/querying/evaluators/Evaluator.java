@@ -19,6 +19,18 @@ import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+/**
+ * Evaluators do the work of the lazy expressions.
+ *
+ * Each lazy expression is built into a corresponding evaluator. Note, evaluators are constructed after a query has been
+ * initialized so assume all lazy expressions are valid.
+ *
+ * Evaluators are evaluated given a BulletRecord and will throw exceptions on any errors. These errors are virtually all
+ * from some form of type check.
+ *
+ * Also, note the type cast in evaluator. For primitives, this acts as how you think it would, but for lists and maps, it
+ * will cast their elements/values.
+ */
 public abstract class Evaluator {
     protected Type type;
 
@@ -59,11 +71,11 @@ public abstract class Evaluator {
             return object;
         }
         if (object.getType() == Type.LIST) {
-            List<Object> objects = (List<Object>) object.getValue();
+            List<Object> objects = object.getList();
             return new TypedObject(Type.LIST, objects.stream().map(o -> TypedObject.typeCastFromObject(type, o).getValue()).collect(Collectors.toList()));
         }
         if (object.getType() == Type.MAP) {
-            Map<String, Object> map = (Map<String, Object>) object.getValue();
+            Map<String, Object> map = object.getMap();
             Map<String, Object> newMap = new HashMap<>();
             map.forEach((key, value) -> newMap.put(key, TypedObject.typeCastFromObject(type, value).getValue()));
             return new TypedObject(Type.MAP, newMap);
@@ -71,6 +83,12 @@ public abstract class Evaluator {
         return object.forceCast(type);
     }
 
+    /**
+     * What is polymorphism?
+     *
+     * @param expression
+     * @return
+     */
     public static Evaluator build(LazyExpression expression) {
         if (expression instanceof LazyNull) {
             return new NullEvaluator((LazyNull) expression);

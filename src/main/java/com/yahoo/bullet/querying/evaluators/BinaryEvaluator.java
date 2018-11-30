@@ -6,6 +6,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.function.BinaryOperator;
 
+/**
+ * Evaluator that evaluates the left and right before applying a binary operator. Casts the result.
+ */
 public class BinaryEvaluator extends Evaluator {
     private Evaluator left;
     private Evaluator right;

@@ -3,7 +3,6 @@ package com.yahoo.bullet.querying.evaluators;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
@@ -12,27 +11,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Binary operations used by BinaryEvaluator.
+ */
 public class BinaryOperations {
 
     static BinaryOperator<TypedObject> ADD = (left, right) -> {
         Type type = getResultType(left.getType(), right.getType());
         switch (type) {
             case INTEGER:
-                Integer i1 = (Integer) left.getValue();
-                Integer i2 = (Integer) right.getValue();
-                return new TypedObject(Type.INTEGER, i1 + i2);
+                return new TypedObject(Type.INTEGER, left.getInteger() + right.getInteger());
             case LONG:
-                Long l1 = (Long) left.getValue();
-                Long l2 = (Long) right.getValue();
-                return new TypedObject(Type.LONG, l1 + l2);
+                return new TypedObject(Type.LONG, left.getLong() + right.getLong());
             case FLOAT:
-                Float f1 = (Float) left.getValue();
-                Float f2 = (Float) right.getValue();
-                return new TypedObject(Type.FLOAT, f1 + f2);
+                return new TypedObject(Type.FLOAT, left.getFloat() + right.getFloat());
             case DOUBLE:
-                Double d1 = (Double) left.getValue();
-                Double d2 = (Double) right.getValue();
-                return new TypedObject(Type.DOUBLE, d1 + d2);
+                return new TypedObject(Type.DOUBLE, left.getDouble() + right.getDouble());
         }
         throw new UnsupportedOperationException("'+' operands must have numeric type.");
     };
@@ -41,21 +35,13 @@ public class BinaryOperations {
         Type type = getResultType(left.getType(), right.getType());
         switch (type) {
             case INTEGER:
-                Integer i1 = (Integer) left.getValue();
-                Integer i2 = (Integer) right.getValue();
-                return new TypedObject(Type.INTEGER, i1 - i2);
+                return new TypedObject(Type.INTEGER, left.getInteger() - right.getInteger());
             case LONG:
-                Long l1 = (Long) left.getValue();
-                Long l2 = (Long) right.getValue();
-                return new TypedObject(Type.LONG, l1 - l2);
+                return new TypedObject(Type.LONG, left.getLong() - right.getLong());
             case FLOAT:
-                Float f1 = (Float) left.getValue();
-                Float f2 = (Float) right.getValue();
-                return new TypedObject(Type.FLOAT, f1 - f2);
+                return new TypedObject(Type.FLOAT, left.getFloat() - right.getFloat());
             case DOUBLE:
-                Double d1 = (Double) left.getValue();
-                Double d2 = (Double) right.getValue();
-                return new TypedObject(Type.DOUBLE, d1 - d2);
+                return new TypedObject(Type.DOUBLE, left.getDouble() - right.getDouble());
         }
         throw new UnsupportedOperationException("'-' operands must have numeric type.");
     };
@@ -64,21 +50,13 @@ public class BinaryOperations {
         Type type = getResultType(left.getType(), right.getType());
         switch (type) {
             case INTEGER:
-                Integer i1 = (Integer) left.getValue();
-                Integer i2 = (Integer) right.getValue();
-                return new TypedObject(Type.INTEGER, i1 * i2);
+                return new TypedObject(Type.INTEGER, left.getInteger() * right.getInteger());
             case LONG:
-                Long l1 = (Long) left.getValue();
-                Long l2 = (Long) right.getValue();
-                return new TypedObject(Type.LONG, l1 * l2);
+                return new TypedObject(Type.LONG, left.getLong() * right.getLong());
             case FLOAT:
-                Float f1 = (Float) left.getValue();
-                Float f2 = (Float) right.getValue();
-                return new TypedObject(Type.FLOAT, f1 * f2);
+                return new TypedObject(Type.FLOAT, left.getFloat() * right.getFloat());
             case DOUBLE:
-                Double d1 = (Double) left.getValue();
-                Double d2 = (Double) right.getValue();
-                return new TypedObject(Type.DOUBLE, d1 * d2);
+                return new TypedObject(Type.DOUBLE, left.getDouble() * right.getDouble());
         }
         throw new UnsupportedOperationException("'*' operands must have numeric type.");
     };
@@ -87,21 +65,13 @@ public class BinaryOperations {
         Type type = getResultType(left.getType(), right.getType());
         switch (type) {
             case INTEGER:
-                Integer i1 = (Integer) left.getValue();
-                Integer i2 = (Integer) right.getValue();
-                return new TypedObject(Type.INTEGER, i1 / i2);
+                return new TypedObject(Type.INTEGER, left.getInteger() / right.getInteger());
             case LONG:
-                Long l1 = (Long) left.getValue();
-                Long l2 = (Long) right.getValue();
-                return new TypedObject(Type.LONG, l1 / l2);
+                return new TypedObject(Type.LONG, left.getLong() / right.getLong());
             case FLOAT:
-                Float f1 = (Float) left.getValue();
-                Float f2 = (Float) right.getValue();
-                return new TypedObject(Type.FLOAT, f1 / f2);
+                return new TypedObject(Type.FLOAT, left.getFloat() / right.getFloat());
             case DOUBLE:
-                Double d1 = (Double) left.getValue();
-                Double d2 = (Double) right.getValue();
-                return new TypedObject(Type.DOUBLE, d1 / d2);
+                return new TypedObject(Type.DOUBLE, left.getDouble() / right.getDouble());
         }
         throw new UnsupportedOperationException("'/' operands must have numeric type.");
     };
@@ -116,7 +86,7 @@ public class BinaryOperations {
             return new TypedObject(left.equalTo(right));
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(left::equalTo));
+            return new TypedObject(right.getList().stream().anyMatch(left::equalTo));
         }
         throw new UnsupportedOperationException("'==' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -131,7 +101,7 @@ public class BinaryOperations {
             return new TypedObject(!left.equalTo(right));
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().noneMatch(left::equalTo));
+            return new TypedObject(right.getList().stream().noneMatch(left::equalTo));
         }
         throw new UnsupportedOperationException("'!=' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -146,7 +116,7 @@ public class BinaryOperations {
             return new TypedObject(left.compareTo(right) > 0);
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(o -> left.compareTo(new TypedObject(o)) > 0));
+            return new TypedObject(right.getList().stream().anyMatch(o -> left.compareTo(new TypedObject(o)) > 0));
         }
         throw new UnsupportedOperationException("'>' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -161,7 +131,7 @@ public class BinaryOperations {
             return new TypedObject(left.compareTo(right) < 0);
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(o -> left.compareTo(new TypedObject(o)) < 0));
+            return new TypedObject(right.getList().stream().anyMatch(o -> left.compareTo(new TypedObject(o)) < 0));
         }
         throw new UnsupportedOperationException("'<' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -176,7 +146,7 @@ public class BinaryOperations {
             return new TypedObject(left.compareTo(right) >= 0);
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(o -> left.compareTo(new TypedObject(o)) >= 0));
+            return new TypedObject(right.getList().stream().anyMatch(o -> left.compareTo(new TypedObject(o)) >= 0));
         }
         throw new UnsupportedOperationException("'>=' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -191,7 +161,7 @@ public class BinaryOperations {
             return new TypedObject(left.compareTo(right) <= 0);
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(o -> left.compareTo(new TypedObject(o)) <= 0));
+            return new TypedObject(right.getList().stream().anyMatch(o -> left.compareTo(new TypedObject(o)) <= 0));
         }
         throw new UnsupportedOperationException("'<=' right operand must have corresponding type or have type LIST with corresponding primitive type.");
     };
@@ -207,7 +177,7 @@ public class BinaryOperations {
         }
         if (rightType == Type.LIST && leftType == right.getPrimitiveType()) {
             String value = (String) left.getValue();
-            return new TypedObject(((List<String>) right.getValue()).stream().map(Pattern::compile).map(p -> p.matcher(value)).anyMatch(Matcher::matches));
+            return new TypedObject(right.getList().stream().map(o -> Pattern.compile((String) o).matcher(value)).anyMatch(Matcher::matches));
         }
         throw new UnsupportedOperationException("'RLIKE' right operand must have type STRING or have type LIST with primitive type STRING.");
     };
@@ -215,7 +185,7 @@ public class BinaryOperations {
     static BinaryOperator<TypedObject> SIZE_IS = (left, right) -> {
         TypedObject size = new TypedObject(left.size());
         if (right.getType() == Type.LIST) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().anyMatch(size::equalTo));
+            return new TypedObject(right.getList().stream().anyMatch(size::equalTo));
         }
         return new TypedObject(right.equalTo(size));
     };
@@ -226,14 +196,14 @@ public class BinaryOperations {
             return new TypedObject(left.containsKey((String) right.getValue()));
         }
         if (rightType == Type.LIST && right.getPrimitiveType() == Type.STRING) {
-            return new TypedObject(((List<String>) right.getValue()).stream().anyMatch(left::containsKey));
+            return new TypedObject(right.getList().stream().anyMatch(o -> left.containsKey((String) o)));
         }
         throw new UnsupportedOperationException("'CONTAINSKEY' right operand must have type STRING or have type LIST with primitive type STRING.");
     };
 
     static BinaryOperator<TypedObject> CONTAINS_VALUE = (left, right) -> {
         if (right.getType() == Type.LIST) {
-            return new TypedObject(((List<Object>) right.getValue()).stream().map(TypedObject::new).anyMatch(left::containsValue));
+            return new TypedObject(right.getList().stream().map(TypedObject::new).anyMatch(left::containsValue));
         }
         return new TypedObject(left.containsValue(right));
     };
@@ -254,8 +224,8 @@ public class BinaryOperations {
         if (left.getType() != Type.LIST || right.getType() != Type.LIST || left.size() != right.size()) {
             throw new UnsupportedOperationException("'FILTER' operands must be two lists of the same size.");
         }
-        List<Object> objects = (List<Object>) left.getValue();
-        List<Boolean> filter = ((List<Object>) right.getValue()).stream().map(o -> (Boolean) TypedObject.typeCastFromObject(Type.BOOLEAN, o).getValue()).collect(Collectors.toList());
+        List<Object> objects = right.getList();
+        List<Boolean> filter = right.getList().stream().map(o -> (Boolean) TypedObject.typeCastFromObject(Type.BOOLEAN, o).getValue()).collect(Collectors.toList());
         return new TypedObject(IntStream.range(0, left.size()).mapToObj(i -> filter.get(i) ? objects.get(i) : null).filter(Objects::nonNull).collect(Collectors.toList()));
     };
 

@@ -55,14 +55,17 @@ public class RunningQuery implements Initializable {
     RunningQuery(String id, Query query) {
         this.id = id;
         this.query = query;
-        this.filter = new Filter(query.getFilter());
-        this.projection = new Projection(query.getProjection());
     }
 
     @Override
     public Optional<List<BulletError>> initialize() {
         start();
-        return query.initialize();
+        Optional<List<BulletError>> errors = query.initialize();
+        if (!errors.isPresent()) {
+            filter = new Filter(query.getFilter());
+            projection = new Projection(query.getProjection());
+        }
+        return errors;
     }
 
     @Override

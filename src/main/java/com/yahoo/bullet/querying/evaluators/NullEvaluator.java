@@ -5,13 +5,20 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+/**
+ * Not so lazy. Need to make sure TypedObjects are properly immutable.
+ *
+ * Not sure if useful though.
+ */
 public class NullEvaluator extends Evaluator {
+    private static final TypedObject TYPED_NULL = new TypedObject(Type.NULL, null);
+
     public NullEvaluator(LazyNull lazyNull) {
         super(lazyNull);
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return new TypedObject(Type.NULL, null);
+        return TYPED_NULL;
     }
 }

@@ -2,6 +2,7 @@ package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 /**
- * Use "Lazy" as a placeholder name because it rolls off the tongue. There's nothing lazy about LazyExpressions because they actually work really hard.
+ * Use "Lazy" as a placeholder name because it rolls off the tongue.
  *
  * Lazy expressions are currently used in queries for filters and projections.
  *
@@ -46,7 +47,7 @@ import static java.util.Arrays.asList;
  * Look at the Evaluator class to see how lazy expressions are evaluated.
  */
 @Getter
-public abstract class LazyExpression implements Initializable {
+public abstract class LazyExpression implements Configurable, Initializable {
     /** The type of the operation in binary/unary lazy expressions. */
     @Getter
     @AllArgsConstructor

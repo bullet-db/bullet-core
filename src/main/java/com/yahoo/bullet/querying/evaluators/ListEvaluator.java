@@ -7,6 +7,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Evaluator that evaluates a list of evaluators on a BulletRecord and then returns the list of results (after casting them).
+ */
 public class ListEvaluator extends Evaluator {
     private List<Evaluator> evaluators;
 

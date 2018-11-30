@@ -5,6 +5,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.function.UnaryOperator;
 
+/**
+ * Unary operations used by UnaryEvaluator. Probably also want IS_NULL / NON_NULL.
+ */
 public class UnaryOperations {
 
     static UnaryOperator<TypedObject> NOT = (value) -> {
