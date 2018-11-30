@@ -4,16 +4,19 @@ import com.yahoo.bullet.parsing.expressions.LazyValue;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+/**
+ * Not so lazy.
+ */
 public class ValueEvaluator extends Evaluator {
-    private String value;
+    private TypedObject value;
 
     public ValueEvaluator(LazyValue lazyValue) {
         super(lazyValue);
-        this.value = lazyValue.getValue();
+        this.value = TypedObject.forceCast(type, lazyValue.getValue());
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return TypedObject.forceCast(type, value);
+        return value;
     }
 }

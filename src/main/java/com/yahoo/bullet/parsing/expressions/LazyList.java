@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
+/**
+ * A lazy expression that, contrary to its name, holds a list of lazy expressions (rather than values). A primitive type
+ * must be specified as only lists of primitives are supported at the moment.
+ */
 @Getter
 public class LazyList extends LazyExpression {
     private static final BulletError LAZY_LIST_REQUIRES_NON_NULL_LIST = makeError("The values list must not be null.", "Please provide a values list.");

@@ -104,23 +104,21 @@ public class Parser {
     }
 
     private static Boolean isLazyField(JsonObject jsonObject) {
-        return (jsonObject.size() == 1 && jsonObject.has("field")) ||
-               (jsonObject.size() == 2 && jsonObject.has("field") && jsonObject.has("type"));
+        return (jsonObject.size() == 1 || (jsonObject.size() == 2 && jsonObject.has("type"))) &&
+                jsonObject.has("field");
     }
 
     private static Boolean isLazyUnary(JsonObject jsonObject) {
-        return jsonObject.size() == 3 &&
-               jsonObject.has("operand") &&
-               jsonObject.has("op") &&
-               jsonObject.has("type");
+        return (jsonObject.size() == 2 || (jsonObject.size() == 3 && jsonObject.has("type"))) &&
+                jsonObject.has("operand") &&
+                jsonObject.has("op");
     }
 
     private static Boolean isLazyBinary(JsonObject jsonObject) {
-        return jsonObject.size() == 4 &&
-               jsonObject.has("left") &&
-               jsonObject.has("right") &&
-               jsonObject.has("op") &&
-               jsonObject.has("type");
+        return (jsonObject.size() == 3 || (jsonObject.size() == 4 && jsonObject.has("type"))) &&
+                jsonObject.has("left") &&
+                jsonObject.has("right") &&
+                jsonObject.has("op");
     }
 
     private static Boolean isLazyList(JsonObject jsonObject) {

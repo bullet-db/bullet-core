@@ -126,7 +126,7 @@
                     <enableAssertions>true</enableAssertions>
                 </configuration>
             </plugin>
-
+<!--
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.16</version>
@@ -151,7 +151,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
+-->
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-clover2-plugin</artifactId>

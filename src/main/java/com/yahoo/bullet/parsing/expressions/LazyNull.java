@@ -6,6 +6,11 @@ import com.yahoo.bullet.typesystem.Type;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Null value. Not sure how useful this is since it seems like it's only used for "is null" and "not null."
+ *
+ * In that case, could just implement those as unary operations.
+ */
 public class LazyNull extends LazyExpression {
 
     public LazyNull() {
@@ -14,7 +19,6 @@ public class LazyNull extends LazyExpression {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        type = Type.NULL;
         return Optional.empty();
     }
 

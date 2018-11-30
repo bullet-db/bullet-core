@@ -12,12 +12,17 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
+/**
+ * A lazy expression that takes two operands and a binary operation. These fields are required; however, an optional
+ * primitive type may be specified.
+ *
+ * Infix and prefix binary operations are differentiated in the naming scheme.
+ */
 @Getter
 public class LazyBinary extends LazyExpression {
     public static final BulletError LAZY_BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError LAZY_BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
     public static final BulletError LAZY_BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
-
 
     @Expose
     private LazyExpression left;
@@ -52,8 +57,10 @@ public class LazyBinary extends LazyExpression {
 
     @Override
     public String getName() {
-        //return op + " (" + left.getName() + ", " + right.getName() + ")";
-        return "(" + left.getName() + " " + op + " " + right.getName() + ")";
+        if (op.isInfix()) {
+            return "(" + left.getName() + " " + op + " " + right.getName() + ")";
+        }
+        return op + " (" + left.getName() + ", " + right.getName() + ")";
     }
 
     @Override

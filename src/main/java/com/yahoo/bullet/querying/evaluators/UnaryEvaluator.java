@@ -6,6 +6,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.function.UnaryOperator;
 
+/**
+ *
+ */
 public class UnaryEvaluator extends Evaluator {
     private Evaluator operand;
     private UnaryOperator<TypedObject> op;

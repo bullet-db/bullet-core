@@ -12,6 +12,10 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
+/**
+ * A lazy expression that takes an operand and a unary operation. These fields are required; however, an optional
+ * primitive type may be specified.
+ */
 @Getter
 public class LazyUnary extends LazyExpression {
     public static final BulletError LAZY_UNARY_REQUIRES_NON_NULL_OPERAND = makeError("The operand must not be null.", "Please provide an expression for operand.");

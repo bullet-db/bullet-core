@@ -55,7 +55,7 @@ public abstract class Evaluator {
     public abstract TypedObject evaluate(BulletRecord record);
 
     protected TypedObject cast(TypedObject object) {
-        if (type == null || object.getType() != Type.LIST || object.getType() != Type.MAP || object.getPrimitiveType() == type) {
+        if (type == null || ((object.getType() == Type.LIST || object.getType() == Type.MAP) && object.getPrimitiveType() == type)) {
             return object;
         }
         if (object.getType() == Type.LIST) {
