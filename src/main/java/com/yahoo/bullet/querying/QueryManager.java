@@ -91,7 +91,7 @@ public class QueryManager {
         boolean enable = config.getAs(BulletConfig.QUERY_PARTITIONER_ENABLE, Boolean.class);
         if (enable) {
             partitioner = config.loadConfiguredClass(BulletConfig.QUERY_PARTITIONER_CLASS_NAME);
-            log.info("Partitioning for queries is enabled. Using %s", partitioner.getClass().getName());
+            log.info("Partitioning for queries is enabled. Using {}", partitioner.getClass().getName());
         } else {
             partitioner = new NoPartitioner();
         }
@@ -112,7 +112,7 @@ public class QueryManager {
             Set<String> partition = partitioning.getOrDefault(key, new HashSet<>());
             partition.add(id);
             partitioning.put(key, partition);
-            log.debug("Added query: %s to partition: %s", id, key);
+            log.debug("Added query: {} to partition: {}", id, key);
         }
         queries.put(id, querier);
     }
@@ -131,7 +131,7 @@ public class QueryManager {
             Set<String> keys = partitioner.getKeys(query);
             for (String key : keys) {
                 partitioning.get(key).remove(id);
-                log.debug("Removed query: %s from partition: %s", id, key);
+                log.debug("Removed query: {} from partition: {}", id, key);
             }
         }
         return querier;
@@ -205,7 +205,7 @@ public class QueryManager {
         int allQueries = queries.size();
         this.queriesSeen += queriesSeen;
         expectedQueriesSeen += allQueries;
-        log.trace("Retrieved %d/%d queries for record: %s", queriesSeen, allQueries, record);
+        log.trace("Retrieved {}/{} queries for record: {}", queriesSeen, allQueries, record);
         return queriers;
     }
 
