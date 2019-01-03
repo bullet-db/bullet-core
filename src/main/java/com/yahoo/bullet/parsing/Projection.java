@@ -9,19 +9,27 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.parsing.expressions.LazyExpression;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.yahoo.bullet.common.BulletError.makeError;
+
 @Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
+    public static final BulletError PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS = makeError("Projection fields cannot contain delimiters.", "Please rename your projection fields to not contain delimiters.");
+    public static final String DELIMITER = ".";
+
     @Expose
-    private Map<String, LazyExpression> fields;
+    private Map<String, Expression> fields;
+    @Expose
+    private Map<String, Expression> computations;
 
     /**
      * Default constructor. GSON recommended.
@@ -32,11 +40,16 @@ public class Projection implements Configurable, Initializable {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        return Optional.empty();
+        List<BulletError> errors = new ArrayList<>();
+        if (fields.keySet().stream().anyMatch(s -> s.contains(DELIMITER))) {
+            errors.add(PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS);
+        }
+        fields.values().forEach(f -> f.initialize().ifPresent(errors::addAll));
+        return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
 
     @Override
     public String toString() {
-        return "{fields: " + fields + "}";
+        return "{fields: " + fields + ", computations: " + computations + "}";
     }
 }

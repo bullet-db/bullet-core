@@ -296,8 +296,10 @@ public class Querier implements Monoidal {
     @Getter
     private RunningQuery runningQuery;
 
+    @Getter
     private Filter filter;
 
+    @Getter
     private Projection projection;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.

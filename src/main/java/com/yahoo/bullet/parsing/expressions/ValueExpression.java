@@ -17,14 +17,14 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * A lazy expression that takes a value. A primitive type must be specified since the value is a represented by a string.
  */
 @Getter
-public class LazyValue extends LazyExpression {
+public class ValueExpression extends Expression {
     private static final BulletError LAZY_VALUE_REQUIRES_NON_NULL_VALUE = makeError("The value must not be null.", "Please provide a non-null value.");
     private static final BulletError LAZY_VALUES_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
 
     @Expose
     private String value;
 
-    public LazyValue() {
+    public ValueExpression() {
         value = null;
         type = null;
     }

@@ -11,13 +11,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.expressions.LazyBinary;
-import com.yahoo.bullet.parsing.expressions.LazyExpression;
-import com.yahoo.bullet.parsing.expressions.LazyField;
-import com.yahoo.bullet.parsing.expressions.LazyList;
-import com.yahoo.bullet.parsing.expressions.LazyNull;
-import com.yahoo.bullet.parsing.expressions.LazyUnary;
-import com.yahoo.bullet.parsing.expressions.LazyValue;
+import com.yahoo.bullet.parsing.expressions.BinaryExpression;
+import com.yahoo.bullet.parsing.expressions.Expression;
+import com.yahoo.bullet.parsing.expressions.FieldExpression;
+import com.yahoo.bullet.parsing.expressions.ListExpression;
+import com.yahoo.bullet.parsing.expressions.NullExpression;
+import com.yahoo.bullet.parsing.expressions.UnaryExpression;
+import com.yahoo.bullet.parsing.expressions.ValueExpression;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
@@ -31,20 +31,15 @@ public class Parser {
                                    .registerSubType(Computation.class, Parser::isComputation);
     private static final FieldTypeAdapterFactory<Expression> EXPRESSION_FACTORY =
             FieldTypeAdapterFactory.of(Expression.class)
-                                   .registerSubType(LeafExpression.class, Parser::isLeafExpression)
-                                   .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
-    private static final FieldTypeAdapterFactory<LazyExpression> LAZY_EXPRESSION_FACTORY =
-            FieldTypeAdapterFactory.of(LazyExpression.class)
-                                   .registerSubType(LazyNull.class, Parser::isLazyNull)
-                                   .registerSubType(LazyValue.class, Parser::isLazyValue)
-                                   .registerSubType(LazyField.class, Parser::isLazyField)
-                                   .registerSubType(LazyUnary.class, Parser::isLazyUnary)
-                                   .registerSubType(LazyBinary.class, Parser::isLazyBinary)
-                                   .registerSubType(LazyList.class, Parser::isLazyList);
+                                   .registerSubType(NullExpression.class, Parser::isLazyNull)
+                                   .registerSubType(ValueExpression.class, Parser::isLazyValue)
+                                   .registerSubType(FieldExpression.class, Parser::isLazyField)
+                                   .registerSubType(UnaryExpression.class, Parser::isLazyUnary)
+                                   .registerSubType(BinaryExpression.class, Parser::isLazyBinary)
+                                   .registerSubType(ListExpression.class, Parser::isLazyList);
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
                                                       .registerTypeAdapterFactory(EXPRESSION_FACTORY)
-                                                      .registerTypeAdapterFactory(LAZY_EXPRESSION_FACTORY)
                                                       .excludeFieldsWithoutExposeAnnotation()
                                                       .create();
 
@@ -82,15 +77,6 @@ public class Parser {
     private static Boolean isComputation(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(PostAggregation.TYPE_FIELD);
         return jsonElement != null && jsonElement.getAsString().equals(PostAggregation.COMPUTATION_SERIALIZED_NAME);
-    }
-
-    private static Boolean isBinaryExpression(JsonObject jsonObject) {
-        JsonElement jsonElement = jsonObject.get(Expression.OPERATION_FIELD);
-        return jsonElement != null && Expression.Operation.BINARY_OPERATION.contains(jsonElement.getAsString());
-    }
-
-    private static Boolean isLeafExpression(JsonObject jsonObject) {
-        return !jsonObject.has(Expression.OPERATION_FIELD);
     }
 
     private static Boolean isLazyNull(JsonObject jsonObject) {

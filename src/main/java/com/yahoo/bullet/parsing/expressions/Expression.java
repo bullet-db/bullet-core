@@ -15,40 +15,38 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 /**
- * Use "Lazy" as a placeholder name because it rolls off the tongue.
+ * Expressions are currently used in queries for filters and projections.
  *
- * Lazy expressions are currently used in queries for filters and projections.
- *
- * A filter is simply a lazy expression. We accept a record iff it the expression evaluates to true (with an explicit cast to Boolean), e.g.
+ * A filter is simply an expression. We accept a record iff it the expression evaluates to true (with a forced cast to Boolean if necessary), e.g.
  *
  * "filter": { "left": {"field": "bcookie"}, "right": {"value": "123456", "type": "STRING"}, "op": "EQUALS" }
  *
  * A projection is a Map (i.e. Json object) from names to lazy expressions, e.g.
  *
  * "projection": {
- *     "bcookie": {"field": "bcookie"},
- *     "some_constant": {"value": "5.0", "type": "DOUBLE"},
- *     "list_of_fields": {"values": [{"field": "bcookie_age"}, {"field": "bcookie_timestamp"}, {"field": "bcookie_version"}], "type": "STRING"}
+ *     "candy": {"field": "candy"},
+ *     "price": {"value": "5.0", "type": "DOUBLE"},
+ *     "properties": {"values": [{"field": "candy_type"}, {"field": "candy_rarity"}, {"field": "candy_score"}], "type": "STRING"}
  * }
  *
- * Currently, the supported lazy expressions are:
- * - LazyNull
- * - LazyValue
- * - LazyField
- * - LazyUnary
- * - LazyBinary
- * - LazyList
+ * Currently, the supported expressions are:
+ * - NullExpression
+ * - ValueExpression
+ * - FieldExpression
+ * - UnaryExpression
+ * - BinaryExpression
+ * - ListExpression
  *
- * LazyMap is not supported at the moment since there's a lot of type-safety to take into consideration.
+ * MapExpression is not supported at the moment.
  *
- * Also, note the "type" field in LazyExpression. This might be the true origin of the "lazy" in lazy expressions. The specified type
- * is not a type-check; rather, when an expression is evaluated, it will force cast to that type (if specified) before returning, so it's like a
- * really late type-check. Also, type must be primitive.
+ * Also, note the "type" field in Expression. This might be the true origin of the "lazy" in lazy expressions. The specified type
+ * is not a type-check; rather, when an expression is evaluated, it will force cast to that type (if specified) before returning, so it is similar to a
+ * late type-check. Also, type must be primitive.
  *
- * Look at the Evaluator class to see how lazy expressions are evaluated.
+ * Look at the Evaluator class to see how expressions are evaluated.
  */
 @Getter
-public abstract class LazyExpression implements Configurable, Initializable {
+public abstract class Expression implements Configurable, Initializable {
     /** The type of the operation in binary/unary lazy expressions. */
     @Getter
     @AllArgsConstructor

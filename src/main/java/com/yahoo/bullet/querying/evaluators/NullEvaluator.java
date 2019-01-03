@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyNull;
+import com.yahoo.bullet.parsing.expressions.NullExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -13,8 +13,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
 public class NullEvaluator extends Evaluator {
     private static final TypedObject TYPED_NULL = new TypedObject(Type.NULL, null);
 
-    public NullEvaluator(LazyNull lazyNull) {
-        super(lazyNull);
+    public NullEvaluator(NullExpression nullExpression) {
+        super(nullExpression);
     }
 
     @Override

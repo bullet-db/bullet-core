@@ -13,8 +13,8 @@ import java.util.Optional;
  *
  * In that case, could just implement those as unary operations.
  */
-public class LazyNull extends LazyExpression {
-    public LazyNull() {
+public class NullExpression extends Expression {
+    public NullExpression() {
         type = Type.NULL;
     }
 

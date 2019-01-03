@@ -10,15 +10,13 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.parsing.expressions.LazyExpression;
-import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -29,9 +27,9 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 @Getter @Setter @Slf4j
 public class Query implements Configurable, Initializable {
     @Expose
-    private Map<String, LazyExpression> projection;
+    private Projection projection;
     @Expose
-    private LazyExpression filter;
+    private Expression filter;
     @Expose
     private Aggregation aggregation;
     @Expose
@@ -41,15 +39,12 @@ public class Query implements Configurable, Initializable {
     @Expose
     private List<PostAggregation> postAggregations;
 
-    public static final BulletError NO_DELIMITERS = makeError("Projection fields cannot contain delimiters.",
-                                                              "Change your projection fields to not contain delimiters.");
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
     public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
                                                            "Change your aggregation type or your window include type");
     public static final BulletError AT_MOST_ONE_ORDERBY = makeError("The post aggregations cannot have multiple \"ORDERBY\"",
                                                            "Change your post aggregations to keep at most one \"ORDERBY\"");
-    public static final String DELIMITER = ".";
 
     /**
      * Default constructor. GSON recommended.
@@ -63,7 +58,7 @@ public class Query implements Configurable, Initializable {
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
         if (projection != null) {
-            projection.values().forEach(p -> p.configure(config));
+            projection.configure(config);
         }
         if (filter != null) {
             filter.configure(config);
@@ -96,10 +91,7 @@ public class Query implements Configurable, Initializable {
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
         if (projection != null) {
-            if (projection.keySet().stream().anyMatch(s -> s.contains(DELIMITER))) {
-                errors.add(NO_DELIMITERS);
-            }
-            projection.values().forEach(p -> p.initialize().ifPresent(errors::addAll));
+            projection.initialize().ifPresent(errors::addAll);
         }
         if (filter != null) {
             filter.initialize().ifPresent(errors::addAll);

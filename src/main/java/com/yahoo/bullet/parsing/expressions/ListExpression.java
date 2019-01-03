@@ -20,15 +20,15 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * must be specified as only lists of primitives are supported at the moment.
  */
 @Getter
-public class LazyList extends LazyExpression {
+public class ListExpression extends Expression {
     private static final BulletError LAZY_LIST_REQUIRES_NON_NULL_LIST = makeError("The values list must not be null.", "Please provide a values list.");
     private static final BulletError LAZY_LIST_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
     private static final String DELIMITER = ", ";
 
     @Expose
-    private List<LazyExpression> values;
+    private List<Expression> values;
 
-    public LazyList() {
+    public ListExpression() {
         values = null;
         type = null;
     }
@@ -48,7 +48,7 @@ public class LazyList extends LazyExpression {
 
     @Override
     public String getName() {
-        return "[" + values.stream().map(LazyExpression::getName).collect(Collectors.joining(DELIMITER)) + "]";
+        return "[" + values.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + "]";
     }
 
     @Override

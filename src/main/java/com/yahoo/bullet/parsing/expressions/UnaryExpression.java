@@ -7,7 +7,6 @@ import com.yahoo.bullet.querying.evaluators.UnaryEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,17 +18,17 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * primitive type may be specified.
  */
 @Getter
-public class LazyUnary extends LazyExpression {
+public class UnaryExpression extends Expression {
     public static final BulletError LAZY_UNARY_REQUIRES_NON_NULL_OPERAND = makeError("The operand must not be null.", "Please provide an expression for operand.");
     public static final BulletError LAZY_UNARY_REQUIRES_UNARY_OPERATION = makeError("The operation must be unary.", "Please provide a unary operation for op.");
     public static final BulletError LAZY_UNARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
-    private LazyExpression operand;
+    private Expression operand;
     @Expose
     private Operation op;
 
-    public LazyUnary() {
+    public UnaryExpression() {
         operand = null;
         op = null;
         type = null;

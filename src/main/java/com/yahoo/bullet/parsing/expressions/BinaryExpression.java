@@ -21,19 +21,19 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * Infix and prefix binary operations are differentiated in the naming scheme.
  */
 @Getter
-public class LazyBinary extends LazyExpression {
+public class BinaryExpression extends Expression {
     public static final BulletError LAZY_BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError LAZY_BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
     public static final BulletError LAZY_BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
-    private LazyExpression left;
+    private Expression left;
     @Expose
-    private LazyExpression right;
+    private Expression right;
     @Expose
     private Operation op;
 
-    public LazyBinary() {
+    public BinaryExpression() {
         left = null;
         right = null;
         op = null;

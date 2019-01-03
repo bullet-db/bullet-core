@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyField;
+import com.yahoo.bullet.parsing.expressions.FieldExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -11,9 +11,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 public class FieldEvaluator extends Evaluator {
     private String field;
 
-    public FieldEvaluator(LazyField lazyField) {
-        super(lazyField);
-        this.field = lazyField.getField();
+    public FieldEvaluator(FieldExpression fieldExpression) {
+        super(fieldExpression);
+        this.field = fieldExpression.getField();
     }
 
     @Override

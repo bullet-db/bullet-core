@@ -23,14 +23,14 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * will try to cast those boolean maps to boolean objects (and fail).
  */
 @Getter
-public class LazyField extends LazyExpression {
+public class FieldExpression extends Expression {
     private static final BulletError LAZY_FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
     private static final BulletError LAZY_FIELD_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
     private String field;
 
-    public LazyField() {
+    public FieldExpression() {
         field = null;
         type = null;
     }

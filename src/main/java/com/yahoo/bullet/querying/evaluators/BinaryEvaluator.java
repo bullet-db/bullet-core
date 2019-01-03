@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyBinary;
+import com.yahoo.bullet.parsing.expressions.BinaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -14,11 +14,11 @@ public class BinaryEvaluator extends Evaluator {
     private Evaluator right;
     private BinaryOperator<TypedObject> op;
 
-    public BinaryEvaluator(LazyBinary lazyBinary) {
-        super(lazyBinary);
-        this.left = Evaluator.build(lazyBinary.getLeft());
-        this.right = Evaluator.build(lazyBinary.getRight());
-        this.op = BINARY_OPERATORS.get(lazyBinary.getOp());
+    public BinaryEvaluator(BinaryExpression binaryExpression) {
+        super(binaryExpression);
+        this.left = Evaluator.build(binaryExpression.getLeft());
+        this.right = Evaluator.build(binaryExpression.getRight());
+        this.op = BINARY_OPERATORS.get(binaryExpression.getOp());
     }
 
     @Override

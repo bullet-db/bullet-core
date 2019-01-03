@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.expressions.LazyExpression;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class Projection {
     private Map<String, Evaluator> evaluators;
 
-    public Projection(Map<String, LazyExpression> projection) {
+    public Projection(Map<String, Expression> projection) {
         if (projection != null && !projection.isEmpty()) {
             evaluators = new HashMap<>();
             projection.forEach((key, value) -> evaluators.put(key, Evaluator.build(value)));

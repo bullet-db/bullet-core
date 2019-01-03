@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyUnary;
+import com.yahoo.bullet.parsing.expressions.UnaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -13,10 +13,10 @@ public class UnaryEvaluator extends Evaluator {
     private Evaluator operand;
     private UnaryOperator<TypedObject> op;
 
-    public UnaryEvaluator(LazyUnary lazyUnary) {
-        super(lazyUnary);
-        this.operand = Evaluator.build(lazyUnary.getOperand());
-        this.op = UNARY_OPERATORS.get(lazyUnary.getOp());
+    public UnaryEvaluator(UnaryExpression unaryExpression) {
+        super(unaryExpression);
+        this.operand = Evaluator.build(unaryExpression.getOperand());
+        this.op = UNARY_OPERATORS.get(unaryExpression.getOp());
     }
 
     @Override

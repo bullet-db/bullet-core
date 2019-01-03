@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyValue;
+import com.yahoo.bullet.parsing.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -10,9 +10,9 @@ import com.yahoo.bullet.typesystem.TypedObject;
 public class ValueEvaluator extends Evaluator {
     private final TypedObject value;
 
-    public ValueEvaluator(LazyValue lazyValue) {
-        super(lazyValue);
-        this.value = TypedObject.forceCast(type, lazyValue.getValue());
+    public ValueEvaluator(ValueExpression valueExpression) {
+        super(valueExpression);
+        this.value = TypedObject.forceCast(type, valueExpression.getValue());
     }
 
     @Override

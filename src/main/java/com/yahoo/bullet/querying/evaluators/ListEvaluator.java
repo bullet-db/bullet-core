@@ -1,6 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyList;
+import com.yahoo.bullet.parsing.expressions.ListExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 public class ListEvaluator extends Evaluator {
     private List<Evaluator> evaluators;
 
-    public ListEvaluator(LazyList lazyList) {
-        super(lazyList);
-        this.evaluators = lazyList.getValues().stream().map(Evaluator::build).collect(Collectors.toList());
+    public ListEvaluator(ListExpression listExpression) {
+        super(listExpression);
+        this.evaluators = listExpression.getValues().stream().map(Evaluator::build).collect(Collectors.toList());
     }
 
     @Override

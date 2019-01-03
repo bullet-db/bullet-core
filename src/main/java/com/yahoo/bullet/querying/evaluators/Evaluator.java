@@ -1,12 +1,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.LazyBinary;
-import com.yahoo.bullet.parsing.expressions.LazyExpression;
-import com.yahoo.bullet.parsing.expressions.LazyField;
-import com.yahoo.bullet.parsing.expressions.LazyList;
-import com.yahoo.bullet.parsing.expressions.LazyNull;
-import com.yahoo.bullet.parsing.expressions.LazyUnary;
-import com.yahoo.bullet.parsing.expressions.LazyValue;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -34,33 +28,33 @@ import java.util.stream.Collectors;
 public abstract class Evaluator {
     protected Type type;
 
-    static final Map<LazyExpression.Operation, BinaryOperator<TypedObject>> BINARY_OPERATORS = new EnumMap<>(LazyExpression.Operation.class);
-    static final Map<LazyExpression.Operation, UnaryOperator<TypedObject>> UNARY_OPERATORS = new EnumMap<>(LazyExpression.Operation.class);
+    static final Map<Expression.Operation, BinaryOperator<TypedObject>> BINARY_OPERATORS = new EnumMap<>(Expression.Operation.class);
+    static final Map<Expression.Operation, UnaryOperator<TypedObject>> UNARY_OPERATORS = new EnumMap<>(Expression.Operation.class);
 
     static {
-        BINARY_OPERATORS.put(LazyExpression.Operation.ADD, BinaryOperations.ADD);
-        BINARY_OPERATORS.put(LazyExpression.Operation.SUB, BinaryOperations.SUB);
-        BINARY_OPERATORS.put(LazyExpression.Operation.MUL, BinaryOperations.MUL);
-        BINARY_OPERATORS.put(LazyExpression.Operation.DIV, BinaryOperations.DIV);
-        BINARY_OPERATORS.put(LazyExpression.Operation.EQUALS, BinaryOperations.EQUALS);
-        BINARY_OPERATORS.put(LazyExpression.Operation.NOT_EQUALS, BinaryOperations.NOT_EQUALS);
-        BINARY_OPERATORS.put(LazyExpression.Operation.GREATER_THAN, BinaryOperations.GREATER_THAN);
-        BINARY_OPERATORS.put(LazyExpression.Operation.LESS_THAN, BinaryOperations.LESS_THAN);
-        BINARY_OPERATORS.put(LazyExpression.Operation.GREATER_THAN_OR_EQUALS, BinaryOperations.GREATER_THAN_OR_EQUALS);
-        BINARY_OPERATORS.put(LazyExpression.Operation.LESS_THAN_OR_EQUALS, BinaryOperations.LESS_THAN_OR_EQUALS);
-        BINARY_OPERATORS.put(LazyExpression.Operation.REGEX_LIKE, BinaryOperations.REGEX_LIKE);
-        BINARY_OPERATORS.put(LazyExpression.Operation.SIZE_IS, BinaryOperations.SIZE_IS);
-        BINARY_OPERATORS.put(LazyExpression.Operation.CONTAINS_KEY, BinaryOperations.CONTAINS_KEY);
-        BINARY_OPERATORS.put(LazyExpression.Operation.CONTAINS_VALUE, BinaryOperations.CONTAINS_VALUE);
-        BINARY_OPERATORS.put(LazyExpression.Operation.AND, BinaryOperations.AND);
-        BINARY_OPERATORS.put(LazyExpression.Operation.OR, BinaryOperations.OR);
-        BINARY_OPERATORS.put(LazyExpression.Operation.XOR, BinaryOperations.XOR);
-        BINARY_OPERATORS.put(LazyExpression.Operation.FILTER, BinaryOperations.FILTER);
-        UNARY_OPERATORS.put(LazyExpression.Operation.NOT, UnaryOperations.NOT);
-        UNARY_OPERATORS.put(LazyExpression.Operation.SIZE_OF, UnaryOperations.SIZE_OF);
+        BINARY_OPERATORS.put(Expression.Operation.ADD, BinaryOperations.ADD);
+        BINARY_OPERATORS.put(Expression.Operation.SUB, BinaryOperations.SUB);
+        BINARY_OPERATORS.put(Expression.Operation.MUL, BinaryOperations.MUL);
+        BINARY_OPERATORS.put(Expression.Operation.DIV, BinaryOperations.DIV);
+        BINARY_OPERATORS.put(Expression.Operation.EQUALS, BinaryOperations.EQUALS);
+        BINARY_OPERATORS.put(Expression.Operation.NOT_EQUALS, BinaryOperations.NOT_EQUALS);
+        BINARY_OPERATORS.put(Expression.Operation.GREATER_THAN, BinaryOperations.GREATER_THAN);
+        BINARY_OPERATORS.put(Expression.Operation.LESS_THAN, BinaryOperations.LESS_THAN);
+        BINARY_OPERATORS.put(Expression.Operation.GREATER_THAN_OR_EQUALS, BinaryOperations.GREATER_THAN_OR_EQUALS);
+        BINARY_OPERATORS.put(Expression.Operation.LESS_THAN_OR_EQUALS, BinaryOperations.LESS_THAN_OR_EQUALS);
+        BINARY_OPERATORS.put(Expression.Operation.REGEX_LIKE, BinaryOperations.REGEX_LIKE);
+        BINARY_OPERATORS.put(Expression.Operation.SIZE_IS, BinaryOperations.SIZE_IS);
+        BINARY_OPERATORS.put(Expression.Operation.CONTAINS_KEY, BinaryOperations.CONTAINS_KEY);
+        BINARY_OPERATORS.put(Expression.Operation.CONTAINS_VALUE, BinaryOperations.CONTAINS_VALUE);
+        BINARY_OPERATORS.put(Expression.Operation.AND, BinaryOperations.AND);
+        BINARY_OPERATORS.put(Expression.Operation.OR, BinaryOperations.OR);
+        BINARY_OPERATORS.put(Expression.Operation.XOR, BinaryOperations.XOR);
+        BINARY_OPERATORS.put(Expression.Operation.FILTER, BinaryOperations.FILTER);
+        UNARY_OPERATORS.put(Expression.Operation.NOT, UnaryOperations.NOT);
+        UNARY_OPERATORS.put(Expression.Operation.SIZE_OF, UnaryOperations.SIZE_OF);
     }
 
-    Evaluator(LazyExpression expression) {
+    Evaluator(Expression expression) {
         this.type = expression.getType();
     }
 
@@ -89,7 +83,7 @@ public abstract class Evaluator {
      * @param expression
      * @return
      */
-    public static Evaluator build(LazyExpression expression) {
+    public static Evaluator build(Expression expression) {
         return expression != null ? expression.getEvaluator() : null;
     }
 }
