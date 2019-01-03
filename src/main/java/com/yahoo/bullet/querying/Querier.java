@@ -296,6 +296,10 @@ public class Querier implements Monoidal {
     @Getter
     private RunningQuery runningQuery;
 
+    private Filter filter;
+
+    private Projection projection;
+
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
 
@@ -393,6 +397,9 @@ public class Querier implements Monoidal {
         }
 
         Query query = this.runningQuery.getQuery();
+
+        filter = new Filter(query.getFilter());
+        projection  = new Projection(query.getProjection());
 
         // Aggregation and Strategy are guaranteed to not be null.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
@@ -633,7 +640,7 @@ public class Querier implements Monoidal {
      */
     public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow =  window == null;
+        boolean noWindow = window == null;
         // Only buffer if there is no window (including Raw) or if it's a record based window.
         return noWindow || !window.isTimeBased();
     }
@@ -657,7 +664,6 @@ public class Querier implements Monoidal {
     // ********************************* Private helpers *********************************
 
     private boolean filter(BulletRecord record) {
-        Filter filter = runningQuery.getFilter();
         if (filter == null) {
             return true;
         }
@@ -665,7 +671,6 @@ public class Querier implements Monoidal {
     }
 
     private BulletRecord project(BulletRecord record) {
-        Projection projection = runningQuery.getProjection();
         if (projection == null) {
             return record;
         }

@@ -2,6 +2,8 @@ package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
+import com.yahoo.bullet.querying.evaluators.ListEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 
@@ -47,6 +49,11 @@ public class LazyList extends LazyExpression {
     @Override
     public String getName() {
         return "[" + values.stream().map(LazyExpression::getName).collect(Collectors.joining(DELIMITER)) + "]";
+    }
+
+    @Override
+    public Evaluator getEvaluator() {
+        return new ListEvaluator(this);
     }
 
     @Override

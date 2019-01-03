@@ -25,10 +25,6 @@ public class RunningQuery implements Initializable {
     private final Query query;
     @Getter
     private long startTime;
-    @Getter
-    private Filter filter;
-    @Getter
-    private Projection projection;
     private String queryString;
 
     /**
@@ -60,12 +56,7 @@ public class RunningQuery implements Initializable {
     @Override
     public Optional<List<BulletError>> initialize() {
         start();
-        Optional<List<BulletError>> errors = query.initialize();
-        if (!errors.isPresent()) {
-            filter = new Filter(query.getFilter());
-            projection = new Projection(query.getProjection());
-        }
-        return errors;
+        return query.initialize();
     }
 
     @Override

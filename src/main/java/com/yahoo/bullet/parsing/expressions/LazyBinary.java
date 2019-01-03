@@ -2,6 +2,8 @@ package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 
@@ -61,6 +63,11 @@ public class LazyBinary extends LazyExpression {
             return "(" + left.getName() + " " + op + " " + right.getName() + ")";
         }
         return op + " (" + left.getName() + ", " + right.getName() + ")";
+    }
+
+    @Override
+    public Evaluator getEvaluator() {
+        return new BinaryEvaluator(this);
     }
 
     @Override

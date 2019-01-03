@@ -15,21 +15,19 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
     @Expose
-    private String name;
-
-    @Expose
-    private LazyExpression value;
+    private Map<String, LazyExpression> fields;
 
     /**
      * Default constructor. GSON recommended.
      */
     public Projection() {
-        name = null;
+        fields = null;
     }
 
     @Override
@@ -39,10 +37,6 @@ public class Projection implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "{name: " + getName() + ", value: " + value + "}";
-    }
-
-    public String getName() {
-        return name != null ? name : value.getName();
+        return "{fields: " + fields + "}";
     }
 }

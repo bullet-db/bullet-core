@@ -90,19 +90,6 @@ public abstract class Evaluator {
      * @return
      */
     public static Evaluator build(LazyExpression expression) {
-        if (expression instanceof LazyNull) {
-            return new NullEvaluator((LazyNull) expression);
-        } else if (expression instanceof LazyValue) {
-            return new ValueEvaluator((LazyValue) expression);
-        } else if (expression instanceof LazyField) {
-            return new FieldEvaluator((LazyField) expression);
-        } else if (expression instanceof LazyUnary) {
-            return new UnaryEvaluator((LazyUnary) expression);
-        } else if (expression instanceof LazyBinary) {
-            return new BinaryEvaluator((LazyBinary) expression);
-        } else if (expression instanceof LazyList) {
-            return new ListEvaluator((LazyList) expression);
-        }
-        return null;
+        return expression != null ? expression.getEvaluator() : null;
     }
 }

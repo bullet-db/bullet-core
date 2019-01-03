@@ -76,12 +76,12 @@ public class Parser {
 
     private static Boolean isOrderBy(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(PostAggregation.TYPE_FIELD);
-        return jsonElement != null && jsonElement.getAsString().equals("ORDERBY");
+        return jsonElement != null && jsonElement.getAsString().equals(PostAggregation.ORDER_BY_SERIALIZED_NAME);
     }
 
     private static Boolean isComputation(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(PostAggregation.TYPE_FIELD);
-        return jsonElement != null && jsonElement.getAsString().equals("COMPUTATION");
+        return jsonElement != null && jsonElement.getAsString().equals(PostAggregation.COMPUTATION_SERIALIZED_NAME);
     }
 
     private static Boolean isBinaryExpression(JsonObject jsonObject) {

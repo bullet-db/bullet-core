@@ -1,6 +1,8 @@
 package com.yahoo.bullet.parsing.expressions;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
+import com.yahoo.bullet.querying.evaluators.NullEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 
 import java.util.List;
@@ -12,7 +14,6 @@ import java.util.Optional;
  * In that case, could just implement those as unary operations.
  */
 public class LazyNull extends LazyExpression {
-
     public LazyNull() {
         type = Type.NULL;
     }
@@ -25,6 +26,11 @@ public class LazyNull extends LazyExpression {
     @Override
     public String getName() {
         return Type.NULL_EXPRESSION;
+    }
+
+    @Override
+    public Evaluator getEvaluator() {
+        return new NullEvaluator(this);
     }
 
     @Override

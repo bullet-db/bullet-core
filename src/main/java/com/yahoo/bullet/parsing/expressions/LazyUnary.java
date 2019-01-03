@@ -2,6 +2,8 @@ package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
+import com.yahoo.bullet.querying.evaluators.UnaryEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 
@@ -50,6 +52,11 @@ public class LazyUnary extends LazyExpression {
     @Override
     public String getName() {
         return op + " (" + operand.getName() + ")";
+    }
+
+    @Override
+    public Evaluator getEvaluator() {
+        return new UnaryEvaluator(this);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -125,6 +126,13 @@ public abstract class LazyExpression implements Configurable, Initializable {
      * @return The name of this expression.
      */
     public abstract String getName();
+
+    /**
+     * Constructs an evaluator for this expression and returns it.
+     *
+     * @return A newly-constructed evaluator for this expression.
+     */
+    public abstract Evaluator getEvaluator();
 
     @Override
     public String toString() {
