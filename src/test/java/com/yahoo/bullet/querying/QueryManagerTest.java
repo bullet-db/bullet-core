@@ -372,4 +372,40 @@ public class QueryManagerTest {
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.ACTUAL_QUERIES_SEEN), 6L);
         Assert.assertEquals(stats.get(QueryManager.PartitionStat.EXPECTED_QUERIES_SEEN), 9L);
     }
+
+    @Test
+    public void testPartitionRemoval() {
+        QueryManager manager = new QueryManager(getEqualityPartitionerConfig("A", "B"));
+        Query queryA = getQuery(ImmutablePair.of("A", "foo"));
+        Query queryB = getQuery(ImmutablePair.of("A", "foo"), ImmutablePair.of("B", "bar"));
+        Query queryC = getQuery();
+        manager.addQuery("idA", getQuerier(queryA));
+        manager.addQuery("idB", getQuerier(queryB));
+        manager.addQuery("idC", getQuerier(queryC));
+        manager.addQuery("idD", getQuerier(queryC));
+
+        Map<QueryManager.PartitionStat, Object> stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 4);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 3);
+
+        manager.removeAndGetQuery("idA");
+        stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 3);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 2);
+
+        manager.removeAndGetQuery("idB");
+        stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 2);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 1);
+
+        manager.removeAndGetQuery("idD");
+        stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 1);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 1);
+
+        manager.removeAndGetQuery("idC");
+        stats = manager.getStats();
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.QUERY_COUNT), 0);
+        Assert.assertEquals(stats.get(QueryManager.PartitionStat.PARTITION_COUNT), 0);
+    }
 }

@@ -130,7 +130,12 @@ public class QueryManager {
             Query query = querier.getQuery();
             Set<String> keys = partitioner.getKeys(query);
             for (String key : keys) {
-                partitioning.get(key).remove(id);
+                Set<String> partition = partitioning.get(key);
+                partition.remove(id);
+                if (partition.isEmpty()) {
+                    log.debug("Partition: {} is empty. Removing...", key);
+                    partitioning.remove(key);
+                }
                 log.debug("Removed query: {} from partition: {}", id, key);
             }
         }
