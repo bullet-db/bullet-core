@@ -15,7 +15,7 @@ import java.util.Optional;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * A lazy expression that takes two operands and a binary operation. These fields are required; however, an optional
+ * An expression that takes two operands and a binary operation. These fields are required; however, an optional
  * primitive type may be specified.
  *
  * Infix and prefix binary operations are differentiated in the naming scheme.

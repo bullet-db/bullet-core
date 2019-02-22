@@ -14,7 +14,8 @@ import java.util.Optional;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * A lazy expression that takes a value. A primitive type must be specified since the value is a represented by a string.
+ * An expression that takes a value. A primitive type must be specified since the value is a represented by a string.
+ * If the type isn't specified, it's assumed to be string.
  */
 @Getter
 public class ValueExpression extends Expression {

@@ -25,4 +25,8 @@ public class UnaryOperations {
         }
         return new TypedObject(value.size());
     };
+
+    static UnaryOperator<TypedObject> IS_NULL = (value) -> new TypedObject(value.getType() == Type.NULL);
+
+    static UnaryOperator<TypedObject> NON_NULL = (value) -> new TypedObject(value.getType() != Type.NULL);
 }

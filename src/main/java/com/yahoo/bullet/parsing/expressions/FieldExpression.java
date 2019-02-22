@@ -14,7 +14,7 @@ import java.util.Optional;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * A lazy expression that takes a field name. A primitive type can be provided.
+ * An expression that takes a field name. A primitive type can be provided.
  *
  * Note, a type should NOT be provided if the field is expected to be a List of Maps or a Map of Maps since only
  * primitive-type casting is supported.

@@ -14,7 +14,7 @@ import java.util.Optional;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * A lazy expression that takes an operand and a unary operation. These fields are required; however, an optional
+ * An expression that takes an operand and a unary operation. These fields are required; however, an optional
  * primitive type may be specified.
  */
 @Getter

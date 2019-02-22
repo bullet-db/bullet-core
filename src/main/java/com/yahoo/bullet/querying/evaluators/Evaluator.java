@@ -52,6 +52,8 @@ public abstract class Evaluator {
         BINARY_OPERATORS.put(Expression.Operation.FILTER, BinaryOperations.FILTER);
         UNARY_OPERATORS.put(Expression.Operation.NOT, UnaryOperations.NOT);
         UNARY_OPERATORS.put(Expression.Operation.SIZE_OF, UnaryOperations.SIZE_OF);
+        UNARY_OPERATORS.put(Expression.Operation.IS_NULL, UnaryOperations.IS_NULL);
+        UNARY_OPERATORS.put(Expression.Operation.NON_NULL, UnaryOperations.NON_NULL);
     }
 
     Evaluator(Expression expression) {

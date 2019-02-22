@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * A lazy expression that, contrary to its name, holds a list of lazy expressions (rather than values). A primitive type
+ * An expression that, contrary to its name, holds a list of lazy expressions (rather than values). A primitive type
  * must be specified as only lists of primitives are supported at the moment.
  */
 @Getter

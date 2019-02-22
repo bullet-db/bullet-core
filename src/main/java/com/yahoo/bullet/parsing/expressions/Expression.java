@@ -90,7 +90,11 @@ public abstract class Expression implements Configurable, Initializable {
         @SerializedName(value = "NOT", alternate = { "~" })
         NOT("NOT", false),
         @SerializedName("SIZEOF")
-        SIZE_OF("SIZEOF", false);
+        SIZE_OF("SIZEOF", false),
+        @SerializedName("ISNULL")
+        IS_NULL("ISNULL", false),
+        @SerializedName("NONNULL")
+        NON_NULL("NONNULL", false);
 
         public static final Set<Operation> BINARY_OPERATIONS =
                 new HashSet<>(asList(ADD, SUB, MUL, DIV,
