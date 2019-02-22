@@ -10,6 +10,10 @@ import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.FilterClause;
 import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.parsing.expressions.BinaryExpression;
+import com.yahoo.bullet.parsing.expressions.Expression;
+import com.yahoo.bullet.parsing.expressions.FieldExpression;
+import com.yahoo.bullet.parsing.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 
@@ -101,9 +105,11 @@ public class SimpleEqualityPartitioner implements Partitioner {
     @Override
     public Set<String> getKeys(Query query) {
         Objects.requireNonNull(query);
-        List<Clause> filters = query.getFilters();
-        // If no filters or has non ANDs, default partition
-        if (filters == null || filters.isEmpty() || hasNonANDLogicals(filters)) {
+
+        Expression filter = query.getFilter();
+
+        // If no filter or has non ANDs, default partition
+        if (filter == null || hasNonANDs(filter)) {
             return defaultKeys;
         }
 
@@ -143,6 +149,20 @@ public class SimpleEqualityPartitioner implements Partitioner {
             return false;
         }
         return clause.getOperation() != Clause.Operation.AND || hasNonANDLogicals(((LogicalClause) clause).getClauses());
+    }
+
+    private static boolean hasNonANDs(Expression filter) {
+        if (!(filter instanceof BinaryExpression)) {
+            return true;
+        }
+        BinaryExpression binary = (BinaryExpression) filter;
+        switch (binary.getOp()) {
+            case AND:
+                return hasNonANDs(binary.getLeft()) || hasNonANDs(binary.getRight());
+            case EQUALS:
+                return !(binary.getLeft() instanceof FieldExpression) || !(binary.getRight() instanceof ValueExpression); // TODO list support
+        }
+        return true;
     }
 
     private void mapFieldToFilters(Clause clause, Map<String, List<FilterClause>> mapping) {

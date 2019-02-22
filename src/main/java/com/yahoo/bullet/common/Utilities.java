@@ -78,7 +78,6 @@ public class Utilities {
         return string == null || string.isEmpty();
     }
 
-
     /**
      * Rounds a double up to the specified number of places.
      *

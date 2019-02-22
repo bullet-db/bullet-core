@@ -19,6 +19,7 @@ import static java.util.Collections.singletonMap;
 
 @SuppressWarnings("unchecked")
 public class ProjectionTest {
+    /*
     @Test
     public void testDefaults() {
         Projection projection = new Projection();
@@ -55,4 +56,5 @@ public class ProjectionTest {
 
         Assert.assertEquals(projection.toString(), "{fields: {null=test, map_field.foo=foo}}");
     }
+    */
 }

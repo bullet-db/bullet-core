@@ -44,7 +44,7 @@ public class RunningQueryTest {
         Assert.assertNotNull(runningQuery.getQuery());
         String actual = runningQuery.toString();
         Assert.assertTrue(actual.contains("{"));
-        Assert.assertTrue(actual.contains("filters: null, projection: null,"));
+        Assert.assertTrue(actual.contains("filter: null, projection: null,"));
         Assert.assertTrue(actual.contains("aggregation: {size: 500, type: RAW, fields: null, attributes: null},"));
         Assert.assertTrue(actual.contains("window: null, duration:"));
         Assert.assertTrue(actual.contains("}"));

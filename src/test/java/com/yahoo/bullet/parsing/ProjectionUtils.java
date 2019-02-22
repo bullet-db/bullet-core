@@ -28,7 +28,7 @@ public class ProjectionUtils {
 
     public static Projection makeProjection(Map<String, String> fields) {
         Projection projection = new Projection();
-        projection.setFields(fields);
+        //projection.setFields(fields);
         return projection;
     }
 }

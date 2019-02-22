@@ -11,6 +11,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.parsing.expressions.BinaryExpression;
+import com.yahoo.bullet.parsing.expressions.Expression;
+import com.yahoo.bullet.parsing.expressions.FieldExpression;
+import com.yahoo.bullet.parsing.expressions.ListExpression;
+import com.yahoo.bullet.parsing.expressions.NullExpression;
+import com.yahoo.bullet.parsing.expressions.UnaryExpression;
+import com.yahoo.bullet.parsing.expressions.ValueExpression;
 
 public class Parser {
     private static final FieldTypeAdapterFactory<Clause> CLAUSE_FACTORY =
@@ -24,8 +31,12 @@ public class Parser {
                                    .registerSubType(Computation.class, Parser::isComputation);
     private static final FieldTypeAdapterFactory<Expression> EXPRESSION_FACTORY =
             FieldTypeAdapterFactory.of(Expression.class)
-                                   .registerSubType(LeafExpression.class, Parser::isLeafExpression)
-                                   .registerSubType(BinaryExpression.class, Parser::isBinaryExpression);
+                                   .registerSubType(NullExpression.class, Parser::isLazyNull)
+                                   .registerSubType(ValueExpression.class, Parser::isLazyValue)
+                                   .registerSubType(FieldExpression.class, Parser::isLazyField)
+                                   .registerSubType(UnaryExpression.class, Parser::isLazyUnary)
+                                   .registerSubType(BinaryExpression.class, Parser::isLazyBinary)
+                                   .registerSubType(ListExpression.class, Parser::isLazyList);
     private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(CLAUSE_FACTORY)
                                                       .registerTypeAdapterFactory(POST_AGGREGATION_FACTORY)
                                                       .registerTypeAdapterFactory(EXPRESSION_FACTORY)
@@ -60,21 +71,46 @@ public class Parser {
 
     private static Boolean isOrderBy(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(PostAggregation.TYPE_FIELD);
-        return jsonElement != null && jsonElement.getAsString().equals("ORDERBY");
+        return jsonElement != null && jsonElement.getAsString().equals(PostAggregation.ORDER_BY_SERIALIZED_NAME);
     }
 
     private static Boolean isComputation(JsonObject jsonObject) {
         JsonElement jsonElement = jsonObject.get(PostAggregation.TYPE_FIELD);
-        return jsonElement != null && jsonElement.getAsString().equals("COMPUTATION");
+        return jsonElement != null && jsonElement.getAsString().equals(PostAggregation.COMPUTATION_SERIALIZED_NAME);
     }
 
-    private static Boolean isBinaryExpression(JsonObject jsonObject) {
-        JsonElement jsonElement = jsonObject.get(Expression.OPERATION_FIELD);
-        return jsonElement != null && Expression.Operation.BINARY_OPERATION.contains(jsonElement.getAsString());
+    private static Boolean isLazyNull(JsonObject jsonObject) {
+        return jsonObject.size() == 0;
     }
 
-    private static Boolean isLeafExpression(JsonObject jsonObject) {
-        return !jsonObject.has(Expression.OPERATION_FIELD);
+    private static Boolean isLazyValue(JsonObject jsonObject) {
+        return jsonObject.size() == 2 &&
+               jsonObject.has("value") &&
+               jsonObject.has("type");
+    }
+
+    private static Boolean isLazyField(JsonObject jsonObject) {
+        return (jsonObject.size() == 1 || (jsonObject.size() == 2 && jsonObject.has("type"))) &&
+                jsonObject.has("field");
+    }
+
+    private static Boolean isLazyUnary(JsonObject jsonObject) {
+        return (jsonObject.size() == 2 || (jsonObject.size() == 3 && jsonObject.has("type"))) &&
+                jsonObject.has("operand") &&
+                jsonObject.has("op");
+    }
+
+    private static Boolean isLazyBinary(JsonObject jsonObject) {
+        return (jsonObject.size() == 3 || (jsonObject.size() == 4 && jsonObject.has("type"))) &&
+                jsonObject.has("left") &&
+                jsonObject.has("right") &&
+                jsonObject.has("op");
+    }
+
+    private static Boolean isLazyList(JsonObject jsonObject) {
+        return jsonObject.size() == 2 &&
+               jsonObject.has("values") &&
+               jsonObject.has("type");
     }
 
     /**

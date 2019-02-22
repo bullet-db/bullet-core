@@ -50,7 +50,7 @@ public class SimpleEqualityPartitionerTest {
     private Query createQuery(Clause... filters) {
         Query query = new Query();
         if (filters != null) {
-            query.setFilters(asList(filters));
+            //query.setFilters(asList(filters));
         }
         query.setAggregation(new Aggregation());
         query.configure(config);

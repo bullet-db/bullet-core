@@ -10,6 +10,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -29,7 +29,7 @@ public class Query implements Configurable, Initializable {
     @Expose
     private Projection projection;
     @Expose
-    private List<Clause> filters;
+    private Expression filter;
     @Expose
     private Aggregation aggregation;
     @Expose
@@ -45,6 +45,7 @@ public class Query implements Configurable, Initializable {
                                                            "Change your aggregation type or your window include type");
     public static final BulletError AT_MOST_ONE_ORDERBY = makeError("The post aggregations cannot have multiple \"ORDERBY\"",
                                                            "Change your post aggregations to keep at most one \"ORDERBY\"");
+
     /**
      * Default constructor. GSON recommended.
      */
@@ -56,12 +57,11 @@ public class Query implements Configurable, Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        if (filters != null) {
-            filters = rewriteClauses(filters);
-            filters.forEach(f -> f.configure(config));
-        }
         if (projection != null) {
             projection.configure(config);
+        }
+        if (filter != null) {
+            filter.configure(config);
         }
         // Must have an aggregation
         if (aggregation == null) {
@@ -90,14 +90,11 @@ public class Query implements Configurable, Initializable {
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
-        if (filters != null) {
-            for (Clause clause : filters) {
-                clause.initialize().ifPresent(errors::addAll);
-            }
-        }
-
         if (projection != null) {
             projection.initialize().ifPresent(errors::addAll);
+        }
+        if (filter != null) {
+            filter.initialize().ifPresent(errors::addAll);
         }
 
         aggregation.initialize().ifPresent(errors::addAll);
@@ -108,7 +105,6 @@ public class Query implements Configurable, Initializable {
             }
             postAggregations.forEach(p -> p.initialize().ifPresent(errors::addAll));
         }
-
         if (window != null) {
             window.initialize().ifPresent(errors::addAll);
             Aggregation.Type type = aggregation.getType();
@@ -126,25 +122,7 @@ public class Query implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "{filters: " + filters + ", projection: " + projection + ", aggregation: " + aggregation +
+        return "{filter: " + filter + ", projection: " + projection + ", aggregation: " + aggregation +
                 ", postAggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + "}";
-    }
-
-    private List<Clause> rewriteClauses(List<Clause> clauses) {
-        if (clauses == null) {
-            return clauses;
-        }
-        return clauses.stream().map(this::rewriteClause).collect(Collectors.toList());
-    }
-
-    private Clause rewriteClause(Clause clause) {
-        Clause toReturn = clause;
-        if (clause instanceof LogicalClause) {
-            LogicalClause logical = ((LogicalClause) clause);
-            logical.setClauses(rewriteClauses(logical.getClauses()));
-        } else if (clause instanceof StringFilterClause) {
-            toReturn = new ObjectFilterClause((StringFilterClause) clause);
-        }
-        return toReturn;
     }
 }

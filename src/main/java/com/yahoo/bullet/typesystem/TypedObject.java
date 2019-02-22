@@ -163,6 +163,9 @@ public class TypedObject implements Comparable<TypedObject> {
      * @return The casted {@link TypedObject}
      */
     public TypedObject forceCast(Type castedType) {
+        if (castedType == type) {
+            return this;
+        }
         return new TypedObject(castedType, type.forceCast(castedType, value));
     }
 
@@ -177,6 +180,40 @@ public class TypedObject implements Comparable<TypedObject> {
         return new TypedObject(castedType, Type.STRING.forceCast(castedType, value));
     }
 
+    public String getString() {
+        return (String) value;
+    }
+
+    public Integer getInteger() {
+        return (Integer) value;
+    }
+
+    public Long getLong() {
+        return (Long) value;
+    }
+
+    public Float getFloat() {
+        return (Float) value;
+    }
+
+    public Double getDouble() {
+        return (Double) value;
+    }
+
+    public Boolean getBoolean() {
+        return (Boolean) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Object> getList() {
+        return (List<Object>) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getMap() {
+        return (Map<String, Object>) value;
+    }
+
     /**
      * Get the size of the value. Currently only LIST, MAP and STRING are supported.
      *
@@ -186,11 +223,11 @@ public class TypedObject implements Comparable<TypedObject> {
     public int size() {
         switch (type) {
             case LIST:
-                return List.class.cast(value).size();
+                return ((List) value).size();
             case MAP:
-                return Map.class.cast(value).size();
+                return ((Map) value).size();
             case STRING:
-                return String.class.cast(value).length();
+                return ((String) value).length();
             default:
                 throw new UnsupportedOperationException("This type of field does not support size of: " + type);
         }

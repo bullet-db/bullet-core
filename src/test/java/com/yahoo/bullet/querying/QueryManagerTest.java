@@ -48,7 +48,7 @@ public class QueryManagerTest {
             List<Clause> clauses = Arrays.stream(equalities)
                                          .map(e -> makeClause(e.getKey(), singletonList(e.getValue()), EQUALS))
                                          .collect(Collectors.toList());
-            query.setFilters(clauses);
+            //query.setFilters(clauses);
         }
         query.setAggregation(new Aggregation());
         query.configure(new BulletConfig());

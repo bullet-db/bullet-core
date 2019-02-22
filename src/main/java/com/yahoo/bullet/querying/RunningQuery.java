@@ -23,7 +23,6 @@ public class RunningQuery implements Initializable {
     private final String id;
     @Getter
     private final Query query;
-
     @Getter
     private long startTime;
     private String queryString;
