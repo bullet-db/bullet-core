@@ -398,10 +398,10 @@ public class Querier implements Monoidal {
             return errors;
         }
 
-        Query query = this.runningQuery.getQuery();
+        Query query = runningQuery.getQuery();
 
         filter = new Filter(query.getFilter());
-        projection  = new Projection(query.getProjection());
+        projection = new Projection(query.getProjection().getFields());
 
         // Aggregation and Strategy are guaranteed to not be null.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);

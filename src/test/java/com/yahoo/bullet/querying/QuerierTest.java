@@ -13,7 +13,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Expression;
 import com.yahoo.bullet.parsing.ExpressionUtils;
 import com.yahoo.bullet.parsing.OrderBy;

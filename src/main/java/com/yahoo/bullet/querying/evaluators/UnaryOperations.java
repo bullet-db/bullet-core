@@ -6,7 +6,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.util.function.UnaryOperator;
 
 /**
- * Unary operations used by UnaryEvaluator. Probably also want IS_NULL / NON_NULL.
+ * Unary operations used by UnaryEvaluator. Probably also want IS_NULL / IS_NOT_NULL.
  */
 public class UnaryOperations {
 
@@ -28,5 +28,5 @@ public class UnaryOperations {
 
     static UnaryOperator<TypedObject> IS_NULL = (value) -> new TypedObject(value.getType() == Type.NULL);
 
-    static UnaryOperator<TypedObject> NON_NULL = (value) -> new TypedObject(value.getType() != Type.NULL);
+    static UnaryOperator<TypedObject> IS_NOT_NULL = (value) -> new TypedObject(value.getType() != Type.NULL);
 }

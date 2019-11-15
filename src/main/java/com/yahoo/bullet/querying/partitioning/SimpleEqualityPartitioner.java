@@ -6,9 +6,6 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.FilterClause;
-import com.yahoo.bullet.parsing.LogicalClause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.expressions.BinaryExpression;
 import com.yahoo.bullet.parsing.expressions.Expression;

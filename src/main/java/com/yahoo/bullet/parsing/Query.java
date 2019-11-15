@@ -50,7 +50,7 @@ public class Query implements Configurable, Initializable {
      * Default constructor. GSON recommended.
      */
     public Query() {
-        // If no aggregation is provided, the default one is used. Aggregations must be present.
+        // If no aggregation is provided, the default one is used. An aggregation must be present.
         aggregation = new Aggregation();
     }
 

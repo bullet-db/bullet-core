@@ -5,9 +5,6 @@
  */
 package com.yahoo.bullet.querying.operations;
 
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.LogicalClause;
-import com.yahoo.bullet.parsing.ObjectFilterClause;
 import com.yahoo.bullet.parsing.Value;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;

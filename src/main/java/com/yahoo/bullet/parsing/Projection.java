@@ -36,15 +36,17 @@ public class Projection implements Configurable, Initializable {
      */
     public Projection() {
         fields = null;
+        computations = null;
     }
 
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
-        if (fields.keySet().stream().anyMatch(s -> s.contains(DELIMITER))) {
+        if (fields.keySet().stream().anyMatch(s -> s.contains(DELIMITER)) || computations.keySet().stream().anyMatch(s -> s.contains(DELIMITER))) {
             errors.add(PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS);
         }
         fields.values().forEach(f -> f.initialize().ifPresent(errors::addAll));
+        computations.values().forEach(f -> f.initialize().ifPresent(errors::addAll));
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
 

@@ -7,7 +7,6 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Clause;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
