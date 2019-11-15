@@ -14,13 +14,13 @@ import java.util.Optional;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * An expression that takes a value. A primitive type must be specified since the value is a represented by a string.
+ * An expression that takes a value. A primitive type must be specified since the value is always represented by a string.
  * If the type isn't specified, it's assumed to be string.
  */
 @Getter
 public class ValueExpression extends Expression {
-    private static final BulletError LAZY_VALUE_REQUIRES_NON_NULL_VALUE = makeError("The value must not be null.", "Please provide a non-null value.");
-    private static final BulletError LAZY_VALUES_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
+    private static final BulletError VALUE_REQUIRES_NON_NULL_VALUE = makeError("The value must not be null.", "Please provide a non-null value.");
+    private static final BulletError VALUE_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
 
     @Expose
     private String value;
@@ -33,10 +33,10 @@ public class ValueExpression extends Expression {
     @Override
     public Optional<List<BulletError>> initialize() {
         if (value == null) {
-            return Optional.of(Collections.singletonList(LAZY_VALUE_REQUIRES_NON_NULL_VALUE));
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_NON_NULL_VALUE));
         }
         if (!Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(LAZY_VALUES_REQUIRES_PRIMITIVE_TYPE));
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_PRIMITIVE_TYPE));
         }
         return Optional.empty();
     }

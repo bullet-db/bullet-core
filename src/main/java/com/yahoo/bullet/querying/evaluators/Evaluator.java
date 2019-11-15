@@ -15,10 +15,10 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
- * Evaluators do the work of the lazy expressions.
+ * Evaluators do the work of expressions.
  *
- * Each lazy expression is built into a corresponding evaluator. Note, evaluators are constructed after a query has been
- * initialized so assume all lazy expressions are valid.
+ * Each expression is built into a corresponding evaluator. Note, evaluators are constructed after a query has been
+ * initialized so assume all expressions are valid.
  *
  * Evaluators are evaluated given a BulletRecord and will throw exceptions on any errors. These errors are virtually all
  * from some form of type check.

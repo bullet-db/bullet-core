@@ -6,7 +6,7 @@ import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Not so lazy. Need to make sure TypedObjects are properly immutable.
+ * Need to make sure TypedObjects are properly immutable.
  *
  * Not sure if useful though.
  */

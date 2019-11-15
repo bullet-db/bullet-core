@@ -10,7 +10,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 /**
- * The type of the operation in binary/unary lazy expressions.
+ * The type of the operation in binary/unary expressions.
  */
 @Getter
 @AllArgsConstructor

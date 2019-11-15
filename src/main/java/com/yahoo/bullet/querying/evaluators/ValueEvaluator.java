@@ -5,7 +5,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Not so lazy. Need to make sure TypedObjects are properly immutable.
+ * Need to make sure TypedObjects are properly immutable.
  */
 public class ValueEvaluator extends Evaluator {
     private final TypedObject value;

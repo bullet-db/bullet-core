@@ -17,15 +17,15 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * An expression that takes a field name. A primitive type can be provided.
  *
  * Note, a type should NOT be provided if the field is expected to be a List of Maps or a Map of Maps since only
- * primitive-type casting is supported.
+ * primitive type-casting is supported.
  *
  * For example, if a field is extracted as a list of boolean maps and the type specified is boolean, then the evaluator
  * will try to cast those boolean maps to boolean objects (and fail).
  */
 @Getter
 public class FieldExpression extends Expression {
-    private static final BulletError LAZY_FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
-    private static final BulletError LAZY_FIELD_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
+    private static final BulletError FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
+    private static final BulletError FIELD_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
     private String field;
@@ -38,10 +38,10 @@ public class FieldExpression extends Expression {
     @Override
     public Optional<List<BulletError>> initialize() {
         if (field == null || field.isEmpty()) {
-            return Optional.of(Collections.singletonList(LAZY_FIELD_REQUIRES_NON_NULL_FIELD));
+            return Optional.of(Collections.singletonList(FIELD_REQUIRES_NON_NULL_FIELD));
         }
         if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(LAZY_FIELD_REQUIRES_PRIMITIVE_TYPE));
+            return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE));
         }
         return Optional.empty();
     }

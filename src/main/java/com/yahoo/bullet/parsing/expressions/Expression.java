@@ -1,27 +1,20 @@
 package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
 
 /**
  * Expressions are currently used in queries for filters and projections.
  *
- * A filter is simply an expression. We accept a record iff it the expression evaluates to true (with a forced cast to Boolean if necessary), e.g.
+ * A filter is simply an expression. We accept a record iff the expression evaluates to true (with a forced cast to Boolean if necessary), e.g.
  *
- * "filter": { "left": {"field": "bcookie"}, "right": {"value": "123456", "type": "STRING"}, "op": "EQUALS" }
+ * "filter": {"left": {"field": "id"}, "right": {"value": "123456", "type": "STRING"}, "op": "EQUALS"}
  *
- * A projection is a Map (i.e. Json object) from names to lazy expressions, e.g.
+ * A projection is a Map (i.e. Json object) from names to expressions, e.g.
  *
  * "projection": {
  *     "candy": {"field": "candy"},
@@ -39,15 +32,13 @@ import static java.util.Arrays.asList;
  *
  * MapExpression is not supported at the moment.
  *
- * Also, note the "type" field in Expression. This might be the true origin of the "lazy" in lazy expressions. The specified type
- * is not a type-check; rather, when an expression is evaluated, it will force cast to that type (if specified) before returning, so it is similar to a
- * late type-check. Also, type must be primitive.
+ * Note, the "type" field in Expression is not a type-check. When an expression is evaluated, it will force cast to that
+ * type (if specified) before returning. Also, type must be primitive.
  *
  * Look at the Evaluator class to see how expressions are evaluated.
  */
 @Getter
 public abstract class Expression implements Configurable, Initializable {
-
     @Expose
     protected Type type;
 

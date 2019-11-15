@@ -19,9 +19,9 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  */
 @Getter
 public class UnaryExpression extends Expression {
-    public static final BulletError LAZY_UNARY_REQUIRES_NON_NULL_OPERAND = makeError("The operand must not be null.", "Please provide an expression for operand.");
-    public static final BulletError LAZY_UNARY_REQUIRES_UNARY_OPERATION = makeError("The operation must be unary.", "Please provide a unary operation for op.");
-    public static final BulletError LAZY_UNARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
+    public static final BulletError UNARY_REQUIRES_NON_NULL_OPERAND = makeError("The operand must not be null.", "Please provide an expression for operand.");
+    public static final BulletError UNARY_REQUIRES_UNARY_OPERATION = makeError("The operation must be unary.", "Please provide a unary operation for op.");
+    public static final BulletError UNARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
     private Expression operand;
@@ -37,13 +37,13 @@ public class UnaryExpression extends Expression {
     @Override
     public Optional<List<BulletError>> initialize() {
         if (operand == null) {
-            return Optional.of(Collections.singletonList(LAZY_UNARY_REQUIRES_NON_NULL_OPERAND));
+            return Optional.of(Collections.singletonList(UNARY_REQUIRES_NON_NULL_OPERAND));
         }
         if (!Operation.UNARY_OPERATIONS.contains(op)) {
-            return Optional.of(Collections.singletonList(LAZY_UNARY_REQUIRES_UNARY_OPERATION));
+            return Optional.of(Collections.singletonList(UNARY_REQUIRES_UNARY_OPERATION));
         }
         if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(LAZY_UNARY_REQUIRES_PRIMITIVE_TYPE));
+            return Optional.of(Collections.singletonList(UNARY_REQUIRES_PRIMITIVE_TYPE));
         }
         return operand.initialize();
     }

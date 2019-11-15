@@ -22,9 +22,9 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  */
 @Getter
 public class BinaryExpression extends Expression {
-    public static final BulletError LAZY_BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
-    public static final BulletError LAZY_BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
-    public static final BulletError LAZY_BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
+    public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
+    public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
+    public static final BulletError BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
     private Expression left;
@@ -43,13 +43,13 @@ public class BinaryExpression extends Expression {
     @Override
     public Optional<List<BulletError>> initialize() {
         if (left == null || right == null) {
-            return Optional.of(Collections.singletonList(LAZY_BINARY_REQUIRES_LEFT_AND_RIGHT));
+            return Optional.of(Collections.singletonList(BINARY_REQUIRES_LEFT_AND_RIGHT));
         }
         if (!Operation.BINARY_OPERATIONS.contains(op)) {
-            return Optional.of(Collections.singletonList(LAZY_BINARY_REQUIRES_BINARY_OPERATION));
+            return Optional.of(Collections.singletonList(BINARY_REQUIRES_BINARY_OPERATION));
         }
         if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(LAZY_BINARY_REQUIRES_PRIMITIVE_TYPE));
+            return Optional.of(Collections.singletonList(BINARY_REQUIRES_PRIMITIVE_TYPE));
         }
         List<BulletError> errors = new ArrayList<>();
         left.initialize().ifPresent(errors::addAll);

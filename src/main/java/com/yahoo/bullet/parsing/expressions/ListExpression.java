@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * An expression that, contrary to its name, holds a list of lazy expressions (rather than values). A primitive type
+ * An expression that, contrary to its name, holds a list of expressions (rather than values). A primitive type
  * must be specified as only lists of primitives are supported at the moment.
  */
 @Getter
 public class ListExpression extends Expression {
-    private static final BulletError LAZY_LIST_REQUIRES_NON_NULL_LIST = makeError("The values list must not be null.", "Please provide a values list.");
-    private static final BulletError LAZY_LIST_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
+    private static final BulletError LIST_REQUIRES_NON_NULL_LIST = makeError("The values list must not be null.", "Please provide a values list.");
+    private static final BulletError LIST_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
     private static final String DELIMITER = ", ";
 
     @Expose
@@ -36,10 +36,10 @@ public class ListExpression extends Expression {
     @Override
     public Optional<List<BulletError>> initialize() {
         if (values == null) {
-            return Optional.of(Collections.singletonList(LAZY_LIST_REQUIRES_NON_NULL_LIST));
+            return Optional.of(Collections.singletonList(LIST_REQUIRES_NON_NULL_LIST));
         }
         if (!Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(LAZY_LIST_REQUIRES_PRIMITIVE_TYPE));
+            return Optional.of(Collections.singletonList(LIST_REQUIRES_PRIMITIVE_TYPE));
         }
         List<BulletError> errors = new ArrayList<>();
         values.forEach(values -> values.initialize().ifPresent(errors::addAll));
