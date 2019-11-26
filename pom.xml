@@ -8,7 +8,6 @@
     <packaging>jar</packaging>
     <name>bullet-core</name>
 
-
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/bullet-db/bullet-core.git</developerConnection>
         <tag>HEAD</tag>

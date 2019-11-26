@@ -11,9 +11,10 @@ import static com.yahoo.bullet.querying.evaluators.Evaluator.UnaryOperator;
 public class UnaryOperations {
     static UnaryOperator NOT = (evaluator, record) -> {
         TypedObject value = evaluator.evaluate(record);
-        if (!Type.PRIMITIVES.contains(value.getType())) {
+        // TODO push to expressions type-checking
+        /*if (!Type.PRIMITIVES.contains(value.getType())) {
             throw new UnsupportedOperationException("'NOT' operand must have primitive type.");
-        }
+        }*/
         Boolean negated = !((Boolean) value.forceCast(Type.BOOLEAN).getValue());
         return new TypedObject(negated);
     };
@@ -21,9 +22,10 @@ public class UnaryOperations {
     static UnaryOperator SIZE_OF = (evaluator, record) -> {
         TypedObject value = evaluator.evaluate(record);
         Type type = value.getType();
-        if (type != Type.STRING && type != Type.LIST && type != Type.MAP) {
+        // TODO push to expressions type-checking
+        /*if (type != Type.STRING && type != Type.LIST && type != Type.MAP) {
             throw new UnsupportedOperationException("'SIZEOF' operand must have type STRING, LIST, OR MAP.");
-        }
+        }*/
         return new TypedObject(value.size());
     };
 
