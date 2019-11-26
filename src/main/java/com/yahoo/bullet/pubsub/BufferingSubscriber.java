@@ -29,7 +29,6 @@ public abstract class BufferingSubscriber implements Subscriber {
      */
     protected final int maxUncommittedMessages;
 
-
     /**
      * A List of messages read. {@link #receive()} emits from the head.
      */
