@@ -1,6 +1,10 @@
+/*
+ *  Copyright 2019, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.Field;
 import com.yahoo.bullet.parsing.expressions.FieldExpression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
@@ -11,8 +15,9 @@ import lombok.Getter;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import static com.yahoo.bullet.parsing.Projection.Field;
 
 /**
  * Projection consists of a map of names to evaluators built from the projection map in the bullet query. If there's no projection,
@@ -27,8 +32,7 @@ import java.util.Set;
  */
 @Getter
 public class Projection {
-    private Map<String, Evaluator> evaluators;
-    private boolean inclusive;
+    private LinkedHashMap<String, Evaluator> evaluators;
 
     public Projection(List<Field> fields) {
         if (fields != null && !fields.isEmpty()) {
@@ -37,20 +41,30 @@ public class Projection {
         }
     }
 
+    public BulletRecord project(BulletRecord record) {
+        if (evaluators == null) {
+            return record;
+        }
+        return project(record, record);
+    }
+
     public BulletRecord project(BulletRecord record, BulletRecordProvider provider) {
         if (evaluators == null) {
             return record;
         }
-        BulletRecord projected = provider.getInstance();
+        return project(record, provider.getInstance());
+    }
+
+    private BulletRecord project(BulletRecord record, BulletRecord projected) {
         evaluators.forEach((name, evaluator) -> {
-                try {
-                    TypedObject value = evaluator.evaluate(record);
-                    if (value != null && value.getValue() != null) {
-                        projected.forceSet(name, value.getValue());
-                    }
-                } catch (Exception ignored) {
+            try {
+                TypedObject value = evaluator.evaluate(record);
+                if (value != null && value.getValue() != null) {
+                    projected.forceSet(name, value.getValue());
                 }
-            });
+            } catch (Exception ignored) {
+            }
+        });
         return projected;
     }
 

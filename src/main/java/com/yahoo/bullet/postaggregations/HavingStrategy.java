@@ -1,3 +1,8 @@
+/*
+ *  Copyright 2019, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
@@ -17,6 +22,10 @@ public class HavingStrategy implements PostStrategy {
     private Having having;
     private Evaluator evaluator;
 
+    /**
+     *
+     * @param having
+     */
     public HavingStrategy(Having having) {
         this.having = having;
     }
@@ -34,14 +43,14 @@ public class HavingStrategy implements PostStrategy {
     @Override
     public Clip execute(Clip clip) {
         List<BulletRecord> records = clip.getRecords();
-        // records is an ArrayList ...
+        // TODO records is an ArrayList, so removing directly would have worse performance than creating a new list (?)
         records = records.stream().filter(r -> {
-            try {
-                return (Boolean) evaluator.evaluate(r).forceCast(Type.BOOLEAN).getValue();
-            } catch (Exception ignored) {
-                return false;
-            }
-        }).collect(Collectors.toList());
+                try {
+                    return evaluator.evaluate(r).forceCast(Type.BOOLEAN).getBoolean();
+                } catch (Exception ignored) {
+                    return false;
+                }
+            }).collect(Collectors.toList());
         return Clip.of(records).add(clip.getMeta());
     }
 

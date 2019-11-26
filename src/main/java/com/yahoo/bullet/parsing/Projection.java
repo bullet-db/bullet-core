@@ -9,6 +9,7 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
+import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,14 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
+    @Getter @Setter
+    public static class Field {
+        @Expose
+        private String name;
+        @Expose
+        private Expression value;
+    }
+
     public static final BulletError PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS = makeError("Projection fields cannot contain delimiters.", "Please rename your projection fields to not contain delimiters.");
     public static final String DELIMITER = ".";
 

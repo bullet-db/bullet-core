@@ -180,26 +180,50 @@ public class TypedObject implements Comparable<TypedObject> {
         return new TypedObject(castedType, Type.STRING.forceCast(castedType, value));
     }
 
+    /**
+     *
+     * @return
+     */
     public String getString() {
         return (String) value;
     }
 
+    /**
+     *
+     * @return
+     */
     public Integer getInteger() {
         return (Integer) value;
     }
 
+    /**
+     *
+     * @return
+     */
     public Long getLong() {
         return (Long) value;
     }
 
+    /**
+     *
+     * @return
+     */
     public Float getFloat() {
         return (Float) value;
     }
 
+    /**
+     *
+     * @return
+     */
     public Double getDouble() {
         return (Double) value;
     }
 
+    /**
+     *
+     * @return
+     */
     public Boolean getBoolean() {
         return (Boolean) value;
     }

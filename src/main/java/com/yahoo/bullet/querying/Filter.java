@@ -1,3 +1,8 @@
+/*
+ *  Copyright 2019, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.parsing.expressions.Expression;
@@ -15,8 +20,8 @@ import com.yahoo.bullet.typesystem.Type;
 public class Filter {
     private Evaluator evaluator;
 
-    public Filter(Expression filter) {
-        evaluator = Evaluator.build(filter);
+    public Filter(Expression filterExpression) {
+        evaluator = Evaluator.build(filterExpression);
     }
 
     /**
@@ -30,7 +35,7 @@ public class Filter {
             return true;
         }
         try {
-            return (Boolean) evaluator.evaluate(record).forceCast(Type.BOOLEAN).getValue();
+            return evaluator.evaluate(record).forceCast(Type.BOOLEAN).getBoolean();
         } catch (Exception e) {
             return false;
         }
