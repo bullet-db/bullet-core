@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.yahoo.bullet.common.BulletConfig;
 
 public class Parser {
@@ -84,7 +85,7 @@ public class Parser {
      * @param config Additional configuration for the query.
      *
      * @return The parsed, configured Query.
-     * @throws com.google.gson.JsonParseException if there was an issue parsing the query.
+     * @throws JsonParseException if there was an issue parsing the query.
      */
     public static Query parse(String queryString, BulletConfig config) {
         Query query = GSON.fromJson(queryString, Query.class);

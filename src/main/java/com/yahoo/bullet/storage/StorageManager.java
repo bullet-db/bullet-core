@@ -20,6 +20,11 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     private static final long serialVersionUID = 6384361951608923687L;
     protected BulletConfig config;
 
+    /**
+     * Constructor that takes a {@link BulletConfig}.
+     *
+     * @param config The config to use.
+     */
     public StorageManager(BulletConfig config) {
         this.config = config;
     }

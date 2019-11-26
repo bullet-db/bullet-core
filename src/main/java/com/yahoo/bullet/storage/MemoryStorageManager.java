@@ -10,7 +10,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 

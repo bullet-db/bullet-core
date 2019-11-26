@@ -28,34 +28,34 @@ public class ComputationStrategy implements PostStrategy {
     @Override
     public Clip execute(Clip clip) {
         clip.getRecords().forEach(r -> {
-                try {
-                    TypedObject result = calculate(computation.getExpression(), r);
-                    switch (result.getType()) {
-                        case INTEGER:
-                            r.setInteger(computation.getNewName(), (Integer) result.getValue());
-                            break;
-                        case LONG:
-                            r.setLong(computation.getNewName(), (Long) result.getValue());
-                            break;
-                        case DOUBLE:
-                            r.setDouble(computation.getNewName(), (Double) result.getValue());
-                            break;
-                        case FLOAT:
-                            r.setFloat(computation.getNewName(), (Float) result.getValue());
-                            break;
-                        case BOOLEAN:
-                            r.setBoolean(computation.getNewName(), (Boolean) result.getValue());
-                            break;
-                        case STRING:
-                            r.setString(computation.getNewName(), (String) result.getValue());
-                            break;
-                    }
-                } catch (RuntimeException e) {
-                    // Ignore the exception and skip setting the field.
-                    log.error("Unable to calculate the expression: " + computation.getExpression());
-                    log.error("Skip it due to: " + e);
+            try {
+                TypedObject result = calculate(computation.getExpression(), r);
+                switch (result.getType()) {
+                    case INTEGER:
+                        r.setInteger(computation.getNewName(), (Integer) result.getValue());
+                        break;
+                    case LONG:
+                        r.setLong(computation.getNewName(), (Long) result.getValue());
+                        break;
+                    case DOUBLE:
+                        r.setDouble(computation.getNewName(), (Double) result.getValue());
+                        break;
+                    case FLOAT:
+                        r.setFloat(computation.getNewName(), (Float) result.getValue());
+                        break;
+                    case BOOLEAN:
+                        r.setBoolean(computation.getNewName(), (Boolean) result.getValue());
+                        break;
+                    case STRING:
+                        r.setString(computation.getNewName(), (String) result.getValue());
+                        break;
                 }
-            });
+            } catch (RuntimeException e) {
+                // Ignore the exception and skip setting the field.
+                log.error("Unable to calculate the expression: " + computation.getExpression());
+                log.error("Skip it due to: " + e);
+            }
+        });
         return clip;
     }
 
