@@ -36,7 +36,6 @@ public class RunningQuery implements Initializable {
      * @param queryString The String version of the query.
      * @param config The configuration to use for the query.
      * @throws com.google.gson.JsonParseException if there were issues parsing the query.
-     *
      */
     public RunningQuery(String id, String queryString, BulletConfig config) {
         this(id, Parser.parse(queryString, config));
