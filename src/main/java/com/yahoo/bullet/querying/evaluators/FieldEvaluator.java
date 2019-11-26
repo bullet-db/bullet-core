@@ -18,7 +18,6 @@ public class FieldEvaluator extends Evaluator {
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        TypedObject object = new TypedObject(record.extractField(field));
-        return cast(object);
+        return cast(new TypedObject(record.extractField(field)));
     }
 }

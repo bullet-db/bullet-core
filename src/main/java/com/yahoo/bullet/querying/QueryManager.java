@@ -109,9 +109,7 @@ public class QueryManager {
         Query query = querier.getQuery();
         Set<String> keys = partitioner.getKeys(query);
         for (String key : keys) {
-            Set<String> partition = partitioning.getOrDefault(key, new HashSet<>());
-            partition.add(id);
-            partitioning.put(key, partition);
+            partitioning.computeIfAbsent(key, s -> new HashSet<>()).add(id);
             log.debug("Added query: {} to partition: {}", id, key);
         }
         queries.put(id, querier);

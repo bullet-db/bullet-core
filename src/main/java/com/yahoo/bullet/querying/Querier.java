@@ -10,9 +10,11 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
+import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.operations.AggregationOperations;
 import com.yahoo.bullet.querying.operations.PostAggregationOperations;
 import com.yahoo.bullet.querying.operations.WindowingOperations;
@@ -29,9 +31,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
@@ -315,8 +319,8 @@ public class Querier implements Monoidal {
     private Mode mode;
 
     private List<PostStrategy> postStrategies;
-    // Fields which are required by post aggregations and will not shown in final result.
-    private Map<String, String> transientFields;
+    // Fields which are required by post aggregations and will not be shown in final result.
+    private Set<String> transientFields;
 
     private BulletRecordProvider provider;
 
@@ -370,7 +374,7 @@ public class Querier implements Monoidal {
         this.runningQuery = query;
         this.config = config;
         this.provider = config.getBulletRecordProvider();
-        this.transientFields = new HashMap<>();
+        this.transientFields = new HashSet<>();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -419,6 +423,7 @@ public class Querier implements Monoidal {
                 }
                 addTransientFieldsFor(postStrategy);
             }
+            projection.addTransientFields(transientFields);
         }
 
         // Scheme is guaranteed to not be null.
@@ -686,7 +691,7 @@ public class Querier implements Monoidal {
         for (PostStrategy postStrategy : postStrategies) {
             clip = postStrategy.execute(clip);
         }
-        for (String field : transientFields.keySet()) {
+        for (String field : transientFields) {
             clip.getRecords().forEach(record -> record.remove(field));
         }
         return clip;
@@ -732,16 +737,12 @@ public class Querier implements Monoidal {
     }
 
     private void addTransientFieldsFor(PostStrategy postStrategy) {
-        /*
-        Projection projection = runningQuery.getQuery().getProjection();
-        Aggregation aggregation = runningQuery.getQuery().getAggregation();
-        if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
-            Map<String, String> projectionFields = projection.getFields();
-            if (projectionFields != null) {
-                postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
-                            .forEach(field -> transientFields.put(field, field));
-            }
+        // We need to add transient fields only if the query selects some subset of fields (i.e. projection)
+        // Only "ORDER BY" requires transient fields. "COMPUTATION" and "HAVING" can only contain aggregate fields.
+        if (projection != null) {
+            Map<String, Evaluator> evaluators = projection.getEvaluators();
+            postStrategy.getRequiredFields().stream().filter(field -> !evaluators.containsKey(field))
+                                                     .forEach(field -> transientFields.add(field));
         }
-        */
     }
 }

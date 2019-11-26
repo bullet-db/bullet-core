@@ -5,6 +5,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ValueEvaluator;
 import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 
 import java.util.Collections;
@@ -15,12 +16,13 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * An expression that takes a value. A primitive type must be specified since the value is always represented by a string.
- * If the type isn't specified, it's assumed to be string.
+ * If the type isn't specified, it's assumed to be string unless the value is null.
  */
 @Getter
 public class ValueExpression extends Expression {
-    private static final BulletError VALUE_REQUIRES_NON_NULL_VALUE = makeError("The value must not be null.", "Please provide a non-null value.");
-    private static final BulletError VALUE_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
+    private static final BulletError VALUE_REQUIRES_NULL_TYPE_FOR_NULL_VALUE = makeError("The type must be null if the value is null.", "Please provide a non-null value or null type.");
+    private static final BulletError VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE = makeError("The type must be primitive or null.", "Please provide a primitive or null type.");
+    private static final BulletError VALUE_REQUIRES_CASTABLE = makeError("The value must be castable to the type.", "Please provide a valid value-type pair.");
 
     @Expose
     private String value;
@@ -32,11 +34,20 @@ public class ValueExpression extends Expression {
 
     @Override
     public Optional<List<BulletError>> initialize() {
-        if (value == null) {
-            return Optional.of(Collections.singletonList(VALUE_REQUIRES_NON_NULL_VALUE));
+        if (value == null && type == null) {
+            type = Type.NULL;
         }
-        if (!Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(VALUE_REQUIRES_PRIMITIVE_TYPE));
+        if (value == null && type != Type.NULL) {
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_NULL_TYPE_FOR_NULL_VALUE));
+        }
+        if (type == null) {
+            type = Type.STRING;
+        }
+        if (!Type.PRIMITIVES.contains(type) && type != Type.NULL) {
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE));
+        }
+        if (TypedObject.typeCast(type, value).getType() == Type.UNKNOWN) {
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_CASTABLE));
         }
         return Optional.empty();
     }

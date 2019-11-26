@@ -9,14 +9,12 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -27,31 +25,27 @@ public class Projection implements Configurable, Initializable {
     public static final String DELIMITER = ".";
 
     @Expose
-    private Map<String, Expression> fields;
-    @Expose
-    private Map<String, Expression> computations;
+    private List<Field> fields;
 
     /**
      * Default constructor. GSON recommended.
      */
     public Projection() {
         fields = null;
-        computations = null;
     }
 
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
-        if (fields.keySet().stream().anyMatch(s -> s.contains(DELIMITER)) || computations.keySet().stream().anyMatch(s -> s.contains(DELIMITER))) {
+        if (fields.stream().map(Field::getName).anyMatch(s -> s.contains(DELIMITER))) {
             errors.add(PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS);
         }
-        fields.values().forEach(f -> f.initialize().ifPresent(errors::addAll));
-        computations.values().forEach(f -> f.initialize().ifPresent(errors::addAll));
+        fields.stream().map(Field::getValue).forEach(f -> f.initialize().ifPresent(errors::addAll));
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
 
     @Override
     public String toString() {
-        return "{fields: " + fields + ", computations: " + computations + "}";
+        return "{fields: " + fields + "}";
     }
 }

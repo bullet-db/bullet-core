@@ -45,7 +45,7 @@ public class GroupData implements Serializable {
      * {@link GroupOperation}.
      *
      * @param operations A set of operations.
-     * @return A empty map of metrics that represent these operations.
+     * @return An empty map of metrics that represent these operations.
      */
     public static Map<GroupOperation, Number> makeInitialMetrics(Set<GroupOperation> operations) {
         Map<GroupOperation, Number> metrics = new HashMap<>();
@@ -53,7 +53,7 @@ public class GroupData implements Serializable {
         for (GroupOperation operation : operations) {
             metrics.put(operation, null);
             if (operation.getType() == AVG) {
-                // For AVG we store an addition COUNT_FIELD operation to store the count (the sum is stored in AVG)
+                // For AVG we store an additional COUNT_FIELD operation to store the count (the sum is stored in AVG)
                 metrics.put(new GroupOperation(COUNT_FIELD, operation.getField(), null), null);
             }
         }

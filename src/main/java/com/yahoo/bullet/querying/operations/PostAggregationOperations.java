@@ -6,9 +6,11 @@
 package com.yahoo.bullet.querying.operations;
 
 import com.yahoo.bullet.parsing.Computation;
+import com.yahoo.bullet.parsing.Having;
 import com.yahoo.bullet.parsing.OrderBy;
 import com.yahoo.bullet.parsing.PostAggregation;
 import com.yahoo.bullet.postaggregations.ComputationStrategy;
+import com.yahoo.bullet.postaggregations.HavingStrategy;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 
@@ -24,10 +26,13 @@ public class PostAggregationOperations {
         // Guaranteed to be present.
         switch (aggregation.getType()) {
             case ORDER_BY:
-                postStrategy  = new OrderByStrategy((OrderBy) aggregation);
+                postStrategy = new OrderByStrategy((OrderBy) aggregation);
                 break;
             case COMPUTATION:
-                postStrategy  = new ComputationStrategy((Computation) aggregation);
+                postStrategy = new ComputationStrategy((Computation) aggregation);
+                break;
+            case HAVING:
+                postStrategy = new HavingStrategy((Having) aggregation);
                 break;
         }
         return postStrategy;

@@ -32,9 +32,9 @@ public interface PostStrategy extends Initializable {
     }
 
     /**
-     * Get the list of required fields.
+     * Get the set of required fields.
      *
-     * @return An @{link List} of fields.
+     * @return A set of fields.
      */
     Set<String> getRequiredFields();
 }

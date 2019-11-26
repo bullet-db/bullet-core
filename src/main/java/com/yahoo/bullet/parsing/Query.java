@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -43,8 +44,8 @@ public class Query implements Configurable, Initializable {
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
     public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
                                                            "Change your aggregation type or your window include type");
-    public static final BulletError AT_MOST_ONE_ORDERBY = makeError("The post aggregations cannot have multiple \"ORDERBY\"",
-                                                           "Change your post aggregations to keep at most one \"ORDERBY\"");
+    public static final BulletError NO_DUPLICATE_POST_AGGREGATIONS = makeError("The post aggregations cannot have multiple of the same type.",
+                                                                               "Change your post aggregations to keep at most one of each.");
 
     /**
      * Default constructor. GSON recommended.
@@ -100,8 +101,8 @@ public class Query implements Configurable, Initializable {
         aggregation.initialize().ifPresent(errors::addAll);
 
         if (postAggregations != null) {
-            if (postAggregations.stream().filter(postAggregation -> postAggregation.getType() == PostAggregation.Type.ORDER_BY).count() > 1) {
-                errors.add(AT_MOST_ONE_ORDERBY);
+            if (postAggregations.stream().map(PostAggregation::getType).distinct().count() < postAggregations.size()) {
+                errors.add(NO_DUPLICATE_POST_AGGREGATIONS);
             }
             postAggregations.forEach(p -> p.initialize().ifPresent(errors::addAll));
         }

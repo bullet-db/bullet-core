@@ -24,13 +24,16 @@ import static java.util.Collections.singletonList;
 public abstract class PostAggregation implements Configurable, Initializable {
     public static final String ORDER_BY_SERIALIZED_NAME = "ORDER BY";
     public static final String COMPUTATION_SERIALIZED_NAME = "COMPUTATION";
+    public static final String HAVING_SERIALIZED_NAME = "HAVING";
 
     /** Represents the type of the PostAggregation. */
     public enum Type {
         @SerializedName(ORDER_BY_SERIALIZED_NAME)
         ORDER_BY,
         @SerializedName(COMPUTATION_SERIALIZED_NAME)
-        COMPUTATION
+        COMPUTATION,
+        @SerializedName(HAVING_SERIALIZED_NAME)
+        HAVING
     }
 
     @Expose @SerializedName(TYPE_FIELD)

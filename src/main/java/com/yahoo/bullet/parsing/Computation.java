@@ -18,26 +18,22 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter @Setter
 public class Computation extends PostAggregation {
-    @Expose
-    private Expression expression;
-    @Expose
-    private String newName;
+    public static final BulletError COMPUTATION_REQUIRES_PROJECTION =
+            makeError("The COMPUTATION post-aggregation requires a projection.", "Please add a projection.");
 
-    public static final BulletError COMPUTATION_REQUIRES_VALID_EXPRESSION_ERROR =
-            makeError("The COMPUTATION post aggregation needs a valid expression field", "Please add a valid expression.");
-    public static final BulletError COMPUTATION_REQUIRES_NEW_FIELD_ERROR =
-            makeError("The COMPUTATION post aggregation needs a non-empty new field name", "Please provide a non-empty new field name.");
+    @Expose
+    private Projection projection;
 
     /**
      * Default constructor. GSON recommended
      */
     public Computation() {
-        expression = null;
+        projection = null;
     }
 
     @Override
     public String toString() {
-        return "{type: " + type + ", expression: " + expression + ", newName: " + newName + "}";
+        return "{type: " + type + ", projection: " + projection + "}";
     }
 
     @Override
@@ -46,16 +42,9 @@ public class Computation extends PostAggregation {
         if (errors.isPresent()) {
             return errors;
         }
-        if (expression == null) {
-            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_VALID_EXPRESSION_ERROR));
+        if (projection == null) {
+            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_PROJECTION));
         }
-        errors = expression.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
-        if (newName == null || newName.isEmpty()) {
-            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_NEW_FIELD_ERROR));
-        }
-        return Optional.empty();
+        return projection.initialize();
     }
 }

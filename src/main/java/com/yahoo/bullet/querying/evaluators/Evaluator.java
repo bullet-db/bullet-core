@@ -10,8 +10,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BinaryOperator;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -27,10 +25,26 @@ import java.util.stream.Collectors;
  * will cast their elements/values.
  */
 public abstract class Evaluator {
+    @FunctionalInterface
+    public interface BinaryOperator {
+        TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
+    }
+
+    @FunctionalInterface
+    public interface UnaryOperator {
+        TypedObject apply(Evaluator evaluator, BulletRecord record);
+    }
+
+    @FunctionalInterface
+    public interface NAryOperator {
+        TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
+    }
+
     protected Type type;
 
-    static final Map<Operation, BinaryOperator<TypedObject>> BINARY_OPERATORS = new EnumMap<>(Operation.class);
-    static final Map<Operation, UnaryOperator<TypedObject>> UNARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
         BINARY_OPERATORS.put(Operation.ADD, BinaryOperations.ADD);
@@ -55,6 +69,12 @@ public abstract class Evaluator {
         UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations.SIZE_OF);
         UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations.IS_NULL);
         UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations.IS_NOT_NULL);
+        //UNARY_OPERATORS.put(Operation.AND, UnaryOperations.ALL_MATCH);
+        //UNARY_OPERATORS.put(Operation.OR, UnaryOperations.ANY_MATCH);
+        //UNARY_OPERATORS.put(Operation.ADD, UnaryOperations.ADD);
+        N_ARY_OPERATORS.put(Operation.AND, NAryOperations.ALL_MATCH);
+        N_ARY_OPERATORS.put(Operation.OR, NAryOperations.ANY_MATCH);
+        N_ARY_OPERATORS.put(Operation.IF, NAryOperations.IF);
     }
 
     Evaluator(Expression expression) {

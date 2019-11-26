@@ -35,6 +35,10 @@ public class FieldExpression extends Expression {
         type = null;
     }
 
+    public FieldExpression(String field) {
+        this.field = field;
+    }
+
     @Override
     public Optional<List<BulletError>> initialize() {
         if (field == null || field.isEmpty()) {

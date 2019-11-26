@@ -20,6 +20,8 @@ import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j @AllArgsConstructor
 public class OrderByStrategy implements PostStrategy {
+    private static final String DELIMITER = "\\.";
+
     private OrderBy orderBy;
 
     @Override
@@ -47,6 +49,6 @@ public class OrderByStrategy implements PostStrategy {
 
     @Override
     public Set<String> getRequiredFields() {
-        return orderBy.getFields().stream().map(OrderBy.SortItem::getField).collect(Collectors.toSet());
+        return orderBy.getFields().stream().map(sortItem -> sortItem.getField().split(DELIMITER, 2)[0]).collect(Collectors.toSet());
     }
 }
