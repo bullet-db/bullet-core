@@ -28,7 +28,6 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage(messageID, messageContent);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertEquals(message.getSequence(), -1);
         Assert.assertNull(message.getMetadata());
     }
 
@@ -37,10 +36,9 @@ public class PubSubMessageTest {
         String messageID = getRandomString();
         String messageContent = getRandomString();
 
-        PubSubMessage message = new PubSubMessage(messageID, messageContent, 0);
+        PubSubMessage message = new PubSubMessage(messageID, messageContent);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertEquals(message.getSequence(), 0);
         Assert.assertNull(message.getMetadata());
     }
 
@@ -51,7 +49,6 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage(messageID, Signal.KILL);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertNull(message.getContent());
-        Assert.assertEquals(message.getSequence(), -1);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
         Assert.assertNull(message.getMetadata().getContent());
@@ -63,10 +60,9 @@ public class PubSubMessageTest {
         String messageContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
 
-        PubSubMessage message = new PubSubMessage(messageID, messageContent, signal, 0);
+        PubSubMessage message = new PubSubMessage(messageID, messageContent, signal);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertEquals(message.getSequence(), 0);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertNull(message.getMetadata().getContent());
@@ -83,7 +79,6 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage(messageID, messageContent, new Metadata(signal, metadataContent));
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertEquals(message.getSequence(), -1);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertEquals(message.getMetadata().getContent().toString(), metadataContent);
@@ -96,10 +91,9 @@ public class PubSubMessageTest {
         String metadataContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
         //Test creation with a sequence number.
-        PubSubMessage message = new PubSubMessage(messageID, messageContent, new Metadata(signal, metadataContent), 0);
+        PubSubMessage message = new PubSubMessage(messageID, messageContent, new Metadata(signal, metadataContent));
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertEquals(message.getSequence(), 0);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertEquals(message.getMetadata().getContent().toString(), metadataContent);
@@ -113,8 +107,9 @@ public class PubSubMessageTest {
         PubSubMessage message;
         message = new PubSubMessage(messageID, messageContent);
         Assert.assertTrue(message.hasContent());
+        Assert.assertEquals(message.getContent(), messageContent);
 
-        message = new PubSubMessage(messageID, null, Signal.COMPLETE);
+        message = new PubSubMessage(messageID, (byte[]) null, Signal.COMPLETE);
         Assert.assertFalse(message.hasContent());
     }
 
@@ -131,11 +126,9 @@ public class PubSubMessageTest {
         PubSubMessage message1 = new PubSubMessage(messageID, messageContent, randomMetadata);
         PubSubMessage message2 = new PubSubMessage(messageID, messageContent, new Metadata(Signal.ACKNOWLEDGE, getRandomString()));
         PubSubMessage message3 = new PubSubMessage(getRandomString(), messageContent, randomMetadata);
-        PubSubMessage message4 = new PubSubMessage(messageID, messageContent, randomMetadata, 2);
 
         Assert.assertEquals(message1, message2);
         Assert.assertNotEquals(message1, message3);
-        Assert.assertNotEquals(message1, message4);
         Assert.assertFalse(message1.equals(null));
         Assert.assertFalse(message1.equals(new PubSubException("Dummy")));
     }
@@ -160,57 +153,61 @@ public class PubSubMessageTest {
         Assert.assertFalse(message.hasMetadata());
         Assert.assertFalse(message.hasSignal());
 
-        message = new PubSubMessage(messageID, null, Signal.COMPLETE);
+        message = new PubSubMessage(messageID, (byte[]) null, Signal.COMPLETE);
         Assert.assertTrue(message.hasMetadata());
         Assert.assertTrue(message.hasSignal(Signal.COMPLETE));
 
-        message = new PubSubMessage(messageID, null, new Metadata());
+        message = new PubSubMessage(messageID, (byte[]) null, new Metadata());
         Assert.assertTrue(message.hasMetadata());
         Assert.assertFalse(message.hasSignal());
     }
 
     @Test
     public void testToString() {
-        assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.FAIL, 42.0), 42).toString(),
-                         "{ 'id': 'foo', 'sequence': 42, 'content': 'bar', 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
+        String bar = "[98,97,114]";
+        assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.FAIL, 42.0)).toString(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.COMPLETE, new ArrayList<>())).toString(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
-        assertJSONEquals(new PubSubMessage("foo", "bar", Signal.COMPLETE, 22).toString(),
-                         "{ 'id': 'foo', 'sequence': 22, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar", Signal.COMPLETE).toString(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", Signal.ACKNOWLEDGE).toString(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
-        assertJSONEquals(new PubSubMessage("foo", "bar", 34).toString(),
-                         "{ 'id': 'foo', 'sequence': 34, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar").toString(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").toString(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
         assertJSONEquals(new PubSubMessage().toString(),
-                         "{ 'id': '', 'sequence': -1, 'content': null, 'metadata': null }");
+                         "{ 'id': '', 'content': null, 'metadata': null }");
     }
 
     @Test
     public void testJSONConversion() {
-        assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.FAIL, 42.0), 42).asJSON(),
-                         "{ 'id': 'foo', 'sequence': 42, 'content': 'bar', 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
+        String bar = "[98,97,114]";
+        assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.FAIL, 42.0)).asJSON(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'FAIL', 'content': 42.0 } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", new Metadata(Signal.COMPLETE, new ArrayList<>())).asJSON(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
-        assertJSONEquals(new PubSubMessage("foo", "bar", Signal.COMPLETE, 22).asJSON(),
-                         "{ 'id': 'foo', 'sequence': 22, 'content': 'bar', 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': [] } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar", Signal.COMPLETE).asJSON(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar", Signal.ACKNOWLEDGE).asJSON(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
-        assertJSONEquals(new PubSubMessage("foo", "bar", 34).asJSON(),
-                         "{ 'id': 'foo', 'sequence': 34, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null } }");
         assertJSONEquals(new PubSubMessage("foo", "bar").asJSON(),
-                         "{ 'id': 'foo', 'sequence': -1, 'content': 'bar', 'metadata': null }");
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").asJSON(),
+                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
         assertJSONEquals(new PubSubMessage().asJSON(),
-                         "{ 'id': '', 'sequence': -1, 'content': null, 'metadata': null }");
+                         "{ 'id': '', 'content': null, 'metadata': null }");
     }
 
     @Test
     public void testRecreatingFromJSON() {
-        PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'sequence': 42, 'content': 'bar', " +
-                                                      "'metadata': { 'signal': 'FAIL', 'content': { 'type': null } } }");
-        PubSubMessage expected = new PubSubMessage("foo", null, 42);
+        String bar = "[98,97,114]";
+        PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': " + bar + ", 'metadata': " +
+                                                        "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
+        PubSubMessage expected = new PubSubMessage("foo", (String) null);
         Assert.assertEquals(actual, expected);
+        Assert.assertEquals(actual.getContent(), "bar");
 
         Assert.assertTrue(actual.hasMetadata());
         Assert.assertTrue(actual.hasSignal());
@@ -224,14 +221,12 @@ public class PubSubMessageTest {
         PubSubMessage actual = PubSubMessage.fromJSON("{ }");
 
         Assert.assertEquals(actual.getId(), "");
-        Assert.assertEquals(actual.getSequence(), -1);
         Assert.assertNull(actual.getMetadata());
         Assert.assertNull(actual.getContent());
 
         actual = PubSubMessage.fromJSON("{ 'metadata': { 'signal': 'ACKNOWLEDGE' } }");
 
         Assert.assertEquals(actual.getId(), "");
-        Assert.assertEquals(actual.getSequence(), -1);
         Assert.assertTrue(actual.hasSignal());
         Assert.assertTrue(actual.hasSignal(Signal.ACKNOWLEDGE));
         Assert.assertTrue(actual.getMetadata().hasSignal(Signal.ACKNOWLEDGE));
@@ -244,7 +239,6 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage("foo", Signal.KILL);
         Assert.assertEquals(message.getId(), "foo");
         Assert.assertNull(message.getContent());
-        Assert.assertEquals(message.getSequence(), -1);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
         Assert.assertNull(message.getMetadata().getContent());

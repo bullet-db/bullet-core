@@ -6,8 +6,6 @@
 package com.yahoo.bullet.pubsub;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,7 +16,7 @@ import java.util.Map;
  * This implements a {@link Subscriber} that provides a base subscriber that buffers a fixed number of messages read.
  * See {@link BufferingSubscriber#maxUncommittedMessages}.
  *
- * It provides implementations of {@link Subscriber#commit(String, int)}, {@link Subscriber#fail(String, int)} and
+ * It provides implementations of {@link Subscriber#commit(String)}, {@link Subscriber#fail(String)} and
  * {@link Subscriber#receive()} that honor the fixed number of messages to read.
  *
  * This class is intended to be used if your PubSub implementation does not care about (or cannot be) using commit and
@@ -31,6 +29,7 @@ public abstract class BufferingSubscriber implements Subscriber {
      */
     protected final int maxUncommittedMessages;
 
+
     /**
      * A List of messages read. {@link #receive()} emits from the head.
      */
@@ -39,7 +38,7 @@ public abstract class BufferingSubscriber implements Subscriber {
     /**
      * A Map of messages that have not been committed so far.
      */
-    protected Map<Pair<String, Integer>, PubSubMessage> uncommittedMessages = new HashMap<>();
+    protected Map<String, PubSubMessage> uncommittedMessages = new HashMap<>();
 
     /**
      * Creates an instance of this class with the given max for commited messages.
@@ -60,7 +59,7 @@ public abstract class BufferingSubscriber implements Subscriber {
             return null;
         }
         PubSubMessage message = receivedMessages.remove(0);
-        uncommittedMessages.put(ImmutablePair.of(message.getId(), message.getSequence()), message);
+        uncommittedMessages.put(message.getId(), message);
         return message;
     }
 
@@ -72,9 +71,8 @@ public abstract class BufferingSubscriber implements Subscriber {
      * nulls till some messages are commited.
      */
     @Override
-    public void commit(String id, int sequence) {
-        ImmutablePair<String, Integer> key = ImmutablePair.of(id, sequence);
-        uncommittedMessages.remove(key);
+    public void commit(String id) {
+        uncommittedMessages.remove(id);
     }
 
     /**
@@ -84,12 +82,11 @@ public abstract class BufferingSubscriber implements Subscriber {
      * emitted on the next {@link BufferingSubscriber#receive()}.
      */
     @Override
-    public void fail(String id, int sequence) {
-        Pair<String, Integer> compositeID = ImmutablePair.of(id, sequence);
-        PubSubMessage message = uncommittedMessages.get(compositeID);
+    public void fail(String id) {
+        PubSubMessage message = uncommittedMessages.get(id);
         if (message != null) {
             receivedMessages.add(0, message);
-            uncommittedMessages.remove(compositeID);
+            uncommittedMessages.remove(id);
         }
     }
 

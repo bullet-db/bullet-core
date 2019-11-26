@@ -17,7 +17,9 @@ public class Metadata implements Serializable {
         ACKNOWLEDGE,
         COMPLETE,
         FAIL,
-        KILL
+        KILL,
+        REPLAY,
+        CUSTOM
     }
 
     private static final long serialVersionUID = 4234800234857923112L;

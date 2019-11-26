@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -20,11 +22,11 @@ import java.util.Objects;
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
-    private static final long serialVersionUID = 2407848310969237888L;
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
+    private static final long serialVersionUID = -5068189058170874687L;
 
     private String id;
-    private int sequence;
-    private String content;
+    private byte[] content;
     @Setter
     private Metadata metadata;
 
@@ -39,32 +41,10 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * Constructor for a message having only content.
      *
      * @param id The ID associated with the message.
-     * @param content The content of the message.
+     * @param content The content of the message as a String.
      */
     public PubSubMessage(String id, String content) {
-        this(id, content, (Metadata) null, -1);
-    }
-
-    /**
-     * Constructor for a message having content and a sequence number.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message.
-     * @param sequence The sequence number of the message.
-     */
-    public PubSubMessage(String id, String content, int sequence) {
-        this(id, content, (Metadata) null, sequence);
-    }
-
-    /**
-     * Constructor for a message having content and {@link Metadata}.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message.
-     * @param metadata The Metadata associated with the message.
-     */
-    public PubSubMessage(String id, String content, Metadata metadata) {
-        this(id, content, metadata, -1);
+        this(id, content, (Metadata) null);
     }
 
     /**
@@ -74,7 +54,18 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param signal The signal only for the Metadata.
      */
     public PubSubMessage(String id, Signal signal) {
-        this(id, null, signal);
+        this(id, (byte[]) null, signal);
+    }
+
+    /**
+     * Constructor for a message having content and a {@link Metadata.Signal}.
+     *
+     * @param id The ID associated with the message.
+     * @param content The content of the message as a String.
+     * @param signal The Signal to be sent with the message.
+     */
+    public PubSubMessage(String id, String content, Signal signal) {
+        this(id, content, new Metadata(signal, null));
     }
 
     /**
@@ -84,20 +75,19 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param content The content of the message.
      * @param signal The Signal to be sent with the message.
      */
-    public PubSubMessage(String id, String content, Signal signal) {
-        this(id, content, signal, -1);
+    public PubSubMessage(String id, byte[] content, Signal signal) {
+        this(id, content, new Metadata(signal, null));
     }
 
     /**
-     * Constructor for a message having content, a {@link Signal} and a sequence number.
+     * Constructor for a message having content, {@link Metadata} and a sequence number.
      *
      * @param id The ID associated with the message.
-     * @param content The content of the message.
-     * @param signal The Signal to be sent with the message.
-     * @param sequence The sequence number of the message.
+     * @param content The content of the message as a String.
+     * @param metadata The Metadata associated with the message.
      */
-    public PubSubMessage(String id, String content, Signal signal, int sequence) {
-        this(id, content, new Metadata(signal, null), sequence);
+    public PubSubMessage(String id, String content, Metadata metadata) {
+        this(id, content == null ? null : content.getBytes(CHARSET), metadata);
     }
 
     /**
@@ -106,13 +96,11 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param id The ID associated with the message.
      * @param content The content of the message.
      * @param metadata The Metadata associated with the message.
-     * @param sequence The sequence number of the message.
      */
-    public PubSubMessage(String id, String content, Metadata metadata, int sequence) {
+    public PubSubMessage(String id, byte[] content, Metadata metadata) {
         this.id = Objects.requireNonNull(id, "ID cannot be null");
         this.content = content;
         this.metadata = metadata;
-        this.sequence = sequence;
     }
 
     /**
@@ -152,9 +140,19 @@ public class PubSubMessage implements Serializable, JSONFormatter {
         return hasMetadata() && metadata.hasSignal();
     }
 
+    /**
+     * Returns the content stored in the message as a String. You should use this to read the String back from the
+     * message if you provided it originally to the message as a String.
+     *
+     * @return The content stored as a String using the {@link PubSubMessage#CHARSET}.
+     */
+    public String getContent() {
+        return content == null ? null : new String(content, CHARSET);
+    }
+
     @Override
     public int hashCode() {
-        return (id + sequence).hashCode();
+        return id.hashCode();
     }
 
     @Override
@@ -163,7 +161,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
             return false;
         }
         PubSubMessage otherMessage = (PubSubMessage) other;
-        return id.equals(otherMessage.getId()) && sequence == otherMessage.getSequence();
+        return id.equals(otherMessage.getId());
     }
 
     @Override

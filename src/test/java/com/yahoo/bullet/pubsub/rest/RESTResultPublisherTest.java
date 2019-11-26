@@ -37,12 +37,12 @@ public class RESTResultPublisherTest {
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
 
         String expectedURI = "my/custom/url";
-        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
+        String expectedMessage = "{\"id\":\"foo\",\"content\":[98,97,114],\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
 
-        Assert.assertEquals(expectedMessage, actualMessage);
-        Assert.assertEquals(expectedHeader, actualHeader);
-        Assert.assertEquals(expectedURI, actualURI);
+        Assert.assertEquals(actualMessage, expectedMessage);
+        Assert.assertEquals(actualHeader, expectedHeader);
+        Assert.assertEquals(actualURI, expectedURI);
     }
 
     @Test

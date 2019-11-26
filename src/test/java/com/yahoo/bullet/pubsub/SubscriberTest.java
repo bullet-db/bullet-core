@@ -13,25 +13,22 @@ import java.util.UUID;
 
 public class SubscriberTest {
     @NoArgsConstructor
-    private class MockSubscriber implements Subscriber {
-        String commitID;
-        String failID;
-
-        int commitSequence;
-        int failSequence;
+    private static class MockSubscriber implements Subscriber {
+        private String commitID;
+        private String failID;
 
         public PubSubMessage receive() {
             throw new UnsupportedOperationException();
         }
 
-        public void commit(String id, int sequence) {
+        @Override
+        public void commit(String id) {
             commitID = id;
-            commitSequence = sequence;
         }
 
-        public void fail(String id, int sequence) {
+        @Override
+        public void fail(String id) {
             failID = id;
-            failSequence = sequence;
         }
 
         public void close() {
@@ -44,8 +41,7 @@ public class SubscriberTest {
         String randomID = UUID.randomUUID().toString();
         MockSubscriber subscriber = new MockSubscriber();
         subscriber.commit(randomID);
-        Assert.assertEquals(subscriber.commitSequence, -1);
-        Assert.assertTrue(subscriber.commitID.equals(randomID));
+        Assert.assertEquals(randomID, subscriber.commitID);
     }
 
     @Test
@@ -53,7 +49,6 @@ public class SubscriberTest {
         String randomID = UUID.randomUUID().toString();
         MockSubscriber subscriber = new MockSubscriber();
         subscriber.fail(randomID);
-        Assert.assertEquals(subscriber.failSequence, -1);
-        Assert.assertTrue(subscriber.failID.equals(randomID));
+        Assert.assertEquals(randomID, subscriber.failID);
     }
 }

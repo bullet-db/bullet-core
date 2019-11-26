@@ -64,6 +64,8 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
+    public static final String STORAGE_CLASS_NAME = "bullet.storage.class.name";
+
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
 
     public static final String QUERY_PARTITIONER_ENABLE = "bullet.query.partitioner.enable";
