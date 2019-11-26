@@ -173,7 +173,7 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     public abstract CompletableFuture<Boolean> clear(Set<String> ids);
 
     @Override
-    public void close() throws Exception {
+    public void close() {
     }
 
     /**

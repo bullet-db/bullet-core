@@ -74,8 +74,4 @@ public class MemoryStorageManager extends StorageManager implements Serializable
         }
         return SUCCESS;
     }
-
-    @Override
-    public void close() {
-    }
 }

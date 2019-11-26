@@ -21,7 +21,8 @@ public class MemoryStorageManagerTest {
     }
 
     @AfterMethod
-    public void teardown() {
+    public void teardown() throws Exception {
+        manager.clear().get();
         manager.close();
     }
 
@@ -42,6 +43,8 @@ public class MemoryStorageManagerTest {
         Assert.assertTrue(manager.clear(null).get());
         Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
         Assert.assertEquals(manager.get("foo").get(), new byte[0]);
+        Assert.assertTrue(manager.clear(Collections.singleton("bar")).get());
+        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
         Assert.assertTrue(manager.clear(Collections.singleton("foo")).get());
         Assert.assertNull(manager.get("foo").get());
     }
@@ -59,6 +62,12 @@ public class MemoryStorageManagerTest {
     @Test
     public void testPutAll() throws Exception {
         Assert.assertTrue(manager.putAll(null).get());
+        Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
+        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
+    }
+
+    @Test
+    public void testClear() throws Exception {
         Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
         Assert.assertEquals(manager.get("foo").get(), new byte[0]);
     }

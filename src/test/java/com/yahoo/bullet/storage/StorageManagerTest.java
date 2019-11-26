@@ -9,6 +9,8 @@ import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -62,5 +64,34 @@ public class StorageManagerTest {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.STORAGE_CLASS_NAME, MockStorageManager.class.getName());
         Assert.assertTrue(StorageManager.from(config) instanceof MockStorageManager);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Cannot create.*")
+    public void testFromWithABadClass() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.STORAGE_CLASS_NAME, "does.not.exist");
+        StorageManager.from(config);
+    }
+
+    @Test
+    public void testStringConversion() {
+        Assert.assertNull(StorageManager.toBytes(null));
+        byte[] data = "foo".getBytes(StandardCharsets.UTF_8);
+        Assert.assertEquals(StorageManager.toBytes("foo"), data);
+    }
+
+    @Test
+    public void testByteConversion() {
+        Assert.assertNull(StorageManager.toString(null));
+        byte[] data = "foo".getBytes(StandardCharsets.UTF_8);
+        Assert.assertEquals(StorageManager.toString(data), "foo");
+    }
+
+    @Test
+    public void testByteMapConversion() {
+        Assert.assertNull(StorageManager.toStringMap(null));
+        byte[] data = "foo".getBytes(StandardCharsets.UTF_8);
+        Map<String, byte[]> map = Collections.singletonMap("foo", data);
+        Assert.assertEquals(StorageManager.toStringMap(map), Collections.singletonMap("foo", "foo"));
     }
 }

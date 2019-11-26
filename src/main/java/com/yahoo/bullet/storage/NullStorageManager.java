@@ -62,8 +62,4 @@ public class NullStorageManager extends StorageManager {
     public CompletableFuture<Boolean> clear() {
         return SUCCESS;
     }
-
-    @Override
-    public void close() {
-    }
 }
