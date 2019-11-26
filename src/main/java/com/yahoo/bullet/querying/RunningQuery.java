@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.JsonParseException;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
@@ -36,7 +35,7 @@ public class RunningQuery implements Initializable {
      * @param id The String query ID.
      * @param queryString The String version of the query.
      * @param config The configuration to use for the query.
-     * @throws JsonParseException if there were issues parsing the query.
+     * @throws com.google.gson.JsonParseException if there were issues parsing the query.
      *
      */
     public RunningQuery(String id, String queryString, BulletConfig config) {
