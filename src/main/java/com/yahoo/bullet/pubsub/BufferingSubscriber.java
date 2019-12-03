@@ -40,7 +40,7 @@ public abstract class BufferingSubscriber implements Subscriber {
     protected Map<String, PubSubMessage> uncommittedMessages = new HashMap<>();
 
     /**
-     * Creates an instance of this class with the given max for commited messages.
+     * Creates an instance of this class with the given max for committed messages.
      *
      * @param maxUncommittedMessages The maximum number of messages that this Subscriber will buffer.
      */
@@ -67,7 +67,7 @@ public abstract class BufferingSubscriber implements Subscriber {
      *
      * Marks a message as fully processed. This message is forgotten and cannot be failed after. If we have equal or
      * more than {@link #maxUncommittedMessages} uncommited messages, further calls to {@link #receive()} will return
-     * nulls till some messages are commited.
+     * nulls till some messages are committed.
      */
     @Override
     public void commit(String id) {
