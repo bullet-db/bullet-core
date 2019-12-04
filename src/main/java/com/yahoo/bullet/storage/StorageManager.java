@@ -116,8 +116,8 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     }
 
     /**
-     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} from the
-     * storage as Strings.
+     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
+     * {@link #putObject(String, Serializable)} from the storage as Strings.
      *
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as Strings or
      *         null if no data is present.
@@ -197,8 +197,8 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     public abstract CompletableFuture<Boolean> putAll(Map<String, byte[]> data);
 
     /**
-     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} from the
-     * storage as byte[].
+     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
+     * {@link #putObject(String, Serializable)} from the storage as byte[].
      *
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
      *         null if no data is present. It completes exceptionally if there were issues.
@@ -206,8 +206,8 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     public abstract CompletableFuture<Map<String, byte[]>> getAll();
 
     /**
-     * Removes all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} from the
-     * storage as byte[].
+     * Removes all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
+     * {@link #putObject(String, Serializable)} from the storage as byte[].
      *
      * @return A {@link CompletableFuture} that resolves to true or false if the wipe was successful.
      */
