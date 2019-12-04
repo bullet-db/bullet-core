@@ -102,15 +102,20 @@ public class StorageManagerTest {
     @Test
     public void testObjectConversion() {
         Assert.assertNull(StorageManager.convert(null));
+        Assert.assertNull(StorageManager.convert((Serializable) null));
 
         Map<Integer, Integer> map = new HashMap<>();
         map.put(1, 42);
         map.put(2, 42);
 
-        Map<Integer, Integer> data = StorageManager.convert(SerializerDeserializer.toBytes((Serializable) map));
+        byte[] bytes = SerializerDeserializer.toBytes((Serializable) map);
+        Assert.assertEquals(bytes, StorageManager.convert((Serializable) map));
+
+        Map<Integer, Integer> data = StorageManager.convert(bytes);
         Assert.assertNotNull(data);
         Assert.assertEquals(data.size(), 2);
         Assert.assertEquals(data.get(1), (Integer) 42);
         Assert.assertEquals(data.get(2), (Integer) 42);
+
     }
 }

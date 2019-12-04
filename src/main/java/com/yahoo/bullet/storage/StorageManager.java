@@ -71,13 +71,24 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
      * Exposed for testing. Converts a @{@link byte[]} to a type of the given object.
      *
      * @param bytes The byte[] to convert.
-     * @param <U> The type of the object to convert it to.
+     * @param <U> The Serializable type of the object to convert it to.
      * @return The converted object or null if the input was null or the conversion was unable to be performed.
      */
-    @SuppressWarnings("unchecked")
-    static <U> U convert(byte[] bytes) {
+    static <U extends Serializable> U convert(byte[] bytes) {
         // While SerializerDeserializer handles nulls, adding a null check to avoid using exceptions for control flow
         return bytes == null ? null : SerializerDeserializer.fromBytes(bytes);
+    }
+
+    /**
+     * Exposed for testing. Converts an object of the given type to a @{@link byte[]}.
+     *
+     * @param object The object to convert.
+     * @param <U> The type of the object to convert.
+     * @return The converted byte[] or null if the input was null or the conversion was unable to be performed.
+     */
+    static <U extends Serializable> byte[] convert(U object) {
+        // While SerializerDeserializer handles nulls, adding a null check to avoid using exceptions for control flow
+        return object == null ? null : SerializerDeserializer.toBytes(object);
     }
 
     /**
@@ -146,7 +157,7 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
      * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
      */
     public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
-        return put(id, SerializerDeserializer.toBytes(data));
+        return put(id, StorageManager.convert(data));
     }
 
     /**
