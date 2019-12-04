@@ -7,6 +7,7 @@ package com.yahoo.bullet.storage;
 
 import com.yahoo.bullet.common.BulletConfig;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -30,13 +31,48 @@ public class NullStorageManager extends StorageManager {
     }
 
     @Override
+    public CompletableFuture<String> getString(String id) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<String> removeString(String id) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> putString(String id, String value) {
+        return SUCCESS;
+    }
+
+    @Override
+    public CompletableFuture<Map<String, String>> getAllString() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public <U extends Serializable> CompletableFuture<U> removeObject(String id) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
+        return SUCCESS;
+    }
+
+    @Override
+    public <U extends Serializable> CompletableFuture<U> getObject(String id) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public CompletableFuture<byte[]> get(String id) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public CompletableFuture<byte[]> remove(String id) {
-        return get(id);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
