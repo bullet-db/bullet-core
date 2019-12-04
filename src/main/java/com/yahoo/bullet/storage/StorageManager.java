@@ -6,6 +6,7 @@
 package com.yahoo.bullet.storage;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -30,32 +31,32 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
     }
 
     /**
-     * Helper to convert a {@link String} to a byte[].
+     * Exposed for testing. Helper to convert a {@link String} to a byte[].
      *
      * @param input The String input.
      * @return The byte[] encoding of the input.
      */
-    public static byte[] toBytes(String input) {
+    static byte[] toBytes(String input) {
         return input == null ? null : input.getBytes(StandardCharsets.UTF_8);
     }
 
     /**
-     * Converts a byte[] input to a String.
+     * Exposed for testing. Converts a byte[] input to a String.
      *
      * @param input The byte[] input.
      * @return The String decoded from the byte[].
      */
-    public static String toString(byte[] input) {
+    static String toString(byte[] input) {
         return input == null ? null : new String(input, StandardCharsets.UTF_8);
     }
 
     /**
-     * Converts a {@link Map} of String to byte[] to a {@link Map} of String to String.
+     * Exposed for testing. Converts a {@link Map} of String to byte[] to a {@link Map} of String to String.
      *
      * @param input The String to byte[] map.
      * @return The String to String converted map.
      */
-    public static Map<String, String> toStringMap(Map<String, byte[]> input) {
+    static Map<String, String> toStringMap(Map<String, byte[]> input) {
         if (input == null) {
             return null;
         }
@@ -64,6 +65,19 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
             map.put(entry.getKey(), toString(entry.getValue()));
         }
         return map;
+    }
+
+    /**
+     * Exposed for testing. Converts a @{@link byte[]} to a type of the given object.
+     *
+     * @param bytes The byte[] to convert.
+     * @param <U> The type of the object to convert it to.
+     * @return The converted object or null if the input was null or the conversion was unable to be performed.
+     */
+    @SuppressWarnings("unchecked")
+    static <U> U convert(byte[] bytes) {
+        // While SerializerDeserializer handles nulls, adding a null check to avoid using exceptions for control flow
+        return bytes == null ? null : SerializerDeserializer.fromBytes(bytes);
     }
 
     /**
@@ -110,6 +124,41 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
      */
     public CompletableFuture<Map<String, String>> getAllString() {
         return getAll().thenApplyAsync(StorageManager::toStringMap);
+    }
+
+    /**
+     * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object.
+     *
+     * @param id The id of the data.
+     * @param <U> The type of the {@link Serializable} object.
+     * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
+     */
+    public <U extends Serializable> CompletableFuture<U> removeObject(String id) {
+        return remove(id).thenApplyAsync(StorageManager::convert);
+    }
+
+    /**
+     * Stores any {@link Serializable} object for a given String identifier.
+     *
+     * @param id The id to store this data under.
+     * @param data The object to store as the data.
+     * @param <U> The type of the {@link Serializable} object.
+     * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
+     */
+    public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
+        return put(id, SerializerDeserializer.toBytes(data));
+    }
+
+    /**
+     * Retrieves data stored for a given String identifier as a {@link Serializable} object.
+     *
+     * @param id The id of the data.
+     * @param <U> The type of the {@link Serializable} object.
+     * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
+     *
+     */
+    public <U extends Serializable> CompletableFuture<U> getObject(String id) {
+        return get(id).thenApplyAsync(StorageManager::convert);
     }
 
     /**

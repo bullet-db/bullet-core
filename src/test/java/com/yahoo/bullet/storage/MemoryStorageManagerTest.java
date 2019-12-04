@@ -10,7 +10,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MemoryStorageManagerTest {
     private MemoryStorageManager manager;
@@ -76,5 +82,22 @@ public class MemoryStorageManagerTest {
     public void testGetAll() throws Exception {
         Assert.assertNull(manager.getAll().get());
         Assert.assertNull(manager.getAllString().get());
+    }
+
+    @Test
+    public void testStoringObjects() throws Exception {
+        Serializable set = new HashSet<>(Arrays.asList("foo", "bar"));
+        Serializable list = new ArrayList<>(Arrays.asList("foo", "bar", "baz"));
+
+        Assert.assertTrue(manager.putObject("set", set).get());
+        Assert.assertTrue(manager.putObject("list", list).get());
+
+        Set<String> asSet = (Set<String>) manager.getObject("set").get();
+        List<String> asList = (List<String>) manager.removeObject("list").get();
+
+        Assert.assertNotNull(manager.getObject("set").get());
+        Assert.assertNull(manager.getObject("list").get());
+        Assert.assertEquals(asSet, set);
+        Assert.assertEquals(asList, list);
     }
 }

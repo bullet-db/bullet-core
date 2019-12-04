@@ -6,11 +6,14 @@
 package com.yahoo.bullet.storage;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -63,7 +66,8 @@ public class StorageManagerTest {
     public void testFrom() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.STORAGE_CLASS_NAME, MockStorageManager.class.getName());
-        Assert.assertTrue(StorageManager.from(config) instanceof MockStorageManager);
+        StorageManager manager = StorageManager.from(config);
+        Assert.assertTrue(manager instanceof MockStorageManager);
     }
 
     @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Cannot create.*")
@@ -93,5 +97,20 @@ public class StorageManagerTest {
         byte[] data = "foo".getBytes(StandardCharsets.UTF_8);
         Map<String, byte[]> map = Collections.singletonMap("foo", data);
         Assert.assertEquals(StorageManager.toStringMap(map), Collections.singletonMap("foo", "foo"));
+    }
+
+    @Test
+    public void testObjectConversion() {
+        Assert.assertNull(StorageManager.convert(null));
+
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(1, 42);
+        map.put(2, 42);
+
+        Map<Integer, Integer> data = StorageManager.convert(SerializerDeserializer.toBytes((Serializable) map));
+        Assert.assertNotNull(data);
+        Assert.assertEquals(data.size(), 2);
+        Assert.assertEquals(data.get(1), (Integer) 42);
+        Assert.assertEquals(data.get(2), (Integer) 42);
     }
 }
