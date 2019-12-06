@@ -49,7 +49,7 @@ public class RESTSubscriberTest {
         RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 10, 3000);
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
-        Assert.assertEquals(messages.get(0).asJSON(), "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":null}");
+        Assert.assertEquals(messages.get(0).asJSON(), "{\"id\":\"foo\",\"content\":[98,97,114],\"metadata\":null}");
     }
 
     @Test

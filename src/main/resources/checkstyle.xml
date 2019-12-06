@@ -172,12 +172,12 @@
             <property name="severity" value="ignore"/>
         </module>
 
-        <!-- Checks if a line is too long. -->
-        <module name="LineLength">
-            <property name="max" value="120"/>
-            <property name="severity" value="ignore"/>
-        </module>
+    </module>
 
+    <!-- Checks if a line is too long. -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="severity" value="ignore"/>
     </module>
 
 

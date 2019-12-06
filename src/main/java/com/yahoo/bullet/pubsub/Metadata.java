@@ -17,16 +17,15 @@ public class Metadata implements Serializable {
         ACKNOWLEDGE,
         COMPLETE,
         FAIL,
-        KILL
+        KILL,
+        REPLAY,
+        CUSTOM
     }
 
     private static final long serialVersionUID = 4234800234857923112L;
-
     @Getter @Setter
     private Signal signal;
-
-    // This is a Serializable object enforced through the constructor, getter and setter. Storing it as an Object so
-    // GSON can reify an instance.
+    // Serializable enforced through the constructor, getter and setter. Is Object so GSON can reify an instance.
     private Object content;
 
     /**
