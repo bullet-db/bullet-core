@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,8 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PubSubResponderTest {
-    private static class TestResponder implements PubSubResponder {
+    private static class TestResponder extends PubSubResponder {
         private Map<String, PubSubMessage> store = new HashMap<>();
+
+        TestResponder() {
+            super(null);
+        }
 
         @Override
         public void respond(String id, PubSubMessage message) {
@@ -22,7 +27,7 @@ public class PubSubResponderTest {
 
         @Override
         public void close() {
-            PubSubResponder.super.close();
+            super.close();
             store.clear();
         }
     }
