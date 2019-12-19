@@ -6,7 +6,6 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public abstract class PubSubResponder implements AutoCloseable {
-    @Getter
     protected BulletConfig config;
 
     /**
