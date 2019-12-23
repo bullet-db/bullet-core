@@ -16,6 +16,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 public class BulletPubSubResponderTest {
+    private static BulletPubSubResponder mockResponder() {
+        BulletConfig config = new BulletConfig("test_config.yaml");
+        config.set(MockPubSub.MOCK_MESSAGE_NAME, "test");
+        return new BulletPubSubResponder(config);
+    }
+
     @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Publisher.*")
     public void testUncreatablePublisher() {
         BulletConfig config = new BulletConfig();
@@ -33,10 +39,7 @@ public class BulletPubSubResponderTest {
 
     @Test
     public void testResponding() throws Exception {
-        BulletConfig config = new BulletConfig("test_config.yaml");
-        config.set(MockPubSub.MOCK_MESSAGE_NAME, "test");
-        BulletPubSubResponder responder = new BulletPubSubResponder(config);
-
+        BulletPubSubResponder responder = mockResponder();
         PubSubMessage message = new PubSubMessage("id", "");
         responder.respond("id", message);
         verify(responder.publisher).send(eq(message));
@@ -44,13 +47,25 @@ public class BulletPubSubResponderTest {
 
     @Test
     public void testRespondingFailure() throws Exception {
-        BulletConfig config = new BulletConfig("test_config.yaml");
-        config.set(MockPubSub.MOCK_MESSAGE_NAME, "test");
-        BulletPubSubResponder responder = new BulletPubSubResponder(config);
+        BulletPubSubResponder responder = mockResponder();
         doThrow(new PubSubException("Testing")).when(responder.publisher).send(any());
-
         PubSubMessage message = new PubSubMessage("id", "");
         responder.respond("id", message);
         verify(responder.publisher).send(eq(message));
+    }
+
+    @Test
+    public void testCloseFailure() throws Exception {
+        BulletPubSubResponder responder = mockResponder();
+        doThrow(new RuntimeException("Testing")).when(responder.publisher).close();
+        responder.close();
+        verify(responder.publisher).close();
+    }
+
+    @Test
+    public void testClose() throws Exception {
+        BulletPubSubResponder responder = mockResponder();
+        responder.close();
+        verify(responder.publisher).close();
     }
 }

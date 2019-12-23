@@ -44,4 +44,13 @@ public class BulletPubSubResponder extends PubSubResponder {
             log.error("Error", e);
         }
     }
+
+    @Override
+    public void close() {
+        try {
+            publisher.close();
+        } catch (Exception e) {
+            log.error("Unable to close the publisher", e);
+        }
+    }
 }
