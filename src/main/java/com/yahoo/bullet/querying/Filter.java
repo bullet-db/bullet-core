@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.expressions.Expression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
@@ -20,8 +21,8 @@ import com.yahoo.bullet.typesystem.Type;
 public class Filter {
     private Evaluator evaluator;
 
-    public Filter(Expression filterExpression) {
-        evaluator = Evaluator.build(filterExpression);
+    public Filter(Expression filter) {
+        evaluator = Evaluator.build(filter);
     }
 
     /**

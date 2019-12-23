@@ -8,6 +8,7 @@ package com.yahoo.bullet.parsing;
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.expressions.Expression;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
-@Getter @Setter
+@AllArgsConstructor @Getter @Setter
 public class Having extends PostAggregation {
     public static final BulletError HAVING_REQUIRES_EXPRESSION =
             makeError("The HAVING post-aggregation requires an expression.", "Please add an expression.");

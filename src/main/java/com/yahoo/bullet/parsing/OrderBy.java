@@ -24,7 +24,7 @@ public class OrderBy extends PostAggregation {
         DESC
     }
 
-    @Getter @AllArgsConstructor
+    @Getter @Setter @AllArgsConstructor
     public static class SortItem {
         @Expose
         private String field;
@@ -58,6 +58,12 @@ public class OrderBy extends PostAggregation {
      */
     public OrderBy() {
         fields = null;
+        type = Type.ORDER_BY;
+    }
+
+    public OrderBy(List<SortItem> fields) {
+        this.fields = fields;
+        this.type = Type.ORDER_BY;
     }
 
     @Override

@@ -405,7 +405,7 @@ public class Querier implements Monoidal {
         Query query = runningQuery.getQuery();
 
         filter = new Filter(query.getFilter());
-        projection = new Projection(query.getProjection().getFields());
+        projection = new Projection(query.getProjection());
 
         // Aggregation and Strategy are guaranteed to not be null.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
@@ -414,7 +414,7 @@ public class Querier implements Monoidal {
             return errors;
         }
 
-        if (query.getPostAggregations() != null) {
+        if (query.getPostAggregations() != null && !query.getPostAggregations().isEmpty()) {
             postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
             for (PostStrategy postStrategy : postStrategies) {
                 errors = postStrategy.initialize();

@@ -11,10 +11,12 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ListEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * must be specified as only lists of primitives are supported at the moment.
  */
 @Getter
+@Setter
 public class ListExpression extends Expression {
     private static final BulletError LIST_REQUIRES_NON_NULL_LIST = makeError("The values list must not be null.", "Please provide a values list.");
     private static final BulletError LIST_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive.", "Please provide a primitive type.");
@@ -36,6 +39,10 @@ public class ListExpression extends Expression {
     public ListExpression() {
         values = null;
         type = null;
+    }
+
+    public ListExpression(List<Expression> values) {
+        this.values = values;
     }
 
     @Override
@@ -59,6 +66,20 @@ public class ListExpression extends Expression {
     @Override
     public Evaluator getEvaluator() {
         return new ListEvaluator(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ListExpression)) {
+            return false;
+        }
+        ListExpression other = (ListExpression) obj;
+        return Objects.equals(values, other.values) && type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values, type);
     }
 
     @Override

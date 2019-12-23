@@ -31,7 +31,7 @@ public class ComputationStrategy implements PostStrategy {
         if (errors.isPresent()) {
             return errors;
         }
-        projection = new Projection(computation.getProjection().getFields());
+        projection = new Projection(computation.getProjection());
         return Optional.empty();
     }
 

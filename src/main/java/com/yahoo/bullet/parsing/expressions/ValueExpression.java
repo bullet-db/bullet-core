@@ -12,9 +12,11 @@ import com.yahoo.bullet.querying.evaluators.ValueEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -24,6 +26,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * If the type isn't specified, it's assumed to be string unless the value is null.
  */
 @Getter
+@Setter
 public class ValueExpression extends Expression {
     private static final BulletError VALUE_REQUIRES_NULL_TYPE_FOR_NULL_VALUE = makeError("The type must be null if the value is null.", "Please provide a non-null value or null type.");
     private static final BulletError VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE = makeError("The type must be primitive or null.", "Please provide a primitive or null type.");
@@ -68,6 +71,20 @@ public class ValueExpression extends Expression {
     @Override
     public Evaluator getEvaluator() {
         return new ValueEvaluator(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ValueExpression)) {
+            return false;
+        }
+        ValueExpression other = (ValueExpression) obj;
+        return Objects.equals(value, other.value) && type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, type);
     }
 
     @Override

@@ -92,6 +92,11 @@ public class Window implements Configurable, Initializable {
         include = null;
     }
 
+    public Window(Map<String, Object> emit, Map<String, Object> include) {
+        this.emit = emit;
+        this.include = include;
+    }
+
     @Override
     public void configure(BulletConfig config) {
         emitType = getUnit(emit);

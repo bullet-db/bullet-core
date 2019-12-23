@@ -29,6 +29,12 @@ public class Computation extends PostAggregation {
      */
     public Computation() {
         projection = null;
+        type = Type.COMPUTATION;
+    }
+
+    public Computation(Projection projection) {
+        this.projection = projection;
+        this.type = Type.COMPUTATION;
     }
 
     @Override

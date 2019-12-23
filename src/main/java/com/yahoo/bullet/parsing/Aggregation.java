@@ -65,6 +65,11 @@ public class Aggregation implements Configurable, Initializable {
         type = Type.RAW;
     }
 
+    public Aggregation(Integer size, Type type) {
+        this.size = size;
+        this.type = type;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {

@@ -11,9 +11,11 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -28,6 +30,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * will try to cast those boolean maps to boolean objects (and fail).
  */
 @Getter
+@Setter
 public class FieldExpression extends Expression {
     private static final BulletError FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
     private static final BulletError FIELD_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
@@ -63,6 +66,20 @@ public class FieldExpression extends Expression {
     @Override
     public Evaluator getEvaluator() {
         return new FieldEvaluator(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof FieldExpression)) {
+            return false;
+        }
+        FieldExpression other = (FieldExpression) obj;
+        return Objects.equals(field, other.field) && type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(field, type);
     }
 
     @Override

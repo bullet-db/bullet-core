@@ -11,16 +11,19 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter
+@Setter
 public class NAryExpression extends Expression {
     private static final BulletError N_ARY_REQUIRES_NON_NULL_LIST = makeError("The operands list must not be null.", "Please provide an operands list.");
     private static final BulletError N_ARY_REQUIRES_N_ARY_OPERATION = makeError("The operation must be n-ary.", "Please provide an n-ary operation for op.");
@@ -61,6 +64,20 @@ public class NAryExpression extends Expression {
     @Override
     public Evaluator getEvaluator() {
         return new NAryEvaluator(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof NAryExpression)) {
+            return false;
+        }
+        NAryExpression other = (NAryExpression) obj;
+        return Objects.equals(operands, other.operands) && op == other.op && type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operands, op, type);
     }
 
     @Override

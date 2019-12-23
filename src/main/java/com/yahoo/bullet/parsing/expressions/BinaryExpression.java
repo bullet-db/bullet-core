@@ -11,10 +11,12 @@ import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -26,6 +28,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * Infix and prefix binary operations are differentiated in the naming scheme.
  */
 @Getter
+@Setter
 public class BinaryExpression extends Expression {
     public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
@@ -73,6 +76,23 @@ public class BinaryExpression extends Expression {
     @Override
     public Evaluator getEvaluator() {
         return new BinaryEvaluator(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BinaryExpression)) {
+            return false;
+        }
+        BinaryExpression other = (BinaryExpression) obj;
+        return Objects.equals(left, other.left) &&
+               Objects.equals(right, other.right) &&
+               op == other.op &&
+               type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right, op, type);
     }
 
     @Override
