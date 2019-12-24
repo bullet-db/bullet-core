@@ -150,6 +150,8 @@ public class BulletConfig extends Config {
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
+    private static final long serialVersionUID = 8074017371059016233L;
+    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
 
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
@@ -319,7 +321,6 @@ public class BulletConfig extends Config {
     }
 
     // Members
-    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
     private BulletRecordProvider provider;
 
     /**
