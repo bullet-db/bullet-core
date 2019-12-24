@@ -38,7 +38,7 @@ public class HTTPMetricEventPublisher implements MetricEventPublisher {
      * Creates an instance of this service that writes to the HTTP endpoint.
      *
      * @param url The URL to use for HTTP publishing.
-     * @param group The name of the Yamas application being used by this instance.
+     * @param group The name of the metrics group being used by this instance.
      * @param dimensions The names to values of the standard static dimensions to use for all requests.
      * @param client The {@link CloseableHttpClient} instance to use.
      * @param retries The number of times to retry a particular request. A request will always be tried once.
@@ -99,8 +99,15 @@ public class HTTPMetricEventPublisher implements MetricEventPublisher {
         return status;
     }
 
-    private HttpUriRequest getPost(String body) {
-        return RequestBuilder.post().setUri(url)
+    /**
+     * Exposed for testing.
+     *
+     * @param body The body to POST with.
+     * @return A {@link HttpUriRequest} that is a POST.
+     */
+    HttpUriRequest getPost(String body) {
+        return RequestBuilder.post()
+                .setUri(url)
                 .setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
                 .setEntity(new StringEntity(body, ContentType.DEFAULT_TEXT)).build();
     }
