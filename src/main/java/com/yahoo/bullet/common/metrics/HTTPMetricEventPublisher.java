@@ -88,17 +88,6 @@ public class HTTPMetricEventPublisher implements MetricEventPublisher {
 
     }
 
-    private boolean submitWithRetry(HttpUriRequest post, int retries) {
-        int count = 0;
-        boolean status;
-        do {
-            count++;
-            log.debug("Attempt {} of {}", count, retries);
-            status = request(post);
-        } while (shouldRetry(status, count, retries, retryIntervalMS));
-        return status;
-    }
-
     /**
      * Exposed for testing.
      *
@@ -110,6 +99,17 @@ public class HTTPMetricEventPublisher implements MetricEventPublisher {
                 .setUri(url)
                 .setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
                 .setEntity(new StringEntity(body, ContentType.DEFAULT_TEXT)).build();
+    }
+
+    private boolean submitWithRetry(HttpUriRequest post, int retries) {
+        int count = 0;
+        boolean status;
+        do {
+            count++;
+            log.debug("Attempt {} of {}", count, retries);
+            status = request(post);
+        } while (shouldRetry(status, count, retries, retryIntervalMS));
+        return status;
     }
 
     private boolean request(HttpUriRequest request) {
