@@ -11,7 +11,7 @@ import lombok.Getter;
 import java.util.Map;
 
 /**
- * Simpler wrapper that represents a metric event being published.
+ * Simple wrapper that represents a metric event being published.
  */
 @Getter
 public class MetricEvent implements JSONFormatter {
@@ -24,7 +24,7 @@ public class MetricEvent implements JSONFormatter {
      * Constructor.
      *
      * @param group The identity of the entity being measured by the metrics.
-     * @param dimensions Static metadata describing the entity being measured.
+     * @param dimensions Static metadata or tags describing the entity being measured.
      * @param metrics Numeric data describing values of the measured entity.
      */
     public MetricEvent(String group, Map<String, String> dimensions, Map<String, Number> metrics) {

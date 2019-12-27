@@ -129,8 +129,8 @@ public class HTTPMetricEventPublisher implements MetricEventPublisher {
     }
 
     private boolean shouldRetry(boolean status, int count, int retries, int interval) {
-        boolean shouldNotSleep = status || count >= retries;
-        if (shouldNotSleep) {
+        boolean shouldNotRetry = status || count >= retries;
+        if (shouldNotRetry) {
             return false;
         }
         try {
