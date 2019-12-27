@@ -27,6 +27,7 @@ public abstract class MetricPublisher<T> implements AutoCloseable {
     /**
      * Returns any static dimensions to use. These are added to any additional dimensions provided.
      *
+     * @param extraDimensions Any non-null extra dimensions {@link Map} to add.
      * @return The {@link Map} of static and extra dimensions to use for all publishing.
      */
     public Map<String, String> getDimensions(Map<String, String> extraDimensions) {
