@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.common.metrics;
 
+import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,14 +17,23 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
 public class MetricEventPublisherTest {
-    private static class NullMetricEventPublisher implements MetricEventPublisher {
+    public static class NullMetricEventPublisher extends MetricEventPublisher {
         private CompletableFuture<MetricEvent> payloadFuture = new CompletableFuture<>();
         private int published = 0;
         private int fired = 0;
 
+        private NullMetricEventPublisher() {
+            super(null);
+        }
+
+        public NullMetricEventPublisher(BulletConfig config) {
+            super(config);
+            throw new RuntimeException("Testing");
+        }
+
         @Override
         public Map<String, String> getDimensions(Map<String, String> extraDimensions) {
-            Map<String, String> map = MetricEventPublisher.super.getDimensions(extraDimensions);
+            Map<String, String> map = super.getDimensions(extraDimensions);
             map.put("qux", "norf");
             return map;
         }
@@ -38,7 +48,7 @@ public class MetricEventPublisherTest {
         @Override
         public void fire(Map<String, String> dimensions, Map<String, Number> metrics) {
             fired++;
-            MetricEventPublisher.super.fire(dimensions, metrics);
+            super.fire(dimensions, metrics);
         }
 
         @Override
@@ -52,6 +62,13 @@ public class MetricEventPublisherTest {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testFailingToLoadAClass() {
+        BulletConfig config = new BulletConfig();
+        config.set(BulletConfig.METRIC_PUBLISHER_CLASS_NAME, NullMetricEventPublisher.class.getName());
+        MetricPublisher.from(config);
     }
 
     @Test

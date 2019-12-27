@@ -66,6 +66,8 @@ public class BulletConfig extends Config {
 
     public static final String STORAGE_CLASS_NAME = "bullet.storage.class.name";
 
+    public static final String METRIC_PUBLISHER_CLASS_NAME = "bullet.metric.publisher.class.name";
+
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
 
     public static final String QUERY_PARTITIONER_ENABLE = "bullet.query.partitioner.enable";

@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.common.metrics;
 
+import com.yahoo.bullet.common.BulletConfig;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
@@ -33,7 +34,8 @@ public class HTTPMetricEventPublisherTest {
 
     private static class FailingMetricEventPublisher extends HTTPMetricEventPublisher {
         private FailingMetricEventPublisher(CloseableHttpClient client) {
-            super("url", "group", emptyMap(), client, 0, 0);
+            super(config("url", "group", null, 1, 1, 1));
+            setClient(client);
         }
 
         @Override
@@ -44,19 +46,20 @@ public class HTTPMetricEventPublisherTest {
 
     private static class MockHTTPMetricEventPublisher extends HTTPMetricEventPublisher {
         private CompletableFuture<Boolean> publishFuture;
-        private boolean shouldThrow = false;
+        private boolean shouldThrow;
 
         private MockHTTPMetricEventPublisher(boolean shouldThrow, Map<String, String> dimensions, CloseableHttpClient client) {
-            super("url", "group", emptyMap(), client, 0, 0);
+            super(config("url", "group", dimensions, 1, 1, 1));
             this.shouldThrow = shouldThrow;
+            setClient(client);
         }
 
         private MockHTTPMetricEventPublisher(Map<String, String> dimensions, CloseableHttpClient client) {
-            super("url", "group", dimensions, client, 0, 0);
+            this(false, dimensions, client);
         }
 
         private MockHTTPMetricEventPublisher(CloseableHttpClient client) {
-            this(emptyMap(), client);
+            this(null, client);
         }
 
         @Override
@@ -77,7 +80,7 @@ public class HTTPMetricEventPublisherTest {
 
     private static class UnabortableHTTPMetricEventPublisher extends MockHTTPMetricEventPublisher {
         private UnabortableHTTPMetricEventPublisher(CloseableHttpClient client) {
-            super(emptyMap(), client);
+            super(null, client);
         }
 
         @Override
@@ -86,6 +89,34 @@ public class HTTPMetricEventPublisherTest {
             doThrow(new RuntimeException("Testing")).when(request).abort();
             return request;
         }
+    }
+
+    private static void setIfNotNull(BulletConfig config, String key, Object value) {
+        if (value != null) {
+            config.set(key, value);
+        }
+    }
+
+    private static BulletConfig config(String url, String group, Map<String, String> dimensions, Integer retry, Integer interval, Integer concurrency) {
+        BulletConfig config = new BulletConfig();
+        setIfNotNull(config, HTTPMetricPublisherConfig.URL, url);
+        setIfNotNull(config, HTTPMetricPublisherConfig.GROUP, group);
+        setIfNotNull(config, HTTPMetricPublisherConfig.DIMENSIONS, dimensions);
+        setIfNotNull(config, HTTPMetricPublisherConfig.RETRIES, retry);
+        setIfNotNull(config, HTTPMetricPublisherConfig.RETRY_INTERVAL_MS, interval);
+        setIfNotNull(config, HTTPMetricPublisherConfig.MAX_CONCURRENCY, concurrency);
+        return config;
+    }
+
+    private static HTTPMetricEventPublisher publisher(String url, String group, Map<String, String> dimensions,
+                                                      int retry, int interval, int concurrency, CloseableHttpClient client) {
+        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher(config(url, group, dimensions, retry, interval, concurrency));
+        publisher.setClient(client);
+        return publisher;
+    }
+
+    private static HTTPMetricEventPublisher publisher(Map<String, String> dimensions, int retry, CloseableHttpClient client) {
+        return publisher("url", "group", dimensions, retry, 1, 20, client);
     }
 
     private static String getPayload(HttpEntityEnclosingRequestBase requestBase) {
@@ -103,15 +134,26 @@ public class HTTPMetricEventPublisherTest {
     }
 
     @Test
+    public void testLoadingAHTTPMetricEventPublisher() {
+        BulletConfig config = config("url", null, null, null, null, null);
+        config.set(BulletConfig.METRIC_PUBLISHER_CLASS_NAME, HTTPMetricEventPublisher.class.getName());
+        MetricPublisher publisher = MetricPublisher.from(config);
+        Assert.assertTrue(publisher instanceof HTTPMetricEventPublisher);
+        HTTPMetricEventPublisher httpPublisher = (HTTPMetricEventPublisher) publisher;
+        Assert.assertEquals(httpPublisher.getGroup(), HTTPMetricPublisherConfig.DEFAULT_GROUP);
+        Assert.assertEquals(httpPublisher.getDimensions(emptyMap()), emptyMap());
+    }
+
+    @Test
     public void testClosing() throws Exception {
         CloseableHttpClient client = mock(CloseableHttpClient.class);
         doThrow(new IOException("Testing")).when(client).close();
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         publisher.close();
         verify(client).close();
 
         client = mock(CloseableHttpClient.class);
-        publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        publisher = publisher(emptyMap(), 1, client);
         publisher.close();
         verify(client).close();
     }
@@ -119,7 +161,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testPublishingAMetric() throws Exception {
         CloseableHttpClient client = mockHTTPClient(200);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         boolean result = publisher.publish("metric", 1L).get();
         Assert.assertTrue(result);
     }
@@ -127,7 +169,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testPublishingMetrics() throws Exception {
         CloseableHttpClient client = mockHTTPClient(200);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         boolean result = publisher.publish(singletonMap("metric", 1L)).get();
         Assert.assertTrue(result);
     }
@@ -135,7 +177,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testPublishingDimensionsAndMetrics() throws Exception {
         CloseableHttpClient client = mockHTTPClient(200);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         boolean result = publisher.publish(singletonMap("dimension", "value"), singletonMap("metric", 1L)).get();
         Assert.assertTrue(result);
     }
@@ -182,7 +224,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testExceptionWhileRequesting() throws Exception {
         CloseableHttpClient client = mock(CloseableHttpClient.class);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         boolean result = publisher.publish("metric", 1L).get();
         Assert.assertFalse(result);
     }
@@ -199,7 +241,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testFailingToPublishAMetric() throws Exception {
         CloseableHttpClient client = mockHTTPClient(400);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 0, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 1, client);
         boolean result = publisher.publish("metric", 1L).get();
         Assert.assertFalse(result);
     }
@@ -215,7 +257,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testExceptionWhileFiring() {
         CloseableHttpClient client = mock(CloseableHttpClient.class);
-        MockHTTPMetricEventPublisher publisher = new MockHTTPMetricEventPublisher(true, emptyMap(), client);
+        MockHTTPMetricEventPublisher publisher = new MockHTTPMetricEventPublisher(true, null, client);
         publisher.fire("metric", 1L);
         publisher.publishFuture.thenRun(Assert::fail);
     }
@@ -232,7 +274,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testRetrying() throws Exception {
         CloseableHttpClient client = mockHTTPClient(400, 200);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 2, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 2, client);
         boolean result = publisher.publish("metric", 1L).get();
         Assert.assertTrue(result);
     }
@@ -240,7 +282,7 @@ public class HTTPMetricEventPublisherTest {
     @Test
     public void testRetryingButFailing() throws Exception {
         CloseableHttpClient client = mockHTTPClient(400, 400);
-        HTTPMetricEventPublisher publisher = new HTTPMetricEventPublisher("url", "group", emptyMap(), client, 2, 0);
+        HTTPMetricEventPublisher publisher = publisher(null, 2, client);
         boolean result = publisher.publish("metric", 1L).get();
         Assert.assertFalse(result);
     }
