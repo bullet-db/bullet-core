@@ -100,7 +100,6 @@ public class HTTPMetricEventPublisher extends MetricEventPublisher {
         return CompletableFuture.supplyAsync(() -> submitWithRetry(post, retries))
                                 .thenApply(HTTPMetricEventPublisher::onHTTPResult)
                                 .exceptionally(HTTPMetricEventPublisher::onHTTPFail);
-
     }
 
     /**
