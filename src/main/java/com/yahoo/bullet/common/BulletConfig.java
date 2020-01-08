@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -398,16 +397,8 @@ public class BulletConfig extends Config {
      * @return A created instance of this class.
      * @throws RuntimeException if there were issues creating an instance. It wraps the real exception.
      */
-    @SuppressWarnings("unchecked")
     public <S> S loadConfiguredClass(String classNameKey) {
-        try {
-            String name = (String) this.get(classNameKey);
-            Class<? extends S> className = (Class<? extends S>) Class.forName(name);
-            Constructor<? extends S> constructor = className.getConstructor(BulletConfig.class);
-            return constructor.newInstance(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Utilities.loadConfiguredClass(this.getAs(classNameKey, String.class), this);
     }
 
     @SuppressWarnings("unchecked")
