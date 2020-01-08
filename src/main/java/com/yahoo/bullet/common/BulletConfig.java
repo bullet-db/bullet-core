@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,6 +64,8 @@ public class BulletConfig extends Config {
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
 
     public static final String STORAGE_CLASS_NAME = "bullet.storage.class.name";
+
+    public static final String METRIC_PUBLISHER_CLASS_NAME = "bullet.metric.publisher.class.name";
 
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
 
@@ -150,6 +151,8 @@ public class BulletConfig extends Config {
     // Validator definitions for the configs in this class.
     // This can be static since VALIDATOR itself does not change for different values for fields in the BulletConfig.
     private static final Validator VALIDATOR = new Validator();
+    private static final long serialVersionUID = 8074017371059016233L;
+    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
 
     static {
         VALIDATOR.define(QUERY_DEFAULT_DURATION)
@@ -319,7 +322,6 @@ public class BulletConfig extends Config {
     }
 
     // Members
-    public static final String DEFAULT_CONFIGURATION_NAME = "bullet_defaults.yaml";
     private BulletRecordProvider provider;
 
     /**
@@ -395,16 +397,8 @@ public class BulletConfig extends Config {
      * @return A created instance of this class.
      * @throws RuntimeException if there were issues creating an instance. It wraps the real exception.
      */
-    @SuppressWarnings("unchecked")
     public <S> S loadConfiguredClass(String classNameKey) {
-        try {
-            String name = (String) this.get(classNameKey);
-            Class<? extends S> className = (Class<? extends S>) Class.forName(name);
-            Constructor<? extends S> constructor = className.getConstructor(BulletConfig.class);
-            return constructor.newInstance(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Utilities.loadConfiguredClass(this.getAs(classNameKey, String.class), this);
     }
 
     @SuppressWarnings("unchecked")
