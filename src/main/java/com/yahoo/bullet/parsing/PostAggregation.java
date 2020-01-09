@@ -25,7 +25,7 @@ public abstract class PostAggregation implements Configurable, Initializable {
     public static final String ORDER_BY_SERIALIZED_NAME = "ORDER BY";
     public static final String COMPUTATION_SERIALIZED_NAME = "COMPUTATION";
     public static final String HAVING_SERIALIZED_NAME = "HAVING";
-    public static final String TRANSIENT_SERIALIZED_NAME = "TRANSIENT";
+    public static final String CULLING_SERIALIZED_NAME = "CULLING";
 
     /** Represents the type of the PostAggregation. */
     public enum Type {
@@ -35,8 +35,8 @@ public abstract class PostAggregation implements Configurable, Initializable {
         COMPUTATION,
         @SerializedName(HAVING_SERIALIZED_NAME)
         HAVING,
-        @SerializedName(TRANSIENT_SERIALIZED_NAME)
-        TRANSIENT
+        @SerializedName(CULLING_SERIALIZED_NAME)
+        CULLING
     }
 
     @Expose @SerializedName(TYPE_FIELD)

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying.operations;
 
 import com.yahoo.bullet.parsing.Computation;
+import com.yahoo.bullet.parsing.Culling;
 import com.yahoo.bullet.parsing.Having;
 import com.yahoo.bullet.parsing.OrderBy;
 import com.yahoo.bullet.parsing.PostAggregation;
@@ -13,6 +14,7 @@ import com.yahoo.bullet.postaggregations.ComputationStrategy;
 import com.yahoo.bullet.postaggregations.HavingStrategy;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.postaggregations.CullingStrategy;
 
 public class PostAggregationOperations {
     /**
@@ -34,6 +36,8 @@ public class PostAggregationOperations {
             case HAVING:
                 postStrategy = new HavingStrategy((Having) aggregation);
                 break;
+            case CULLING:
+                postStrategy = new CullingStrategy((Culling) aggregation);
         }
         return postStrategy;
     }

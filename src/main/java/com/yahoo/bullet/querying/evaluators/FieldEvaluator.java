@@ -23,7 +23,7 @@ public class FieldEvaluator extends Evaluator {
 
     public FieldEvaluator(FieldExpression fieldExpression) {
         super(fieldExpression);
-        this.fieldExtractor = getFieldExtractor(fieldExpression);
+        fieldExtractor = getFieldExtractor(fieldExpression);
     }
 
     @Override

@@ -18,13 +18,18 @@ import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
-@AllArgsConstructor @Getter @Setter
+@Getter @Setter
 public class Having extends PostAggregation {
     public static final BulletError HAVING_REQUIRES_EXPRESSION =
             makeError("The HAVING post-aggregation requires an expression.", "Please add an expression.");
 
     @Expose
     private Expression expression;
+
+    public Having(Expression expression) {
+        this.expression = expression;
+        this.type = Type.HAVING;
+    }
 
     @Override
     public Optional<List<BulletError>> initialize() {

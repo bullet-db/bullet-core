@@ -18,9 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-
-//import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Slf4j @Getter @Setter
 public class Projection implements Configurable, Initializable {
@@ -30,10 +29,21 @@ public class Projection implements Configurable, Initializable {
         private String name;
         @Expose
         private Expression value;
-    }
 
-    //public static final BulletError PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS = makeError("Projection fields cannot contain delimiters.", "Please rename your projection fields to not contain delimiters.");
-    //public static final String DELIMITER = ".";
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Field)) {
+                return false;
+            }
+            Field other = (Field) obj;
+            return Objects.equals(name, other.name) && Objects.equals(value, other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, value);
+        }
+    }
 
     @Expose
     private List<Field> fields;
@@ -52,9 +62,6 @@ public class Projection implements Configurable, Initializable {
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
-        //if (fields.stream().map(Field::getName).anyMatch(s -> s.contains(DELIMITER))) {
-        //    errors.add(PROJECTION_FIELDS_CANNOT_CONTAIN_DELIMITERS);
-        //}
         fields.stream().map(Field::getValue).forEach(f -> f.initialize().ifPresent(errors::addAll));
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
