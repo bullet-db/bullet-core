@@ -17,7 +17,7 @@ public class ValueEvaluator extends Evaluator {
 
     public ValueEvaluator(ValueExpression valueExpression) {
         super(valueExpression);
-        this.value = TypedObject.forceCast(type, valueExpression.getValue());
+        this.value = new TypedObject(type, valueExpression.getValue());
     }
 
     @Override

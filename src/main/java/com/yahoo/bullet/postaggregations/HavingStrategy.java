@@ -12,10 +12,8 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.Type;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HavingStrategy implements PostStrategy {
@@ -52,10 +50,5 @@ public class HavingStrategy implements PostStrategy {
                 }
             }).collect(Collectors.toList());
         return Clip.of(records).add(clip.getMeta());
-    }
-
-    @Override
-    public Set<String> getRequiredFields() {
-        return Collections.emptySet();
     }
 }

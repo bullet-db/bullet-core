@@ -33,28 +33,27 @@ public class ValueExpression extends Expression {
     private static final BulletError VALUE_REQUIRES_CASTABLE = makeError("The value must be castable to the type.", "Please provide a valid value-type pair.");
 
     @Expose
-    private String value;
+    private Object value;
 
     public ValueExpression() {
         value = null;
         type = null;
     }
 
+    public ValueExpression(Object value) {
+        this.value = value;
+        this.type = Type.getType(value);
+    }
+
     @Override
     public Optional<List<BulletError>> initialize() {
-        if (value == null && type == null) {
-            type = Type.NULL;
-        }
         if (value == null && type != Type.NULL) {
             return Optional.of(Collections.singletonList(VALUE_REQUIRES_NULL_TYPE_FOR_NULL_VALUE));
-        }
-        if (type == null) {
-            type = Type.STRING;
         }
         if (!Type.PRIMITIVES.contains(type) && type != Type.NULL) {
             return Optional.of(Collections.singletonList(VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE));
         }
-        if (TypedObject.typeCast(type, value).getType() == Type.UNKNOWN) {
+        if (TypedObject.typeCastFromObject(type, value).getType() == Type.UNKNOWN) {
             return Optional.of(Collections.singletonList(VALUE_REQUIRES_CASTABLE));
         }
         return Optional.empty();
@@ -63,9 +62,9 @@ public class ValueExpression extends Expression {
     @Override
     public String getName() {
         if (type == Type.STRING) {
-            return '"' + value + '"';
+            return '"' + value.toString() + '"';
         }
-        return value;
+        return value.toString();
     }
 
     @Override

@@ -11,10 +11,8 @@ import com.yahoo.bullet.querying.Projection;
 import com.yahoo.bullet.result.Clip;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 public class ComputationStrategy implements PostStrategy {
@@ -39,10 +37,5 @@ public class ComputationStrategy implements PostStrategy {
     public Clip execute(Clip clip) {
         clip.getRecords().forEach(projection::project);
         return clip;
-    }
-
-    @Override
-    public Set<String> getRequiredFields() {
-        return Collections.emptySet();
     }
 }

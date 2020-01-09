@@ -319,8 +319,6 @@ public class Querier implements Monoidal {
     private Mode mode;
 
     private List<PostStrategy> postStrategies;
-    // Fields which are required by post aggregations and will not be shown in final result.
-    private Set<String> transientFields;
 
     private BulletRecordProvider provider;
 
@@ -374,7 +372,6 @@ public class Querier implements Monoidal {
         this.runningQuery = query;
         this.config = config;
         this.provider = config.getBulletRecordProvider();
-        this.transientFields = new HashSet<>();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -404,8 +401,13 @@ public class Querier implements Monoidal {
 
         Query query = runningQuery.getQuery();
 
-        filter = new Filter(query.getFilter());
-        projection = new Projection(query.getProjection());
+        if (query.getFilter() != null) {
+            filter = new Filter(query.getFilter());
+        }
+
+        if (query.getProjection() != null) {
+            projection = new Projection(query.getProjection());
+        }
 
         // Aggregation and Strategy are guaranteed to not be null.
         Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
@@ -421,9 +423,7 @@ public class Querier implements Monoidal {
                 if (errors.isPresent()) {
                     return errors;
                 }
-                addTransientFieldsFor(postStrategy);
             }
-            projection.addTransientFields(transientFields);
         }
 
         // Scheme is guaranteed to not be null.
@@ -691,9 +691,6 @@ public class Querier implements Monoidal {
         for (PostStrategy postStrategy : postStrategies) {
             clip = postStrategy.execute(clip);
         }
-        for (String field : transientFields) {
-            clip.getRecords().forEach(record -> record.remove(field));
-        }
         return clip;
     }
 
@@ -734,15 +731,5 @@ public class Querier implements Monoidal {
 
     private String getMetaKey() {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
-    }
-
-    private void addTransientFieldsFor(PostStrategy postStrategy) {
-        // We need to add transient fields only if the query selects some subset of fields (i.e. projection)
-        // Only "ORDER BY" requires transient fields. "COMPUTATION" and "HAVING" can only contain aggregate fields.
-        if (projection != null) {
-            Map<String, Evaluator> evaluators = projection.getEvaluators();
-            postStrategy.getRequiredFields().stream().filter(field -> !evaluators.containsKey(field))
-                                                     .forEach(field -> transientFields.add(field));
-        }
     }
 }

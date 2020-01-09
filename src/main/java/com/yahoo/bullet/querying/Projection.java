@@ -5,16 +5,13 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.expressions.FieldExpression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
-import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 /**
  * Projection consists of a map of names to evaluators built from the projection map in the bullet query. If there's no projection,
@@ -32,7 +29,7 @@ public class Projection {
     private LinkedHashMap<String, Evaluator> evaluators;
 
     public Projection(com.yahoo.bullet.parsing.Projection projection) {
-        if (projection == null || projection.getFields() == null || projection.getFields().isEmpty()) {
+        if (projection.getFields() == null) {
             return;
         }
         evaluators = new LinkedHashMap<>();
@@ -48,7 +45,7 @@ public class Projection {
 
     public BulletRecord project(BulletRecord record, BulletRecordProvider provider) {
         if (evaluators == null) {
-            return record;
+            return copy(record, provider.getInstance());
         }
         return project(record, provider.getInstance());
     }
@@ -66,9 +63,8 @@ public class Projection {
         return projected;
     }
 
-    public void addTransientFields(Set<String> transientFields) {
-        for (String field : transientFields) {
-            evaluators.put(field, new FieldEvaluator(new FieldExpression(field)));
-        }
+    private BulletRecord copy(BulletRecord record, BulletRecord projected) {
+        record.iterator().forEachRemaining(entry -> projected.forceSet(entry.getKey(), entry.getValue()));
+        return projected;
     }
 }

@@ -46,6 +46,7 @@ public abstract class Evaluator {
     }
 
     protected Type type;
+    protected Type primitiveType;
 
     static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
     static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
@@ -83,7 +84,9 @@ public abstract class Evaluator {
     }
 
     Evaluator(Expression expression) {
+        // TODO useless?
         type = expression.getType();
+        primitiveType = expression.getPrimitiveType();
     }
 
     public abstract TypedObject evaluate(BulletRecord record);

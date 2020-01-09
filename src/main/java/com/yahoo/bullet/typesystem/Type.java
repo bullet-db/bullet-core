@@ -21,12 +21,15 @@ public enum Type {
     DOUBLE(Double.class),
     LIST(List.class),
     MAP(Map.class),
+    LISTOFMAP(List.class),
+    MAPOFMAP(Map.class),
     // Doesn't matter what underlyingType is for NULL and UNKNOWN, just need something that isn't encountered
     NULL(Type.class),
     UNKNOWN(Type.class);
 
     public static final String NULL_EXPRESSION = "null";
     public static List<Type> PRIMITIVES = Arrays.asList(BOOLEAN, INTEGER, LONG, FLOAT, DOUBLE, STRING);
+    public static List<Type> COLLECTIONS = Arrays.asList(LIST, MAP, LISTOFMAP, MAPOFMAP);
     public static List<Type> SUPPORTED_TYPES = Arrays.asList(BOOLEAN, INTEGER, LONG, FLOAT, DOUBLE, STRING, LIST, MAP);
     public static List<Type> NUMERICS = Arrays.asList(INTEGER, LONG, FLOAT, DOUBLE);
 
@@ -52,13 +55,26 @@ public enum Type {
         if (object == null) {
             return Type.NULL;
         }
-
         for (Type type : SUPPORTED_TYPES) {
             if (type.getUnderlyingType().isInstance(object)) {
+                switch (type) {
+                    case LIST:
+                        return containsMap((List) object) ? LISTOFMAP : LIST;
+                    case MAP:
+                        return containsMap((Map) object) ? MAPOFMAP : MAP;
+                }
                 return type;
             }
         }
         return UNKNOWN;
+    }
+
+    private static boolean containsMap(List target) {
+        return !target.isEmpty() && target.get(0) instanceof Map;
+    }
+
+    private static boolean containsMap(Map target) {
+        return !target.isEmpty() && target.values().stream().findAny().get() instanceof Map;
     }
 
     /**

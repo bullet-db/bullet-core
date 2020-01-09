@@ -113,7 +113,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         }
 
         // Map each field to the values that it is checked for equality against
-        Map<String, List<String>> equalityClauses = new HashMap<>();
+        Map<String, Set<Object>> equalityClauses = new HashMap<>();
         mapFieldsToValues((NAryExpression) filter, equalityClauses);
 
         // If not exactly one equality per field, default partition
@@ -147,7 +147,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     /**
      * Note, this does not look for any equality clauses past the first layer of inner expressions.
      */
-    private void mapFieldsToValues(NAryExpression filter, Map<String, List<String>> mapping) {
+    private void mapFieldsToValues(NAryExpression filter, Map<String, Set<Object>> mapping) {
         for (Expression clause : filter.getOperands()) {
             if (!(clause instanceof BinaryExpression)) {
                 continue;
@@ -158,21 +158,21 @@ public class SimpleEqualityPartitioner implements Partitioner {
             }
             String field = ((FieldExpression) binary.getLeft()).getField();
             if (fieldSet.contains(field)) {
-                String value = ((ValueExpression) binary.getRight()).getValue();
-                mapping.computeIfAbsent(field, s -> new ArrayList<>()).add(value);
+                Object value = ((ValueExpression) binary.getRight()).getValue();
+                mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
             }
         }
     }
 
-    private String getFilterValue(List<String> values) {
+    private String getFilterValue(Set<Object> values) {
         if (values == null) {
             return ANY;
         }
-        String value = values.get(0);
+        Object value = values.iterator().next();
         if (value == null) {
             return NULL;
         }
-        return makeKeyEntry(value);
+        return makeKeyEntry(value.toString());
     }
 
     private Map<String, String> getFieldValues(BulletRecord record) {

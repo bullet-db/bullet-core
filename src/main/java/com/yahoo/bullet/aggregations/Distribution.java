@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.Utilities.extractFieldAsNumber;
 import static com.yahoo.bullet.common.BulletError.makeError;
@@ -82,7 +81,7 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     }
     public static final BulletError REQUIRES_TYPE_ERROR =
             makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
-                      SUPPORTED_DISTRIBUTION_TYPES.keySet().stream().collect(Collectors.joining(", ")));
+                      String.join(", ", SUPPORTED_DISTRIBUTION_TYPES.keySet()));
     public static final BulletError REQUIRES_POINTS_ERROR =
             makeError("The DISTRIBUTION type requires at least one point specified in attributes",
                       "Please add a list of numeric points with points, OR " +

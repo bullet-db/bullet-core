@@ -97,7 +97,8 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @return A string representing the composite field.
      */
     String composeField(BulletRecord record) {
-        return composeField(fields.stream().map(field -> Objects.toString(record.extractField(field))));
+        //return composeField(fields.stream().map(field -> Objects.toString(record.extractField(field))));
+        return composeField(fields.stream().map(field -> Objects.toString(record.get(field))));
     }
 
     /**

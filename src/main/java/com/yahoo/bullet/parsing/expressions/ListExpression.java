@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
- * An expression that, contrary to its name, holds a list of expressions (rather than values). A primitive type
+ * An expression that holds a list of expressions. A primitive type
  * must be specified as only lists of primitives are supported at the moment.
  */
 @Getter

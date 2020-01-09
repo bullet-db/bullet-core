@@ -14,15 +14,40 @@ import com.yahoo.bullet.typesystem.TypedObject;
  * that directly takes a BulletRecord.
  */
 public class FieldEvaluator extends Evaluator {
-    private String field;
+    @FunctionalInterface
+    public interface FieldExtractor {
+        TypedObject extract(BulletRecord record);
+    }
+
+    private FieldExtractor fieldExtractor;
 
     public FieldEvaluator(FieldExpression fieldExpression) {
         super(fieldExpression);
-        this.field = fieldExpression.getField();
+        this.fieldExtractor = getFieldExtractor(fieldExpression);
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return cast(new TypedObject(record.extractField(field)));
+        return cast(new TypedObject(fieldExtractor.extract(record)));
+    }
+
+    private static FieldExtractor getFieldExtractor(FieldExpression fieldExpression) {
+        final String field = fieldExpression.getField();
+        final Integer index = fieldExpression.getIndex();
+        final String key = fieldExpression.getKey();
+        final String subKey = fieldExpression.getSubKey();
+        if (index != null) {
+            if (subKey != null) {
+                return record -> new TypedObject(record.get(field, index, subKey));
+            }
+            return record -> new TypedObject(record.get(field, index));
+        }
+        if (key != null) {
+            if (subKey != null) {
+                return record -> new TypedObject(record.get(field, key, subKey));
+            }
+            return record -> new TypedObject(record.get(field, key));
+        }
+        return record -> new TypedObject(record.get(field));
     }
 }

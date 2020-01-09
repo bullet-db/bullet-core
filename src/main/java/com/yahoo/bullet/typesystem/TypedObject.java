@@ -43,7 +43,7 @@ public class TypedObject implements Comparable<TypedObject> {
         Objects.requireNonNull(type);
         this.type = type;
         this.value = value;
-        primitiveType = extractPrimitiveType(type, value);
+        this.primitiveType = extractPrimitiveType(type, value);
     }
 
     /**
@@ -181,58 +181,74 @@ public class TypedObject implements Comparable<TypedObject> {
     }
 
     /**
+     * Gets the object as a {@link String}.
      *
-     * @return
+     * @return The object as a {@link String}.
      */
     public String getString() {
         return (String) value;
     }
 
     /**
+     * Gets the object as an {@link Integer}.
      *
-     * @return
+     * @return The object as an {@link Integer}.
      */
     public Integer getInteger() {
         return (Integer) value;
     }
 
     /**
+     * Gets the object as a {@link Long}.
      *
-     * @return
+     * @return The object as a {@link Long}.
      */
     public Long getLong() {
         return (Long) value;
     }
 
     /**
+     * Gets the object as a {@link Float}.
      *
-     * @return
+     * @return The object as a {@link Float}.
      */
     public Float getFloat() {
         return (Float) value;
     }
 
     /**
+     * Gets the object as a {@link Double}.
      *
-     * @return
+     * @return The object as a {@link Double}.
      */
     public Double getDouble() {
         return (Double) value;
     }
 
     /**
+     * Gets the object as a {@link Boolean}.
      *
-     * @return
+     * @return The object as a {@link Boolean}.
      */
     public Boolean getBoolean() {
         return (Boolean) value;
     }
 
+    /**
+     * Gets the object as a {@link List} of objects.
+     *
+     * @return The object as a {@link List} of objects.
+     */
     @SuppressWarnings("unchecked")
     public List<Object> getList() {
         return (List<Object>) value;
     }
 
+    /**
+     * Gets the object as a {@link Map} from {@link String} to {@link Object}.
+     *
+     * @return The object as a {@link Map} from {@link String} to {@link Object}.
+     */
     @SuppressWarnings("unchecked")
     public Map<String, Object> getMap() {
         return (Map<String, Object>) value;
@@ -247,8 +263,10 @@ public class TypedObject implements Comparable<TypedObject> {
     public int size() {
         switch (type) {
             case LIST:
+            case LISTOFMAP:
                 return ((List) value).size();
             case MAP:
+            case MAPOFMAP:
                 return ((Map) value).size();
             case STRING:
                 return ((String) value).length();
@@ -323,6 +341,10 @@ public class TypedObject implements Comparable<TypedObject> {
                 return extractPrimitiveTypeFromList((List) target);
             case MAP:
                 return extractPrimitiveTypeFromMap((Map) target);
+            case LISTOFMAP:
+                return extractPrimitiveTypeFromListOfMap((List) target);
+            case MAPOFMAP:
+                return extractPrimitiveTypeFromMapOfMap((Map) target);
             default:
                 return Type.UNKNOWN;
         }
@@ -333,9 +355,6 @@ public class TypedObject implements Comparable<TypedObject> {
             return Type.UNKNOWN;
         }
         Object firstElement = list.get(0);
-        if (firstElement instanceof Map) {
-            return extractPrimitiveTypeFromMap((Map) firstElement);
-        }
         return Type.getType(firstElement);
     }
 
@@ -344,10 +363,22 @@ public class TypedObject implements Comparable<TypedObject> {
             return Type.UNKNOWN;
         }
         Object firstValue = map.values().stream().findAny().get();
-        if (firstValue instanceof Map) {
-            Map innerMap = (Map) firstValue;
-            return innerMap.isEmpty() ? Type.UNKNOWN : Type.getType(innerMap.values().stream().findAny().get());
-        }
         return Type.getType(firstValue);
+    }
+
+    private static Type extractPrimitiveTypeFromListOfMap(List list) {
+        if (list.isEmpty()) {
+            return Type.UNKNOWN;
+        }
+        Map firstElement = (Map) list.get(0);
+        return extractPrimitiveTypeFromMap(firstElement);
+    }
+
+    private static Type extractPrimitiveTypeFromMapOfMap(Map map) {
+        if (map.isEmpty()) {
+            return Type.UNKNOWN;
+        }
+        Map firstValue = (Map) map.values().stream().findAny().get();
+        return extractPrimitiveTypeFromMap(firstValue);
     }
 }

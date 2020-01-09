@@ -11,6 +11,7 @@ import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -29,11 +30,11 @@ import lombok.Setter;
  * }
  *
  * Currently, the supported expressions are:
- * - NullExpression
  * - ValueExpression
  * - FieldExpression
  * - UnaryExpression
  * - BinaryExpression
+ * - NAryExpression
  * - ListExpression
  *
  * MapExpression is not supported at the moment.
@@ -45,9 +46,12 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@RequiredArgsConstructor
 public abstract class Expression implements Configurable, Initializable {
     @Expose
     protected Type type;
+    @Expose
+    protected Type primitiveType;
 
     /**
      * Gets the name of this expression from its values and operations.

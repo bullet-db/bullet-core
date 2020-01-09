@@ -37,14 +37,23 @@ public class FieldExpression extends Expression {
 
     @Expose
     private String field;
+    private Integer index;
+    private String key;
+    private String subKey;
 
     public FieldExpression() {
         field = null;
+        key = null;
+        subKey = null;
         type = null;
+        primitiveType = null;
     }
 
-    public FieldExpression(String field) {
+    public FieldExpression(String field, Integer index, String key, String subKey) {
         this.field = field;
+        this.index = index;
+        this.key = key;
+        this.subKey = subKey;
     }
 
     @Override
@@ -55,6 +64,47 @@ public class FieldExpression extends Expression {
         if (type != null && !Type.PRIMITIVES.contains(type)) {
             return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE));
         }
+
+
+        if (index != null && key != null) {
+            // can't have both
+        }
+
+        // if subkey is not null, then type must be primitive and primitivetype should be null
+        if (subKey != null) {
+            if (index == null && key == null) {
+                // must have one
+            }
+            if (!Type.PRIMITIVES.contains(type)) {
+                // type must be primitive
+            }
+            if (primitiveType != null) {
+                // primitiveType must be null
+            }
+
+        } else if (index != null || key != null) {
+            if (!Type.PRIMITIVES.contains(type) && type != Type.MAP) {
+                // type has to be primitive or map
+            }
+            if (type == Type.MAP) {
+                if (!Type.PRIMITIVES.contains(primitiveType)) {
+                    // primitivetype needs to be primitive type
+                }
+            } else if (primitiveType != null) {
+                // primitivetype has to be null if type is primitive
+            }
+        } else {
+            // type can be anything
+            if (Type.COLLECTIONS.contains(type)) {
+                if (!Type.PRIMITIVES.contains(primitiveType)) {
+                    // primitivetype has to be primitive if type is list/map
+                }
+            } else if (primitiveType != null) {
+                // primitive type has to be null if type isn't list/map
+            }
+        }
+
+
         return Optional.empty();
     }
 

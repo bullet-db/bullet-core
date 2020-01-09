@@ -30,11 +30,4 @@ public interface PostStrategy extends Initializable {
     default Optional<List<BulletError>> initialize() {
         return Optional.empty();
     }
-
-    /**
-     * Get the set of required fields.
-     *
-     * @return A set of fields.
-     */
-    Set<String> getRequiredFields();
 }

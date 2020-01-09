@@ -102,7 +102,8 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
             // This explicitly does not do a TypedObject checking. Nulls (and everything else) turn into Strings
-            String value = Objects.toString(record.extractField(field));
+            //String value = Objects.toString(record.extractField(field));
+            String value = Objects.toString(record.get(field));
             fieldValues.put(field, value);
         }
         return fieldValues;

@@ -11,6 +11,7 @@ import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -29,24 +30,18 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  */
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class BinaryExpression extends Expression {
     public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
     public static final BulletError BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
-    private Expression left;
+    private final Expression left;
     @Expose
-    private Expression right;
+    private final Expression right;
     @Expose
-    private Operation op;
-
-    public BinaryExpression() {
-        left = null;
-        right = null;
-        op = null;
-        type = null;
-    }
+    private final Operation op;
 
     @Override
     public Optional<List<BulletError>> initialize() {
@@ -86,13 +81,12 @@ public class BinaryExpression extends Expression {
         BinaryExpression other = (BinaryExpression) obj;
         return Objects.equals(left, other.left) &&
                Objects.equals(right, other.right) &&
-               op == other.op &&
-               type == other.type;
+               op == other.op;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(left, right, op, type);
+        return Objects.hash(left, right, op);
     }
 
     @Override

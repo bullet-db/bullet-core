@@ -13,15 +13,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j @AllArgsConstructor
 public class OrderByStrategy implements PostStrategy {
-    private static final String DELIMITER = "\\.";
-
     private OrderBy orderBy;
 
     @Override
@@ -45,10 +41,5 @@ public class OrderByStrategy implements PostStrategy {
                 return 0;
             });
         return clip;
-    }
-
-    @Override
-    public Set<String> getRequiredFields() {
-        return orderBy.getFields().stream().map(sortItem -> sortItem.getField().split(DELIMITER, 2)[0]).collect(Collectors.toSet());
     }
 }

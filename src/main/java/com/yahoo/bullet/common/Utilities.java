@@ -98,7 +98,7 @@ public class Utilities {
      * @return The created TypedObject from the value for the identifier in the record.
      */
     public static TypedObject extractTypedObject(String identifier, BulletRecord record) {
-        return new TypedObject(record.extractField(identifier));
+        return new TypedObject(record.get(identifier));
     }
 
     /**
