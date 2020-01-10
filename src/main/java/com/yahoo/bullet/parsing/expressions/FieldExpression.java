@@ -37,8 +37,11 @@ public class FieldExpression extends Expression {
 
     @Expose
     private String field;
+    @Expose
     private Integer index;
+    @Expose
     private String key;
+    @Expose
     private String subKey;
 
     public FieldExpression() {
@@ -49,11 +52,13 @@ public class FieldExpression extends Expression {
         primitiveType = null;
     }
 
-    public FieldExpression(String field, Integer index, String key, String subKey) {
+    public FieldExpression(String field, Integer index, String key, String subKey, Type type, Type primitiveType) {
         this.field = field;
         this.index = index;
         this.key = key;
         this.subKey = subKey;
+        this.type = type;
+        this.primitiveType = primitiveType;
     }
 
     @Override
@@ -124,16 +129,19 @@ public class FieldExpression extends Expression {
             return false;
         }
         FieldExpression other = (FieldExpression) obj;
-        return Objects.equals(field, other.field) && type == other.type;
+        return Objects.equals(field, other.field) &&
+               Objects.equals(index, other.index) &&
+               Objects.equals(key, other.key) &&
+               Objects.equals(subKey, other.subKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(field, type);
+        return Objects.hash(field, index, key, subKey);
     }
 
     @Override
     public String toString() {
-        return "{field: " + field + ", " + super.toString() + "}";
+        return "{field: " + field + ", index: " + index + ", key: " + key + ", subKey: " + subKey + ", " + super.toString() + "}";
     }
 }

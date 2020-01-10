@@ -1,5 +1,6 @@
 package com.yahoo.bullet.parsing.expressions;
 
+import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.CastEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
@@ -14,7 +15,9 @@ import java.util.Optional;
 @Getter
 @RequiredArgsConstructor
 public class CastExpression extends Expression {
+    @Expose
     private final Expression value;
+    @Expose
     private final Type castType;
 
     @Override
