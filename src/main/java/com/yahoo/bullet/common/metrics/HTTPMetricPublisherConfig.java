@@ -12,11 +12,11 @@ import java.util.Collections;
 import java.util.Map;
 
 public class HTTPMetricPublisherConfig extends BulletConfig {
-    private static final String HTTP_NAMESPACE = "bullet.metrics.publisher.http.";
+    private static final String HTTP_NAMESPACE = "bullet.metric.publisher.http.";
     // The URL to use for HTTP publishing
     public static final String URL = HTTP_NAMESPACE + "url";
     // The name of the metrics group being used by this instance
-    public static final String GROUP = HTTP_NAMESPACE + "metric.group";
+    public static final String GROUP = HTTP_NAMESPACE + "group";
     // The names to values of the standard static dimensions to use for all requests
     public static final String DIMENSIONS = HTTP_NAMESPACE + "dimensions";
     // The number of times to retry a particular request. A request will always be tried once
