@@ -10,7 +10,9 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import com.yahoo.bullet.typesystem.Type;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collections;
@@ -31,9 +33,19 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class FieldExpression extends Expression {
     private static final BulletError FIELD_REQUIRES_NON_NULL_FIELD = makeError("The field must not be null.", "Please provide a non-null field.");
-    private static final BulletError FIELD_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
+    private static final BulletError SUB_FIELD_REQUIRES_ONLY_INDEX_OR_KEY = makeError("The index and key cannot both be specified.", "Please provide one or the other.");
+    private static final BulletError SUB_SUB_FIELD_REQUIRES_INDEX_OR_KEY = makeError("The index or key must be specified for subkey.", "Plesae provide an index or key or remove the subkey.");
+    private static final BulletError SUB_SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_TYPE = makeError("The type must be primitive for subsubfield (if specified).", "Please provide a primitive type or no type at all.");
+    private static final BulletError SUB_SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL = makeError("The primitive type must be null for subsubfield.", "Please set the primitive type to null.");
+    private static final BulletError SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_OR_MAP = makeError("The type must be primitive or map for subfield (if specified).", "Please provide a primitive type, map type, or no type at all.");
+    private static final BulletError SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_MAP = makeError("The primitive type must be primitive for subfield if map type.", "Please provide a primitive type for primitive type.");
+    private static final BulletError SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_MAP = makeError("The primitive type must be null for subfield if not map type.", "Please set the primitive type to null.");
+    private static final BulletError FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_COLLECTION = makeError("The primitive type must be specified for field if list/map type.", "Please provide a primitive type.");
+    private static final BulletError FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_COLLECTION = makeError("The primitive type must null for field if not list/map type.", "Please set the primitive type to null.");
 
     @Expose
     private String field;
@@ -44,19 +56,28 @@ public class FieldExpression extends Expression {
     @Expose
     private String subKey;
 
-    public FieldExpression() {
-        field = null;
-        key = null;
-        subKey = null;
-        type = null;
-        primitiveType = null;
+    public FieldExpression(String field) {
+        this(field, null, null, null);
+    }
+
+    public FieldExpression(String field, Integer index) {
+        this(field, index, null, null);
+    }
+
+    public FieldExpression(String field, String key) {
+        this(field, null, key, null);
+    }
+
+    public FieldExpression(String field, Integer index, String subKey) {
+        this(field, index, null, subKey);
+    }
+
+    public FieldExpression(String field, String key, String subKey) {
+        this(field, null, key, subKey);
     }
 
     public FieldExpression(String field, Integer index, String key, String subKey, Type type, Type primitiveType) {
-        this.field = field;
-        this.index = index;
-        this.key = key;
-        this.subKey = subKey;
+        this(field, index, key, subKey);
         this.type = type;
         this.primitiveType = primitiveType;
     }
@@ -66,55 +87,58 @@ public class FieldExpression extends Expression {
         if (field == null || field.isEmpty()) {
             return Optional.of(Collections.singletonList(FIELD_REQUIRES_NON_NULL_FIELD));
         }
-        if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE));
-        }
-
-
         if (index != null && key != null) {
-            // can't have both
+            return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_ONLY_INDEX_OR_KEY));
         }
-
         // if subkey is not null, then type must be primitive and primitivetype should be null
         if (subKey != null) {
             if (index == null && key == null) {
-                // must have one
+                return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_INDEX_OR_KEY));
             }
-            if (!Type.PRIMITIVES.contains(type)) {
-                // type must be primitive
+            if (type != null && !Type.PRIMITIVES.contains(type)) {
+                return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_TYPE));
             }
             if (primitiveType != null) {
-                // primitiveType must be null
+                return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL));
             }
-
         } else if (index != null || key != null) {
-            if (!Type.PRIMITIVES.contains(type) && type != Type.MAP) {
-                // type has to be primitive or map
+            if (type != null && !Type.PRIMITIVES.contains(type) && type != Type.MAP) {
+                return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_OR_MAP));
             }
             if (type == Type.MAP) {
                 if (!Type.PRIMITIVES.contains(primitiveType)) {
-                    // primitivetype needs to be primitive type
+                    return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_MAP));
                 }
             } else if (primitiveType != null) {
-                // primitivetype has to be null if type is primitive
+                return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_MAP));
             }
         } else {
             // type can be anything
             if (Type.COLLECTIONS.contains(type)) {
                 if (!Type.PRIMITIVES.contains(primitiveType)) {
-                    // primitivetype has to be primitive if type is list/map
+                    return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_COLLECTION));
                 }
             } else if (primitiveType != null) {
-                // primitive type has to be null if type isn't list/map
+                return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_COLLECTION));
             }
         }
-
-
         return Optional.empty();
     }
 
     @Override
     public String getName() {
+        if (index != null) {
+            if (subKey != null) {
+                return field + "[" + index + "]." + subKey;
+            }
+            return field + "[" + index + "]";
+        }
+        if (key != null) {
+            if (subKey != null) {
+                return field + "." + key + "." + subKey;
+            }
+            return field + "." + key;
+        }
         return field;
     }
 
@@ -125,6 +149,9 @@ public class FieldExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (!(obj instanceof FieldExpression)) {
             return false;
         }

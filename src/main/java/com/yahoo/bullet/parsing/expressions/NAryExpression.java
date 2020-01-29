@@ -9,8 +9,8 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
-import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -23,22 +23,16 @@ import java.util.stream.Collectors;
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter
-@Setter
+@RequiredArgsConstructor
 public class NAryExpression extends Expression {
     private static final BulletError N_ARY_REQUIRES_NON_NULL_LIST = makeError("The operands list must not be null.", "Please provide an operands list.");
     private static final BulletError N_ARY_REQUIRES_N_ARY_OPERATION = makeError("The operation must be n-ary.", "Please provide an n-ary operation for op.");
-    private static final BulletError N_ARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
     private static final String DELIMITER = ", ";
 
     @Expose
-    private List<Expression> operands;
+    private final List<Expression> operands;
     @Expose
-    private Operation op;
-
-    public NAryExpression() {
-        operands = null;
-        op = null;
-    }
+    private final Operation op;
 
     @Override
     public Optional<List<BulletError>> initialize() {
@@ -47,9 +41,6 @@ public class NAryExpression extends Expression {
         }
         if (!Operation.N_ARY_OPERATIONS.contains(op)) {
             return Optional.of(Collections.singletonList(N_ARY_REQUIRES_N_ARY_OPERATION));
-        }
-        if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(N_ARY_REQUIRES_PRIMITIVE_TYPE));
         }
         List<BulletError> errors = new ArrayList<>();
         operands.forEach(values -> values.initialize().ifPresent(errors::addAll));
@@ -68,6 +59,9 @@ public class NAryExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (!(obj instanceof NAryExpression)) {
             return false;
         }

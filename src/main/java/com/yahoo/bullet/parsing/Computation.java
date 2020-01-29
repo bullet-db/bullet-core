@@ -18,28 +18,24 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter @Setter
 public class Computation extends PostAggregation {
-    public static final BulletError COMPUTATION_REQUIRES_PROJECTION =
-            makeError("The COMPUTATION post-aggregation requires a projection.", "Please add a projection.");
+    public static final BulletError COMPUTATION_REQUIRES_FIELDS =
+            makeError("The COMPUTATION post-aggregation requires at least one field.", "Please add fields.");
 
     @Expose
-    private Projection projection;
+    private List<Field> fields;
 
-    /**
-     * Default constructor. GSON recommended
-     */
     public Computation() {
-        projection = null;
         type = Type.COMPUTATION;
     }
 
-    public Computation(Projection projection) {
-        this.projection = projection;
+    public Computation(List<Field> fields) {
+        this.fields = fields;
         this.type = Type.COMPUTATION;
     }
 
     @Override
     public String toString() {
-        return "{type: " + type + ", projection: " + projection + "}";
+        return "{type: " + type + ", fields: " + fields + "}";
     }
 
     @Override
@@ -48,9 +44,9 @@ public class Computation extends PostAggregation {
         if (errors.isPresent()) {
             return errors;
         }
-        if (projection == null) {
-            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_PROJECTION));
+        if (fields == null || fields.isEmpty()) {
+            return Optional.of(Collections.singletonList(COMPUTATION_REQUIRES_FIELDS));
         }
-        return projection.initialize();
+        return Optional.empty();
     }
 }

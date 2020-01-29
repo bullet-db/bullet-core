@@ -28,8 +28,8 @@ public enum Operation {
     MUL("*", true),
     @SerializedName("/")
     DIV("/", true),
-    @SerializedName("==")
-    EQUALS("==", true),
+    @SerializedName("=")
+    EQUALS("=", true),
     @SerializedName("!=")
     NOT_EQUALS("!=", true),
     @SerializedName(">")

@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -46,14 +45,8 @@ public class Query implements Configurable, Initializable {
                                                            "Change your aggregation type or your window include type");
     public static final BulletError NO_DUPLICATE_POST_AGGREGATIONS = makeError("The post aggregations cannot have multiple of the same type.",
                                                                                "Change your post aggregations to keep at most one of each.");
-
-    /**
-     * Default constructor. GSON recommended.
-     */
-    public Query() {
-        // If no aggregation is provided, the default one is used. An aggregation must be present.
-        aggregation = new Aggregation();
-    }
+    public static final BulletError IMMUTABLE_RECORD = makeError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and no projection",
+                                                                 "This is a bug if this query came from BQL");
 
     @Override
     @SuppressWarnings("unchecked")
@@ -105,6 +98,11 @@ public class Query implements Configurable, Initializable {
                 errors.add(NO_DUPLICATE_POST_AGGREGATIONS);
             }
             postAggregations.forEach(p -> p.initialize().ifPresent(errors::addAll));
+            if (projection == null && aggregation.getType() == Aggregation.Type.RAW &&
+                postAggregations.stream().anyMatch(postAggregation -> postAggregation instanceof Computation ||
+                                                                      postAggregation instanceof Culling)) {
+                errors.add(IMMUTABLE_RECORD);
+            }
         }
         if (window != null) {
             window.initialize().ifPresent(errors::addAll);

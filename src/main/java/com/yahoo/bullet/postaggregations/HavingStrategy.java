@@ -5,19 +5,12 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.parsing.Having;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
-import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.Type;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 public class HavingStrategy implements PostStrategy {
-    private Having having;
     private Evaluator evaluator;
 
     /**
@@ -25,23 +18,13 @@ public class HavingStrategy implements PostStrategy {
      * @param having
      */
     public HavingStrategy(Having having) {
-        this.having = having;
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        Optional<List<BulletError>> errors = having.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
         evaluator = Evaluator.build(having.getExpression());
-        return Optional.empty();
     }
 
     @Override
     public Clip execute(Clip clip) {
+        /*
         List<BulletRecord> records = clip.getRecords();
-        // TODO records is an ArrayList, so removing directly would have worse performance than creating a new list (?)
         records = records.stream().filter(r -> {
                 try {
                     return evaluator.evaluate(r).forceCast(Type.BOOLEAN).getBoolean();
@@ -50,5 +33,14 @@ public class HavingStrategy implements PostStrategy {
                 }
             }).collect(Collectors.toList());
         return Clip.of(records).add(clip.getMeta());
+        */
+        clip.getRecords().removeIf(record -> {
+            try {
+                return !evaluator.evaluate(record).forceCast(Type.BOOLEAN).getBoolean();
+            } catch (Exception ignored) {
+                return true;
+            }
+        });
+        return clip;
     }
 }

@@ -19,13 +19,13 @@ public class BinaryEvaluator extends Evaluator {
 
     public BinaryEvaluator(BinaryExpression binaryExpression) {
         super(binaryExpression);
-        this.left = Evaluator.build(binaryExpression.getLeft());
-        this.right = Evaluator.build(binaryExpression.getRight());
-        this.op = BINARY_OPERATORS.get(binaryExpression.getOp());
+        left = Evaluator.build(binaryExpression.getLeft());
+        right = Evaluator.build(binaryExpression.getRight());
+        op = BINARY_OPERATORS.get(binaryExpression.getOp());
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return cast(op.apply(left, right, record));
+        return op.apply(left, right, record);
     }
 }

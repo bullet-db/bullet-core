@@ -9,7 +9,6 @@ import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
-import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -34,7 +33,6 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 public class BinaryExpression extends Expression {
     public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
-    public static final BulletError BINARY_REQUIRES_PRIMITIVE_TYPE = makeError("The type must be primitive (if specified).", "Please provide a primitive type or no type at all.");
 
     @Expose
     private final Expression left;
@@ -50,9 +48,6 @@ public class BinaryExpression extends Expression {
         }
         if (!Operation.BINARY_OPERATIONS.contains(op)) {
             return Optional.of(Collections.singletonList(BINARY_REQUIRES_BINARY_OPERATION));
-        }
-        if (type != null && !Type.PRIMITIVES.contains(type)) {
-            return Optional.of(Collections.singletonList(BINARY_REQUIRES_PRIMITIVE_TYPE));
         }
         List<BulletError> errors = new ArrayList<>();
         left.initialize().ifPresent(errors::addAll);
@@ -75,6 +70,9 @@ public class BinaryExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (!(obj instanceof BinaryExpression)) {
             return false;
         }

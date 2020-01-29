@@ -10,14 +10,14 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Need to make sure TypedObjects are properly immutable.
+ *
  */
 public class ValueEvaluator extends Evaluator {
     private final TypedObject value;
 
     public ValueEvaluator(ValueExpression valueExpression) {
         super(valueExpression);
-        this.value = new TypedObject(type, valueExpression.getValue());
+        value = new TypedObject(type, valueExpression.getValue());
     }
 
     @Override

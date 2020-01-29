@@ -18,12 +18,12 @@ public class NAryEvaluator extends Evaluator {
 
     public NAryEvaluator(NAryExpression nAryExpression) {
         super(nAryExpression);
-        this.operands = nAryExpression.getOperands().stream().map(Evaluator::build).collect(Collectors.toList());
-        this.op = N_ARY_OPERATORS.get(nAryExpression.getOp());
+        operands = nAryExpression.getOperands().stream().map(Evaluator::build).collect(Collectors.toList());
+        op = N_ARY_OPERATORS.get(nAryExpression.getOp());
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return cast(op.apply(operands, record));
+        return op.apply(operands, record);
     }
 }

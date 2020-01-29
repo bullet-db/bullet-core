@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.parsing.Field;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
@@ -12,6 +13,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Projection consists of a map of names to evaluators built from the projection map in the bullet query. If there's no projection,
@@ -28,12 +30,12 @@ import java.util.LinkedHashMap;
 public class Projection {
     private LinkedHashMap<String, Evaluator> evaluators;
 
-    public Projection(com.yahoo.bullet.parsing.Projection projection) {
-        if (projection.getFields() == null) {
+    public Projection(List<Field> fields) {
+        if (fields == null) {
             return;
         }
         evaluators = new LinkedHashMap<>();
-        projection.getFields().forEach(field -> evaluators.put(field.getName(), Evaluator.build(field.getValue())));
+        fields.forEach(field -> evaluators.put(field.getName(), Evaluator.build(field.getValue())));
     }
 
     public BulletRecord project(BulletRecord record) {

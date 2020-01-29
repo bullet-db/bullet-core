@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Evaluator that evaluates a list of evaluators on a BulletRecord and then returns the list of results (after casting them).
+ * Evaluator that evaluates a list of evaluators on a BulletRecord and then returns the list of results.
  */
 public class ListEvaluator extends Evaluator {
     private List<Evaluator> evaluators;
 
     public ListEvaluator(ListExpression listExpression) {
         super(listExpression);
-        this.evaluators = listExpression.getValues().stream().map(Evaluator::build).collect(Collectors.toList());
+        evaluators = listExpression.getValues().stream().map(Evaluator::build).collect(Collectors.toList());
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return new TypedObject(evaluators.stream().map(e -> e.evaluate(record).forceCast(type).getValue()).collect(Collectors.toList()));
+        return new TypedObject(evaluators.stream().map(e -> e.evaluate(record).getValue()).collect(Collectors.toList()));
     }
 }

@@ -406,7 +406,7 @@ public class Querier implements Monoidal {
         }
 
         if (query.getProjection() != null) {
-            projection = new Projection(query.getProjection());
+            projection = new Projection(query.getProjection().getFields());
         }
 
         // Aggregation and Strategy are guaranteed to not be null.

@@ -75,9 +75,6 @@ public abstract class Evaluator {
         UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations.SIZE_OF);
         UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations.IS_NULL);
         UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations.IS_NOT_NULL);
-        //UNARY_OPERATORS.put(Operation.AND, UnaryOperations.ALL_MATCH);
-        //UNARY_OPERATORS.put(Operation.OR, UnaryOperations.ANY_MATCH);
-        //UNARY_OPERATORS.put(Operation.ADD, UnaryOperations.ADD);
         N_ARY_OPERATORS.put(Operation.AND, NAryOperations.ALL_MATCH);
         N_ARY_OPERATORS.put(Operation.OR, NAryOperations.ANY_MATCH);
         N_ARY_OPERATORS.put(Operation.IF, NAryOperations.IF);
@@ -90,7 +87,7 @@ public abstract class Evaluator {
     }
 
     public abstract TypedObject evaluate(BulletRecord record);
-
+    /*
     protected TypedObject cast(TypedObject object) {
         if (type == null || ((object.getType() == Type.LIST || object.getType() == Type.MAP) && object.getPrimitiveType() == type)) {
             return object;
@@ -107,9 +104,9 @@ public abstract class Evaluator {
         }
         return object.forceCast(type);
     }
-
+    */
     /**
-     * What is polymorphism?
+     *
      *
      * @param expression
      * @return

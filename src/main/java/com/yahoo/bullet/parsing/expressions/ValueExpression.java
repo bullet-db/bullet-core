@@ -12,6 +12,7 @@ import com.yahoo.bullet.querying.evaluators.ValueEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collections;
@@ -25,20 +26,14 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * An expression that takes a value. A primitive type must be specified since the value is always represented by a string.
  * If the type isn't specified, it's assumed to be string unless the value is null.
  */
-@Getter
-@Setter
+@Getter @Setter @NoArgsConstructor
 public class ValueExpression extends Expression {
     private static final BulletError VALUE_REQUIRES_NULL_TYPE_FOR_NULL_VALUE = makeError("The type must be null if the value is null.", "Please provide a non-null value or null type.");
     private static final BulletError VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE = makeError("The type must be primitive or null.", "Please provide a primitive or null type.");
-    private static final BulletError VALUE_REQUIRES_CASTABLE = makeError("The value must be castable to the type.", "Please provide a valid value-type pair.");
+    private static final BulletError VALUE_REQUIRES_TYPE_MUST_MATCH = makeError("The value and type must match.", "Please provide the correct type.");
 
     @Expose
     private Object value;
-
-    public ValueExpression() {
-        value = null;
-        type = null;
-    }
 
     public ValueExpression(Object value) {
         this.value = value;
@@ -53,8 +48,8 @@ public class ValueExpression extends Expression {
         if (!Type.PRIMITIVES.contains(type) && type != Type.NULL) {
             return Optional.of(Collections.singletonList(VALUE_REQUIRES_PRIMITIVE_OR_NULL_TYPE));
         }
-        if (TypedObject.typeCastFromObject(type, value).getType() == Type.UNKNOWN) {
-            return Optional.of(Collections.singletonList(VALUE_REQUIRES_CASTABLE));
+        if (type != Type.getType(value)) {
+            return Optional.of(Collections.singletonList(VALUE_REQUIRES_TYPE_MUST_MATCH));
         }
         return Optional.empty();
     }
@@ -62,7 +57,7 @@ public class ValueExpression extends Expression {
     @Override
     public String getName() {
         if (type == Type.STRING) {
-            return '"' + value.toString() + '"';
+            return "'" + value.toString() + "'";
         }
         return value.toString();
     }
@@ -74,6 +69,9 @@ public class ValueExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (!(obj instanceof ValueExpression)) {
             return false;
         }
@@ -88,6 +86,6 @@ public class ValueExpression extends Expression {
 
     @Override
     public String toString() {
-        return "{value: " + getName() + "}";
+        return "{value: " + getName() + ", " + super.toString() + "}";
     }
 }

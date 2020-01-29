@@ -44,14 +44,7 @@ public abstract class PostAggregation implements Configurable, Initializable {
 
     public static final String TYPE_FIELD = "type";
     public static final BulletError TYPE_MISSING =
-            makeError("Missing post aggregation type", "You must specify a type for post aggregation");
-
-    /**
-     * Default constructor. GSON recommended
-     */
-    public PostAggregation() {
-        type = null;
-    }
+            makeError("Missing post-aggregation type", "You must specify a type for post-aggregation");
 
     @Override
     public Optional<List<BulletError>> initialize() {

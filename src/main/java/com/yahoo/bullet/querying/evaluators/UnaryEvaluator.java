@@ -18,12 +18,12 @@ public class UnaryEvaluator extends Evaluator {
 
     public UnaryEvaluator(UnaryExpression unaryExpression) {
         super(unaryExpression);
-        this.operand = Evaluator.build(unaryExpression.getOperand());
-        this.op = UNARY_OPERATORS.get(unaryExpression.getOp());
+        operand = Evaluator.build(unaryExpression.getOperand());
+        op = UNARY_OPERATORS.get(unaryExpression.getOp());
     }
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return cast(op.apply(operand, record));
+        return op.apply(operand, record);
     }
 }

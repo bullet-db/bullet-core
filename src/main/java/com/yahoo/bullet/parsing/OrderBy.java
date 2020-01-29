@@ -53,11 +53,7 @@ public class OrderBy extends PostAggregation {
     public static final BulletError ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR =
             makeError("The fields in ORDERBY post aggregation must not be empty", "Please add non-empty fields.");
 
-    /**
-     * Default constructor. GSON recommended
-     */
     public OrderBy() {
-        fields = null;
         type = Type.ORDER_BY;
     }
 
@@ -85,5 +81,4 @@ public class OrderBy extends PostAggregation {
         }
         return Optional.empty();
     }
-
 }

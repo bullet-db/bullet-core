@@ -36,11 +36,7 @@ import lombok.Setter;
  * - BinaryExpression
  * - NAryExpression
  * - ListExpression
- *
- * MapExpression is not supported at the moment.
- *
- * Note, the "type" field in Expression is not a type-check. When an expression is evaluated, it will force cast to that
- * type (if specified) before returning. Also, type must be primitive.
+ * - CastExpression
  *
  * Look at the Evaluator class to see how expressions are evaluated.
  */
@@ -75,6 +71,6 @@ public abstract class Expression implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "type: " + (type == null ? "null" : type.toString());
+        return "type: " + type;
     }
 }
