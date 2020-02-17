@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -46,8 +46,6 @@ import lombok.Setter;
 public abstract class Expression implements Configurable, Initializable {
     @Expose
     protected Type type;
-    @Expose
-    protected Type primitiveType;
 
     /**
      * Gets the name of this expression from its values and operations.

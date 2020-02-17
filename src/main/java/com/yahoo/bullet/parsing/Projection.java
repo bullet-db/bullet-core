@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing;
 
@@ -23,11 +23,21 @@ import java.util.Optional;
 public class Projection implements Configurable, Initializable {
     @Expose
     private List<Field> fields;
+    @Expose
+    private boolean copy;
+
+    public Projection(List<Field> fields) {
+        this.fields = fields;
+        this.copy = false;
+    }
 
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
         if (fields != null) {
+            if (fields.isEmpty()) {
+                // error
+            }
             fields.stream().map(Field::getValue).forEach(f -> f.initialize().ifPresent(errors::addAll));
         }
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
@@ -35,6 +45,6 @@ public class Projection implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "{fields: " + fields + "}";
+        return "{fields: " + fields + ", copy: " + copy + " }";
     }
 }

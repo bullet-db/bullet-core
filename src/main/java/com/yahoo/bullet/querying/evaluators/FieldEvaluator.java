@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying.evaluators;
 
@@ -38,16 +38,21 @@ public class FieldEvaluator extends Evaluator {
         final String subKey = fieldExpression.getSubKey();
         if (index != null) {
             if (subKey != null) {
-                return record -> new TypedObject(record.get(field, index, subKey));
+                return record -> record.typedGet(field, index, subKey);
+                //return record -> new TypedObject(record.get(field, index, subKey));
             }
-            return record -> new TypedObject(record.get(field, index));
+            return record -> record.typedGet(field, index);
+            //return record -> new TypedObject(record.get(field, index));
         }
         if (key != null) {
             if (subKey != null) {
-                return record -> new TypedObject(record.get(field, key, subKey));
+                return record -> record.typedGet(field, key, subKey);
+                //return record -> new TypedObject(record.get(field, key, subKey));
             }
-            return record -> new TypedObject(record.get(field, key));
+            return record -> record.typedGet(field, key);
+            //return record -> new TypedObject(record.get(field, key));
         }
-        return record -> new TypedObject(record.get(field));
+        return record -> record.typedGet(field);
+        //return record -> new TypedObject(record.get(field));
     }
 }

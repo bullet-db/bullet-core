@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.result;
 
@@ -22,8 +22,8 @@ public class Clip implements JSONFormatter {
     private Meta meta = new Meta();
     private List<BulletRecord> records = new ArrayList<>();
 
-    private static Map<String, Object> asMap(BulletRecord record) {
-        Map<String, Object> mapped = new HashMap<>();
+    private static <T> Map<String, T> asMap(BulletRecord<T> record) {
+        Map<String, T> mapped = new HashMap<>();
         record.forEach(entry -> mapped.put(entry.getKey(), entry.getValue()));
         return mapped;
     }

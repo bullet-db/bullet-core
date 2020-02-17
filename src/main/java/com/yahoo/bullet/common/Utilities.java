@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.common;
 
@@ -109,15 +109,20 @@ public class Utilities {
      * @return The value of the identifier as a {@link Number} or null if it cannot be forced to one.
      */
     public static Number extractFieldAsNumber(String identifier, BulletRecord record) {
-        Object value = record.extractField(identifier);
-        // Also checks for null
-        if (value instanceof Number) {
-            return (Number) value;
-        }
-        TypedObject asNumber = TypedObject.makeNumber(value);
-        if (asNumber.getType() == Type.UNKNOWN) {
+        //Object value = record.extractField(identifier);
+        TypedObject value = record.typedGet(identifier).forceCast(Type.DOUBLE);
+        if (value.isUnknown() || value.isNull()) {
             return null;
         }
-        return (Number) asNumber.getValue();
+        return (Number) value.getValue();
+        // Also checks for null
+        //if (value instanceof Number) {
+        //    return (Number) value;
+        //}
+        //TypedObject asNumber = TypedObject.makeNumber(value);
+        //if (asNumber.getType() == Type.UNKNOWN) {
+        //    return null;
+        //}
+        //return (Number) asNumber.getValue();
     }
 }

@@ -220,7 +220,7 @@ bullet.query.rate.limit.time.interval: 100
 
 # Factory class to create new BulletRecords while doing GroupData, Sketch operations, etc. This can be changed to force
 # Bullet to use a particular type of BulletRecord everywhere.
-bullet.record.provider.class.name: "com.yahoo.bullet.record.AvroBulletRecordProvider"
+bullet.record.provider.class.name: "com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider"
 
 ## Partitioner
 # Configure whether you want to use a partitioner for your queries. In the Filtering stage, generally all queries see

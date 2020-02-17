@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations.sketches;
 
@@ -156,7 +156,8 @@ public class ThetaSketch extends KMVSketch {
     private BulletRecord getCount() {
         double count = result.getEstimate();
         BulletRecord record = provider.getInstance();
-        record.setDouble(COUNT_FIELD, count);
+        record.setLong(COUNT_FIELD, Math.round(count));
+        //record.setDouble(COUNT_FIELD, count);
         return record;
     }
 }

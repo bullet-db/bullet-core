@@ -1,7 +1,7 @@
 /*
  *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying.partitioning;
 
@@ -14,6 +14,7 @@ import com.yahoo.bullet.parsing.expressions.NAryExpression;
 import com.yahoo.bullet.parsing.expressions.Operation;
 import com.yahoo.bullet.parsing.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,8 +179,10 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            Object value = record.extractField(field);
-            fieldValues.put(field, value == null ? NULL : makeKeyEntry(value.toString()));
+            //Object value = record.extractField(field);
+            //fieldValues.put(field, value == null ? NULL : makeKeyEntry(value.toString()));
+            TypedObject value = record.typedGet(field);
+            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.toString()));
         }
         return fieldValues;
     }

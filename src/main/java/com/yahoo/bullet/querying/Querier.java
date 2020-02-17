@@ -1,7 +1,7 @@
 /*
  *  Copyright 2018, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying;
 
@@ -10,11 +10,9 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Aggregation;
 import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
-import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.operations.AggregationOperations;
 import com.yahoo.bullet.querying.operations.PostAggregationOperations;
 import com.yahoo.bullet.querying.operations.WindowingOperations;
@@ -31,11 +29,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
@@ -306,6 +302,8 @@ public class Querier implements Monoidal {
     @Getter
     private Projection projection;
 
+    private boolean copy;
+
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
 
@@ -407,6 +405,7 @@ public class Querier implements Monoidal {
 
         if (query.getProjection() != null) {
             projection = new Projection(query.getProjection().getFields());
+            copy = query.getProjection().isCopy();
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
@@ -680,6 +679,9 @@ public class Querier implements Monoidal {
     private BulletRecord project(BulletRecord record) {
         if (projection == null) {
             return record;
+        }
+        if (copy) {
+            return projection.copyAndProject(record, provider);
         }
         return projection.project(record, provider);
     }

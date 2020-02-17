@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -44,12 +44,13 @@ public class ListExpression extends Expression {
             return Optional.of(Collections.singletonList(LIST_REQUIRES_NON_NULL_LIST));
         }
         if (type != null) {
-            if (type != Type.LIST) {
+            //if (type != Type.LIST) {
+            if (!Type.isList(type)) {
                 return Optional.of(Collections.singletonList(LIST_REQUIRES_LIST_TYPE));
             }
-            if (!Type.PRIMITIVES.contains(primitiveType)) {
-                return Optional.of(Collections.singletonList(LIST_REQUIRES_PRIMITIVE_TYPE));
-            }
+            //if (!Type.PRIMITIVES.contains(primitiveType)) {
+            //    return Optional.of(Collections.singletonList(LIST_REQUIRES_PRIMITIVE_TYPE));
+            //}
         }
         List<BulletError> errors = new ArrayList<>();
         values.forEach(values -> values.initialize().ifPresent(errors::addAll));
@@ -75,12 +76,12 @@ public class ListExpression extends Expression {
             return false;
         }
         ListExpression other = (ListExpression) obj;
-        return Objects.equals(values, other.values) && type == other.type;
+        return Objects.equals(values, other.values);// && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(values, type);
+        return Objects.hash(values);//, type);
     }
 
     @Override

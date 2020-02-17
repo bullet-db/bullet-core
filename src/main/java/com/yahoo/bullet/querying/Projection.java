@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying;
 
@@ -12,8 +12,10 @@ import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Projection consists of a map of names to evaluators built from the projection map in the bullet query. If there's no projection,
@@ -28,36 +30,25 @@ import java.util.List;
  */
 @Getter
 public class Projection {
-    private LinkedHashMap<String, Evaluator> evaluators;
+    private Map<String, Evaluator> evaluators;
 
+    /**
+     *
+     * @param fields Non-null required by initialize.
+     */
     public Projection(List<Field> fields) {
-        if (fields == null) {
-            return;
-        }
-        evaluators = new LinkedHashMap<>();
-        fields.forEach(field -> evaluators.put(field.getName(), Evaluator.build(field.getValue())));
-    }
-
-    public BulletRecord project(BulletRecord record) {
-        if (evaluators == null) {
-            return record;
-        }
-        return project(record, record);
+        evaluators = fields.stream().collect(Collectors.toMap(Field::getName, Projection::getEvaluator));
     }
 
     public BulletRecord project(BulletRecord record, BulletRecordProvider provider) {
-        if (evaluators == null) {
-            return copy(record, provider.getInstance());
-        }
-        return project(record, provider.getInstance());
-    }
-
-    private BulletRecord project(BulletRecord record, BulletRecord projected) {
+        BulletRecord projected = provider.getInstance();
         evaluators.forEach((name, evaluator) -> {
             try {
                 TypedObject value = evaluator.evaluate(record);
                 if (value != null && value.getValue() != null) {
-                    projected.forceSet(name, value.getValue());
+                    // ^ NULL check instead?
+                    projected.typedSet(name, value);
+                    //projected.forceSet(name, value.getValue());
                 }
             } catch (Exception ignored) {
             }
@@ -65,8 +56,35 @@ public class Projection {
         return projected;
     }
 
-    private BulletRecord copy(BulletRecord record, BulletRecord projected) {
-        record.iterator().forEachRemaining(entry -> projected.forceSet(entry.getKey(), entry.getValue()));
+    // Used for computation
+    public BulletRecord project(BulletRecord record) {
+        Map<String, TypedObject> map = new HashMap<>();
+        evaluators.forEach((name, evaluator) -> {
+            try {
+                TypedObject value = evaluator.evaluate(record);
+                if (value != null && value.getValue() != null) {
+                    map.put(name, value);
+                    //map.put(name, value.getValue());
+                }
+            } catch (Exception ignored) {
+            }
+        });
+        map.forEach(record::typedSet);
+        //map.forEach(record::forceSet);
+        return record;
+    }
+
+    public BulletRecord copyAndProject(BulletRecord record, BulletRecordProvider provider) {
+        return project(copy(record, provider.getInstance()));
+    }
+
+    private <T> BulletRecord copy(BulletRecord<T> record, BulletRecord<T> projected) {
+        record.iterator().forEachRemaining(entry -> projected.typedSet(entry.getKey(), new TypedObject(entry.getValue())));
+        //record.iterator().forEachRemaining(entry -> projected.forceSet(entry.getKey(), entry.getValue()));
         return projected;
+    }
+
+    private static Evaluator getEvaluator(Field field) {
+        return field.getValue().getEvaluator();
     }
 }

@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -11,7 +11,6 @@ import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +27,14 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * Infix and prefix binary operations are differentiated in the naming scheme.
  */
 @Getter
-@Setter
 @RequiredArgsConstructor
 public class BinaryExpression extends Expression {
     public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
     public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
+
+    public enum Modifier {
+        ANY, ALL
+    }
 
     @Expose
     private final Expression left;
@@ -40,6 +42,15 @@ public class BinaryExpression extends Expression {
     private final Expression right;
     @Expose
     private final Operation op;
+    @Expose
+    private final Modifier modifier;
+
+    public BinaryExpression(Expression left, Expression right, Operation op) {
+        this.left = left;
+        this.right = right;
+        this.op = op;
+        this.modifier = null;
+    }
 
     @Override
     public Optional<List<BulletError>> initialize() {
@@ -58,9 +69,12 @@ public class BinaryExpression extends Expression {
     @Override
     public String getName() {
         if (op.isInfix()) {
+            if (modifier != null) {
+                return "(" + left.getName() + " " + op + " " + modifier + " " + right.getName() + ")";
+            }
             return "(" + left.getName() + " " + op + " " + right.getName() + ")";
         }
-        return op + " (" + left.getName() + ", " + right.getName() + ")";
+        return op + "(" + left.getName() + ", " + right.getName() + ")";
     }
 
     @Override
@@ -79,16 +93,17 @@ public class BinaryExpression extends Expression {
         BinaryExpression other = (BinaryExpression) obj;
         return Objects.equals(left, other.left) &&
                Objects.equals(right, other.right) &&
-               op == other.op;
+               op == other.op &&
+               modifier == other.modifier;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(left, right, op);
+        return Objects.hash(left, right, op, modifier);
     }
 
     @Override
     public String toString() {
-        return "{left: " + left + ", right: " + right + ", op: " + op + ", " + super.toString() + "}";
+        return "{left: " + left + ", right: " + right + ", op: " + op + ", modifier: " + modifier + ", " + super.toString() + "}";
     }
 }

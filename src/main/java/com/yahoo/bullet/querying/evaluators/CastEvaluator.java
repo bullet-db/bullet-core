@@ -11,7 +11,7 @@ public class CastEvaluator extends Evaluator {
 
     public CastEvaluator(CastExpression castExpression) {
         super(castExpression);
-        value = Evaluator.build(castExpression.getValue());
+        value = castExpression.getValue().getEvaluator();
         castType = castExpression.getCastType();
     }
 

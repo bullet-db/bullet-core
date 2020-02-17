@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying;
 
@@ -20,7 +20,7 @@ public class Filter {
     private Evaluator evaluator;
 
     public Filter(Expression filter) {
-        evaluator = Evaluator.build(filter);
+        evaluator = filter.getEvaluator();
     }
 
     /**
@@ -31,7 +31,7 @@ public class Filter {
      */
     public boolean match(BulletRecord record) {
         try {
-            return evaluator.evaluate(record).forceCast(Type.BOOLEAN).getBoolean();
+            return (Boolean) evaluator.evaluate(record).forceCast(Type.BOOLEAN).getValue();
         } catch (Exception e) {
             return false;
         }

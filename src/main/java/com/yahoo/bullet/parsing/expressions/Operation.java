@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -48,6 +48,8 @@ public enum Operation {
     CONTAINS_KEY("CONTAINSKEY", false),
     @SerializedName("CONTAINSVALUE")
     CONTAINS_VALUE("CONTAINSVALUE", false),
+    @SerializedName("IN")
+    IN("IN", true),
     @SerializedName(value = "AND", alternate = { "&&" })
     AND("AND", true),
     @SerializedName(value = "OR", alternate = { "||" })
@@ -70,7 +72,7 @@ public enum Operation {
     public static final Set<Operation> BINARY_OPERATIONS =
             new HashSet<>(asList(ADD, SUB, MUL, DIV,
                                  EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS,
-                                 REGEX_LIKE, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE,
+                                 REGEX_LIKE, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN,
                                  AND, OR, XOR,
                                  FILTER));
     public static final Set<Operation> UNARY_OPERATIONS = new HashSet<>(asList(NOT, SIZE_OF, IS_NULL, IS_NOT_NULL));

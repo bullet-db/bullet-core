@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations;
 
@@ -49,7 +49,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         Map<String, Object> attributes = aggregation.getAttributes();
         operations = GroupOperation.getOperations(attributes);
         Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(operations);
-        container = new CachingGroupData(null, metrics);
+        container = new CachingGroupData(null, fieldsToNames, metrics);
 
         ResizeFactor resizeFactor = getResizeFactor(config, BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR);
         float samplingProbability = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, Float.class);
@@ -79,7 +79,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         container.setGroupFields(fieldToValues);
         sketch.update(key, container);
     }
-
+/*
     @Override
     public Clip getResult() {
         Clip result = super.getResult();
@@ -93,7 +93,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         renameFields(result);
         return result;
     }
-
+*/
     private void renameFields(List<BulletRecord> records) {
         records.forEach(this::renameFields);
     }

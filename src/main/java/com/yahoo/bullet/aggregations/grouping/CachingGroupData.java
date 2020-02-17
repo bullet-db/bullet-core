@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations.grouping;
 
@@ -29,17 +29,17 @@ public class CachingGroupData extends GroupData {
      * @param groupFields The mappings of field names to their values that represent this group.
      * @param metrics the non-null {@link Map} of metrics for this object.
      */
-    public CachingGroupData(Map<String, String> groupFields, Map<GroupOperation, Number> metrics) {
-        super(groupFields, metrics);
+    public CachingGroupData(Map<String, String> groupFields, Map<String, String> mapping, Map<GroupOperation, Number> metrics) {
+        super(groupFields, mapping, metrics);
     }
 
     /**
-     * Creates an partial copy of itself. Only the metrics are copied, not the group.
+     * Creates a partial copy of itself. Only the metrics are copied, not the group.
      *
      * @return A copied {@link CachingGroupData}.
      */
     public CachingGroupData partialCopy() {
-        return new CachingGroupData(groupFields, copy(metrics));
+        return new CachingGroupData(groupFields, mapping, copy(metrics));
     }
 
     /**
@@ -49,7 +49,7 @@ public class CachingGroupData extends GroupData {
      * @return A {@link CachingGroupData} copy of the GroupData or null if it was null.
      */
     public static CachingGroupData copy(GroupData other) {
-        return other != null ? new CachingGroupData(copy(other.groupFields), copy(other.metrics)) : null;
+        return other != null ? new CachingGroupData(copy(other.groupFields), copy(other.mapping), copy(other.metrics)) : null;
     }
 
     private static <K, V> Map<K, V> copy(Map<K, V> map) {

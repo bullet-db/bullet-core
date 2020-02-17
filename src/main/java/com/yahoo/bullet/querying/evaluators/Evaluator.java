@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying.evaluators;
 
@@ -12,10 +12,8 @@ import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Evaluators do the work of expressions.
@@ -46,9 +44,10 @@ public abstract class Evaluator {
     }
 
     protected Type type;
-    protected Type primitiveType;
 
     static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperator> BINARY_ANY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperator> BINARY_ALL_OPERATORS = new EnumMap<>(Operation.class);
     static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
     static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
 
@@ -67,51 +66,39 @@ public abstract class Evaluator {
         BINARY_OPERATORS.put(Operation.SIZE_IS, BinaryOperations.SIZE_IS);
         BINARY_OPERATORS.put(Operation.CONTAINS_KEY, BinaryOperations.CONTAINS_KEY);
         BINARY_OPERATORS.put(Operation.CONTAINS_VALUE, BinaryOperations.CONTAINS_VALUE);
+        BINARY_OPERATORS.put(Operation.IN, BinaryOperations.IN);
         BINARY_OPERATORS.put(Operation.AND, BinaryOperations.AND);
         BINARY_OPERATORS.put(Operation.OR, BinaryOperations.OR);
         BINARY_OPERATORS.put(Operation.XOR, BinaryOperations.XOR);
         BINARY_OPERATORS.put(Operation.FILTER, BinaryOperations.FILTER);
+
+        BINARY_ANY_OPERATORS.put(Operation.EQUALS, BinaryOperations.EQUALS_ANY);
+        BINARY_ANY_OPERATORS.put(Operation.NOT_EQUALS, BinaryOperations.NOT_EQUALS_ANY);
+        BINARY_ANY_OPERATORS.put(Operation.GREATER_THAN, BinaryOperations.GREATER_THAN_ANY);
+        BINARY_ANY_OPERATORS.put(Operation.LESS_THAN, BinaryOperations.LESS_THAN_ANY);
+        BINARY_ANY_OPERATORS.put(Operation.GREATER_THAN_OR_EQUALS, BinaryOperations.GREATER_THAN_OR_EQUALS_ANY);
+        BINARY_ANY_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS, BinaryOperations.LESS_THAN_OR_EQUALS_ANY);
+
+        BINARY_ALL_OPERATORS.put(Operation.EQUALS, BinaryOperations.EQUALS_ALL);
+        BINARY_ALL_OPERATORS.put(Operation.NOT_EQUALS, BinaryOperations.NOT_EQUALS_ALL);
+        BINARY_ALL_OPERATORS.put(Operation.GREATER_THAN, BinaryOperations.GREATER_THAN_ALL);
+        BINARY_ALL_OPERATORS.put(Operation.LESS_THAN, BinaryOperations.LESS_THAN_ALL);
+        BINARY_ALL_OPERATORS.put(Operation.GREATER_THAN_OR_EQUALS, BinaryOperations.GREATER_THAN_OR_EQUALS_ALL);
+        BINARY_ALL_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS, BinaryOperations.LESS_THAN_OR_EQUALS_ALL);
+
         UNARY_OPERATORS.put(Operation.NOT, UnaryOperations.NOT);
         UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations.SIZE_OF);
         UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations.IS_NULL);
         UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations.IS_NOT_NULL);
+
         N_ARY_OPERATORS.put(Operation.AND, NAryOperations.ALL_MATCH);
         N_ARY_OPERATORS.put(Operation.OR, NAryOperations.ANY_MATCH);
         N_ARY_OPERATORS.put(Operation.IF, NAryOperations.IF);
     }
 
     Evaluator(Expression expression) {
-        // TODO useless?
         type = expression.getType();
-        primitiveType = expression.getPrimitiveType();
     }
 
     public abstract TypedObject evaluate(BulletRecord record);
-    /*
-    protected TypedObject cast(TypedObject object) {
-        if (type == null || ((object.getType() == Type.LIST || object.getType() == Type.MAP) && object.getPrimitiveType() == type)) {
-            return object;
-        }
-        if (object.getType() == Type.LIST) {
-            List<Object> objects = object.getList();
-            return new TypedObject(Type.LIST, objects.stream().map(o -> TypedObject.typeCastFromObject(type, o).getValue()).collect(Collectors.toList()));
-        }
-        if (object.getType() == Type.MAP) {
-            Map<String, Object> map = object.getMap();
-            Map<String, Object> newMap = new HashMap<>();
-            map.forEach((key, value) -> newMap.put(key, TypedObject.typeCastFromObject(type, value).getValue()));
-            return new TypedObject(Type.MAP, newMap);
-        }
-        return object.forceCast(type);
-    }
-    */
-    /**
-     *
-     *
-     * @param expression
-     * @return
-     */
-    public static Evaluator build(Expression expression) {
-        return expression != null ? expression.getEvaluator() : null;
-    }
 }

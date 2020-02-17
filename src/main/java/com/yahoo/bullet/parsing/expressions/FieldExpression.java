@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -76,10 +76,9 @@ public class FieldExpression extends Expression {
         this(field, null, key, subKey);
     }
 
-    public FieldExpression(String field, Integer index, String key, String subKey, Type type, Type primitiveType) {
+    public FieldExpression(String field, Integer index, String key, String subKey, Type type) {
         this(field, index, key, subKey);
         this.type = type;
-        this.primitiveType = primitiveType;
     }
 
     @Override
@@ -90,36 +89,16 @@ public class FieldExpression extends Expression {
         if (index != null && key != null) {
             return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_ONLY_INDEX_OR_KEY));
         }
-        // if subkey is not null, then type must be primitive and primitivetype should be null
         if (subKey != null) {
             if (index == null && key == null) {
                 return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_INDEX_OR_KEY));
             }
-            if (type != null && !Type.PRIMITIVES.contains(type)) {
+            if (type != null && !Type.isPrimitive(type)) {
                 return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_TYPE));
             }
-            if (primitiveType != null) {
-                return Optional.of(Collections.singletonList(SUB_SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL));
-            }
         } else if (index != null || key != null) {
-            if (type != null && !Type.PRIMITIVES.contains(type) && type != Type.MAP) {
+            if (type != null && !Type.isPrimitive(type) && !Type.isPrimitiveMap(type)) {
                 return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_TYPE_TO_BE_PRIMITIVE_OR_MAP));
-            }
-            if (type == Type.MAP) {
-                if (!Type.PRIMITIVES.contains(primitiveType)) {
-                    return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_MAP));
-                }
-            } else if (primitiveType != null) {
-                return Optional.of(Collections.singletonList(SUB_FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_MAP));
-            }
-        } else {
-            // type can be anything
-            if (Type.COLLECTIONS.contains(type)) {
-                if (!Type.PRIMITIVES.contains(primitiveType)) {
-                    return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE_FOR_COLLECTION));
-                }
-            } else if (primitiveType != null) {
-                return Optional.of(Collections.singletonList(FIELD_REQUIRES_PRIMITIVE_TYPE_TO_BE_NULL_IF_NOT_COLLECTION));
             }
         }
         return Optional.empty();

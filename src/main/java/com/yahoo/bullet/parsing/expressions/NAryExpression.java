@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.parsing.expressions;
 
@@ -49,7 +49,7 @@ public class NAryExpression extends Expression {
 
     @Override
     public String getName() {
-        return op + " (" + operands.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + ")";
+        return op + "(" + operands.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + ")";
     }
 
     @Override
@@ -66,12 +66,12 @@ public class NAryExpression extends Expression {
             return false;
         }
         NAryExpression other = (NAryExpression) obj;
-        return Objects.equals(operands, other.operands) && op == other.op && type == other.type;
+        return Objects.equals(operands, other.operands) && op == other.op;// && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(operands, op, type);
+        return Objects.hash(operands, op);//, type);
     }
 
     @Override

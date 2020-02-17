@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations.grouping;
 
@@ -38,6 +38,7 @@ public class GroupData implements Serializable {
 
     @Setter
     protected Map<String, String> groupFields;
+    protected Map<String, String> mapping = Collections.emptyMap();
     protected Map<GroupOperation, Number> metrics;
 
     /**
@@ -85,6 +86,20 @@ public class GroupData implements Serializable {
      * Constructor that initializes the GroupData with an existing {@link Map} of {@link GroupOperation} to values and
      * a {@link Map} of Strings that represent the group fields. These arguments are not copied.
      *
+     * @param groupFields The mapping of field names to their values that represent this group.
+     * @param mapping The mapping of field names to their aliases.
+     * @param metrics The non-null {@link Map} of metrics for this object.
+     */
+    public GroupData(Map<String, String> groupFields, Map<String, String> mapping, Map<GroupOperation, Number> metrics) {
+        this.groupFields = groupFields;
+        this.mapping = mapping;
+        this.metrics = metrics;
+    }
+
+    /**
+     * Constructor that initializes the GroupData with an existing {@link Map} of {@link GroupOperation} to values and
+     * a {@link Map} of Strings that represent the group fields. These arguments are not copied.
+     *
      * @param groupFields The mappings of field names to their values that represent this group.
      * @param metrics     the non-null {@link Map} of metrics for this object.
      */
@@ -99,7 +114,7 @@ public class GroupData implements Serializable {
      * @param data The record to compute metrics for.
      */
     public void consume(BulletRecord data) {
-        metrics.entrySet().stream().forEach(e -> consume(e, data));
+        metrics.entrySet().forEach(e -> consume(e, data));
     }
 
     /**
@@ -124,7 +139,7 @@ public class GroupData implements Serializable {
      * @param otherData The other GroupData to merge.
      */
     public void combine(GroupData otherData) {
-        metrics.entrySet().stream().forEach(e -> combine(e, otherData));
+        metrics.entrySet().forEach(e -> combine(e, otherData));
     }
 
     /**
@@ -135,7 +150,7 @@ public class GroupData implements Serializable {
      */
     public BulletRecord getMetricsAsBulletRecord(BulletRecordProvider provider) {
         BulletRecord record = provider.getInstance();
-        metrics.entrySet().stream().forEach(e -> addToRecord(e, record));
+        metrics.entrySet().forEach(e -> addToRecord(e, record));
         return record;
     }
 
@@ -146,7 +161,7 @@ public class GroupData implements Serializable {
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getAsBulletRecord(BulletRecordProvider provider) {
-        return getAsBulletRecord(Collections.emptyMap(), provider);
+        return getAsBulletRecord(mapping, provider);
     }
 
     /**

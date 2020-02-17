@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying.evaluators;
 
@@ -18,7 +18,7 @@ public class UnaryEvaluator extends Evaluator {
 
     public UnaryEvaluator(UnaryExpression unaryExpression) {
         super(unaryExpression);
-        operand = Evaluator.build(unaryExpression.getOperand());
+        operand = unaryExpression.getOperand().getEvaluator();
         op = UNARY_OPERATORS.get(unaryExpression.getOp());
     }
 

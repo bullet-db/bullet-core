@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations.sketches;
 
@@ -49,8 +49,10 @@ public class TupleSketch extends KMVSketch {
         GroupDataSummaryFactory factory = new GroupDataSummaryFactory();
         UpdatableSketchBuilder<CachingGroupData, GroupDataSummary> builder = new UpdatableSketchBuilder(factory);
 
-        updateSketch = builder.setResizeFactor(resizeFactor).setNominalEntries(nominalEntries)
-                              .setSamplingProbability(samplingProbability).build();
+        updateSketch = builder.setResizeFactor(resizeFactor)
+                              .setNominalEntries(nominalEntries)
+                              .setSamplingProbability(samplingProbability)
+                              .build();
         unionSketch = new Union<>(nominalEntries, factory);
 
         this.maxSize = maxSize;
@@ -182,6 +184,5 @@ public class TupleSketch extends KMVSketch {
      */
     private Double getUniquesEstimate() {
         return result.getEstimate();
-
     }
 }

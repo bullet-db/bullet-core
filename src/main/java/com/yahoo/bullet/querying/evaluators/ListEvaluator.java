@@ -1,10 +1,11 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.parsing.expressions.Expression;
 import com.yahoo.bullet.parsing.expressions.ListExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -20,7 +21,7 @@ public class ListEvaluator extends Evaluator {
 
     public ListEvaluator(ListExpression listExpression) {
         super(listExpression);
-        evaluators = listExpression.getValues().stream().map(Evaluator::build).collect(Collectors.toList());
+        evaluators = listExpression.getValues().stream().map(Expression::getEvaluator).collect(Collectors.toList());
     }
 
     @Override

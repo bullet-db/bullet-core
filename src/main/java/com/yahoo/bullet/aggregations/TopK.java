@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.aggregations;
 
@@ -84,6 +84,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     }
 
     private void splitFields(BulletRecord record) {
+        /*
         String field = record.getAndRemove(FrequentItemsSketch.ITEM_FIELD).toString();
         List<String> values = decomposeField(field);
         for (int i = 0; i < fields.size(); ++i) {
@@ -92,6 +93,16 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
             record.setString(Utilities.isEmpty(fieldName) ? originalField : fieldName, values.get(i));
         }
         record.rename(FrequentItemsSketch.COUNT_FIELD, newName);
+        */
+        String field = record.getAndRemove(FrequentItemsSketch.ITEM_FIELD).toString();
+        Long count = (Long) record.getAndRemove(FrequentItemsSketch.COUNT_FIELD);
+        List<String> values = decomposeField(field);
+        for (int i = 0; i < fields.size(); ++i) {
+            String originalField = fields.get(i);
+            String fieldName = fieldsToNames.get(originalField);
+            record.setString(Utilities.isEmpty(fieldName) ? originalField : fieldName, values.get(i));
+        }
+        record.setLong(newName, count);
     }
 
     private static Number getThreshold(Map<String, Object> attributes)  {

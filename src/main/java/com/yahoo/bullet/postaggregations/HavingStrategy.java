@@ -1,7 +1,7 @@
 /*
  *  Copyright 2019, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the project for terms.
+ *  See the LICENSE file associated with the compute for terms.
  */
 package com.yahoo.bullet.postaggregations;
 
@@ -18,25 +18,14 @@ public class HavingStrategy implements PostStrategy {
      * @param having
      */
     public HavingStrategy(Having having) {
-        evaluator = Evaluator.build(having.getExpression());
+        evaluator = having.getExpression().getEvaluator();
     }
 
     @Override
     public Clip execute(Clip clip) {
-        /*
-        List<BulletRecord> records = clip.getRecords();
-        records = records.stream().filter(r -> {
-                try {
-                    return evaluator.evaluate(r).forceCast(Type.BOOLEAN).getBoolean();
-                } catch (Exception ignored) {
-                    return false;
-                }
-            }).collect(Collectors.toList());
-        return Clip.of(records).add(clip.getMeta());
-        */
         clip.getRecords().removeIf(record -> {
             try {
-                return !evaluator.evaluate(record).forceCast(Type.BOOLEAN).getBoolean();
+                return !((Boolean) evaluator.evaluate(record).forceCast(Type.BOOLEAN).getValue());
             } catch (Exception ignored) {
                 return true;
             }
