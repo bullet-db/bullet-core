@@ -118,7 +118,6 @@ public class Query implements Configurable, Initializable {
         return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
 
-
     @Override
     public String toString() {
         return "{filter: " + filter + ", projection: " + projection + ", aggregation: " + aggregation +
