@@ -84,7 +84,6 @@ public class RESTPubSubConfig extends BulletConfig {
     public RESTPubSubConfig(Config other) {
         super(DEFAULT_REST_PUBSUB_CONFIGURATION_NAME);
         merge(other);
-        VALIDATOR.validate(this);
         log.info("Merged settings:\n {}", this);
     }
 

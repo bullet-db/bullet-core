@@ -13,8 +13,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -22,6 +24,7 @@ import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
@@ -167,6 +170,7 @@ public class ValidatorTest {
         Assert.assertTrue(Validator.isType(1, Integer.class));
         Assert.assertTrue(Validator.isType(1L, Long.class));
         Assert.assertTrue(Validator.isType(asList("foo", "bar"), List.class));
+        Assert.assertTrue(Validator.isType(singletonMap("foo", "bar"), Map.class));
         Assert.assertFalse(Validator.isType(0, Float.class));
     }
 
@@ -245,6 +249,15 @@ public class ValidatorTest {
         Assert.assertFalse(Validator.isNonEmptyList("string"));
         Assert.assertFalse(Validator.isNonEmptyList(null));
         Assert.assertFalse(Validator.isNonEmptyList(emptyList()));
+    }
+
+    @Test
+    public void testIsNonEmptyMap() {
+        Assert.assertTrue(Validator.isNonEmptyMap(singletonMap(0, null)));
+        Assert.assertTrue(Validator.isNonEmptyMap(singletonMap(0, 1)));
+        Assert.assertTrue(Validator.isNonEmptyMap(singletonMap("string", "string")));
+        Assert.assertFalse(Validator.isNonEmptyMap(null));
+        Assert.assertFalse(Validator.isNonEmptyMap(emptyMap()));
     }
 
     @Test
@@ -640,6 +653,26 @@ public class ValidatorTest {
         Assert.assertTrue(stringChecker.test(asList("a", "b")));
         Assert.assertFalse(stringChecker.test(singletonList(1)));
         Assert.assertFalse(stringChecker.test(asList(1, 2)));
+    }
+
+    @Test
+    public void testIsMapOfType() {
+        Predicate<Object> stringIntegerChecker = Validator.isMapOfType(String.class, Integer.class);
+
+        Assert.assertFalse(stringIntegerChecker.test(null));
+        Assert.assertFalse(stringIntegerChecker.test(emptyMap()));
+        Assert.assertTrue(stringIntegerChecker.test(singletonMap("a", 1)));
+        Map<String, Integer> mapA = new HashMap<>();
+        mapA.put("a", 1);
+        mapA.put("b", 2);
+        Assert.assertTrue(stringIntegerChecker.test(mapA));
+        Assert.assertFalse(stringIntegerChecker.test(singletonMap("a", 1.0)));
+        Assert.assertFalse(stringIntegerChecker.test(singletonMap("a", "1")));
+        Assert.assertFalse(stringIntegerChecker.test(singletonMap("a", "1")));
+        Map<Object, Object> mapB = new HashMap<>();
+        mapB.put("a", 1);
+        mapB.put("b", "2");
+        Assert.assertFalse(stringIntegerChecker.test(mapB));
     }
 
     @Test

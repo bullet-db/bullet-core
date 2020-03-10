@@ -34,12 +34,12 @@ public class RESTQueryPublisher extends RESTPublisher {
     }
 
     @Override
-    public void send(PubSubMessage message) {
-        // Put responseURL in the metadata so the ResponsePublisher knows to which host to send the response
+    public PubSubMessage send(PubSubMessage message) {
+        // Put resultURL in the metadata so the ResponsePublisher knows to which host to send the response
         Metadata metadata = message.getMetadata();
-        metadata = metadata == null ? new Metadata() : metadata;
-        metadata.setContent(resultURL);
+        metadata = metadata == null ? new RESTMetadata(resultURL) : new RESTMetadata(resultURL, metadata);
         message.setMetadata(metadata);
         sendToURL(queryURL, message);
+        return message;
     }
 }

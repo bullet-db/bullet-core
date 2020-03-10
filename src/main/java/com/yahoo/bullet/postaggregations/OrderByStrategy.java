@@ -24,22 +24,22 @@ public class OrderByStrategy implements PostStrategy {
     public Clip execute(Clip clip) {
         List<BulletRecord> records = clip.getRecords();
         records.sort((a, b) -> {
-                for (OrderBy.SortItem sortItem : orderBy.getFields()) {
-                    TypedObject typedObjectA = extractTypedObject(sortItem.getField(), a);
-                    TypedObject typedObjectB = extractTypedObject(sortItem.getField(), b);
-                    try {
-                        int compareValue = typedObjectA.compareTo(typedObjectB);
-                        if (compareValue != 0) {
-                            return (sortItem.getDirection() == OrderBy.Direction.ASC ? 1 : -1) * compareValue;
-                        }
-                    } catch (RuntimeException e) {
-                        // Ignore the exception and skip this field.
-                        log.error("Unable to compare field " + sortItem.getField());
-                        log.error("Skip it due to: " + e);
+            for (OrderBy.SortItem sortItem : orderBy.getFields()) {
+                TypedObject typedObjectA = extractTypedObject(sortItem.getField(), a);
+                TypedObject typedObjectB = extractTypedObject(sortItem.getField(), b);
+                try {
+                    int compareValue = typedObjectA.compareTo(typedObjectB);
+                    if (compareValue != 0) {
+                        return (sortItem.getDirection() == OrderBy.Direction.ASC ? 1 : -1) * compareValue;
                     }
+                } catch (RuntimeException e) {
+                    // Ignore the exception and skip this field.
+                    log.error("Unable to compare field " + sortItem.getField());
+                    log.error("Skip it due to: " + e);
                 }
-                return 0;
-            });
+            }
+            return 0;
+        });
         return clip;
     }
 }

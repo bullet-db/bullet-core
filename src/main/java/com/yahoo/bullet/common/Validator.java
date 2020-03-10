@@ -656,10 +656,20 @@ public class Validator {
      * Checks to see if the value is a non-empty {@link List}.
      *
      * @param value The object to check.
-     * @return A boolean denoting if the value was a non-empty List.
+     * @return A boolean denoting if the value was a non-empty list.
      */
     public static boolean isNonEmptyList(Object value) {
         return isType(value, List.class) && !((List) value).isEmpty();
+    }
+
+    /**
+     * Checks to see if the value is a non-empty {@link Map}.
+     *
+     * @param value The object to check.
+     * @return A boolean denoting if the value was a non-empty map.
+     */
+    public static boolean isNonEmptyMap(Object value) {
+        return isType(value, Map.class) && !((Map) value).isEmpty();
     }
 
     /**
@@ -733,12 +743,12 @@ public class Validator {
     }
 
     /**
-     * Creates a {@link Predicate} that checks to see if the given object  is a non-empty {@link List} of the
+     * Creates a {@link Predicate} that checks to see if the given object is a non-empty {@link List} of the
      * given type.
      *
      * @param type The class of the contents of the list to check for.
      * @param <T> The type of the content in the list.
-     * @return A Predicate that checks tor see if the value was a non-empty List of the given type.
+     * @return A Predicate that checks tor see if the value was a non-empty list of the given type.
      */
     @SuppressWarnings("unchecked")
     public static <T> Predicate<Object> isListOfType(Class<T> type) {
@@ -748,6 +758,29 @@ public class Validator {
             }
             List list = (List) value;
             return list.stream().allMatch(i -> isType(i, type));
+        };
+    }
+
+    /**
+     * Checks to see if the value is a {@link Map} of the given key and value type.
+     *
+     * @param keyType The class of the key of the map to check for.
+     * @param valueType The class of the value of the map to check for.
+     * @param <K> The type of the key in the map.
+     * @param <V> The type of the value in the map.
+     * @return A Predicate that checks tor see if the value was a non-empty map of the given types.
+     */
+    @SuppressWarnings("unchecked")
+    public static <K, V> Predicate<Object> isMapOfType(Class<K> keyType, Class<V> valueType) {
+        return value -> {
+            if (!isNonEmptyMap(value)) {
+                return false;
+            }
+            Map map = (Map) value;
+            return map.entrySet().stream().allMatch(e -> {
+                Map.Entry entry = (Map.Entry) e;
+                return isType(entry.getKey(), keyType) && isType(entry.getValue(), valueType);
+            });
         };
     }
 

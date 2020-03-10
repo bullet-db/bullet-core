@@ -23,33 +23,13 @@ public interface Subscriber extends AutoCloseable {
      *  2. Commit current read offset to persistent/fault tolerant storage.
      *
      * @param id The ID of the message to be marked as committed.
-     * @param sequence The sequence number of the message to be committed.
      */
-    void commit(String id, int sequence);
-
-    /**
-     * Convenience method to commit a message that doesn't contain a sequence number.
-     *
-     * @param id The ID of the message to be marked as committed.
-     */
-    default void commit(String id) {
-        commit(id, -1);
-    }
+    void commit(String id);
 
     /**
      * Marks the processing of the {@link PubSubMessage} with the given id as failed.
      *
      * @param id The ID of the PubSubMessage to mark as a processing failure.
-     * @param sequence The sequence number of the PubSubMessage to mark as a processing failure.
      */
-    void fail(String id, int sequence);
-
-    /**
-     * Convenience method to fail a message that doesn't contain a sequence number.
-     *
-     * @param id The ID of the message to be marked as a processing failure.
-     */
-    default void fail(String id) {
-        fail(id, -1);
-    }
+    void fail(String id);
 }

@@ -11,12 +11,13 @@ import org.testng.annotations.Test;
 import java.util.UUID;
 
 public class PublisherTest {
-    private class MockPublisher implements Publisher {
+    private static class MockPublisher implements Publisher {
         PubSubMessage sentMessage;
 
         @Override
-        public void send(PubSubMessage message) {
+        public PubSubMessage send(PubSubMessage message) {
             sentMessage = message;
+            return message;
         }
 
         @Override
@@ -30,8 +31,10 @@ public class PublisherTest {
         String randomId = UUID.randomUUID().toString();
         String randomMessage = UUID.randomUUID().toString();
         MockPublisher mockPublisher = new MockPublisher();
-        mockPublisher.send(randomId, randomMessage);
+        PubSubMessage message = mockPublisher.send(randomId, randomMessage);
 
+        Assert.assertTrue(message.getContent().equals(randomMessage));
+        Assert.assertTrue(message.getId().equals(randomId));
         Assert.assertTrue(mockPublisher.sentMessage.getContent().equals(randomMessage));
         Assert.assertTrue(mockPublisher.sentMessage.getId().equals(randomId));
     }

@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import java.io.IOException;
 
+import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -25,7 +26,7 @@ public class RESTResultPublisherTest {
     public void testSendPullsURLFromMessage() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         RESTResultPublisher publisher = new RESTResultPublisher(mockClient, 5000);
-        Metadata metadata = new Metadata(null, "my/custom/url");
+        Metadata metadata = new RESTMetadata("my/custom/url");
         publisher.send(new PubSubMessage("foo", "bar", metadata));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
@@ -37,12 +38,12 @@ public class RESTResultPublisherTest {
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
 
         String expectedURI = "my/custom/url";
-        String expectedMessage = "{\"id\":\"foo\",\"sequence\":-1,\"content\":\"bar\",\"metadata\":{\"signal\":null,\"content\":\"my/custom/url\"}}";
+        String expectedMessage = "{'id':'foo','content':[98,97,114],'metadata':{'url':'my/custom/url','signal':null,'content':null}}";
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
 
-        Assert.assertEquals(expectedMessage, actualMessage);
-        Assert.assertEquals(expectedHeader, actualHeader);
-        Assert.assertEquals(expectedURI, actualURI);
+        assertJSONEquals(actualMessage, expectedMessage);
+        Assert.assertEquals(actualHeader, expectedHeader);
+        Assert.assertEquals(actualURI, expectedURI);
     }
 
     @Test

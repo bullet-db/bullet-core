@@ -9,6 +9,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
@@ -124,5 +125,27 @@ public class Utilities {
         //    return null;
         //}
         //return (Number) asNumber.getValue();
+    }
+
+    /**
+     * This method loads a given class name with the class name key and creates an instance of it by using a constructor
+     * that has a single argument for a {@link BulletConfig}. It then passes in the provided config and returns the
+     * constructed instance.
+     *
+     * @param name The name of class name to load.
+     * @param config The {@link BulletConfig} to use to create an instance of the class.
+     * @param <S> The type of the class.
+     * @return A created instance of this class.
+     * @throws RuntimeException if there were issues creating an instance. It wraps the real exception.
+     */
+    @SuppressWarnings("unchecked")
+    public static <S> S loadConfiguredClass(String name, BulletConfig config) {
+        try {
+            Class<? extends S> className = (Class<? extends S>) Class.forName(name);
+            Constructor<? extends S> constructor = className.getConstructor(BulletConfig.class);
+            return constructor.newInstance(config);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

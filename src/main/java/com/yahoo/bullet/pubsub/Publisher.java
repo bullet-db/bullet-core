@@ -11,17 +11,19 @@ public interface Publisher extends AutoCloseable {
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
+     * @return The sent {@link PubSubMessage}.
      * @throws PubSubException if the messaging system throws an error.
      */
-    default void send(String id, String content) throws PubSubException {
-        send(new PubSubMessage(id, content));
+    default PubSubMessage send(String id, String content) throws PubSubException {
+        return send(new PubSubMessage(id, content));
     }
 
     /**
-     * Sends a {@link PubSubMessage}. Messages with the same ID should be received in order.
+     * Sends a {@link PubSubMessage}. The message might be modified so the sent message is returned.
      *
      * @param message The {@link PubSubMessage} to be sent.
+     * @return The sent {@link PubSubMessage}.
      * @throws PubSubException if the messaging system throws an error.
      */
-    void send(PubSubMessage message) throws PubSubException;
+    PubSubMessage send(PubSubMessage message) throws PubSubException;
 }

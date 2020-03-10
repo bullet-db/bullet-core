@@ -22,9 +22,10 @@ public class RESTResultPublisher extends RESTPublisher {
     }
 
     @Override
-    public void send(PubSubMessage message) {
-        String url = (String) message.getMetadata().getContent();
-        log.debug("Extracted url to which to send results: {}", url);
+    public PubSubMessage send(PubSubMessage message) {
+        String url = ((RESTMetadata) message.getMetadata()).getUrl();
+        log.debug("Extracted url to send results to: {}", url);
         sendToURL(url, message);
+        return message;
     }
 }
