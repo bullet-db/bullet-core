@@ -7,9 +7,7 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +19,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Collections.singletonList;
 
 @Getter @Setter
-public abstract class PostAggregation implements Configurable, Initializable {
+public abstract class PostAggregation implements Initializable {
     public static final String ORDER_BY_SERIALIZED_NAME = "ORDER BY";
     public static final String COMPUTATION_SERIALIZED_NAME = "COMPUTATION";
     public static final String HAVING_SERIALIZED_NAME = "HAVING";
@@ -52,9 +50,5 @@ public abstract class PostAggregation implements Configurable, Initializable {
             return Optional.of(singletonList(TYPE_MISSING));
         }
         return Optional.empty();
-    }
-
-    @Override
-    public void configure(BulletConfig configuration) {
     }
 }

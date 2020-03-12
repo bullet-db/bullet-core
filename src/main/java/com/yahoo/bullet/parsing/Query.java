@@ -51,12 +51,6 @@ public class Query implements Configurable, Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(BulletConfig config) {
-        if (projection != null) {
-            projection.configure(config);
-        }
-        if (filter != null) {
-            filter.configure(config);
-        }
         // Must have an aggregation
         if (aggregation == null) {
             aggregation = new Aggregation();
@@ -75,10 +69,6 @@ public class Query implements Configurable, Initializable {
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration <= 0) ? durationDefault : Math.min(duration, durationMax);
-
-        if (postAggregations != null) {
-            postAggregations.forEach(p -> p.configure(config));
-        }
     }
 
     @Override

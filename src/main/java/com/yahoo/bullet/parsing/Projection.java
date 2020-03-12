@@ -7,7 +7,6 @@ package com.yahoo.bullet.parsing;
 
 import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class Projection implements Configurable, Initializable {
+public class Projection implements Initializable {
     @Expose
     private List<Field> fields;
     @Expose

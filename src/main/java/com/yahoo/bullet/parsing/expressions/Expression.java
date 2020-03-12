@@ -6,7 +6,6 @@
 package com.yahoo.bullet.parsing.expressions;
 
 import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
@@ -43,7 +42,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public abstract class Expression implements Configurable, Initializable {
+public abstract class Expression implements Initializable {
     @Expose
     protected Type type;
 
