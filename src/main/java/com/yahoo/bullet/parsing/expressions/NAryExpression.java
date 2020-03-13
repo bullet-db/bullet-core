@@ -5,47 +5,21 @@
  */
 package com.yahoo.bullet.parsing.expressions;
 
-import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
-
-@Getter
-@RequiredArgsConstructor
+@Getter @RequiredArgsConstructor
 public class NAryExpression extends Expression {
-    private static final BulletError N_ARY_REQUIRES_NON_NULL_LIST = makeError("The operands list must not be null.", "Please provide an operands list.");
-    private static final BulletError N_ARY_REQUIRES_N_ARY_OPERATION = makeError("The operation must be n-ary.", "Please provide an n-ary operation for op.");
     private static final String DELIMITER = ", ";
 
-    @Expose
     private final List<Expression> operands;
-    @Expose
     private final Operation op;
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        if (operands == null) {
-            return Optional.of(Collections.singletonList(N_ARY_REQUIRES_NON_NULL_LIST));
-        }
-        if (!Operation.N_ARY_OPERATIONS.contains(op)) {
-            return Optional.of(Collections.singletonList(N_ARY_REQUIRES_N_ARY_OPERATION));
-        }
-        List<BulletError> errors = new ArrayList<>();
-        operands.forEach(values -> values.initialize().ifPresent(errors::addAll));
-        return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
-    }
 
     @Override
     public String getName() {

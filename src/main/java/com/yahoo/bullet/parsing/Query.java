@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
@@ -26,25 +25,17 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  */
 @Getter @Setter @Slf4j
 public class Query implements Configurable, Initializable {
-    @Expose
     private Projection projection;
-    @Expose
     private Expression filter;
-    @Expose
     private Aggregation aggregation;
-    @Expose
     private Window window;
-    @Expose
     private Long duration;
-    @Expose
     private List<PostAggregation> postAggregations;
 
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
     public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
                                                            "Change your aggregation type or your window include type");
-    public static final BulletError NO_DUPLICATE_POST_AGGREGATIONS = makeError("The post aggregations cannot have multiple of the same type.",
-                                                                               "Change your post aggregations to keep at most one of each.");
     public static final BulletError IMMUTABLE_RECORD = makeError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and no projection",
                                                                  "This is a bug if this query came from BQL");
 
@@ -74,20 +65,7 @@ public class Query implements Configurable, Initializable {
     @Override
     public Optional<List<BulletError>> initialize() {
         List<BulletError> errors = new ArrayList<>();
-        if (projection != null) {
-            projection.initialize().ifPresent(errors::addAll);
-        }
-        if (filter != null) {
-            filter.initialize().ifPresent(errors::addAll);
-        }
-
-        aggregation.initialize().ifPresent(errors::addAll);
-
         if (postAggregations != null) {
-            if (postAggregations.stream().map(PostAggregation::getType).distinct().count() < postAggregations.size()) {
-                errors.add(NO_DUPLICATE_POST_AGGREGATIONS);
-            }
-            postAggregations.forEach(p -> p.initialize().ifPresent(errors::addAll));
             if (projection == null && aggregation.getType() == Aggregation.Type.RAW &&
                 postAggregations.stream().anyMatch(postAggregation -> postAggregation instanceof Computation ||
                                                                       postAggregation instanceof Culling)) {

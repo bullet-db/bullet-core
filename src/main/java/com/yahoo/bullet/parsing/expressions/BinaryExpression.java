@@ -5,20 +5,12 @@
  */
 package com.yahoo.bullet.parsing.expressions;
 
-import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-
-import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * An expression that takes two operands and a binary operation. These fields are required; however, an optional
@@ -26,23 +18,15 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  *
  * Infix and prefix binary operations are differentiated in the naming scheme.
  */
-@Getter
-@RequiredArgsConstructor
+@Getter @RequiredArgsConstructor
 public class BinaryExpression extends Expression {
-    public static final BulletError BINARY_REQUIRES_LEFT_AND_RIGHT = makeError("The left and right expressions must not be null.", "Please provide expressions for left and right.");
-    public static final BulletError BINARY_REQUIRES_BINARY_OPERATION = makeError("The operation must be binary.", "Please provide a binary operation for op.");
-
     public enum Modifier {
         ANY, ALL
     }
 
-    @Expose
     private final Expression left;
-    @Expose
     private final Expression right;
-    @Expose
     private final Operation op;
-    @Expose
     private final Modifier modifier;
 
     public BinaryExpression(Expression left, Expression right, Operation op) {
@@ -50,20 +34,6 @@ public class BinaryExpression extends Expression {
         this.right = right;
         this.op = op;
         this.modifier = null;
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        if (left == null || right == null) {
-            return Optional.of(Collections.singletonList(BINARY_REQUIRES_LEFT_AND_RIGHT));
-        }
-        if (!Operation.BINARY_OPERATIONS.contains(op)) {
-            return Optional.of(Collections.singletonList(BINARY_REQUIRES_BINARY_OPERATION));
-        }
-        List<BulletError> errors = new ArrayList<>();
-        left.initialize().ifPresent(errors::addAll);
-        right.initialize().ifPresent(errors::addAll);
-        return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
     }
 
     @Override

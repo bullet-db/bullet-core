@@ -5,15 +5,12 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletError;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -26,9 +23,7 @@ public class OrderBy extends PostAggregation {
 
     @Getter @Setter @AllArgsConstructor
     public static class SortItem {
-        @Expose
         private String field;
-        @Expose
         private Direction direction;
 
         /**
@@ -45,7 +40,6 @@ public class OrderBy extends PostAggregation {
         }
     }
 
-    @Expose
     private List<SortItem> fields;
 
     public static final BulletError ORDERBY_REQUIRES_FIELDS_ERROR =
@@ -65,20 +59,5 @@ public class OrderBy extends PostAggregation {
     @Override
     public String toString() {
         return "{type: " + type + ", fields: " + fields + "}";
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        Optional<List<BulletError>> errors = super.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
-        if (fields == null || fields.isEmpty()) {
-            return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_FIELDS_ERROR));
-        }
-        if (fields.stream().anyMatch(sortItem -> sortItem.getField() == null || sortItem.getField().isEmpty())) {
-            return Optional.of(Collections.singletonList(ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR));
-        }
-        return Optional.empty();
     }
 }

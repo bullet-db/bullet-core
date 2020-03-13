@@ -321,30 +321,28 @@ public class Querier implements Monoidal {
     private BulletRecordProvider provider;
 
     /**
-     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
-     * query.
+     * Constructor that takes a query and a configuration to use. This also starts the query.
      *
      * @param id The query ID.
-     * @param queryString The query as a string.
+     * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
      * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException {
-        this(Mode.ALL, new RunningQuery(id, queryString, config), config);
+    public Querier(String id, Query query, BulletConfig config) throws JsonParseException {
+        this(Mode.ALL, new RunningQuery(id, query), config);
     }
 
     /**
-     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
-     * query.
+     * Constructor that takes a query and a configuration to use. This also starts the query.
      *
      * @param mode The mode for this querier.
      * @param id The query ID.
-     * @param queryString The query as a string.
+     * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
      * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(Mode mode, String id, String queryString, BulletConfig config) throws JsonParseException {
-        this(mode, new RunningQuery(id, queryString, config), config);
+    public Querier(Mode mode, String id, Query query, BulletConfig config) throws JsonParseException {
+        this(mode, new RunningQuery(id, query), config);
     }
     /**
      * Constructor that takes a {@link RunningQuery} instance and a configuration to use. This also starts executing
@@ -417,12 +415,6 @@ public class Querier implements Monoidal {
 
         if (query.getPostAggregations() != null && !query.getPostAggregations().isEmpty()) {
             postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
-            for (PostStrategy postStrategy : postStrategies) {
-                errors = postStrategy.initialize();
-                if (errors.isPresent()) {
-                    return errors;
-                }
-            }
         }
 
         // Scheme is guaranteed to not be null.

@@ -5,8 +5,6 @@
  */
 package com.yahoo.bullet.parsing.expressions;
 
-import com.google.gson.annotations.Expose;
-import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
@@ -39,11 +37,8 @@ import lombok.Setter;
  *
  * Look at the Evaluator class to see how expressions are evaluated.
  */
-@Getter
-@Setter
-@RequiredArgsConstructor
-public abstract class Expression implements Initializable {
-    @Expose
+@Getter @Setter @RequiredArgsConstructor
+public abstract class Expression {
     protected Type type;
 
     /**

@@ -5,12 +5,12 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.common.Utilities;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +26,11 @@ import static java.util.Collections.singletonList;
 @Getter @Setter @Slf4j
 public class Window implements Configurable, Initializable {
     /** Represents the type of the Window Unit for either emit or include. */
-    @Getter
+    @Getter @AllArgsConstructor
     public enum Unit {
         RECORD("RECORD"), TIME("TIME"), ALL("ALL");
 
         private String name;
-
-        Unit(String name) {
-            this.name = name;
-        }
 
         /**
          * Checks to see if this String represents this enum.
@@ -76,9 +72,7 @@ public class Window implements Configurable, Initializable {
     public static final BulletError NO_RECORD_ALL = makeError("The emit type was \"RECORD\" and include type was \"ALL\"",
                                                               "Please set emit type to \"TIME\" or match include to emit");
 
-    @Expose
     private Map<String, Object> emit;
-    @Expose
     private Map<String, Object> include;
 
     private Unit emitType;

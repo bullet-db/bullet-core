@@ -5,8 +5,6 @@
  */
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.typesystem.Type;
@@ -22,9 +20,7 @@ import static com.yahoo.bullet.common.BulletError.makeError;
 @Getter @AllArgsConstructor
 public class Value implements Initializable {
     public enum Kind {
-        @SerializedName("VALUE")
         VALUE,
-        @SerializedName("FIELD")
         FIELD
     }
 
@@ -33,11 +29,8 @@ public class Value implements Initializable {
     public static final BulletError VALUE_OBJECT_REQUIRES_NOT_NULL_VALUE_ERROR =
             makeError("The value must not be null", "Please provide a non-null value.");
 
-    @Expose
     private Kind kind;
-    @Expose
     private String value;
-    @Expose
     private Type type;
 
     /**

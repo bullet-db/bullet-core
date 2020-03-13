@@ -1,6 +1,5 @@
 package com.yahoo.bullet.parsing;
 
-import com.google.gson.annotations.Expose;
 import com.yahoo.bullet.parsing.expressions.Expression;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +10,7 @@ import java.util.Objects;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Field {
-    @Expose
     private String name;
-    @Expose
     private Expression value;
 
     @Override
