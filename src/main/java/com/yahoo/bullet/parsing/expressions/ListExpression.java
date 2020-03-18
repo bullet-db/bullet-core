@@ -45,12 +45,12 @@ public class ListExpression extends Expression {
             return false;
         }
         ListExpression other = (ListExpression) obj;
-        return Objects.equals(values, other.values);// && type == other.type;
+        return Objects.equals(values, other.values) && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(values);//, type);
+        return Objects.hash(values, type);
     }
 
     @Override

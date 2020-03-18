@@ -64,12 +64,13 @@ public class BinaryExpression extends Expression {
         return Objects.equals(left, other.left) &&
                Objects.equals(right, other.right) &&
                op == other.op &&
-               modifier == other.modifier;
+               modifier == other.modifier &&
+               type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(left, right, op, modifier);
+        return Objects.hash(left, right, op, modifier, type);
     }
 
     @Override

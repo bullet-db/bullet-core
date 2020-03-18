@@ -10,13 +10,11 @@ import com.yahoo.bullet.parsing.Query;
 import com.yahoo.bullet.parsing.expressions.BinaryExpression;
 import com.yahoo.bullet.parsing.expressions.Expression;
 import com.yahoo.bullet.parsing.expressions.FieldExpression;
-import com.yahoo.bullet.parsing.expressions.NAryExpression;
 import com.yahoo.bullet.parsing.expressions.Operation;
 import com.yahoo.bullet.parsing.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,18 +106,17 @@ public class SimpleEqualityPartitioner implements Partitioner {
 
         Expression filter = query.getFilter();
 
-        // If no filter or not a conjunction, default partition
-        if (filter == null || isNotConjunction(filter)) {
+        // If no filter, default partition
+        if (filter == null) {
             return defaultKeys;
         }
 
         // Map each field to the values that it is checked for equality against
         Map<String, Set<Object>> equalityClauses = new HashMap<>();
-        mapFieldsToValues((NAryExpression) filter, equalityClauses);
+        mapFieldsToValues(filter, equalityClauses);
 
         // If not exactly one equality per field, default partition
-        if (equalityClauses.values().stream().anyMatch(list -> list.size() != 1)) {
-            // TODO technically should return an empty set (?) but would need to use set and not list
+        if (equalityClauses.values().stream().anyMatch(set -> set.size() != 1)) {
             return defaultKeys;
         }
 
@@ -141,23 +138,17 @@ public class SimpleEqualityPartitioner implements Partitioner {
         return IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toSet());
     }
 
-    private static boolean isNotConjunction(Expression filter) {
-        return !(filter instanceof NAryExpression) || ((NAryExpression) filter).getOp() != Operation.AND;
-    }
-
-    /**
-     * Note, this does not look for any equality clauses past the first layer of inner expressions.
-     */
-    private void mapFieldsToValues(NAryExpression filter, Map<String, Set<Object>> mapping) {
-        for (Expression clause : filter.getOperands()) {
-            if (!(clause instanceof BinaryExpression)) {
-                continue;
-            }
-            BinaryExpression binary = (BinaryExpression) clause;
-            if (binary.getOp() != Operation.EQUALS || !(binary.getLeft() instanceof FieldExpression) || !(binary.getRight() instanceof ValueExpression)) {
-                continue;
-            }
-            String field = ((FieldExpression) binary.getLeft()).getField();
+    private void mapFieldsToValues(Expression expression, Map<String, Set<Object>> mapping) {
+        if (!(expression instanceof BinaryExpression)) {
+            return;
+        }
+        BinaryExpression binary = (BinaryExpression) expression;
+        if (binary.getOp() == Operation.AND) {
+            mapFieldsToValues(binary.getLeft(), mapping);
+            mapFieldsToValues(binary.getRight(), mapping);
+        } else if (binary.getOp() == Operation.EQUALS && binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
+            // Using getName covers complex fields in addition to simple fields
+            String field = binary.getLeft().getName();
             if (fieldSet.contains(field)) {
                 Object value = ((ValueExpression) binary.getRight()).getValue();
                 mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
@@ -179,8 +170,6 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            //Object value = record.extractField(field);
-            //fieldValues.put(field, value == null ? NULL : makeKeyEntry(value.toString()));
             TypedObject value = record.typedGet(field);
             fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.toString()));
         }

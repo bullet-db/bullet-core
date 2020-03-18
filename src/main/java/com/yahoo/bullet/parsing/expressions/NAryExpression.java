@@ -40,12 +40,12 @@ public class NAryExpression extends Expression {
             return false;
         }
         NAryExpression other = (NAryExpression) obj;
-        return Objects.equals(operands, other.operands) && op == other.op;// && type == other.type;
+        return Objects.equals(operands, other.operands) && op == other.op && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(operands, op);//, type);
+        return Objects.hash(operands, op, type);
     }
 
     @Override

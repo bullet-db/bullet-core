@@ -90,12 +90,13 @@ public class FieldExpression extends Expression {
         return Objects.equals(field, other.field) &&
                Objects.equals(index, other.index) &&
                Objects.equals(key, other.key) &&
-               Objects.equals(subKey, other.subKey);
+               Objects.equals(subKey, other.subKey) &&
+               type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(field, index, key, subKey);
+        return Objects.hash(field, index, key, subKey, type);
     }
 
     @Override

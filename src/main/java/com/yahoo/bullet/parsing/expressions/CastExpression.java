@@ -32,12 +32,12 @@ public class CastExpression extends Expression {
             return false;
         }
         CastExpression other = (CastExpression) obj;
-        return Objects.equals(value, other.value) && castType == other.castType;
+        return Objects.equals(value, other.value) && castType == other.castType && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, castType);
+        return Objects.hash(value, castType, type);
     }
 
     @Override

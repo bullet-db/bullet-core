@@ -32,12 +32,12 @@ public class Query implements Configurable, Initializable {
     private Long duration;
     private List<PostAggregation> postAggregations;
 
+    public static final BulletError IMMUTABLE_RECORD = makeError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and no projection",
+                                                                 "This is a bug if this query came from BQL");
     public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
                                                                 "Change your aggregation type or your window emit type to \"TIME\"");
     public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
                                                            "Change your aggregation type or your window include type");
-    public static final BulletError IMMUTABLE_RECORD = makeError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and no projection",
-                                                                 "This is a bug if this query came from BQL");
 
     @Override
     @SuppressWarnings("unchecked")

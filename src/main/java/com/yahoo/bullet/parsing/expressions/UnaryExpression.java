@@ -47,12 +47,12 @@ public class UnaryExpression extends Expression {
             return false;
         }
         UnaryExpression other = (UnaryExpression) obj;
-        return Objects.equals(operand, other.operand) && op == other.op;// && type == other.type;
+        return Objects.equals(operand, other.operand) && op == other.op && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(operand, op);//, type);
+        return Objects.hash(operand, op, type);
     }
 
     @Override
