@@ -12,9 +12,8 @@ import com.yahoo.bullet.aggregations.sketches.TupleSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.result.Clip;
 import com.yahoo.sketches.ResizeFactor;
 
 import java.util.HashMap;
@@ -102,8 +101,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
             // This explicitly does not do a TypedObject checking. Nulls (and everything else) turn into Strings
-            //String value = Objects.toString(record.extractField(field));
-            String value = Objects.toString(record.get(field));
+            String value = Objects.toString(record.typedGet(field).getValue());
             fieldValues.put(field, value);
         }
         return fieldValues;

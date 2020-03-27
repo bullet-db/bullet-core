@@ -5,8 +5,9 @@
  */
 package com.yahoo.bullet.result;
 
-import com.yahoo.bullet.record.AvroBulletRecord;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.record.avro.TypedAvroBulletRecord;
+import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 @Getter
 public class RecordBox {
-    private BulletRecord record = new AvroBulletRecord();
+    private BulletRecord record = new TypedAvroBulletRecord();
 
     public static RecordBox get() {
         return new RecordBox();
@@ -35,6 +36,9 @@ public class RecordBox {
     }
 
     public final RecordBox add(String name, Object value) {
+        record.typedSet(name, new TypedObject(value));
+        return this;
+        /*
         if (value instanceof Boolean) {
             record.setBoolean(name, (Boolean) value);
         } else if (value instanceof Integer) {
@@ -51,6 +55,7 @@ public class RecordBox {
             throw new RuntimeException("Unsupported type cannot be added in test code to BulletRecord " + value);
         }
         return this;
+        */
     }
 
     @SafeVarargs

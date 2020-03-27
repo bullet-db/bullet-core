@@ -23,8 +23,8 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MAX;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.MIN;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
+import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
+import static com.yahoo.bullet.query.AggregationUtils.makeGroupOperation;
 
 public class GroupOperationTest {
     @Test

@@ -5,11 +5,11 @@
  */
 package com.yahoo.bullet.querying.operations;
 
-import com.yahoo.bullet.parsing.Computation;
-import com.yahoo.bullet.parsing.Culling;
-import com.yahoo.bullet.parsing.Having;
-import com.yahoo.bullet.parsing.OrderBy;
-import com.yahoo.bullet.parsing.PostAggregation;
+import com.yahoo.bullet.query.postaggregations.Computation;
+import com.yahoo.bullet.query.postaggregations.Culling;
+import com.yahoo.bullet.query.postaggregations.Having;
+import com.yahoo.bullet.query.postaggregations.OrderBy;
+import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.postaggregations.ComputationStrategy;
 import com.yahoo.bullet.postaggregations.HavingStrategy;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;

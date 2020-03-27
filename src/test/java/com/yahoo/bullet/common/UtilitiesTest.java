@@ -90,6 +90,6 @@ public class UtilitiesTest {
         Assert.assertNull(Utilities.extractFieldAsNumber("id", record));
         Assert.assertEquals(Utilities.extractFieldAsNumber("foo", record), ((Number) 1.20).doubleValue());
         Assert.assertEquals(Utilities.extractFieldAsNumber("bar", record), ((Number) 42).longValue());
-        Assert.assertEquals(Utilities.extractFieldAsNumber("map_field.foo", record), ((Number) 21).doubleValue());
+        Assert.assertNull(Utilities.extractFieldAsNumber("map_field.foo", record));
     }
 }

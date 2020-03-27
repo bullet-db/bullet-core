@@ -12,9 +12,12 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class Utilities {
+    private static final String KEY_DELIMITER = "\\.";
+
    /**
     * Tries to get the object casted as the target type. If it is generic, the captured types cannot not be
     * validated. Only the base object type is validated.
@@ -92,39 +95,65 @@ public class Utilities {
     }
 
     /**
-     * Extracts this identifier as a {@link TypedObject}.
+     * Gets a field from the record by identifier.
      *
-     * @param identifier The identifier name to extract. It can be "." separated to look inside maps and arrays.
-     * @param record The {@link BulletRecord} to extract it from.
-     * @return The created TypedObject from the value for the identifier in the record.
+     * For example, suppose a record has a map of boolean maps called "aaa". Then
+     * - "aaa" identifies that map of maps
+     * - "aaa.bbb" identifies the inner map that "aaa" maps "bbb" to (if it exists)
+     * - "aaa.bbb.ccc" identifies the boolean that "aaa.bbb" (if it exists) maps "ccc" to (if it exists)
+     *
+     * For a list element, the index is the key, e.g. "my_list.0" or "my_list.0.some_key"
+     *
+     * @param field The non-null identifier of the field to get.
+     * @return The value of the field or null if it does not exist.
      */
-    public static TypedObject extractTypedObject(String identifier, BulletRecord record) {
-        return new TypedObject(record.get(identifier));
+    public static TypedObject extractField(String field, BulletRecord record) {
+        String[] keys = field.split(KEY_DELIMITER, 3);
+        TypedObject first = record.typedGet(keys[0]);
+        if (keys.length == 1) {
+            return first;
+        }
+        Object second;
+        if (first.isMap()) {
+            second = ((Map) first.getValue()).get(keys[1]);
+        } else if (first.isList()) {
+            second = ((List) first.getValue()).get(Integer.parseInt(keys[1]));
+        } else {
+            return TypedObject.NULL;
+        }
+        if (second == null) {
+            return TypedObject.NULL;
+        }
+        if (keys.length == 2) {
+            return new TypedObject(first.getType().getSubType(), second);
+        }
+        if (!first.isComplexMap() && !first.isComplexList()) {
+            return TypedObject.NULL;
+        }
+        Object third = ((Map) second).get(keys[2]);
+        return third != null ? new TypedObject(first.getType().getSubType().getSubType(), third) : TypedObject.NULL;
     }
 
     /**
-     * Extracts the identifier from the given (@link BulletRecord} as a {@link Number}, if possible.
+     * Extracts the field from the given (@link BulletRecord} as a {@link Number}, if possible.
      *
-     * @param identifier The identifier of a number to get. It can be "." separated to look inside maps and arrays.
-     * @param record The record containing the identifier.
-     * @return The value of the identifier as a {@link Number} or null if it cannot be forced to one.
+     * @param field The field to get as a number.
+     * @param record The record containing the field.
+     * @return The value of the field as a {@link Number} or null if it cannot be forced to one.
      */
-    public static Number extractFieldAsNumber(String identifier, BulletRecord record) {
-        //Object value = record.extractField(identifier);
-        TypedObject value = record.typedGet(identifier).forceCast(Type.DOUBLE);
-        if (value.isUnknown() || value.isNull()) {
+    public static Number extractFieldAsNumber(String field, BulletRecord record) {
+        TypedObject value = record.typedGet(field);
+        if (value.isNull()) {
             return null;
         }
-        return (Number) value.getValue();
-        // Also checks for null
-        //if (value instanceof Number) {
-        //    return (Number) value;
-        //}
-        //TypedObject asNumber = TypedObject.makeNumber(value);
-        //if (asNumber.getType() == Type.UNKNOWN) {
-        //    return null;
-        //}
-        //return (Number) asNumber.getValue();
+        if (Type.isNumeric(value.getType())) {
+            return (Number) value.getValue();
+        }
+        try {
+            return (Number) value.forceCast(Type.DOUBLE).getValue();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

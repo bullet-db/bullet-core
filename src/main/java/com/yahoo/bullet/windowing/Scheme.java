@@ -8,7 +8,7 @@ package com.yahoo.bullet.windowing;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.result.Meta;
 import lombok.extern.slf4j.Slf4j;
 

@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.UnaryExpression;
+import com.yahoo.bullet.query.expressions.UnaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 

@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.OrderBy;
-import com.yahoo.bullet.parsing.PostAggregation;
+import com.yahoo.bullet.query.postaggregations.OrderBy;
+import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.RecordBox;
@@ -37,14 +37,14 @@ public class OrderByStrategyTest {
         clip.add(records);
         Clip result = orderByStrategy.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("a"), 1);
-        Assert.assertEquals(result.getRecords().get(0).get("b"), 7);
-        Assert.assertEquals(result.getRecords().get(1).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("b"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("b"), 4);
-        Assert.assertEquals(result.getRecords().get(3).get("a"), 5);
-        Assert.assertEquals(result.getRecords().get(3).get("b"), 2);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 7);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 4);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), 5);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("b").getValue(), 2);
     }
 
     @Test
@@ -59,14 +59,14 @@ public class OrderByStrategyTest {
         clip.add(records);
         Clip result = orderByStrategy.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("a"), 5);
-        Assert.assertEquals(result.getRecords().get(0).get("b"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("b"), 4);
-        Assert.assertEquals(result.getRecords().get(2).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("b"), 2);
-        Assert.assertEquals(result.getRecords().get(3).get("a"), 1);
-        Assert.assertEquals(result.getRecords().get(3).get("b"), 7);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 5);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 4);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("b").getValue(), 7);
     }
 
     @Test
@@ -81,14 +81,14 @@ public class OrderByStrategyTest {
         clip.add(records);
         Clip result = orderByStrategy.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("a"), 1);
-        Assert.assertEquals(result.getRecords().get(0).get("b"), 7);
-        Assert.assertEquals(result.getRecords().get(1).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("b"), 4);
-        Assert.assertEquals(result.getRecords().get(2).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("b"), 2.0);
-        Assert.assertEquals(result.getRecords().get(3).get("a"), 5);
-        Assert.assertEquals(result.getRecords().get(3).get("b"), 2.0);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 7);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 2.0);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 4);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), 5);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("b").getValue(), 2.0);
     }
 
     @Test
@@ -103,14 +103,14 @@ public class OrderByStrategyTest {
         clip.add(records);
         Clip result = orderByStrategy.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("a"), 1);
-        Assert.assertEquals(result.getRecords().get(0).get("b"), 7);
-        Assert.assertEquals(result.getRecords().get(1).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("b"), 4);
-        Assert.assertEquals(result.getRecords().get(2).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("b"), 2.0);
-        Assert.assertEquals(result.getRecords().get(3).get("a"), 5);
-        Assert.assertEquals(result.getRecords().get(3).get("b"), 2.0);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 7);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 4);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 2.0);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), 5);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("b").getValue(), 2.0);
     }
 
     @Test
@@ -125,13 +125,13 @@ public class OrderByStrategyTest {
         clip.add(records);
         Clip result = orderByStrategy.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("a"), null);
-        Assert.assertEquals(result.getRecords().get(0).get("b"), 2);
-        Assert.assertEquals(result.getRecords().get(1).get("a"), 1);
-        Assert.assertEquals(result.getRecords().get(1).get("b"), 7);
-        Assert.assertEquals(result.getRecords().get(2).get("a"), 2);
-        Assert.assertEquals(result.getRecords().get(2).get("b"), 4);
-        Assert.assertEquals(result.getRecords().get(3).get("a"), 5);
-        Assert.assertEquals(result.getRecords().get(3).get("b"), 2);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), null);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 7);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 4);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), 5);
+        Assert.assertEquals(result.getRecords().get(3).typedGet("b").getValue(), 2);
     }
 }

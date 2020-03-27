@@ -536,20 +536,20 @@ public class GroupDataTest {
         Map<String, String> fields = new HashMap<>();
         fields.put("fieldA", "foo");
         fields.put("fieldB", "bar");
-        GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "mapA.someField", "sum"),
+        GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"),
                               new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
         BulletRecord record;
 
-        record = RecordBox.get().addMap("mapA", Pair.of("someField", "48.2")).add("otherField", "17").getRecord();
+        record = RecordBox.get().add("someField", "48.2").add("otherField", "17").getRecord();
         data.consume(record);
-        record = RecordBox.get().addMap("mapA", Pair.of("someField", "35.8")).add("otherField", "67").getRecord();
+        record = RecordBox.get().add("someField", "35.8").add("otherField", "67").getRecord();
         data.consume(record);
 
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 84.0).add("avg", 42.0).getRecord();
 
         BulletRecord actual = data.getAsBulletRecord(provider);
-        Assert.assertTrue(actual.equals(expected));
+        Assert.assertEquals(actual, expected);
     }
 
     @Test
@@ -557,22 +557,22 @@ public class GroupDataTest {
         Map<String, String> fields = new HashMap<>();
         fields.put("fieldA", "foo");
         fields.put("fieldB", "bar");
-        GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "mapA.someField", "sum"),
+        GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"),
                               new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
         BulletRecord record;
 
-        record = RecordBox.get().addMap("mapA", Pair.of("someField", "48.2")).add("otherField", "17").getRecord();
+        record = RecordBox.get().add("someField", "48.2").add("otherField", "17").getRecord();
         data.consume(record);
         // otherField is null
-        record = RecordBox.get().addMap("mapA", Pair.of("someField", "35.8")).addNull("otherField").getRecord();
+        record = RecordBox.get().add("someField", "35.8").addNull("otherField").getRecord();
         data.consume(record);
-        // Null mapA and otherField is now a map
-        record = RecordBox.get().addMap("mapA").addMap("otherField", Pair.of("Now", "A map")).getRecord();
+        // Null someField and otherField is now a map
+        record = RecordBox.get().addNull("someField").addMap("otherField", Pair.of("Now", "A map")).getRecord();
         data.consume(record);
         BulletRecord expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
                                                .add("sum", 84.0).add("avg", 17.0).getRecord();
 
         BulletRecord actual = data.getAsBulletRecord(provider);
-        Assert.assertTrue(actual.equals(expected));
+        Assert.assertEquals(actual, expected);
     }
 }

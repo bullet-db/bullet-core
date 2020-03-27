@@ -5,12 +5,12 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Evaluator that extracts the given field from a BulletRecord and casts the result. The is the only evaluator
+ * Evaluator that extracts the given field from a BulletRecord. The is the only evaluator
  * that directly takes a BulletRecord.
  */
 public class FieldEvaluator extends Evaluator {
@@ -39,20 +39,15 @@ public class FieldEvaluator extends Evaluator {
         if (index != null) {
             if (subKey != null) {
                 return record -> record.typedGet(field, index, subKey);
-                //return record -> new TypedObject(record.get(field, index, subKey));
             }
             return record -> record.typedGet(field, index);
-            //return record -> new TypedObject(record.get(field, index));
-        }
-        if (key != null) {
+        } else if (key != null) {
             if (subKey != null) {
                 return record -> record.typedGet(field, key, subKey);
-                //return record -> new TypedObject(record.get(field, key, subKey));
             }
             return record -> record.typedGet(field, key);
-            //return record -> new TypedObject(record.get(field, key));
+        } else {
+            return record -> record.typedGet(field);
         }
-        return record -> record.typedGet(field);
-        //return record -> new TypedObject(record.get(field));
     }
 }

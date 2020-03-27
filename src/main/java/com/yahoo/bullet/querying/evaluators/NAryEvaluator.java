@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.parsing.expressions.Expression;
-import com.yahoo.bullet.parsing.expressions.NAryExpression;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.expressions.NAryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 

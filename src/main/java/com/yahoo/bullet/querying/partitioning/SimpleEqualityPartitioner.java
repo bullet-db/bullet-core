@@ -6,12 +6,13 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.expressions.BinaryExpression;
-import com.yahoo.bullet.parsing.expressions.Expression;
-import com.yahoo.bullet.parsing.expressions.FieldExpression;
-import com.yahoo.bullet.parsing.expressions.Operation;
-import com.yahoo.bullet.parsing.expressions.ValueExpression;
+import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -146,12 +147,19 @@ public class SimpleEqualityPartitioner implements Partitioner {
         if (binary.getOp() == Operation.AND) {
             mapFieldsToValues(binary.getLeft(), mapping);
             mapFieldsToValues(binary.getRight(), mapping);
-        } else if (binary.getOp() == Operation.EQUALS && binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
-            // Using getName covers complex fields in addition to simple fields
-            String field = binary.getLeft().getName();
-            if (fieldSet.contains(field)) {
-                Object value = ((ValueExpression) binary.getRight()).getValue();
-                mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
+        } else if (binary.getOp() == Operation.EQUALS) {
+            if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
+                String field = ((FieldExpression) binary.getLeft()).getSimpleName();
+                if (fieldSet.contains(field)) {
+                    Object value = ((ValueExpression) binary.getRight()).getValue();
+                    mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
+                }
+            } else if (binary.getRight() instanceof FieldExpression && binary.getLeft() instanceof ValueExpression) {
+                String field = ((FieldExpression) binary.getRight()).getSimpleName();
+                if (fieldSet.contains(field)) {
+                    Object value = ((ValueExpression) binary.getLeft()).getValue();
+                    mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
+                }
             }
         }
     }
@@ -170,8 +178,8 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            TypedObject value = record.typedGet(field);
-            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.toString()));
+            TypedObject value = Utilities.extractField(field, record);
+            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.getValue().toString()));
         }
         return fieldValues;
     }

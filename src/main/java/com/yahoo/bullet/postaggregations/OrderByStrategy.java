@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.OrderBy;
+import com.yahoo.bullet.query.postaggregations.OrderBy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.TypedObject;
@@ -13,8 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-
-import static com.yahoo.bullet.common.Utilities.extractTypedObject;
 
 @Slf4j @AllArgsConstructor
 public class OrderByStrategy implements PostStrategy {
@@ -25,10 +23,17 @@ public class OrderByStrategy implements PostStrategy {
         List<BulletRecord> records = clip.getRecords();
         records.sort((a, b) -> {
             for (OrderBy.SortItem sortItem : orderBy.getFields()) {
-                TypedObject typedObjectA = extractTypedObject(sortItem.getField(), a);
-                TypedObject typedObjectB = extractTypedObject(sortItem.getField(), b);
+                TypedObject typedObjectA = a.typedGet(sortItem.getField());
+                TypedObject typedObjectB = b.typedGet(sortItem.getField());
                 try {
-                    int compareValue = typedObjectA.compareTo(typedObjectB);
+                    int compareValue;
+                    if (typedObjectA.isNull()) {
+                        compareValue = typedObjectB.isNull() ? 0 : -1;
+                    } else if (typedObjectB.isNull()) {
+                        compareValue = 1;
+                    } else {
+                        compareValue = typedObjectA.compareTo(typedObjectB);
+                    }
                     if (compareValue != 0) {
                         return (sortItem.getDirection() == OrderBy.Direction.ASC ? 1 : -1) * compareValue;
                     }

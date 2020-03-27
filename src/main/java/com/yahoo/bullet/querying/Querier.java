@@ -10,8 +10,8 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.querying.operations.AggregationOperations;
 import com.yahoo.bullet.querying.operations.PostAggregationOperations;
@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.query.Projection.Type.COPY;
+import static com.yahoo.bullet.query.Projection.Type.PASS_THROUGH;
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
@@ -401,9 +403,9 @@ public class Querier implements Monoidal {
             filter = new Filter(query.getFilter());
         }
 
-        if (query.getProjection() != null) {
+        if (query.getProjection() != null && query.getProjection().getType() != PASS_THROUGH) {
             projection = new Projection(query.getProjection().getFields());
-            copy = query.getProjection().isCopy();
+            copy = query.getProjection().getType() == COPY;
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
@@ -671,11 +673,11 @@ public class Querier implements Monoidal {
     private BulletRecord project(BulletRecord record) {
         if (projection == null) {
             return record;
-        }
-        if (copy) {
+        } else if (copy) {
             return projection.copyAndProject(record, provider);
+        } else {
+            return projection.project(record, provider);
         }
-        return projection.project(record, provider);
     }
 
     private Clip postAggregate(Clip clip) {

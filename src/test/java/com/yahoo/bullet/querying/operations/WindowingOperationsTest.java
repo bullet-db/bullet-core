@@ -6,10 +6,10 @@
 package com.yahoo.bullet.querying.operations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.parsing.WindowUtils;
+import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.WindowUtils;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.SlidingRecord;

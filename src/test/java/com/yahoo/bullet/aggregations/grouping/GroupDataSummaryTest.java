@@ -83,7 +83,7 @@ public class GroupDataSummaryTest {
         List<String> groups = asList("foo", "bar", "baz");
         List<GroupOperation.GroupOperationType> operations = asList(COUNT, MAX, MIN);
         BulletRecord record = makeRecord(groups, operations, 10);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
         data.setCachedRecord(record);
 
         GroupDataSummary summary = new GroupDataSummary();
@@ -102,7 +102,7 @@ public class GroupDataSummaryTest {
         List<String> groups = asList("foo", "bar", "baz");
         List<GroupOperation.GroupOperationType> operations = asList(COUNT, MAX, MIN);
         BulletRecord record = makeRecord(groups, operations, 10);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
         data.setCachedRecord(record);
 
         GroupDataSummary summary = new GroupDataSummary();
@@ -131,7 +131,7 @@ public class GroupDataSummaryTest {
     public void testMergeNullLeftSummary() {
         List<String> groups = asList("foo", "bar");
         List<GroupOperation.GroupOperationType> operations = asList(SUM, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summary = new GroupDataSummary();
         summary.setData(data);
@@ -154,7 +154,7 @@ public class GroupDataSummaryTest {
     public void testMergeNullRightSummary() {
         List<String> groups = asList("foo", "bar");
         List<GroupOperation.GroupOperationType> operations = asList(SUM, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summary = new GroupDataSummary();
         summary.setData(data);
@@ -177,7 +177,7 @@ public class GroupDataSummaryTest {
     public void testMergeLeftSummaryWithNullData() {
         List<String> groups = asList("foo", "bar");
         List<GroupOperation.GroupOperationType> operations = asList(SUM, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summaryA = new GroupDataSummary();
         GroupDataSummary summaryB = new GroupDataSummary();
@@ -203,7 +203,7 @@ public class GroupDataSummaryTest {
     public void testMergeRightSummaryWithNullData() {
         List<String> groups = asList("foo", "bar");
         List<GroupOperation.GroupOperationType> operations = asList(SUM, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summaryA = new GroupDataSummary();
         GroupDataSummary summaryB = new GroupDataSummary();
@@ -229,7 +229,7 @@ public class GroupDataSummaryTest {
     public void testMergeValidSummaries() {
         List<String> groups = asList("foo", "bar");
         List<GroupOperation.GroupOperationType> operations = asList(SUM, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summaryA = new GroupDataSummary();
         GroupDataSummary summaryB = new GroupDataSummary();
@@ -286,7 +286,7 @@ public class GroupDataSummaryTest {
     public void testCopy() {
         List<String> groups = asList("foo", "bar", "baz");
         List<GroupOperation.GroupOperationType> operations = asList(COUNT, MAX, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         GroupDataSummary summary = new GroupDataSummary();
         summary.setData(data);
@@ -334,7 +334,7 @@ public class GroupDataSummaryTest {
     public void testSerialization() {
         List<String> groups = asList("foo", "bar", "baz");
         List<GroupOperation.GroupOperationType> operations = asList(COUNT, MAX, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
         data.setCachedRecord(RecordBox.get().getRecord());
 
         GroupDataSummary summary = new GroupDataSummary();
@@ -381,7 +381,7 @@ public class GroupDataSummaryTest {
     public void testDeserialization() {
         List<String> groups = asList("foo", "bar", "baz");
         List<GroupOperation.GroupOperationType> operations = asList(COUNT, MAX, MIN);
-        CachingGroupData data = new CachingGroupData(makeGroups(groups), makeMetrics(operations));
+        CachingGroupData data = new CachingGroupData(makeGroups(groups), null, makeMetrics(operations));
 
         byte[] serializedData = SerializerDeserializer.toBytes(data);
         int serializedDataLength = serializedData.length;

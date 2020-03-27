@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.Computation;
+import com.yahoo.bullet.query.postaggregations.Computation;
 import com.yahoo.bullet.querying.Projection;
 import com.yahoo.bullet.result.Clip;
 import lombok.extern.slf4j.Slf4j;

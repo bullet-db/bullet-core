@@ -8,7 +8,7 @@ package com.yahoo.bullet.aggregations;
 import com.yahoo.bullet.TestHelpers;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.SerializerDeserializer;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;

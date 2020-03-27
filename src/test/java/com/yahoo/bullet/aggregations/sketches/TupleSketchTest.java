@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +74,7 @@ public class TupleSketchTest {
 
     @BeforeMethod
     public void setup() {
-        data = new CachingGroupData(null, GroupData.makeInitialMetrics(OPERATIONS));
+        data = new CachingGroupData(null, Collections.emptyMap(), GroupData.makeInitialMetrics(OPERATIONS));
     }
 
     @Test(expectedExceptions = SketchesArgumentException.class)
@@ -84,7 +85,7 @@ public class TupleSketchTest {
 
     @Test
     public void testDistincts() {
-        data = new CachingGroupData(null, new HashMap<>());
+        data = new CachingGroupData(null, Collections.emptyMap(), new HashMap<>());
 
         TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 64, 64, provider);
 
@@ -163,11 +164,11 @@ public class TupleSketchTest {
 
         Assert.assertEquals(result.getRecords().size(), 16);
         for (BulletRecord actual : result.getRecords()) {
-            String fieldA = actual.get("A").toString();
-            String fieldB = actual.get("B").toString();
-            Long count = (Long) actual.get("cnt");
-            Double sumB = (Double) actual.get("sumB");
-            Double averageA = (Double) actual.get("avgA");
+            String fieldA = (String) actual.typedGet("A").getValue();
+            String fieldB = (String) actual.typedGet("B").getValue();
+            Long count = (Long) actual.typedGet("cnt").getValue();
+            Double sumB = (Double) actual.typedGet("sumB").getValue();
+            Double averageA = (Double) actual.typedGet("avgA").getValue();
             Assert.assertTrue(Integer.valueOf(fieldA) < 64);
             Assert.assertEquals(Double.valueOf(fieldB), 1.0);
             Assert.assertEquals(count, Long.valueOf(2));
@@ -197,11 +198,11 @@ public class TupleSketchTest {
 
         Assert.assertEquals(results.size(), 16);
         for (BulletRecord actual : results) {
-            Integer fieldA = Integer.valueOf(actual.get("A").toString());
-            Double fieldB = Double.valueOf(actual.get("B").toString());
-            Long count = (Long) actual.get("cnt");
-            Double sumB = (Double) actual.get("sumB");
-            Double averageA = (Double) actual.get("avgA");
+            Integer fieldA = Integer.valueOf((String) actual.typedGet("A").getValue());
+            Double fieldB = Double.valueOf((String) actual.typedGet("B").getValue());
+            Long count = (Long) actual.typedGet("cnt").getValue();
+            Double sumB = (Double) actual.typedGet("sumB").getValue();
+            Double averageA = (Double) actual.typedGet("avgA").getValue();
 
             if (fieldA < 8) {
                 // 1 or 3
@@ -222,7 +223,7 @@ public class TupleSketchTest {
 
     @Test
     public void testResetting() {
-        data = new CachingGroupData(null, new HashMap<>());
+        data = new CachingGroupData(null, Collections.emptyMap(), new HashMap<>());
 
         TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("foo", 0.0, data), data);
@@ -265,7 +266,7 @@ public class TupleSketchTest {
 
     @Test
     public void testFetchingDataWithoutResettingAndInsertingMoreData() {
-        data = new CachingGroupData(null, new HashMap<>());
+        data = new CachingGroupData(null, Collections.emptyMap(), new HashMap<>());
 
         TupleSketch sketch = new TupleSketch(ResizeFactor.X4, 1.0f, 32, 16, provider);
         sketch.update(addToData("foo", 0.0, data), data);

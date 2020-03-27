@@ -6,7 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.querying.partitioning.Partitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.extern.slf4j.Slf4j;

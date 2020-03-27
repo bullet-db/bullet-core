@@ -14,7 +14,11 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
+import com.yahoo.bullet.query.aggregations.DistributionAggregation;
+import com.yahoo.bullet.query.aggregations.GroupAggregation;
+import com.yahoo.bullet.query.aggregations.TopKAggregation;
 
 public class AggregationOperations {
     /**
@@ -26,19 +30,26 @@ public class AggregationOperations {
      * @return The created instance of a strategy that can implement the Aggregation.
      */
     public static Strategy findStrategy(Aggregation aggregation, BulletConfig config) {
+        Strategy strategy = null;
         // Guaranteed to be present.
         switch (aggregation.getType()) {
             case COUNT_DISTINCT:
-                return new CountDistinct(aggregation, config);
+                strategy = new CountDistinct((CountDistinctAggregation) aggregation, config);
+                break;
             case DISTRIBUTION:
-                return new Distribution(aggregation, config);
+                strategy = new Distribution((DistributionAggregation) aggregation, config);
+                break;
             case RAW:
-                return new Raw(aggregation, config);
+                strategy = new Raw(aggregation, config);
+                break;
             case TOP_K:
-                return new TopK(aggregation, config);
+                strategy = new TopK((TopKAggregation) aggregation, config);
+                break;
+            case GROUP:
+                // If we have any fields -> GroupBy
+                GroupAggregation groupAggregation = (GroupAggregation) aggregation;
+                strategy = groupAggregation.hasFields() ? new GroupBy(groupAggregation, config) : new GroupAll(groupAggregation, config);
         }
-
-        // If we have any fields -> GroupBy
-        return Utilities.isEmpty(aggregation.getFields()) ? new GroupAll(aggregation, config) : new GroupBy(aggregation, config);
+        return strategy;
     }
 }

@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.sketches.ResizeFactor;
 
 /**

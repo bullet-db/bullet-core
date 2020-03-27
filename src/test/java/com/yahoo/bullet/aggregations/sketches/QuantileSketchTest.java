@@ -100,8 +100,8 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = sketch.getResult(null, null).getRecords();
         for (BulletRecord record : records) {
-            Double quantile = (Double) record.get(QUANTILE_FIELD);
-            Double value = (Double) record.get(VALUE_FIELD);
+            Double quantile = (Double) record.typedGet(QUANTILE_FIELD).getValue();
+            Double value = (Double) record.typedGet(VALUE_FIELD).getValue();
             // The value is the quantile as a percentage : Value 20.0 is the 0.2 or 20th percentile
             double percent = quantile * 100;
 
@@ -135,9 +135,9 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
-            double probablity = (Double) record.get(PROBABILITY_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
+            double probablity = (Double) record.typedGet(PROBABILITY_FIELD).getValue();
             String rangeStart = getStart(range);
             String rangeEnd = getEnd(range);
 
@@ -176,9 +176,9 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
-            double probablity = (Double) record.get(PROBABILITY_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
+            double probablity = (Double) record.typedGet(PROBABILITY_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -208,8 +208,8 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = sketch.getResult(null, null).getRecords();
         for (BulletRecord record : records) {
-            Double quantile = (Double) record.get(QUANTILE_FIELD);
-            Double value = (Double) record.get(VALUE_FIELD);
+            Double quantile = (Double) record.typedGet(QUANTILE_FIELD).getValue();
+            Double value = (Double) record.typedGet(VALUE_FIELD).getValue();
             double percent = quantile * 100;
 
             assertApproxEquals(percent, value);
@@ -228,9 +228,9 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
-            double probablity = (Double) record.get(PROBABILITY_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
+            double probablity = (Double) record.typedGet(PROBABILITY_FIELD).getValue();
             String rangeStart = getStart(range);
             String rangeEnd = getEnd(range);
 
@@ -265,9 +265,9 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
-            double probablity = (Double) record.get(PROBABILITY_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
+            double probablity = (Double) record.typedGet(PROBABILITY_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -424,8 +424,8 @@ public class QuantileSketchTest {
         List<BulletRecord> records = result.getRecords();
 
         for (BulletRecord record : records) {
-            Double quantile = (Double) record.get(QUANTILE_FIELD);
-            Double value = (Double) record.get(VALUE_FIELD);
+            Double quantile = (Double) record.typedGet(QUANTILE_FIELD).getValue();
+            Double value = (Double) record.typedGet(VALUE_FIELD).getValue();
 
             // We input 100 values: 0.0, 0.1, ... 9.9, and our NRE is ~6.3%. This means, for e.g., that the 50th
             // percentile value is approximate and is between the true 43th and 57th percentile, or between 4.3 and 5.7
@@ -453,9 +453,9 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
-            double probablity = (Double) record.get(PROBABILITY_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
+            double probablity = (Double) record.typedGet(PROBABILITY_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -488,8 +488,8 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -511,8 +511,8 @@ public class QuantileSketchTest {
 
         records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -542,8 +542,8 @@ public class QuantileSketchTest {
 
         List<BulletRecord> records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -564,8 +564,8 @@ public class QuantileSketchTest {
 
         records = result.getRecords();
         for (BulletRecord record : records) {
-            String range = (String) record.get(RANGE_FIELD);
-            double count = (Double) record.get(COUNT_FIELD);
+            String range = (String) record.typedGet(RANGE_FIELD).getValue();
+            double count = (Double) record.typedGet(COUNT_FIELD).getValue();
             String rangeEnd = getEnd(range);
 
             if (rangeEnd.equals(POSITIVE_INFINITY)) {
@@ -631,7 +631,7 @@ public class QuantileSketchTest {
         List<BulletRecord> results = getDefaultQuantileSketch().zip(domain, range, Distribution.Type.PMF, 30);
 
         double[] actualRange = results.stream()
-                                       .mapToDouble(r -> (Double) r.get(PROBABILITY_FIELD)).toArray();
+                                      .mapToDouble(r -> (Double) r.typedGet(PROBABILITY_FIELD).getValue()).toArray();
 
         Assert.assertEquals(actualRange, range);
     }
@@ -644,7 +644,7 @@ public class QuantileSketchTest {
         List<BulletRecord> results = getDefaultQuantileSketch().zip(domain, values, Distribution.Type.QUANTILE, 30);
 
         double[] actualValues = results.stream()
-                                       .mapToDouble(r -> (Double) r.get(VALUE_FIELD)).toArray();
+                                       .mapToDouble(r -> (Double) r.typedGet(VALUE_FIELD).getValue()).toArray();
 
         Assert.assertEquals(actualValues, values);
     }
@@ -658,7 +658,7 @@ public class QuantileSketchTest {
 
         Clip result = sketch.getResult(null, null);
 
-        Set<String> actualRangeEnds = result.getRecords().stream().map(r -> (String) r.get(RANGE_FIELD))
+        Set<String> actualRangeEnds = result.getRecords().stream().map(r -> (String) r.typedGet(RANGE_FIELD).getValue())
                                                                   .map(QuantileSketchTest::getEnd)
                                                                   .collect(Collectors.toSet());
         Set<String> expectedRangeEnds = new HashSet<>(Arrays.asList("0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0",

@@ -5,38 +5,17 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.JsonParseException;
-import com.yahoo.bullet.aggregations.SketchingStrategy;
 import com.yahoo.bullet.aggregations.Strategy;
-import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Expression;
-import com.yahoo.bullet.parsing.ExpressionUtils;
-import com.yahoo.bullet.parsing.OrderBy;
-import com.yahoo.bullet.parsing.PostAggregation;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.Value;
-import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.parsing.WindowUtils;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
-import com.yahoo.bullet.typesystem.Type;
-import com.yahoo.bullet.windowing.AdditiveTumbling;
-import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
-import com.yahoo.bullet.windowing.Tumbling;
-import org.apache.commons.lang3.tuple.Pair;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,22 +23,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.primitives.Booleans.asList;
-import static com.yahoo.bullet.TestHelpers.getListBytes;
-import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
-import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
-import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
-import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
-import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
-import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
-import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.mockito.AdditionalAnswers.returnsElementsOf;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
+//import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
+//import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
 import static org.mockito.Mockito.spy;
 
 public class QuerierTest {
@@ -153,7 +123,7 @@ public class QuerierTest {
         }
         return size;
     }
-
+/*
     private static Querier make(Querier.Mode mode, String id, String query, BulletConfig config) {
         Querier querier = new Querier(mode, id, query, config);
         Optional<List<BulletError>> errors = querier.initialize();
@@ -928,4 +898,5 @@ public class QuerierTest {
         Assert.assertFalse(result.get(3).hasField("a"));
         Assert.assertEquals(result.get(3).get("b"), 3);
     }
+    */
 }

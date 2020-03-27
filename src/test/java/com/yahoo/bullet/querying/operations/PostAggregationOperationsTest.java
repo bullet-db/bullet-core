@@ -5,13 +5,15 @@
  */
 package com.yahoo.bullet.querying.operations;
 
-import com.yahoo.bullet.parsing.Computation;
-import com.yahoo.bullet.parsing.OrderBy;
-import com.yahoo.bullet.parsing.PostAggregation;
+import com.yahoo.bullet.query.postaggregations.Computation;
+import com.yahoo.bullet.query.postaggregations.OrderBy;
+import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.postaggregations.ComputationStrategy;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
 
 public class PostAggregationOperationsTest {
     @Test(expectedExceptions = NullPointerException.class)
@@ -25,15 +27,13 @@ public class PostAggregationOperationsTest {
     public void testOrderByPostStrategy() {
         PostAggregation aggregation = new OrderBy();
         aggregation.setType(PostAggregation.Type.ORDER_BY);
-
         Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), OrderByStrategy.class);
     }
 
     @Test
     public void testComputationPostStrategy() {
-        PostAggregation aggregation = new Computation();
+        PostAggregation aggregation = new Computation(Collections.emptyList());
         aggregation.setType(PostAggregation.Type.COMPUTATION);
-
         Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), ComputationStrategy.class);
     }
 }

@@ -9,7 +9,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -31,10 +31,10 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupOperation;
-import static com.yahoo.bullet.parsing.Aggregation.Type.GROUP;
+import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
+import static com.yahoo.bullet.query.AggregationUtils.makeGroupFields;
+import static com.yahoo.bullet.query.AggregationUtils.makeGroupOperation;
+import static com.yahoo.bullet.query.aggregations.Aggregation.Type.GROUP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -261,8 +261,8 @@ public class GroupByTest {
 
         Set<String> groups = new HashSet<>();
         for (BulletRecord record : records) {
-            groups.add((String) record.get("A"));
-            Assert.assertEquals(record.get(COUNT.getName()), 4L);
+            groups.add((String) record.typedGet("A").getValue());
+            Assert.assertEquals(record.typedGet(COUNT.getName()).getValue(), 4L);
         }
         Assert.assertEquals(groups.size(), 32);
 
@@ -390,7 +390,7 @@ public class GroupByTest {
 
         List<BulletRecord> records = aggregate.getRecords();
         Assert.assertEquals(records.size(), 32);
-        records.forEach(r -> Assert.assertTrue(Integer.valueOf(r.get("fieldA").toString()) < 64));
+        records.forEach(r -> Assert.assertTrue(Integer.valueOf((String) r.typedGet("fieldA").getValue()) < 64));
 
         Map<String, Object> meta = aggregate.getMeta().asMap();
         Assert.assertEquals(meta.size(), 1);

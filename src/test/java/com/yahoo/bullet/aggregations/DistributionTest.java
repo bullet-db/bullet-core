@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -41,7 +41,7 @@ import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.SEPARATOR;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.START_INCLUSIVE;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.VALUE_FIELD;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
+import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
 import static java.util.Arrays.asList;
 
 public class DistributionTest {
@@ -347,8 +347,8 @@ public class DistributionTest {
         Assert.assertEquals(records.get(2), expectedC);
 
         BulletRecord actualB = records.get(1);
-        Assert.assertEquals(actualB.get(QUANTILE_FIELD), 0.5);
-        Double actualMedian = (Double) actualB.get(VALUE_FIELD);
+        Assert.assertEquals(actualB.typedGet(QUANTILE_FIELD).getValue(), 0.5);
+        Double actualMedian = (Double) actualB.typedGet(VALUE_FIELD).getValue();
         // We insert 0,0.1, ... 199.9. Our median is around 100.0. Our NRE < 1%, so we can be pretty certain the median
         // from the sketch is around this.
         assertApproxEquals(actualMedian, 100.0, 2.0);
@@ -547,7 +547,7 @@ public class DistributionTest {
 
         List<BulletRecord> records = result.getRecords();
         Assert.assertEquals(records.size(), 11);
-        Set<String> actualQuantilePoints = records.stream().map(r -> r.get(QUANTILE_FIELD).toString())
+        Set<String> actualQuantilePoints = records.stream().map(r -> r.typedGet(QUANTILE_FIELD).getValue().toString())
                                                            .collect(Collectors.toSet());
         Set<String> expectedQuantilePoints = new HashSet<>(Arrays.asList("0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6",
                                                                          "0.7", "0.8", "0.9", "1.0"));

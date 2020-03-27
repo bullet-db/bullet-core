@@ -22,6 +22,7 @@ public class GroupDataSummaryFactoryTest {
     private static CachingGroupData sampleSumGroupData(double sum) {
         CachingGroupData data;
         data = new CachingGroupData(singletonMap("fieldA", "bar"),
+                                    null,
                                     singletonMap(new GroupOperation(GroupOperation.GroupOperationType.SUM, "fieldB", "sum"), null));
         BulletRecord record = RecordBox.get().add("fieldA", "bar").add("fieldB", sum).getRecord();
         data.setCachedRecord(record);

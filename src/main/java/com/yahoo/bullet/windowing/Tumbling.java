@@ -9,7 +9,7 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.result.Meta;
 
 import java.util.List;

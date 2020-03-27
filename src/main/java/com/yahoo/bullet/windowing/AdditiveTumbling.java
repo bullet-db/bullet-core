@@ -7,7 +7,7 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Window;
 
 public class AdditiveTumbling extends Tumbling {
     /**

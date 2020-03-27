@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.parsing.Field;
+import com.yahoo.bullet.query.Field;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
@@ -45,10 +45,8 @@ public class Projection {
         evaluators.forEach((name, evaluator) -> {
             try {
                 TypedObject value = evaluator.evaluate(record);
-                if (value != null && value.getValue() != null) {
-                    // ^ NULL check instead?
+                if (!value.isNull()) {
                     projected.typedSet(name, value);
-                    //projected.forceSet(name, value.getValue());
                 }
             } catch (Exception ignored) {
             }
@@ -64,13 +62,11 @@ public class Projection {
                 TypedObject value = evaluator.evaluate(record);
                 if (value != null && value.getValue() != null) {
                     map.put(name, value);
-                    //map.put(name, value.getValue());
                 }
             } catch (Exception ignored) {
             }
         });
         map.forEach(record::typedSet);
-        //map.forEach(record::forceSet);
         return record;
     }
 
@@ -80,7 +76,6 @@ public class Projection {
 
     private <T> BulletRecord copy(BulletRecord<T> record, BulletRecord<T> projected) {
         record.iterator().forEachRemaining(entry -> projected.typedSet(entry.getKey(), new TypedObject(entry.getValue())));
-        //record.iterator().forEachRemaining(entry -> projected.forceSet(entry.getKey(), entry.getValue()));
         return projected;
     }
 

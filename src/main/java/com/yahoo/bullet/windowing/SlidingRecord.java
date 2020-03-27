@@ -10,7 +10,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Meta;
 import lombok.AllArgsConstructor;

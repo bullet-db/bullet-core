@@ -27,7 +27,7 @@ public class CachingGroupDataTest {
     }
 
     public static CachingGroupData sampleSumGroupData(double sum) {
-        return new CachingGroupData(getSampleGroup(), getSampleMetrics(sum));
+        return new CachingGroupData(getSampleGroup(), null, getSampleMetrics(sum));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class CachingGroupDataTest {
 
     @Test
     public void testGroupDataCopyNullGroups() {
-        CachingGroupData original = new CachingGroupData(null, getSampleMetrics(20.0));
+        CachingGroupData original = new CachingGroupData(null, null, getSampleMetrics(20.0));
         CachingGroupData copy = CachingGroupData.copy(original);
 
         copy.metrics.remove(OPERATION);
@@ -71,7 +71,7 @@ public class CachingGroupDataTest {
 
     @Test
     public void testGroupDataCopyNullMetrics() {
-        CachingGroupData original = new CachingGroupData(getSampleGroup(), null);
+        CachingGroupData original = new CachingGroupData(getSampleGroup(), null, null);
         CachingGroupData copy = CachingGroupData.copy(original);
 
         copy.groupFields.put("foo", "baz");
@@ -94,7 +94,7 @@ public class CachingGroupDataTest {
         GroupOperation operation = new GroupOperation(GroupOperation.GroupOperationType.SUM, "sum", "");
         metrics.put(operation, 20.0);
 
-        CachingGroupData original = new CachingGroupData(groups, metrics);
+        CachingGroupData original = new CachingGroupData(groups, null, metrics);
         CachingGroupData copy = CachingGroupData.copy(original);
 
         copy.groupFields.put("foo", "baz");

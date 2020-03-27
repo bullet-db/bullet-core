@@ -9,7 +9,8 @@ import com.yahoo.bullet.aggregations.sketches.ThetaSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.sketches.Family;
@@ -22,7 +23,6 @@ import java.util.Optional;
 import static java.util.Collections.singletonList;
 
 public class CountDistinct extends KMVStrategy<ThetaSketch> {
-    public static final String NEW_NAME_FIELD = "newName";
     public static final String DEFAULT_NEW_NAME = "COUNT DISTINCT";
 
     // Theta Sketch defaults
@@ -41,17 +41,14 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public CountDistinct(Aggregation aggregation, BulletConfig config) {
+    public CountDistinct(CountDistinctAggregation aggregation, BulletConfig config) {
         super(aggregation, config);
-        Map<String, Object> attributes = aggregation.getAttributes();
 
         ResizeFactor resizeFactor = getResizeFactor(config, BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR);
         float samplingProbability = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING, Float.class);
         Family family = getFamily(config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY, String.class));
         int nominalEntries = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES, Integer.class);
-        newName = attributes == null ? DEFAULT_NEW_NAME :
-                                       attributes.getOrDefault(NEW_NAME_FIELD, DEFAULT_NEW_NAME).toString();
-
+        newName = aggregation.getName();
         sketch = new ThetaSketch(resizeFactor, family, samplingProbability, nominalEntries, config.getBulletRecordProvider());
     }
 

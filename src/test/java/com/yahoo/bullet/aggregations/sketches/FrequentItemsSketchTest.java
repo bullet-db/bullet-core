@@ -62,14 +62,14 @@ public class FrequentItemsSketchTest {
         List<BulletRecord> records = result.getRecords();
         Assert.assertEquals(records.size(), 13);
         for (BulletRecord actual : records) {
-            String item = actual.get(FrequentItemsSketch.ITEM_FIELD).toString();
+            String item = (String) actual.typedGet(FrequentItemsSketch.ITEM_FIELD).getValue();
             Assert.assertEquals(actual.fieldCount(), 2);
             if ("bar".equals(item)) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 90L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 90L);
             } else if ("foo".equals(item) || "baz".equals(item)) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 1L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 1L);
             } else if (Integer.valueOf(item) < 10) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 10L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 10L);
             } else {
                 Assert.fail("This should not be a case");
             }
@@ -93,10 +93,10 @@ public class FrequentItemsSketchTest {
         Assert.assertEquals(records.size(), 10);
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 2);
-            Integer item = Integer.valueOf(actual.get(FrequentItemsSketch.ITEM_FIELD).toString());
+            Integer item = Integer.valueOf((String) actual.typedGet(FrequentItemsSketch.ITEM_FIELD).getValue());
             // 1, 2 had the lowest and since our size is 10, we should have not seen them
             Assert.assertTrue(item > 2 && item < 13);
-            Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), Long.valueOf(item));
+            Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), Long.valueOf(item));
         }
 
         Assert.assertEquals(sketch.getRecords(), result.getRecords());
@@ -119,8 +119,8 @@ public class FrequentItemsSketchTest {
         Assert.assertTrue(records.size() >= 4);
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 2);
-            Integer item = Integer.valueOf(actual.get(FrequentItemsSketch.ITEM_FIELD).toString());
-            Long count = (Long) actual.get(FrequentItemsSketch.COUNT_FIELD);
+            Integer item = Integer.valueOf((String) actual.typedGet(FrequentItemsSketch.ITEM_FIELD).getValue());
+            Long count = (Long) actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue();
             if (item == 10 || item == 20 || item == 25 || item == 30) {
                 Assert.assertTrue(count >= item + 1);
                 Assert.assertTrue(count <= item + 1 + error);
@@ -157,14 +157,14 @@ public class FrequentItemsSketchTest {
         List<BulletRecord> records = result.getRecords();
         Assert.assertEquals(records.size(), 13);
         for (BulletRecord actual : records) {
-            String item = actual.get(FrequentItemsSketch.ITEM_FIELD).toString();
+            String item = (String) actual.typedGet(FrequentItemsSketch.ITEM_FIELD).getValue();
             Assert.assertEquals(actual.fieldCount(), 2);
             if ("bar".equals(item)) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 91L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 91L);
             } else if ("foo".equals(item) || "baz".equals(item)) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 1L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 1L);
             } else if (Integer.valueOf(item) < 10) {
-                Assert.assertEquals(actual.get(FrequentItemsSketch.COUNT_FIELD), 10L);
+                Assert.assertEquals(actual.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue(), 10L);
             } else {
                 Assert.fail("This should not be a case");
             }

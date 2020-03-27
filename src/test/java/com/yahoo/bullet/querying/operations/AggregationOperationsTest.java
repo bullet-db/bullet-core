@@ -13,7 +13,7 @@ import com.yahoo.bullet.aggregations.Raw;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -7,7 +7,7 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Query;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

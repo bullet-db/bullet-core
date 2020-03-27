@@ -8,7 +8,7 @@ package com.yahoo.bullet.aggregations;
 import com.yahoo.bullet.aggregations.sketches.Sketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -55,7 +55,6 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
         separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
         shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
-
         fieldsToNames = aggregation.getFields();
         fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());
     }
@@ -97,8 +96,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @return A string representing the composite field.
      */
     String composeField(BulletRecord record) {
-        //return composeField(fields.stream().map(field -> Objects.toString(record.extractField(field))));
-        return composeField(fields.stream().map(field -> Objects.toString(record.get(field))));
+        return composeField(fields.stream().map(field -> Objects.toString(record.typedGet(field).getValue())));
     }
 
     /**

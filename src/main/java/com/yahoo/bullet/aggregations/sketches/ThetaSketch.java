@@ -157,7 +157,6 @@ public class ThetaSketch extends KMVSketch {
         double count = result.getEstimate();
         BulletRecord record = provider.getInstance();
         record.setLong(COUNT_FIELD, Math.round(count));
-        //record.setDouble(COUNT_FIELD, count);
         return record;
     }
 }

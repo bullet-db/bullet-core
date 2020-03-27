@@ -7,7 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.parsing.AggregationUtils.makeGroupFields;
+import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
+import static com.yahoo.bullet.query.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -110,12 +110,12 @@ public class TopKTest {
         Set<Integer> fields = new HashSet<>();
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 3);
-            int fieldA = Integer.valueOf(actual.get("A").toString());
-            int fieldB = Integer.valueOf(actual.get("B").toString());
+            int fieldA = Integer.valueOf((String) actual.typedGet("A").getValue());
+            int fieldB = Integer.valueOf((String) actual.typedGet("B").getValue());
             Assert.assertTrue(fieldA < 3);
             Assert.assertTrue(fieldB < 4);
             fields.add(fieldA * 3 + fieldB * 4);
-            Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 83L);
+            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 83L);
         }
         Assert.assertEquals(fields.size(), 12);
 
@@ -208,8 +208,8 @@ public class TopKTest {
         Assert.assertEquals(records.size(), 4);
         for (int i = 0; i < 3; ++i) {
             BulletRecord actual = records.get(i);
-            int fieldA = Integer.valueOf(actual.get("A").toString());
-            long count = (Long) actual.get(TopK.DEFAULT_NEW_NAME);
+            int fieldA = Integer.valueOf((String) actual.typedGet("A").getValue());
+            long count = (Long) actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue();
             if (fieldA == 0) {
                 Assert.assertTrue(count >= 23L);
                 Assert.assertTrue(count <= 23L + error);
@@ -225,7 +225,7 @@ public class TopKTest {
         }
         // The last one is one of the other records
         BulletRecord actual = records.get(3);
-        long count = (Long) actual.get(TopK.DEFAULT_NEW_NAME);
+        long count = (Long) actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue();
         Assert.assertTrue(count >= 1L);
         Assert.assertTrue(count <= 1L + error);
 
@@ -280,9 +280,9 @@ public class TopKTest {
         Assert.assertEquals(records.size(), 16);
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 2);
-            int fieldA = Integer.valueOf(actual.get("foo").toString());
+            int fieldA = Integer.valueOf((String) actual.typedGet("foo").getValue());
             Assert.assertTrue(fieldA < 16);
-            Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
+            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);
@@ -305,9 +305,9 @@ public class TopKTest {
         Assert.assertEquals(records.size(), uniqueGroups);
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 2);
-            int fieldA = Integer.valueOf(actual.get("foo").toString());
+            int fieldA = Integer.valueOf((String) actual.typedGet("foo").getValue());
             Assert.assertTrue(fieldA < uniqueGroups);
-            Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
+            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);
@@ -346,11 +346,11 @@ public class TopKTest {
         Assert.assertEquals(records.size(), 16);
         for (BulletRecord actual : records) {
             Assert.assertEquals(actual.fieldCount(), 3);
-            int fieldA = Integer.valueOf(actual.get("foo").toString());
-            int fieldB = Integer.valueOf(actual.get("fieldB").toString());
+            int fieldA = Integer.valueOf((String) actual.typedGet("foo").getValue());
+            int fieldB = Integer.valueOf((String) actual.typedGet("fieldB").getValue());
             Assert.assertTrue(fieldA < 16);
             Assert.assertTrue(fieldB > 16);
-            Assert.assertEquals(actual.get(TopK.DEFAULT_NEW_NAME), 1L);
+            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);

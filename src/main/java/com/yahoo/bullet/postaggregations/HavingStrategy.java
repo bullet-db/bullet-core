@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.Having;
+import com.yahoo.bullet.query.postaggregations.Having;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.Type;

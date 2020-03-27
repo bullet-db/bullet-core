@@ -7,8 +7,8 @@ package com.yahoo.bullet.querying.operations;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;

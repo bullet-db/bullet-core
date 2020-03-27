@@ -31,7 +31,7 @@ public class GroupDataSummarySetOperationsTest {
         metrics.put(operationA, sumValue);
         metrics.put(operationB, minValue);
 
-        return new CachingGroupData(fields, metrics);
+        return new CachingGroupData(fields, null, metrics);
     }
 
     @Test

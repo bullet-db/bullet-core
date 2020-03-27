@@ -9,7 +9,7 @@ import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Getter;

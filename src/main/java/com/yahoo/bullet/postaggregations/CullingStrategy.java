@@ -1,6 +1,6 @@
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.Culling;
+import com.yahoo.bullet.query.postaggregations.Culling;
 import com.yahoo.bullet.result.Clip;
 
 import java.util.Set;

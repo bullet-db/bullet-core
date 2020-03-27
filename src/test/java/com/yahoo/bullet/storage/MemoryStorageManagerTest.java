@@ -82,6 +82,10 @@ public class MemoryStorageManagerTest {
     public void testGetAll() throws Exception {
         Assert.assertNull(manager.getAll().get());
         Assert.assertNull(manager.getAllString().get());
+
+        manager.put("foo", new byte[0]);
+
+        Assert.assertEquals(manager.getAll().get(), Collections.singletonMap("foo", new byte[0]));
     }
 
     @Test

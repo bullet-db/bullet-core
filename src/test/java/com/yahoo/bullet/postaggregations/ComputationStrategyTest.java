@@ -5,25 +5,8 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-import com.yahoo.bullet.parsing.Computation;
-import com.yahoo.bullet.parsing.Expression;
-import com.yahoo.bullet.parsing.PostAggregation;
-import com.yahoo.bullet.parsing.Value;
-import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.result.Clip;
-import com.yahoo.bullet.result.RecordBox;
-import com.yahoo.bullet.typesystem.Type;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static com.yahoo.bullet.parsing.ExpressionUtils.makeBinaryExpression;
-import static com.yahoo.bullet.parsing.ExpressionUtils.makeLeafExpression;
-
 public class ComputationStrategyTest {
+    /*
     private ComputationStrategy makeComputation(Expression expression, String newName) {
         Computation postAggregation = new Computation();
         postAggregation.setType(PostAggregation.Type.COMPUTATION);
@@ -197,4 +180,5 @@ public class ComputationStrategyTest {
 
         Assert.assertFalse(result.getRecords().get(0).hasField("newName"));
     }
+    */
 }

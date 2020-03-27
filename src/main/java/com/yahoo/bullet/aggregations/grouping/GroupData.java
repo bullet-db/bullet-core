@@ -38,7 +38,7 @@ public class GroupData implements Serializable {
 
     @Setter
     protected Map<String, String> groupFields;
-    protected Map<String, String> mapping = Collections.emptyMap();
+    protected Map<String, String> mapping;
     protected Map<GroupOperation, Number> metrics;
 
     /**
@@ -70,6 +70,7 @@ public class GroupData implements Serializable {
      */
     public GroupData(Map<String, String> groupFields, Set<GroupOperation> operations) {
         this.groupFields = groupFields;
+        this.mapping = Collections.emptyMap();
         this.metrics = makeInitialMetrics(operations);
     }
 
@@ -105,6 +106,7 @@ public class GroupData implements Serializable {
      */
     public GroupData(Map<String, String> groupFields, Map<GroupOperation, Number> metrics) {
         this.groupFields = groupFields;
+        this.mapping = Collections.emptyMap();
         this.metrics = metrics;
     }
 

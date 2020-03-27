@@ -9,7 +9,7 @@ import com.yahoo.bullet.aggregations.sketches.FrequentItemsSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.parsing.Aggregation;
+import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -84,18 +84,10 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
     }
 
     private void splitFields(BulletRecord record) {
-        /*
-        String field = record.getAndRemove(FrequentItemsSketch.ITEM_FIELD).toString();
-        List<String> values = decomposeField(field);
-        for (int i = 0; i < fields.size(); ++i) {
-            String originalField = fields.get(i);
-            String fieldName = fieldsToNames.get(originalField);
-            record.setString(Utilities.isEmpty(fieldName) ? originalField : fieldName, values.get(i));
-        }
-        record.rename(FrequentItemsSketch.COUNT_FIELD, newName);
-        */
-        String field = record.getAndRemove(FrequentItemsSketch.ITEM_FIELD).toString();
-        Long count = (Long) record.getAndRemove(FrequentItemsSketch.COUNT_FIELD);
+        String field = (String) record.typedGet(FrequentItemsSketch.ITEM_FIELD).getValue();
+        Long count = (Long) record.typedGet(FrequentItemsSketch.COUNT_FIELD).getValue();
+        record.remove(FrequentItemsSketch.ITEM_FIELD);
+        record.remove(FrequentItemsSketch.COUNT_FIELD);
         List<String> values = decomposeField(field);
         for (int i = 0; i < fields.size(); ++i) {
             String originalField = fields.get(i);
