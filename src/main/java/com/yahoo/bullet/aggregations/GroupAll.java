@@ -8,10 +8,9 @@ package com.yahoo.bullet.aggregations;
 import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.SerializerDeserializer;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.GroupAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -19,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-
-import static java.util.Collections.singletonList;
 
 @Slf4j
 public class GroupAll implements Strategy {
@@ -37,19 +33,11 @@ public class GroupAll implements Strategy {
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
      * @param config The BulletConfig.
      */
-    public GroupAll(Aggregation aggregation, BulletConfig config) {
+    public GroupAll(GroupAggregation aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result
-        operations = GroupOperation.getOperations(aggregation.getAttributes());
+        operations = aggregation.getOperations();
         data = new GroupData(operations);
         this.provider = config.getBulletRecordProvider();
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        if (Utilities.isEmpty(operations)) {
-            return Optional.of(singletonList(GroupOperation.REQUIRES_FIELD_OR_OPERATION_ERROR));
-        }
-        return GroupOperation.checkOperations(operations);
     }
 
     @Override

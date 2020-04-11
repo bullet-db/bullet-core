@@ -7,8 +7,6 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.ThetaSketch;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
 import com.yahoo.bullet.record.BulletRecord;
@@ -17,14 +15,8 @@ import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static java.util.Collections.singletonList;
 
 public class CountDistinct extends KMVStrategy<ThetaSketch> {
-    public static final String DEFAULT_NEW_NAME = "COUNT DISTINCT";
-
     // Theta Sketch defaults
     // Recommended for real-time systems
     public static final String DEFAULT_UPDATE_SKETCH_FAMILY = Family.ALPHA.getFamilyName();
@@ -32,7 +24,7 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
     // rate at 99.73% confidence (3 Standard Deviations).
     public static final int DEFAULT_NOMINAL_ENTRIES = 16384;
 
-    private final String newName;
+    private final String name;
 
     /**
      * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
@@ -48,13 +40,9 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
         float samplingProbability = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_SAMPLING, Float.class);
         Family family = getFamily(config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_FAMILY, String.class));
         int nominalEntries = config.getAs(BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_ENTRIES, Integer.class);
-        newName = aggregation.getName();
-        sketch = new ThetaSketch(resizeFactor, family, samplingProbability, nominalEntries, config.getBulletRecordProvider());
-    }
 
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        return Utilities.isEmpty(fields) ? Optional.of(singletonList(REQUIRES_FIELD_ERROR)) : Optional.empty();
+        name = aggregation.getName();
+        sketch = new ThetaSketch(resizeFactor, family, samplingProbability, nominalEntries, config.getBulletRecordProvider());
     }
 
     @Override
@@ -78,7 +66,7 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
     private List<BulletRecord> renameInPlace(List<BulletRecord> records) {
         // One record only.
         BulletRecord record = records.get(0);
-        record.rename(ThetaSketch.COUNT_FIELD, newName);
+        record.rename(ThetaSketch.COUNT_FIELD, name);
         return records;
     }
 

@@ -5,48 +5,32 @@
  */
 package com.yahoo.bullet.query;
 
+import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
-import com.yahoo.bullet.common.Initializable;
-import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.windowing.AdditiveTumbling;
+import com.yahoo.bullet.windowing.Basic;
+import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.SlidingRecord;
+import com.yahoo.bullet.windowing.Tumbling;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
-import static java.util.Collections.singletonList;
 
-@Getter @Setter @Slf4j
-public class Window implements Configurable, Initializable {
+@Getter @NoArgsConstructor @Slf4j
+public class Window implements Configurable {
     /** Represents the type of the Window Unit for either emit or include. */
     @Getter @AllArgsConstructor
     public enum Unit {
         RECORD("RECORD"), TIME("TIME"), ALL("ALL");
 
         private String name;
-
-        /**
-         * Checks to see if this String represents this enum.
-         *
-         * @param name The String version of the enum.
-         * @return true if the name represents this enum.
-         */
-        public boolean isMe(String name) {
-            return this.name.equalsIgnoreCase(name);
-        }
-    }
-    public static final Map<String, Unit> SUPPORTED_TYPES = new HashMap<>();
-    static {
-        SUPPORTED_TYPES.put(Unit.TIME.getName(), Unit.TIME);
-        SUPPORTED_TYPES.put(Unit.RECORD.getName(), Unit.RECORD);
-        SUPPORTED_TYPES.put(Unit.ALL.getName(), Unit.ALL);
     }
 
     /**
@@ -72,72 +56,74 @@ public class Window implements Configurable, Initializable {
     public static final BulletError NO_RECORD_ALL = makeError("The emit type was \"RECORD\" and include type was \"ALL\"",
                                                               "Please set emit type to \"TIME\" or match include to emit");
 
-    private Map<String, Object> emit;
-    private Map<String, Object> include;
-
+    private int emitEvery;
     private Unit emitType;
     private Unit includeType;
+    private int includeFirst;
 
-    /**
-     * Default constructor. GSON recommended.
-     */
-    public Window() {
-        emit = null;
-        include = null;
+    public Window(int emitEvery, Unit emitType) {
+        if (emitEvery <= 0) {
+            throw new IllegalArgumentException("bad");
+        }
+        if (emitType == Unit.ALL) {
+            throw new IllegalArgumentException("bad emit type");
+        }
+        this.emitEvery = emitEvery;
+        this.emitType = Objects.requireNonNull(emitType);
     }
 
-    public Window(Map<String, Object> emit, Map<String, Object> include) {
-        this.emit = emit;
-        this.include = include;
+    public Window(int emitEvery, Unit emitType, Unit includeType, int includeFirst) {
+        if (emitEvery <= 0) {
+            throw new IllegalArgumentException("bad");
+        }
+        if (emitType == Unit.ALL) {
+            throw new IllegalArgumentException("bad emit type");
+        }
+        // This is temporary. For now, emit needs to be equal to include. Change when other windows are supported.
+        if (includeType != emitType) {
+            throw new IllegalArgumentException("include type and emit type must be the same");
+        }
+        if (includeFirst != emitEvery) {
+            throw new IllegalArgumentException("include first and emit every must be the same");
+        }
+        this.emitEvery = emitEvery;
+        this.emitType = Objects.requireNonNull(emitType);
+        this.includeType = Objects.requireNonNull(includeType);
+        this.includeFirst = includeFirst;
     }
 
     @Override
     public void configure(BulletConfig config) {
-        emitType = getUnit(emit);
-        includeType = getUnit(include);
-        if (Utilities.isEmpty(emit) || emitType != Unit.TIME) {
+        if (emitType != Unit.TIME) {
             return;
         }
-        Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
-        if (every != null) {
-            int minEmitTime = config.getAs(BulletConfig.WINDOW_MIN_EMIT_EVERY, Integer.class);
-            // Clamp upward to minimum
-            if (every.intValue() < minEmitTime) {
-                emit.put(EMIT_EVERY_FIELD, minEmitTime);
-            }
+        int minEmitTime = config.getAs(BulletConfig.WINDOW_MIN_EMIT_EVERY, Integer.class);
+        // Clamp upward to minimum
+        if (emitEvery < minEmitTime) {
+            emitEvery = minEmitTime;
         }
     }
 
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        if (emitType == null || emitType == Unit.ALL) {
-            return Optional.of(singletonList(IMPROPER_EMIT));
+    public Scheme getScheme(Strategy strategy, BulletConfig config) {
+        /*
+         * TODO: Support other windows
+         * The windows we support at the moment:
+         * 1. No window -> Basic
+         * 2. Window is emit RECORD and include RECORD -> SlidingRecord
+         * 3. Window is emit TIME and include ALL -> Additive Tumbling
+         * 4. All other windows -> Tumbling (RAW can be Tumbling too)
+         */
+        if (emitType == null) {
+            return new Basic(strategy, null, config);
         }
-
-        Number every = Utilities.getCasted(emit, EMIT_EVERY_FIELD, Number.class);
-        if (every == null || every.intValue() <= 0) {
-            return Optional.of(singletonList(IMPROPER_EVERY));
+        Window.Classification classification = getType();
+        if (classification == Window.Classification.RECORD_RECORD) {
+            return new SlidingRecord(strategy, this, config);
         }
-
-        if (include == null) {
-            return Optional.empty();
+        if (classification == Window.Classification.TIME_ALL) {
+            return new AdditiveTumbling(strategy, this, config);
         }
-
-        Number first = Utilities.getCasted(include, INCLUDE_FIRST_FIELD, Number.class);
-        if (includeType == Unit.ALL) {
-            if (emitType == Unit.RECORD) {
-                return Optional.of(singletonList(NO_RECORD_ALL));
-            }
-            if (first != null) {
-                return Optional.of(singletonList(IMPROPER_FIRST));
-            }
-            return Optional.empty();
-        }
-        // This is temporary. For now, emit needs to be equal to include. Change when other windows are supported.
-        if (includeType != emitType || first == null || first.intValue() != every.intValue()) {
-            return Optional.of(singletonList(IMPROPER_INCLUDE));
-        }
-        return Optional.empty();
+        return new Tumbling(strategy, this, config);
     }
 
     /**
@@ -175,14 +161,6 @@ public class Window implements Configurable, Initializable {
 
     @Override
     public String toString() {
-        return "{emit: " + emit + ", include: " + include + "}";
-    }
-
-    private static Unit getUnit(Map<String, Object> map) {
-        if (Utilities.isEmpty(map)) {
-            return null;
-        }
-        String type = Utilities.getCasted(map, TYPE_FIELD, String.class);
-        return SUPPORTED_TYPES.get(type);
+        return "{emitEvery: " + emitEvery + ", emitType: " + emitType + ", includeType: " + includeType + ", includeFirst: " + includeFirst + "}";
     }
 }

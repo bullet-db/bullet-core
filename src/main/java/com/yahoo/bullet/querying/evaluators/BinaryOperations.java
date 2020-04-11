@@ -8,8 +8,11 @@ package com.yahoo.bullet.querying.evaluators;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.querying.evaluators.Evaluator.BinaryOperator;
@@ -100,14 +103,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().allMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator NOT_EQUALS = (left, right, record) -> {
@@ -120,14 +123,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> !leftValue.equalTo(new TypedObject(subType, o))));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> !leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator NOT_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().noneMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().noneMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator GREATER_THAN = (left, right, record) -> {
@@ -140,14 +143,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
     static BinaryOperator GREATER_THAN_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
     static BinaryOperator LESS_THAN = (left, right, record) -> {
@@ -160,14 +163,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
     static BinaryOperator LESS_THAN_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
     static BinaryOperator GREATER_THAN_OR_EQUALS = (left, right, record) -> {
@@ -180,14 +183,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
     static BinaryOperator GREATER_THAN_OR_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
     static BinaryOperator LESS_THAN_OR_EQUALS = (left, right, record) -> {
@@ -200,14 +203,14 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 
     static BinaryOperator LESS_THAN_OR_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         Type subType = leftValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<?>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
+        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 
     static BinaryOperator REGEX_LIKE = (left, right, record) -> {
@@ -270,9 +273,9 @@ public class BinaryOperations {
     static BinaryOperator FILTER = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        List<Object> list = (List<Object>) leftValue.getValue();
+        List<? extends Serializable> list = (List<? extends Serializable>) leftValue.getValue();
         List<Boolean> booleans = (List<Boolean>) rightValue.getValue();
-        return new TypedObject(leftValue.getType(), IntStream.range(0, list.size()).filter(booleans::get).mapToObj(list::get));
+        return new TypedObject(leftValue.getType(), IntStream.range(0, list.size()).filter(booleans::get).mapToObj(list::get).collect(Collectors.toCollection(ArrayList::new)));
     };
 
     private static Type getResultType(Type left, Type right) {

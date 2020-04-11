@@ -7,10 +7,7 @@ package com.yahoo.bullet.query.expressions;
 
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ListEvaluator;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,11 +17,20 @@ import java.util.stream.Collectors;
  * An expression that holds a list of expressions. A primitive type
  * must be specified as only lists of primitives are supported at the moment.
  */
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
 public class ListExpression extends Expression {
+    private static final long serialVersionUID = 311789452858823415L;
     private static final String DELIMITER = ", ";
 
-    private List<Expression> values;
+    private final List<Expression> values;
+
+    public ListExpression(List<Expression> values) {
+        Objects.requireNonNull(values);
+        for (Expression value : values) {
+            Objects.requireNonNull(value);
+        }
+        this.values = values;
+    }
 
     @Override
     public String getName() {

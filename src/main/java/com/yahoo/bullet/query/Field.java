@@ -1,17 +1,19 @@
 package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.query.expressions.Expression;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Objects;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
 public class Field {
     private String name;
     private Expression value;
+
+    public Field(String name, Expression value) {
+        this.name = Objects.requireNonNull(name);
+        this.value = Objects.requireNonNull(value);
+    }
 
     @Override
     public boolean equals(Object obj) {

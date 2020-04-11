@@ -7,15 +7,12 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.Sketch;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +33,6 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
     protected final String separator;
 
     // The fields being inserted into the Sketch
-    protected final Map<String, String> fieldsToNames;
     protected final List<String> fields;
 
     // The Sketch that should be initialized by a child class
@@ -55,8 +51,7 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
         metadataKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
         separator = config.getAs(BulletConfig.AGGREGATION_COMPOSITE_FIELD_SEPARATOR, String.class);
         shouldMeta = config.getAs(BulletConfig.RESULT_METADATA_ENABLE, Boolean.class);
-        fieldsToNames = aggregation.getFields();
-        fields = Utilities.isEmpty(fieldsToNames) ? Collections.emptyList() : new ArrayList<>(fieldsToNames.keySet());
+        fields = aggregation.getFields();
     }
 
     @Override

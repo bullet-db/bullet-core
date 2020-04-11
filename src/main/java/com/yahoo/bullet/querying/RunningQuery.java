@@ -5,29 +5,18 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Initializable;
 import com.yahoo.bullet.query.Query;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * A wrapper for a running query.
  */
 @Getter @RequiredArgsConstructor
-public class RunningQuery implements Initializable {
+public class RunningQuery {
     private final String id;
     private final Query query;
     private long startTime;
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        start();
-        return query.initialize();
-    }
 
     @Override
     public String toString() {

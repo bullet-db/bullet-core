@@ -6,7 +6,6 @@
 package com.yahoo.bullet.querying.evaluators;
 
 import com.yahoo.bullet.query.expressions.BinaryExpression;
-import com.yahoo.bullet.query.expressions.BinaryExpression.Modifier;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -22,13 +21,16 @@ public class BinaryEvaluator extends Evaluator {
         super(binaryExpression);
         left = binaryExpression.getLeft().getEvaluator();
         right = binaryExpression.getRight().getEvaluator();
-        Modifier modifier = binaryExpression.getModifier();
-        if (modifier == null) {
-            op = BINARY_OPERATORS.get(binaryExpression.getOp());
-        } else if (modifier == Modifier.ANY) {
-            op = BINARY_ANY_OPERATORS.get(binaryExpression.getOp());
-        } else {
-            op = BINARY_ALL_OPERATORS.get(binaryExpression.getOp());
+        switch (binaryExpression.getModifier()) {
+            case ANY:
+                op = BINARY_ANY_OPERATORS.get(binaryExpression.getOp());
+                break;
+            case ALL:
+                op = BINARY_ALL_OPERATORS.get(binaryExpression.getOp());
+                break;
+            default:
+                op = BINARY_OPERATORS.get(binaryExpression.getOp());
+                break;
         }
     }
 

@@ -109,8 +109,7 @@ public class Basic extends Scheme {
     }
 
     @Override
-    public Optional<List<BulletError>> initialize() {
-        return Optional.empty();
+    public void start() {
     }
 
     /**

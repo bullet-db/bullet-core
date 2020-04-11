@@ -65,6 +65,8 @@ public abstract class Scheme implements Monoidal {
      */
     public abstract void resetForPartition();
 
+    public abstract void start();
+
     /**
      * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.
      *

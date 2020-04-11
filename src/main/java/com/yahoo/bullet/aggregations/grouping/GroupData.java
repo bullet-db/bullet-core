@@ -264,7 +264,7 @@ public class GroupData implements Serializable {
      * @return a String representing a name for the result of the operation.
      */
     public static String getResultName(GroupOperation operation) {
-        String name = operation.getNewName();
+        String name = operation.getName();
         if (name != null) {
             return name;
         }

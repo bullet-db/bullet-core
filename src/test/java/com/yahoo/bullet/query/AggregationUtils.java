@@ -34,7 +34,7 @@ public class AggregationUtils {
     }
 
     public static Map<String, String> makeGroupOperation(GroupOperation operation) {
-        return makeGroupOperation(operation.getType(), operation.getField(), operation.getNewName());
+        return makeGroupOperation(operation.getType(), operation.getField(), operation.getName());
     }
 
     public static Map<String, String> makeGroupOperation(GroupOperation.GroupOperationType type, String field, String newName) {

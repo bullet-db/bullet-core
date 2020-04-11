@@ -8,6 +8,11 @@ import java.util.Set;
 public class CullingStrategy implements PostStrategy {
     private Set<String> transientFields;
 
+    /**
+     * Constructor for Culling strategy;
+     *
+     * @param culling Culling post aggregation.
+     */
     public CullingStrategy(Culling culling) {
         transientFields = culling.getTransientFields();
     }

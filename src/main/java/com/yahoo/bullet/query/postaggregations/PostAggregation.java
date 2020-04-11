@@ -5,18 +5,28 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
+import com.yahoo.bullet.postaggregations.PostStrategy;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter @Setter
-public abstract class PostAggregation {
+import java.io.Serializable;
+
+@Getter @AllArgsConstructor
+public abstract class PostAggregation implements Serializable {
+    private static final long serialVersionUID = -3083946184345104820L;
+
     /** Represents the type of the PostAggregation. */
+    @Getter @AllArgsConstructor
     public enum Type {
-        HAVING,
-        COMPUTATION,
-        ORDER_BY,
-        CULLING
+        HAVING(0),
+        COMPUTATION(1),
+        ORDER_BY(2),
+        CULLING(3);
+
+        private int priority;
     }
 
-    protected Type type;
+    protected final Type type;
+
+    public abstract PostStrategy getPostStrategy();
 }

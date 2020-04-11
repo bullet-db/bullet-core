@@ -4,14 +4,19 @@ import com.yahoo.bullet.querying.evaluators.CastEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-@Getter @RequiredArgsConstructor
+@Getter
 public class CastExpression extends Expression {
+    private static final long serialVersionUID = -1732511101513444236L;
     private final Expression value;
     private final Type castType;
+
+    public CastExpression(Expression value, Type castType) {
+        this.value = Objects.requireNonNull(value);
+        this.castType = Objects.requireNonNull(castType);
+    }
 
     @Override
     public String getName() {

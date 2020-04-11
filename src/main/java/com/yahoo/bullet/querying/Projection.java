@@ -33,13 +33,21 @@ public class Projection {
     private Map<String, Evaluator> evaluators;
 
     /**
+     * Constructor that creates a Projection from the given fields.
      *
-     * @param fields Non-null required by initialize.
+     * @param fields The fields to create a Projection from. Will be non-null.
      */
     public Projection(List<Field> fields) {
         evaluators = fields.stream().collect(Collectors.toMap(Field::getName, Projection::getEvaluator));
     }
 
+    /**
+     * Projects onto a new BulletRecord.
+     *
+     * @param record The record to compute new fields from.
+     * @param provider The provider to get the new BulletRecord.
+     * @return A new BulletRecord with fields projected onto it.
+     */
     public BulletRecord project(BulletRecord record, BulletRecordProvider provider) {
         BulletRecord projected = provider.getInstance();
         evaluators.forEach((name, evaluator) -> {
@@ -54,13 +62,18 @@ public class Projection {
         return projected;
     }
 
-    // Used for computation
+    /**
+     * Projects onto a BulletRecord. Projected fields are projected all at once.
+     *
+     * @param record The record to compute new fields from and to project onto.
+     * @return The original BulletRecord with new fields projected onto it.
+     */
     public BulletRecord project(BulletRecord record) {
         Map<String, TypedObject> map = new HashMap<>();
         evaluators.forEach((name, evaluator) -> {
             try {
                 TypedObject value = evaluator.evaluate(record);
-                if (value != null && value.getValue() != null) {
+                if (!value.isNull()) {
                     map.put(name, value);
                 }
             } catch (Exception ignored) {
@@ -68,15 +81,6 @@ public class Projection {
         });
         map.forEach(record::typedSet);
         return record;
-    }
-
-    public BulletRecord copyAndProject(BulletRecord record, BulletRecordProvider provider) {
-        return project(copy(record, provider.getInstance()));
-    }
-
-    private <T> BulletRecord copy(BulletRecord<T> record, BulletRecord<T> projected) {
-        record.iterator().forEachRemaining(entry -> projected.typedSet(entry.getKey(), new TypedObject(entry.getValue())));
-        return projected;
     }
 
     private static Evaluator getEvaluator(Field field) {

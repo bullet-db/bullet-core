@@ -8,7 +8,6 @@ package com.yahoo.bullet.query.expressions;
 import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
@@ -18,10 +17,12 @@ import java.util.Objects;
  *
  * Infix and prefix binary operations are differentiated in the naming scheme.
  */
-@Getter @RequiredArgsConstructor
+@Getter
 public class BinaryExpression extends Expression {
+    private static final long serialVersionUID = -7911485746578844403L;
+
     public enum Modifier {
-        ANY, ALL
+        ANY, ALL, NONE
     }
 
     private final Expression left;
@@ -30,10 +31,14 @@ public class BinaryExpression extends Expression {
     private final Modifier modifier;
 
     public BinaryExpression(Expression left, Expression right, Operation op) {
-        this.left = left;
-        this.right = right;
-        this.op = op;
-        this.modifier = null;
+        this(left, right, op, Modifier.NONE);
+    }
+
+    public BinaryExpression(Expression left, Expression right, Operation op, Modifier modifier) {
+        this.left = Objects.requireNonNull(left);
+        this.right = Objects.requireNonNull(right);
+        this.op = Objects.requireNonNull(op);
+        this.modifier = Objects.requireNonNull(modifier);
     }
 
     @Override

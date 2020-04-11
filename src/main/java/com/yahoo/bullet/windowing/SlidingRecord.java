@@ -9,7 +9,6 @@ import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.SerializerDeserializer;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Meta;
@@ -17,13 +16,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
-import static java.util.Collections.singletonList;
 
 public class SlidingRecord extends Basic {
     public static String NAME = "Sliding";
@@ -49,17 +45,7 @@ public class SlidingRecord extends Basic {
      */
     public SlidingRecord(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        if (window.getEmitType() != Window.Unit.RECORD) {
-            return Optional.of(singletonList(NOT_RECORD));
-        }
-        // Already checked
-        Number every = Utilities.getCasted(window.getEmit(), Window.EMIT_EVERY_FIELD, Number.class);
-        maxCount = every.intValue();
-        return super.initialize();
+        maxCount = window.getEmitEvery();
     }
 
     @Override

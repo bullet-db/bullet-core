@@ -13,7 +13,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
  *
  */
 public class ValueEvaluator extends Evaluator {
-    private final TypedObject value;
+    private TypedObject value;
 
     public ValueEvaluator(ValueExpression valueExpression) {
         super(valueExpression);

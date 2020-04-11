@@ -7,14 +7,10 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.result.Meta;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
@@ -33,15 +29,7 @@ public class Tumbling extends Basic {
      */
     public Tumbling(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        // Window is initialized so every is present and positive.
-        Number every = Utilities.getCasted(window.getEmit(), Window.EMIT_EVERY_FIELD, Number.class);
-        windowLength = every.longValue();
-        nextCloseTime = System.currentTimeMillis() + windowLength;
-        return Optional.empty();
+        windowLength = (long) window.getEmitEvery();
     }
 
     @Override
@@ -66,6 +54,11 @@ public class Tumbling extends Basic {
     public boolean isClosedForPartition() {
         // For tumbling windows, isClosedForPartition is the same as isClosed.
         return isClosed();
+    }
+
+    @Override
+    public void start() {
+        nextCloseTime = System.currentTimeMillis() + windowLength;
     }
 
     @Override

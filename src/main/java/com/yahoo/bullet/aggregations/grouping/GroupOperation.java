@@ -35,7 +35,7 @@ import static java.util.Arrays.asList;
 public class GroupOperation implements Serializable {
     // ************************************************ Definitions ************************************************
 
-    @Getter
+    @Getter @AllArgsConstructor
     public enum GroupOperationType {
         COUNT("COUNT"),
         SUM("SUM"),
@@ -46,20 +46,6 @@ public class GroupOperation implements Serializable {
         COUNT_FIELD("COUNT_FIELD");
 
         private String name;
-
-        GroupOperationType(String name) {
-            this.name = name;
-        }
-
-        /**
-         * Checks to see if this String represents this enum.
-         *
-         * @param name The String version of the enum.
-         * @return true if the name represents this enum.
-         */
-        public boolean isMe(String name) {
-            return this.name.equalsIgnoreCase(name);
-        }
     }
 
     public interface GroupOperator extends BiFunction<Number, Number, Number> {
@@ -104,7 +90,7 @@ public class GroupOperation implements Serializable {
     private final GroupOperationType type;
     private final String field;
     // Ignored purposefully for hashCode and equals
-    private final String newName;
+    private final String name;
 
     // ************************************************ Methods ************************************************
 
@@ -128,68 +114,5 @@ public class GroupOperation implements Serializable {
             return true;
         }
         return field != null && field.equals(other.field);
-    }
-
-    /**
-     * Returns true if the attributes contains a {@link GroupOperation#OPERATIONS} field defined.
-     *
-     * @param attributes The attributes that contains the operations.
-     * @return A boolean denoting whether there were operations.
-     */
-    public static boolean hasOperations(Map<String, Object> attributes) {
-        return !Utilities.isEmpty(attributes) && attributes.get(OPERATIONS) != null;
-    }
-
-    /**
-     * Validates whether the provided {@link Collection} of {@link GroupOperation} is valid.
-     *
-     * @param operations The non-null operations to normalize.
-     * @return An {@link Optional} {@link List} of {@link BulletError} if any operations were invalid or null if valid.
-     */
-    public static Optional<List<BulletError>> checkOperations(Collection<GroupOperation> operations) {
-        List<BulletError> errors = new ArrayList<>();
-        for (GroupOperation o : operations) {
-            if (o.getField() == null && o.getType() != GroupOperationType.COUNT) {
-                errors.add(makeError(GROUP_OPERATION_REQUIRES_FIELD + o.getType(), OPERATION_REQUIRES_FIELD_RESOLUTION));
-            }
-        }
-        return errors.size() > 0 ? Optional.of(errors) : Optional.empty();
-    }
-
-    /**
-     * Parses a {@link Set} of group operations from an Object that is expected to be a {@link List} of {@link Map}.
-     *
-     * @param attributes An Map that contains an object that is the representation of List of group operations.
-     * @return A {@link Set} of GroupOperation or {@link Collections#emptySet()}.
-     */
-    @SuppressWarnings("unchecked")
-    public static Set<GroupOperation> getOperations(Map<String, Object> attributes) {
-        if (!hasOperations(attributes)) {
-            return Collections.emptySet();
-        }
-        List<Object> operations = Utilities.getCasted(attributes, OPERATIONS, List.class);
-        if (operations == null) {
-            return Collections.emptySet();
-        }
-        // Return a list of distinct, non-null, GroupOperations
-        return operations.stream().map(GroupOperation::makeOperation).filter(Objects::nonNull).collect(Collectors.toSet());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static GroupOperation makeOperation(Object object) {
-        try {
-            Map<String, String> data = (Map<String, String>) object;
-
-            String type = data.get(OPERATION_TYPE);
-            Optional<GroupOperationType> operation = SUPPORTED_GROUP_OPERATIONS.stream().filter(t -> t.isMe(type)).findFirst();
-            // May or may not be present
-            String field = data.get(OPERATION_FIELD);
-            // May or may not be present
-            String newName = data.get(OPERATION_NEW_NAME);
-            // Unknown GroupOperations are ignored.
-            return operation.isPresent() ? new GroupOperation(operation.get(), field, newName) : null;
-        } catch (ClassCastException | NullPointerException e) {
-            return null;
-        }
     }
 }

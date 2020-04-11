@@ -14,6 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ComputationStrategy implements PostStrategy {
     private Projection projection;
 
+    /**
+     * Constructor for Computation strategy.
+     *
+     * @param computation Computation post aggregation.
+     */
     public ComputationStrategy(Computation computation) {
         projection = new Projection(computation.getFields());
     }

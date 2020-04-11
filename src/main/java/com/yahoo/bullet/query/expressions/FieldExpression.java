@@ -7,11 +7,7 @@ package com.yahoo.bullet.query.expressions;
 
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
-import com.yahoo.bullet.typesystem.Type;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Objects;
 
@@ -24,12 +20,14 @@ import java.util.Objects;
  * For example, if a field is extracted as a list of boolean maps and the type specified is boolean, then the evaluator
  * will try to cast those boolean maps to boolean objects (and fail).
  */
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
 public class FieldExpression extends Expression {
-    private String field;
-    private Integer index;
-    private String key;
-    private String subKey;
+    private static final long serialVersionUID = -1659250076242321771L;
+
+    private final String field;
+    private final Integer index;
+    private final String key;
+    private final String subKey;
 
     public FieldExpression(String field) {
         this(field, null, null, null);
@@ -51,9 +49,11 @@ public class FieldExpression extends Expression {
         this(field, null, key, subKey);
     }
 
-    public FieldExpression(String field, Integer index, String key, String subKey, Type type) {
-        this(field, index, key, subKey);
-        this.type = type;
+    public FieldExpression(String field, Integer index, String key, String subKey) {
+        this.field = Objects.requireNonNull(field);
+        this.index = Objects.requireNonNull(index);
+        this.key = Objects.requireNonNull(key);
+        this.subKey = Objects.requireNonNull(subKey);
     }
 
     @Override

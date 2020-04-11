@@ -5,28 +5,27 @@
  */
 package com.yahoo.bullet.query.expressions;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.UnaryEvaluator;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.Objects;
-
-import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * An expression that takes an operand and a unary operation. These fields are required; however, an optional
  * primitive type may be specified.
  */
-@Getter @Setter @RequiredArgsConstructor
+@Getter
 public class UnaryExpression extends Expression {
-    public static final BulletError UNARY_REQUIRES_NON_NULL_OPERAND = makeError("The operand must not be null.", "Please provide an expression for operand.");
-    public static final BulletError UNARY_REQUIRES_UNARY_OPERATION = makeError("The operation must be unary.", "Please provide a unary operation for op.");
+    private static final long serialVersionUID = -1893522779659725928L;
 
     private final Expression operand;
     private final Operation op;
+
+    public UnaryExpression(Expression operand, Operation op) {
+        this.operand = Objects.requireNonNull(operand);
+        this.op = Objects.requireNonNull(op);
+    }
 
     @Override
     public String getName() {

@@ -135,9 +135,4 @@ public class Raw implements Strategy {
         consumed = 0;
         combined = 0;
     }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        return Optional.empty();
-    }
 }

@@ -9,20 +9,21 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ValueEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * An expression that takes a value. A primitive type must be specified since the value is always represented by a string.
  * If the type isn't specified, it's assumed to be string unless the value is null.
  */
-@Getter @Setter @NoArgsConstructor
+@Getter
 public class ValueExpression extends Expression {
-    private Object value;
+    private static final long serialVersionUID = -6979831483897873098L;
 
-    public ValueExpression(Object value) {
+    private final Serializable value;
+
+    public ValueExpression(Serializable value) {
         this.value = value;
         this.type = Type.getType(value);
     }

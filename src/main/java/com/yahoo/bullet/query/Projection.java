@@ -7,32 +7,46 @@ package com.yahoo.bullet.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 
-@Slf4j @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Slf4j @Getter
 public class Projection {
     /**
-     * Represents the type of the Projection.
+     * The type of the Projection decides how its fields are projected.
      */
     public enum Type {
-        // Projects onto a copy of the record
-        COPY,
-        // Projects to an empty record
-        NO_COPY,
-        // Does nothing
-        PASS_THROUGH
+        COPY,           // Projects onto a copy of the original record
+        NO_COPY,        // Projects onto a new record
+        PASS_THROUGH    // Passes the original record through
     }
 
-    private List<Field> fields;
-    private Type type;
+    private final List<Field> fields;
+    private final Type type;
 
-    public Projection(List<Field> fields) {
+    /**
+     * Default constructor that creates a PASS_THROUGH Projection.
+     */
+    public Projection() {
+        fields = null;
+        type = Type.PASS_THROUGH;
+    }
+
+    /**
+     * Constructor that creates a COPY or NO_COPY Projection.
+     *
+     * @param fields The list of fields to project. Must not be null or contain null fields.
+     * @param copy Whether the projection should copy or not copy.
+     */
+    public Projection(List<Field> fields, boolean copy) {
+        Objects.requireNonNull(fields);
+        for (Field field : fields) {
+            Objects.requireNonNull(field);
+        }
         this.fields = fields;
-        this.type = Type.NO_COPY;
+        this.type = copy ? Type.COPY : Type.NO_COPY;
     }
 
     @Override

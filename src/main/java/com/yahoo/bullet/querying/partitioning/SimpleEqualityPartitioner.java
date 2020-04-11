@@ -178,7 +178,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            TypedObject value = Utilities.extractField(field, record);
+            TypedObject value = record.typedExtract(field);
             fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.getValue().toString()));
         }
         return fieldValues;

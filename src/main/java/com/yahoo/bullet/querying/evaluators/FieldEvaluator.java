@@ -28,7 +28,7 @@ public class FieldEvaluator extends Evaluator {
 
     @Override
     public TypedObject evaluate(BulletRecord record) {
-        return new TypedObject(fieldExtractor.extract(record));
+        return fieldExtractor.extract(record);
     }
 
     private static FieldExtractor getFieldExtractor(FieldExpression fieldExpression) {

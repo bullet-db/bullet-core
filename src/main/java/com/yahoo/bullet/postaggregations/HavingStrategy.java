@@ -11,11 +11,12 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.Type;
 
 public class HavingStrategy implements PostStrategy {
-    private Evaluator evaluator;
+    private final Evaluator evaluator;
 
     /**
+     * Constructor for Having strategy.
      *
-     * @param having
+     * @param having Having post aggregation.
      */
     public HavingStrategy(Having having) {
         evaluator = having.getExpression().getEvaluator();

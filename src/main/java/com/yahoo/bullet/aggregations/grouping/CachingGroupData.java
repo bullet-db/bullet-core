@@ -19,6 +19,8 @@ import java.util.Map;
  * and metrics. This helps us not have to keep recreating group fields and metrics for every single record.
  */
 public class CachingGroupData extends GroupData {
+    private static final long serialVersionUID = 5059094620642168848L;
+
     @Getter @Setter
     private transient BulletRecord cachedRecord;
 
@@ -27,6 +29,7 @@ public class CachingGroupData extends GroupData {
      * a {@link Map} of Strings that represent the group fields. These arguments are not copied.
      *
      * @param groupFields The mappings of field names to their values that represent this group.
+     * @param mapping The mappings of field names to their new names.
      * @param metrics the non-null {@link Map} of metrics for this object.
      */
     public CachingGroupData(Map<String, String> groupFields, Map<String, String> mapping, Map<GroupOperation, Number> metrics) {

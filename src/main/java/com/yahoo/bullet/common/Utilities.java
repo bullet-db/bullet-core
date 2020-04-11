@@ -14,10 +14,10 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class Utilities {
-    private static final String KEY_DELIMITER = "\\.";
-
    /**
     * Tries to get the object casted as the target type. If it is generic, the captured types cannot not be
     * validated. Only the base object type is validated.
@@ -82,6 +82,31 @@ public class Utilities {
         return string == null || string.isEmpty();
     }
 
+    public static <T> List<T> requireNonNullList(List<T> list) {
+        Objects.requireNonNull(list);
+        for (T t : list) {
+            Objects.requireNonNull(t);
+        }
+        return list;
+    }
+
+    public static <T> Set<T> requireNonNullSet(Set<T> set) {
+        Objects.requireNonNull(set);
+        for (T t : set) {
+            Objects.requireNonNull(t);
+        }
+        return set;
+    }
+
+    public static <K, V> Map<K, V> requireNonNullMap(Map<K, V> map) {
+        Objects.requireNonNull(map);
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            Objects.requireNonNull(entry.getKey());
+            Objects.requireNonNull(entry.getValue());
+        }
+        return map;
+    }
+
     /**
      * Rounds a double up to the specified number of places.
      *
@@ -92,46 +117,6 @@ public class Utilities {
     public static double round(double value, int places) {
         return Double.isInfinite(value) || Double.isNaN(value) ?
                value : BigDecimal.valueOf(value).setScale(places, BigDecimal.ROUND_HALF_UP).doubleValue();
-    }
-
-    /**
-     * Gets a field from the record by identifier.
-     *
-     * For example, suppose a record has a map of boolean maps called "aaa". Then
-     * - "aaa" identifies that map of maps
-     * - "aaa.bbb" identifies the inner map that "aaa" maps "bbb" to (if it exists)
-     * - "aaa.bbb.ccc" identifies the boolean that "aaa.bbb" (if it exists) maps "ccc" to (if it exists)
-     *
-     * For a list element, the index is the key, e.g. "my_list.0" or "my_list.0.some_key"
-     *
-     * @param field The non-null identifier of the field to get.
-     * @return The value of the field or null if it does not exist.
-     */
-    public static TypedObject extractField(String field, BulletRecord record) {
-        String[] keys = field.split(KEY_DELIMITER, 3);
-        TypedObject first = record.typedGet(keys[0]);
-        if (keys.length == 1) {
-            return first;
-        }
-        Object second;
-        if (first.isMap()) {
-            second = ((Map) first.getValue()).get(keys[1]);
-        } else if (first.isList()) {
-            second = ((List) first.getValue()).get(Integer.parseInt(keys[1]));
-        } else {
-            return TypedObject.NULL;
-        }
-        if (second == null) {
-            return TypedObject.NULL;
-        }
-        if (keys.length == 2) {
-            return new TypedObject(first.getType().getSubType(), second);
-        }
-        if (!first.isComplexMap() && !first.isComplexList()) {
-            return TypedObject.NULL;
-        }
-        Object third = ((Map) second).get(keys[2]);
-        return third != null ? new TypedObject(first.getType().getSubType().getSubType(), third) : TypedObject.NULL;
     }
 
     /**

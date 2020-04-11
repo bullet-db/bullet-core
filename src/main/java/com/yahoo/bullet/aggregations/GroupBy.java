@@ -10,9 +10,8 @@ import com.yahoo.bullet.aggregations.grouping.GroupData;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.TupleSketch;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.GroupAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.sketches.ResizeFactor;
 
@@ -20,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * This {@link Strategy} implements a Tuple Sketch based approach to doing a group by. In particular, it
@@ -33,8 +30,6 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     // This is reused for the duration of the strategy.
     private final CachingGroupData container;
 
-    private final Set<GroupOperation> operations;
-
     /**
      * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.
      *
@@ -42,13 +37,11 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public GroupBy(Aggregation aggregation, BulletConfig config) {
+    public GroupBy(GroupAggregation aggregation, BulletConfig config) {
         super(aggregation, config);
 
-        Map<String, Object> attributes = aggregation.getAttributes();
-        operations = GroupOperation.getOperations(attributes);
-        Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(operations);
-        container = new CachingGroupData(null, fieldsToNames, metrics);
+        Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(aggregation.getOperations());
+        container = new CachingGroupData(null, aggregation.getFieldsToNames(), metrics);
 
         ResizeFactor resizeFactor = getResizeFactor(config, BulletConfig.GROUP_AGGREGATION_SKETCH_RESIZE_FACTOR);
         float samplingProbability = config.getAs(BulletConfig.GROUP_AGGREGATION_SKETCH_SAMPLING, Float.class);
@@ -63,11 +56,6 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     }
 
     @Override
-    public Optional<List<BulletError>> initialize() {
-        return GroupOperation.checkOperations(operations);
-    }
-
-    @Override
     public void consume(BulletRecord data) {
         Map<String, String> fieldToValues = getFields(data);
         // More optimal than calling composeFields
@@ -78,42 +66,14 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
         container.setGroupFields(fieldToValues);
         sketch.update(key, container);
     }
-/*
-    @Override
-    public Clip getResult() {
-        Clip result = super.getResult();
-        renameFields(result.getRecords());
-        return result;
-    }
-
-    @Override
-    public List<BulletRecord> getRecords() {
-        List<BulletRecord> result = super.getRecords();
-        renameFields(result);
-        return result;
-    }
-*/
-    private void renameFields(List<BulletRecord> records) {
-        records.forEach(this::renameFields);
-    }
 
     private Map<String, String> getFields(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            // This explicitly does not do a TypedObject checking. Nulls (and everything else) turn into Strings
             String value = Objects.toString(record.typedGet(field).getValue());
             fieldValues.put(field, value);
         }
         return fieldValues;
-    }
-
-    private void renameFields(BulletRecord record) {
-        for (Map.Entry<String, String> entry : fieldsToNames.entrySet()) {
-            String newName = entry.getValue();
-            if (!Utilities.isEmpty(newName)) {
-                record.rename(entry.getKey(), newName);
-            }
-        }
     }
 
     private String getFieldsAsString(List<String> fields, Map<String, String> mapping) {

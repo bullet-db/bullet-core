@@ -103,7 +103,7 @@ public class QueryManager {
      * Adds a configured, initialized query instance {@link Querier} to the manager.
      *
      * @param id The query ID.
-     * @param querier A fully initialized (using {@link Querier#initialize()} {@link Querier} instance.
+     * @param querier A fully initialized {@link Querier} instance.
      */
     public void addQuery(String id, Querier querier) {
         Query query = querier.getQuery();

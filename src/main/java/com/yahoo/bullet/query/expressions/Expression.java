@@ -8,8 +8,9 @@ package com.yahoo.bullet.query.expressions;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * Expressions are currently used in queries for filters and projections.
@@ -37,8 +38,10 @@ import lombok.Setter;
  *
  * Look at the Evaluator class to see how expressions are evaluated.
  */
-@Getter @Setter @RequiredArgsConstructor
-public abstract class Expression {
+@Getter @Setter
+public abstract class Expression implements Serializable {
+    private static final long serialVersionUID = -769774785327135375L;
+
     protected Type type;
 
     /**

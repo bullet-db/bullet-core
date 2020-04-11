@@ -13,9 +13,7 @@ import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.postaggregations.PostStrategy;
-import com.yahoo.bullet.querying.operations.AggregationOperations;
-import com.yahoo.bullet.querying.operations.PostAggregationOperations;
-import com.yahoo.bullet.querying.operations.WindowingOperations;
+import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -43,8 +41,6 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
  * itself with another instance of running query using {@link #merge(Monoidal)}. Use {@link #finish()} to retrieve the
  * final results and terminate the query.
- *
- * <p>After you create this object, you <strong>must call</strong> {@link #initialize()} before using it.</p>
  *
  * <p>Ideally to implement Bullet, you would parallelize into two stages:</p>
  *
@@ -102,8 +98,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *
  * If you do not want to call {@link #getData()}, you can serialize Querier using non-native serialization frameworks
  * and use {@link #merge(Monoidal)} in the Join stage to merge them into an empty Querier for the query. This will be
- * equivalent to calling {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
- * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
+ * equivalent to calling {@link #combine(byte[])} on {@link #getData()}.
  *
  * <h4>Pseudo Code</h4>
  *
@@ -370,6 +365,7 @@ public class Querier implements Monoidal {
         this.runningQuery = query;
         this.config = config;
         this.provider = config.getBulletRecordProvider();
+        start();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -377,9 +373,7 @@ public class Querier implements Monoidal {
     /**
      * Starts the query.
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<List<BulletError>> initialize() {
+    private void start() {
         // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
@@ -390,42 +384,42 @@ public class Querier implements Monoidal {
             rateLimit = new RateLimiter(maxEmit, timeInterval);
         }
 
-        Optional<List<BulletError>> errors;
-
-        errors = runningQuery.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
-
         Query query = runningQuery.getQuery();
 
         if (query.getFilter() != null) {
             filter = new Filter(query.getFilter());
         }
 
-        if (query.getProjection() != null && query.getProjection().getType() != PASS_THROUGH) {
-            projection = new Projection(query.getProjection().getFields());
-            copy = query.getProjection().getType() == COPY;
+        switch (query.getProjection().getType()) {
+            case COPY:
+                projection = new Projection(query.getProjection().getFields());
+                copy = true;
+                break;
+            case NO_COPY:
+                projection = new Projection(query.getProjection().getFields());
+                copy = false;
+                break;
+            default:
+                break;
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
-        Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        errors = strategy.initialize();
-        if (errors.isPresent()) {
-            return errors;
-        }
+        Strategy strategy = query.getAggregation().getStrategy(config);
 
-        if (query.getPostAggregations() != null && !query.getPostAggregations().isEmpty()) {
-            postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
+        List<PostAggregation> postAggregations = query.getPostAggregations();
+        if (postAggregations != null && !postAggregations.isEmpty()) {
+            postStrategies = postAggregations.stream().map(PostAggregation::getPostStrategy).collect(Collectors.toList());
         }
 
         // Scheme is guaranteed to not be null.
-        window = WindowingOperations.findScheme(query, strategy, config);
-        return window.initialize();
+        window = query.getWindow().getScheme(strategy, config);
+
+        runningQuery.start();
+        window.start();
     }
 
     /**
-     * Forces a restart of a valid query (must have previously called {@link #initialize()}) to mark the
+     * Forces a restart of a valid query to mark the
      * correct start of this object if it was previously created but delayed in starting it (by using the negation of
      * {@link #shouldBuffer()}. You might be using this if you were delaying the start of the query in the
      * Join phase. This does not revalidate the query or reset any data this might have already consumed.
@@ -434,7 +428,7 @@ public class Querier implements Monoidal {
         // Only timestamps are in RunningQuery and Scheme.
         // For RunningQuery, we just need to fix the start time.
         runningQuery.start();
-        window.initialize();
+        window.start();
     }
 
     /**
@@ -674,7 +668,7 @@ public class Querier implements Monoidal {
         if (projection == null) {
             return record;
         } else if (copy) {
-            return projection.copyAndProject(record, provider);
+            return projection.project(record.copy());
         } else {
             return projection.project(record, provider);
         }

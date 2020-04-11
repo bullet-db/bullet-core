@@ -8,18 +8,27 @@ package com.yahoo.bullet.query.expressions;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Getter @RequiredArgsConstructor
+@Getter
 public class NAryExpression extends Expression {
+    private static final long serialVersionUID = -1000391436451418013L;
     private static final String DELIMITER = ", ";
 
     private final List<Expression> operands;
     private final Operation op;
+
+    public NAryExpression(List<Expression> operands, Operation op) {
+        Objects.requireNonNull(operands);
+        for (Expression operand : operands) {
+            Objects.requireNonNull(operand);
+        }
+        this.operands = operands;
+        this.op = Objects.requireNonNull(op);
+    }
 
     @Override
     public String getName() {
