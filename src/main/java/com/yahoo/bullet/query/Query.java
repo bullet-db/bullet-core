@@ -8,7 +8,6 @@ package com.yahoo.bullet.query;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Configurable;
-import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.postaggregations.Computation;
@@ -17,10 +16,9 @@ import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -28,7 +26,9 @@ import static com.yahoo.bullet.common.BulletError.makeError;
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
  */
 @Getter @Slf4j
-public class Query implements Configurable {
+public class Query implements Configurable, Serializable {
+    private static final long serialVersionUID = 592082288228551406L;
+
     private Projection projection;
     private Expression filter;
     private Aggregation aggregation;

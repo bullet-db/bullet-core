@@ -9,11 +9,11 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
@@ -26,17 +26,16 @@ public class OrderBy extends PostAggregation {
         DESC
     }
 
-    @Getter @Setter @AllArgsConstructor
-    public static class SortItem {
+    @Getter
+    public static class SortItem implements Serializable {
+        private static final long serialVersionUID = 4024279669854156179L;
+
         private String field;
         private Direction direction;
 
-        /**
-         * Default constructor. GSON recommended
-         */
-        public SortItem() {
-            field = null;
-            direction = Direction.ASC;
+        public SortItem(String field, Direction direction) {
+            this.field = Objects.requireNonNull(field);
+            this.direction = Objects.requireNonNull(direction);
         }
 
         @Override
@@ -54,7 +53,11 @@ public class OrderBy extends PostAggregation {
 
     public OrderBy(List<SortItem> fields) {
         super(Type.ORDER_BY);
-        this.fields = Utilities.requireNonNullList(fields);
+        Utilities.requireNonNullList(fields);
+        if (fields.isEmpty()) {
+            throw new IllegalArgumentException("List empty bad");
+        }
+        this.fields = fields;
     }
 
     @Override

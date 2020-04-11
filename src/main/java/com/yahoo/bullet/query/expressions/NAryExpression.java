@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
 import lombok.Getter;
@@ -22,11 +23,7 @@ public class NAryExpression extends Expression {
     private final Operation op;
 
     public NAryExpression(List<Expression> operands, Operation op) {
-        Objects.requireNonNull(operands);
-        for (Expression operand : operands) {
-            Objects.requireNonNull(operand);
-        }
-        this.operands = operands;
+        this.operands = Utilities.requireNonNullList(operands);
         this.op = Objects.requireNonNull(op);
     }
 

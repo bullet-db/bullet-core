@@ -1,3 +1,8 @@
+/*
+ *  Copyright 2020, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the compute for terms.
+ */
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
@@ -21,7 +26,11 @@ public class Culling extends PostAggregation {
 
     public Culling(Set<String> transientFields) {
         super(Type.CULLING);
-        this.transientFields = Utilities.requireNonNullSet(transientFields);
+        Utilities.requireNonNullSet(transientFields);
+        if (transientFields.isEmpty()) {
+            throw new IllegalArgumentException("Set empty bad");
+        }
+        this.transientFields = transientFields;
     }
 
     @Override

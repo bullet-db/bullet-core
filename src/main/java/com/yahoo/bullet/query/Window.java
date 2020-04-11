@@ -19,12 +19,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter @NoArgsConstructor @Slf4j
-public class Window implements Configurable {
+public class Window implements Configurable, Serializable {
+    private static final long serialVersionUID = 3671691728693727956L;
+
     /** Represents the type of the Window Unit for either emit or include. */
     @Getter @AllArgsConstructor
     public enum Unit {

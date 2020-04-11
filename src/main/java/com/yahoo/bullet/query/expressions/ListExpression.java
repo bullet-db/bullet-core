@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ListEvaluator;
 import lombok.Getter;
@@ -25,11 +26,7 @@ public class ListExpression extends Expression {
     private final List<Expression> values;
 
     public ListExpression(List<Expression> values) {
-        Objects.requireNonNull(values);
-        for (Expression value : values) {
-            Objects.requireNonNull(value);
-        }
-        this.values = values;
+        this.values = Utilities.requireNonNullList(values);
     }
 
     @Override

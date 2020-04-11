@@ -5,15 +5,19 @@
  */
 package com.yahoo.bullet.query;
 
+import com.yahoo.bullet.common.Utilities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j @Getter
-public class Projection {
+public class Projection implements Serializable {
+    private static final long serialVersionUID = -9194169391843941958L;
+
     /**
      * The type of the Projection decides how its fields are projected.
      */
@@ -41,11 +45,7 @@ public class Projection {
      * @param copy Whether the projection should copy or not copy.
      */
     public Projection(List<Field> fields, boolean copy) {
-        Objects.requireNonNull(fields);
-        for (Field field : fields) {
-            Objects.requireNonNull(field);
-        }
-        this.fields = fields;
+        this.fields = Utilities.requireNonNullList(fields);
         this.type = copy ? Type.COPY : Type.NO_COPY;
     }
 
