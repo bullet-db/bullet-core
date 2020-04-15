@@ -10,11 +10,13 @@ import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public class ManualDistributionAggregation extends DistributionAggregation {
     private static final long serialVersionUID = 7022392121466809427L;
 

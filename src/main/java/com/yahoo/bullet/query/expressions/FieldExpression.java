@@ -24,34 +24,33 @@ import java.util.Objects;
 public class FieldExpression extends Expression {
     private static final long serialVersionUID = -1659250076242321771L;
 
-    private final String field;
-    private final Integer index;
-    private final String key;
-    private final String subKey;
+    private String field;
+    private Integer index;
+    private String key;
+    private String subKey;
 
     public FieldExpression(String field) {
-        this(field, null, null, null);
+        this.field = Objects.requireNonNull(field);
     }
 
     public FieldExpression(String field, Integer index) {
-        this(field, index, null, null);
+        this.field = Objects.requireNonNull(field);
+        this.index = Objects.requireNonNull(index);
     }
 
     public FieldExpression(String field, String key) {
-        this(field, null, key, null);
+        this.field = Objects.requireNonNull(field);
+        this.key = Objects.requireNonNull(key);
     }
 
     public FieldExpression(String field, Integer index, String subKey) {
-        this(field, index, null, subKey);
+        this.field = Objects.requireNonNull(field);
+        this.index = Objects.requireNonNull(index);
+        this.subKey = Objects.requireNonNull(subKey);
     }
 
     public FieldExpression(String field, String key, String subKey) {
-        this(field, null, key, subKey);
-    }
-
-    public FieldExpression(String field, Integer index, String key, String subKey) {
         this.field = Objects.requireNonNull(field);
-        this.index = Objects.requireNonNull(index);
         this.key = Objects.requireNonNull(key);
         this.subKey = Objects.requireNonNull(subKey);
     }

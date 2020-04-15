@@ -9,7 +9,9 @@ import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import lombok.Getter;
 
+@Getter
 public class LinearDistributionAggregation extends DistributionAggregation {
     private static final long serialVersionUID = -5320252906943658246L;
 
@@ -23,7 +25,7 @@ public class LinearDistributionAggregation extends DistributionAggregation {
      * @param size The max size of the DISTRIBUTION aggregation. Can be null.
      * @param numberOfPoints The number of equidistant points for this distribution.
      */
-    protected LinearDistributionAggregation(String field, Distribution.Type type, Integer size, int numberOfPoints) {
+    public LinearDistributionAggregation(String field, Distribution.Type type, Integer size, int numberOfPoints) {
         super(field, type, size);
         if (numberOfPoints <= 0) {
             throw new IllegalArgumentException("Number of points in distribution must be positive.");

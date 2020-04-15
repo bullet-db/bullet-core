@@ -10,7 +10,9 @@ import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import lombok.Getter;
 
+@Getter
 public class RegionDistributionAggregation extends DistributionAggregation {
     private static final long serialVersionUID = -7033735418893233303L;
 

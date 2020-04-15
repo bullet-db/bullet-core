@@ -14,7 +14,6 @@ import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
 import com.yahoo.bullet.windowing.SlidingRecord;
 import com.yahoo.bullet.windowing.Tumbling;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +28,8 @@ public class Window implements Configurable, Serializable {
     private static final long serialVersionUID = 3671691728693727956L;
 
     /** Represents the type of the Window Unit for either emit or include. */
-    @Getter @AllArgsConstructor
     public enum Unit {
-        RECORD("RECORD"), TIME("TIME"), ALL("ALL");
-
-        private String name;
+        RECORD, TIME, ALL;
     }
 
     /**
@@ -59,40 +55,51 @@ public class Window implements Configurable, Serializable {
     public static final BulletError NO_RECORD_ALL = makeError("The emit type was \"RECORD\" and include type was \"ALL\"",
                                                               "Please set emit type to \"TIME\" or match include to emit");
 
-    private int emitEvery;
+    private Integer emitEvery;
     private Unit emitType;
     private Unit includeType;
-    private int includeFirst;
+    private Integer includeFirst;
 
-    public Window(int emitEvery, Unit emitType) {
+    public Window(Integer emitEvery, Unit emitType) {
+        this.emitEvery = Objects.requireNonNull(emitEvery);
+        this.emitType = Objects.requireNonNull(emitType);
         if (emitEvery <= 0) {
             throw new IllegalArgumentException("bad");
         }
         if (emitType == Unit.ALL) {
             throw new IllegalArgumentException("bad emit type");
         }
-        this.emitEvery = emitEvery;
-        this.emitType = Objects.requireNonNull(emitType);
     }
 
-    public Window(int emitEvery, Unit emitType, Unit includeType, int includeFirst) {
+    public Window(Integer emitEvery, Unit emitType, Unit includeType, Integer includeFirst) {
+        this.emitEvery = Objects.requireNonNull(emitEvery);
+        this.emitType = Objects.requireNonNull(emitType);
+        this.includeType = Objects.requireNonNull(includeType);
         if (emitEvery <= 0) {
             throw new IllegalArgumentException("bad");
         }
         if (emitType == Unit.ALL) {
             throw new IllegalArgumentException("bad emit type");
         }
-        // This is temporary. For now, emit needs to be equal to include. Change when other windows are supported.
-        if (includeType != emitType) {
-            throw new IllegalArgumentException("include type and emit type must be the same");
+        // This is temporary. For now, emit needs to be equal to include if include is not ALL.
+        // Change when other windows are supported.
+        switch (includeType) {
+            case TIME:
+            case RECORD:
+                if (includeType != emitType) {
+                    throw new IllegalArgumentException("include type and emit type must be the same");
+                }
+                if (includeFirst.intValue() != emitEvery.intValue()) {
+                    throw new IllegalArgumentException("include first and emit every must be the same");
+                }
+                this.includeFirst = Objects.requireNonNull(includeFirst);
+                break;
+            default:
+                if (emitType == Unit.RECORD) {
+                    throw new IllegalArgumentException("no record all");
+                }
+                break;
         }
-        if (includeFirst != emitEvery) {
-            throw new IllegalArgumentException("include first and emit every must be the same");
-        }
-        this.emitEvery = emitEvery;
-        this.emitType = Objects.requireNonNull(emitType);
-        this.includeType = Objects.requireNonNull(includeType);
-        this.includeFirst = includeFirst;
     }
 
     @Override
