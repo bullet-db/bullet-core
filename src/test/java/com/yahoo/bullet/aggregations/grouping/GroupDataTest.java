@@ -39,12 +39,8 @@ public class GroupDataTest {
     public void testNameExtraction() {
         GroupOperation operation;
 
-        operation = new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null);
-        Assert.assertEquals(GroupData.getResultName(operation), GroupOperation.GroupOperationType.COUNT.getName());
-
-        operation = new GroupOperation(GroupOperation.GroupOperationType.COUNT, "foo", null);
-        Assert.assertEquals(GroupData.getResultName(operation), GroupOperation.GroupOperationType.COUNT.getName() +
-                                                                  GroupData.NAME_SEPARATOR + "foo");
+        operation = new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "bar");
+        Assert.assertEquals(GroupData.getResultName(operation), "bar");
 
         operation = new GroupOperation(GroupOperation.GroupOperationType.COUNT, "foo", "bar");
         Assert.assertEquals(GroupData.getResultName(operation), "bar");
@@ -97,12 +93,12 @@ public class GroupDataTest {
 
     @Test
     public void testCountingMoreThanMaximum() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
 
         IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> data.consume(someRecord));
 
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(),
+        BulletRecord expected = RecordBox.get().add("count",
                                                     2L * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).getRecord();
         Assert.assertEquals(data.getMetricsAsBulletRecord(provider), expected);
     }
@@ -164,7 +160,7 @@ public class GroupDataTest {
 
     @Test
     public void testMergingRawMetricFail() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
         IntStream.range(0, 10).forEach(i -> data.consume(someRecord));
 
@@ -172,13 +168,13 @@ public class GroupDataTest {
         data.combine(String.valueOf(242).getBytes());
 
         // Unchanged count
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(), 10L).getRecord();
+        BulletRecord expected = RecordBox.get().add("count", 10L).getRecord();
         Assert.assertEquals(data.getMetricsAsBulletRecord(provider), expected);
     }
 
     @Test
     public void testMergingSupportedAndUnSupportedOperation() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
         IntStream.range(0, 10).forEach(i -> data.consume(someRecord));
 
@@ -190,13 +186,13 @@ public class GroupDataTest {
         data.combine(serialized);
 
         // AVG should not have influenced other counts.
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(), 10L).getRecord();
+        BulletRecord expected = RecordBox.get().add("count", 10L).getRecord();
         Assert.assertEquals(data.getMetricsAsBulletRecord(provider), expected);
     }
 
     @Test
     public void testNullRecordMin() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MIN, null, "min"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MIN, "abc", "min"));
         data.consume(RecordBox.get().add("foo", "bar").getRecord());
 
         BulletRecord expected = RecordBox.get().addNull("min").getRecord();
@@ -205,7 +201,7 @@ public class GroupDataTest {
 
     @Test
     public void testNoRecordMin() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MIN, null, "min"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MIN, "foo", "min"));
 
         // MIN will return null if no records are observed
         BulletRecord expected = RecordBox.get().addNull("min").getRecord();
@@ -257,7 +253,7 @@ public class GroupDataTest {
 
     @Test
     public void testNullRecordMax() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MAX, null, "max"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MAX, "abc", "max"));
         data.consume(RecordBox.get().add("foo", "bar").getRecord());
 
         BulletRecord expected = RecordBox.get().addNull("max").getRecord();
@@ -266,7 +262,7 @@ public class GroupDataTest {
 
     @Test
     public void testNoRecordMax() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MAX, null, "max"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.MAX, "foo", "max"));
 
         // MAX will return null if no records are observed
         BulletRecord expected = RecordBox.get().addNull("max").getRecord();
@@ -318,7 +314,7 @@ public class GroupDataTest {
 
     @Test
     public void testNullRecordSum() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.SUM, null, "sum"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.SUM, "abc", "sum"));
         data.consume(RecordBox.get().add("foo", "bar").getRecord());
 
         BulletRecord expected = RecordBox.get().addNull("sum").getRecord();
@@ -327,7 +323,7 @@ public class GroupDataTest {
 
     @Test
     public void testNoRecordSum() {
-        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.SUM, null, "sum"));
+        GroupData data = make(new GroupOperation(GroupOperation.GroupOperationType.SUM, "foo", "sum"));
 
         // SUM will return null if no records are observed
         BulletRecord expected = RecordBox.get().addNull("sum").getRecord();

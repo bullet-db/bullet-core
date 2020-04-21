@@ -30,6 +30,7 @@ public class Tumbling extends Basic {
     public Tumbling(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
         windowLength = (long) window.getEmitEvery();
+        nextCloseTime = System.currentTimeMillis() + windowLength;
     }
 
     @Override

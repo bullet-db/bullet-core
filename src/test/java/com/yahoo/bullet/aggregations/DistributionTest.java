@@ -53,6 +53,11 @@ public class DistributionTest {
                Pair.of(Concept.SKETCH_MAXIMUM_VALUE, "max"),
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
+    public static Distribution makeDistribution(BulletConfig configuration, int size, String field, Distribution.Type type, int numberOfPoints) {
+        LinearDistributionAggregation aggregation = new LinearDistributionAggregation(field, type, size, numberOfPoints);
+        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
+    }
+
     public static Distribution makeDistribution(String field, Distribution.Type type, int numberOfPoints) {
         LinearDistributionAggregation aggregation = new LinearDistributionAggregation(field, type, 20, numberOfPoints);
         BulletConfig configuration = makeConfiguration(100, 512);
@@ -495,7 +500,7 @@ public class DistributionTest {
     public void testNegativeSize() {
         // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
         // and aggregation size, which is 1
-        Distribution distribution = makeDistribution("field", Distribution.Type.PMF, 10);
+        Distribution distribution = makeDistribution(makeConfiguration(-1, 128), 1, "field", Distribution.Type.PMF, 10);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -526,8 +531,8 @@ public class DistributionTest {
     public void testRounding() {
         Distribution distribution = makeDistribution(Distribution.Type.QUANTILE, 20, 6, 0.0, 1.0, 0.1);
 
-        IntStream.range(0, 10).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
-                               .forEach(distribution::consume);
+        IntStream.range(0, 10).mapToDouble(i -> i * 0.1).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
+                              .forEach(distribution::consume);
 
         Clip result = distribution.getResult();
 

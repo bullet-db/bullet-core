@@ -57,7 +57,7 @@ public class RegionDistributionAggregation extends DistributionAggregation {
     }
 
     private double[] generatePoints(int maxPoints, int rounding) {
-        int numPoints = Math.min((int) ((end - start) / increment), maxPoints);
+        int numPoints = Math.min((int) ((end - start) / increment) + 1, maxPoints);
         double[] points = new double[numPoints];
         double d = start;
         for (int i = 0; i < numPoints; ++i) {

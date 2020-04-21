@@ -10,6 +10,7 @@ import com.yahoo.bullet.aggregations.GroupBy;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class GroupAggregation extends Aggregation {
@@ -62,19 +62,13 @@ public class GroupAggregation extends Aggregation {
     }
 
     public void addGroupOperation(GroupOperation.GroupOperationType type, String field, String name) {
-        Objects.requireNonNull(name);
-        switch (type) {
-            case COUNT:
-                addGroupOperation(new GroupOperation(type, null, name));
-                break;
-            default:
-                addGroupOperation(new GroupOperation(type, Objects.requireNonNull(field), name));
-                break;
-        }
+        addGroupOperation(new GroupOperation(type, field, name));
     }
 
     public void addGroupOperation(GroupOperation groupOperation) {
-        Objects.requireNonNull(groupOperation);
+        if (groupOperation.getType() == GroupOperation.GroupOperationType.COUNT_FIELD) {
+            throw new BulletException("COUNT_FIELD is not a valid operation.", "Please remove this operation.");
+        }
         if (operations == null) {
             operations = new HashSet<>();
         }

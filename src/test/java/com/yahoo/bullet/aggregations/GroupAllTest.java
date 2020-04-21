@@ -93,13 +93,13 @@ public class GroupAllTest {
 */
     @Test
     public void testNoRecordCount() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
 
         Assert.assertNotNull(groupAll.getData());
         List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(), 0L).getRecord();
+        BulletRecord expected = RecordBox.get().add("count", 0L).getRecord();
         Assert.assertEquals(actual, expected);
 
         Assert.assertEquals(groupAll.getRecords(), aggregate);
@@ -143,7 +143,7 @@ public class GroupAllTest {
 
     @Test
     public void testCountingMoreThanMaximum() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1L).getRecord();
 
         IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
@@ -152,7 +152,7 @@ public class GroupAllTest {
         List<BulletRecord> aggregate = groupAll.getResult().getRecords();
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(),
+        BulletRecord expected = RecordBox.get().add("count",
                                                     2L * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).getRecord();
         Assert.assertEquals(actual, expected);
 
@@ -198,7 +198,7 @@ public class GroupAllTest {
 
     @Test
     public void testCombiningMetricsFail() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, null));
+        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
         IntStream.range(0, 10).forEach(i -> groupAll.consume(someRecord));
 
@@ -210,7 +210,7 @@ public class GroupAllTest {
         Assert.assertEquals(aggregate.size(), 1);
         BulletRecord actual = aggregate.get(0);
         // Unchanged count
-        BulletRecord expected = RecordBox.get().add(GroupOperation.GroupOperationType.COUNT.getName(), 10L).getRecord();
+        BulletRecord expected = RecordBox.get().add("count", 10L).getRecord();
         Assert.assertEquals(actual, expected);
 
         Assert.assertEquals(groupAll.getRecords(), aggregate);

@@ -26,7 +26,7 @@ import static java.util.Arrays.asList;
  */
 @Getter
 public class GroupOperation implements Serializable {
-    // ************************************************ Definitions ************************************************
+    private static final long serialVersionUID = 40039294765462402L;
 
     @Getter @AllArgsConstructor
     public enum GroupOperationType {
@@ -64,39 +64,33 @@ public class GroupOperation implements Serializable {
             new HashSet<>(asList(GroupOperationType.COUNT, GroupOperationType.AVG, GroupOperationType.MAX,
                                  GroupOperationType.MIN, GroupOperationType.SUM));
 
-    private static final long serialVersionUID = 40039294765462402L;
-
     public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
     public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";
     public static final BulletError REQUIRES_FIELD_OR_OPERATION_ERROR =
             new BulletError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
-    private final GroupOperationType type;
-    private final String field;
+    private GroupOperationType type;
+    private String field;
     // Ignored purposefully for hashCode and equals
-    private final String name;
+    private String name;
 
     public GroupOperation(GroupOperationType type, String field, String name) {
         switch (type) {
             case COUNT:
-                if (field != null) {
-                    throw new BulletException("COUNT operation cannot have a field.", "Please remove the field.");
-                }
+                this.name = Objects.requireNonNull(name);
                 break;
             case SUM:
             case MIN:
             case MAX:
             case AVG:
-                if (field == null) {
-                    throw new BulletException(type.getName() + " operation requires a field.", "Please add a field for this operation.");
-                }
+                this.field = Objects.requireNonNull(field);
+                this.name = Objects.requireNonNull(name);
                 break;
-            default:
-                throw new BulletException("COUNT_FIELD is not a valid operation.", "Please remove this operation.");
+            case COUNT_FIELD:
+                this.field = Objects.requireNonNull(field);
+                break;
         }
         this.type = type;
-        this.field = field;
-        this.name = Objects.requireNonNull(name);
     }
 
     @Override

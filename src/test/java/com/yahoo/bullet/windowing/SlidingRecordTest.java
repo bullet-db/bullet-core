@@ -53,7 +53,7 @@ public class SlidingRecordTest {
         Assert.assertFalse(sliding.isClosed());
         Assert.assertFalse(sliding.isClosedForPartition());
     }
-
+/*
     @Test
     public void testImproperInitialization() {
         SlidingRecord sliding = new SlidingRecord(strategy, new Window(), config);
@@ -62,7 +62,7 @@ public class SlidingRecordTest {
         //Assert.assertTrue(errors.isPresent());
         //Assert.assertEquals(errors.get(), singletonList(SlidingRecord.NOT_RECORD));
     }
-
+*/
     @Test
     public void testNotClosedOnStrategyClosed() {
         Window window = makeSlidingWindow(5);

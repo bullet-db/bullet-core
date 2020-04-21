@@ -81,24 +81,7 @@ public class GroupOperationTest {
         Assert.assertNotEquals(c.hashCode(), d.hashCode());
         Assert.assertNotEquals(a.hashCode(), e.hashCode());
         Assert.assertNotEquals(c.hashCode(), e.hashCode());
-        Assert.assertNotEquals(d.hashCode(), e.hashCode());
-    }
-
-    @Test
-    public void testNullFieldsForHashCode() {
-        GroupOperation a = new GroupOperation(null, null, "a");
-        GroupOperation b = new GroupOperation(null, "foo", "a");
-        GroupOperation c = new GroupOperation(null, "bar", "a");
-        GroupOperation d = new GroupOperation(null, null, "b");
-        GroupOperation e = new GroupOperation(AVG, null, "avg");
-
-        Assert.assertNotEquals(a.hashCode(), b.hashCode());
-        Assert.assertNotEquals(a.hashCode(), c.hashCode());
-        Assert.assertNotEquals(b.hashCode(), c.hashCode());
-        Assert.assertEquals(a.hashCode(), d.hashCode());
-        Assert.assertNotEquals(a.hashCode(), e.hashCode());
-        Assert.assertNotEquals(b.hashCode(), e.hashCode());
-        Assert.assertNotEquals(c.hashCode(), e.hashCode());
+        Assert.assertEquals(d.hashCode(), e.hashCode());
     }
 
     @Test
@@ -115,18 +98,5 @@ public class GroupOperationTest {
         Assert.assertNotEquals(c, d);
 
         Assert.assertFalse(a.equals(e));
-    }
-
-    @Test
-    public void testNullFieldsForEquals() {
-        GroupOperation a = new GroupOperation(null, null, "a");
-        GroupOperation b = new GroupOperation(null, "foo", "a");
-        GroupOperation c = new GroupOperation(null, "bar", "a");
-        GroupOperation d = new GroupOperation(null, null, "a");
-
-        Assert.assertNotEquals(a, b);
-        Assert.assertNotEquals(a, c);
-        Assert.assertNotEquals(b, c);
-        Assert.assertEquals(a, d);
     }
 }

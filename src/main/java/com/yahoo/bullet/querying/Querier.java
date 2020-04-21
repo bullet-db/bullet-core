@@ -408,11 +408,10 @@ public class Querier implements Monoidal {
             postStrategies = postAggregations.stream().map(PostAggregation::getPostStrategy).collect(Collectors.toList());
         }
 
-        // Scheme is guaranteed to not be null.
+        // Scheme is guaranteed to not be null. It is constructed in its "start" state.
         window = query.getWindow().getScheme(strategy, config);
 
         runningQuery.start();
-        window.start();
     }
 
     /**

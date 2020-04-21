@@ -186,7 +186,7 @@ public class GroupByTest {
     @Test
     public void testGroupByOperations() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(COUNT, null, null),
+        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(COUNT, null, "count"),
                                       new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -209,10 +209,10 @@ public class GroupByTest {
 
         // count = 10 + 20, price = 10*3 + 20*3
         BulletRecord expectedA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 30L).add("priceSum", 90.0).getRecord();
+                                                .add("count", 30L).add("priceSum", 90.0).getRecord();
         // count = 9 + 1, price = 9*1 + 1*1
         BulletRecord expectedB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 10.0).getRecord();
 
         assertContains(records, expectedA);
         assertContains(records, expectedB);
@@ -227,7 +227,7 @@ public class GroupByTest {
 
         // Nominal Entries is 32. Aggregation size is also 32
         GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
-                                      singletonList(new GroupOperation(COUNT, null, null)), ALL_METADATA);
+                                      singletonList(new GroupOperation(COUNT, null, "count")), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
@@ -244,7 +244,7 @@ public class GroupByTest {
         Set<String> groups = new HashSet<>();
         for (BulletRecord record : records) {
             groups.add((String) record.typedGet("A").getValue());
-            Assert.assertEquals(record.typedGet(COUNT.getName()).getValue(), 4L);
+            Assert.assertEquals(record.typedGet("count").getValue(), 4L);
         }
         Assert.assertEquals(groups.size(), 32);
 
@@ -255,7 +255,7 @@ public class GroupByTest {
     @Test
     public void testCombining() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -270,7 +270,7 @@ public class GroupByTest {
         byte[] firstSerialized = groupBy.getData();
 
         // Remake it
-        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                          new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordC = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -281,7 +281,7 @@ public class GroupByTest {
 
         byte[] secondSerialized = groupBy.getData();
 
-        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                          new GroupOperation(SUM, "price", "priceSum"));
 
         groupBy.combine(firstSerialized);
@@ -295,13 +295,13 @@ public class GroupByTest {
 
         // count = 10 + 20 + 30, price = 10*3 + 20*3 + 30*3
         BulletRecord expectedA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 60L).add("priceSum", 180.0).getRecord();
+                                                .add("count", 60L).add("priceSum", 180.0).getRecord();
         // count = 9 + 1, price = 9*1 + 1*1
         BulletRecord expectedB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 10.0).getRecord();
         // count = 10, price = 10*10
         BulletRecord expectedC = RecordBox.get().add("fieldA", "null").add("fieldB", "null")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 100.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 100.0).getRecord();
 
         assertContains(records, expectedA);
         assertContains(records, expectedB);
@@ -314,7 +314,7 @@ public class GroupByTest {
     @Test
     public void testCombiningAndConsuming() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -326,7 +326,7 @@ public class GroupByTest {
         byte[] serialized = groupBy.getData();
 
         // Remake it
-        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                          new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordC = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -344,11 +344,11 @@ public class GroupByTest {
         Assert.assertEquals(records.size(), 3);
 
         BulletRecord expectedA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 60L).add("priceSum", 180.0).getRecord();
+                                                .add("count", 60L).add("priceSum", 180.0).getRecord();
         BulletRecord expectedB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 10.0).getRecord();
         BulletRecord expectedC = RecordBox.get().add("fieldA", "null").add("fieldB", "null")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 100.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 100.0).getRecord();
 
         assertContains(records, expectedA);
         assertContains(records, expectedB);
@@ -360,10 +360,10 @@ public class GroupByTest {
 
     @Test
     public void testMetadata() {
-        Map<String, String> fields = singletonMap("fieldA", null);
+        Map<String, String> fields = singletonMap("fieldA", "fieldA");
         // Nominal Entries is 32. Aggregation size is also 32
         GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
-                                      singletonList(new GroupOperation(COUNT, null, null)), ALL_METADATA);
+                                      singletonList(new GroupOperation(COUNT, null, "count")), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
@@ -413,7 +413,7 @@ public class GroupByTest {
     @Test
     public void testResetting() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -423,9 +423,9 @@ public class GroupByTest {
         IntStream.range(0, 10).mapToObj(i -> recordB).forEach(groupBy::consume);
 
         BulletRecord expectedA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 30L).add("priceSum", 90.0).getRecord();
+                                                .add("count", 30L).add("priceSum", 90.0).getRecord();
         BulletRecord expectedB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 10.0).getRecord();
 
         Clip aggregate = groupBy.getResult();
         Assert.assertNotNull(aggregate);
@@ -454,11 +454,11 @@ public class GroupByTest {
         Assert.assertEquals(records.size(), 3);
 
         expectedA = RecordBox.get().add("fieldA", "null").add("fieldB", "bar")
-                                   .add(COUNT.getName(), 10L).add("priceSum", 10.0).getRecord();
+                                   .add("count", 10L).add("priceSum", 10.0).getRecord();
         expectedB = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar")
-                                   .add(COUNT.getName(), 30L).add("priceSum", 90.0).getRecord();
+                                   .add("count", 30L).add("priceSum", 90.0).getRecord();
         BulletRecord expectedC = RecordBox.get().add("fieldA", "null").add("fieldB", "null")
-                                                .add(COUNT.getName(), 10L).add("priceSum", 100.0).getRecord();
+                                                .add("count", 10L).add("priceSum", 100.0).getRecord();
 
         assertContains(records, expectedA);
         assertContains(records, expectedB);

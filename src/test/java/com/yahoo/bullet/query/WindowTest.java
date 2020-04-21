@@ -85,9 +85,9 @@ public class WindowTest {
         //Assert.assertEquals(window.getType(), Window.Classification.RECORD_TIME);
         //Assert.assertFalse(window.isTimeBased());
 
-        window = new Window(500, Window.Unit.RECORD, Window.Unit.ALL, null);
-        Assert.assertEquals(window.getType(), Window.Classification.RECORD_ALL);
-        Assert.assertFalse(window.isTimeBased());
+        //window = new Window(500, Window.Unit.RECORD, Window.Unit.ALL, null);
+        //Assert.assertEquals(window.getType(), Window.Classification.RECORD_ALL);
+        //Assert.assertFalse(window.isTimeBased());
     }
 
     @Test
