@@ -6,6 +6,8 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,18 +45,17 @@ public class QueryManagerTest {
     }
 
     @SafeVarargs
-    private static Query getQuery(Pair<String, Object>... equalities) {
-        Query query = new Query();
+    private static Query getQuery(Pair<String, Serializable>... equalities) {
+        BinaryExpression expression = null;
         if (equalities != null && equalities.length > 0) {
             if (equalities.length == 1) {
-                BinaryExpression expression = new BinaryExpression(new FieldExpression(equalities[0].getLeft()),
-                                                                   new ValueExpression(equalities[0].getRight()),
-                                                                   Operation.EQUALS);
+                expression = new BinaryExpression(new FieldExpression(equalities[0].getLeft()),
+                                                  new ValueExpression(equalities[0].getRight()),
+                                                  Operation.EQUALS);
                 expression.setType(Type.BOOLEAN);
                 expression.getLeft().setType(expression.getRight().getType());
-                query.setFilter(expression);
             } else {
-                BinaryExpression expression = Arrays.stream(equalities).reduce(null, (a, b) -> {
+                expression = Arrays.stream(equalities).reduce(null, (a, b) -> {
                     BinaryExpression equals = new BinaryExpression(new FieldExpression(b.getLeft()),
                                                                    new ValueExpression(b.getRight()),
                                                                    Operation.EQUALS);
@@ -70,12 +72,15 @@ public class QueryManagerTest {
                     and.setType(Type.BOOLEAN);
                     return and;
                 });
-                query.setFilter(expression);
             }
         }
-        query.setAggregation(new Aggregation());
+        Query query = new Query(new Projection(),
+                                expression,
+                                new Aggregation(),
+                                null,
+                                new Window(),
+                                null);
         query.configure(new BulletConfig());
-        query.initialize();
         return query;
     }
 

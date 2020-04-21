@@ -11,6 +11,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -35,27 +36,9 @@ public class RecordBox {
         return this;
     }
 
-    public final RecordBox add(String name, Object value) {
+    public final RecordBox add(String name, Serializable value) {
         record.typedSet(name, new TypedObject(value));
         return this;
-        /*
-        if (value instanceof Boolean) {
-            record.setBoolean(name, (Boolean) value);
-        } else if (value instanceof Integer) {
-            record.setInteger(name, (Integer) value);
-        } else if (value instanceof Long) {
-            record.setLong(name, (Long) value);
-        } else if (value instanceof Float) {
-            record.setFloat(name, (Float) value);
-        } else if (value instanceof Double) {
-            record.setDouble(name, (Double) value);
-        } else if (value instanceof String) {
-            record.setString(name, (String) value) ;
-        } else {
-            throw new RuntimeException("Unsupported type cannot be added in test code to BulletRecord " + value);
-        }
-        return this;
-        */
     }
 
     @SafeVarargs

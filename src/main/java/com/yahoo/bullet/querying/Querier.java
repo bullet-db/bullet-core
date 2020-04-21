@@ -707,7 +707,7 @@ public class Querier implements Monoidal {
     }
 
     private Meta getErrorMeta(Exception e) {
-        return Meta.of(BulletError.makeError(e.getMessage(), TRY_AGAIN_LATER));
+        return Meta.of(new BulletError(e.getMessage(), TRY_AGAIN_LATER));
     }
 
     private void incrementRate() {

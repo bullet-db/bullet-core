@@ -63,16 +63,21 @@ public class GroupAggregation extends Aggregation {
 
     public void addGroupOperation(GroupOperation.GroupOperationType type, String field, String name) {
         Objects.requireNonNull(name);
+        switch (type) {
+            case COUNT:
+                addGroupOperation(new GroupOperation(type, null, name));
+                break;
+            default:
+                addGroupOperation(new GroupOperation(type, Objects.requireNonNull(field), name));
+                break;
+        }
+    }
+
+    public void addGroupOperation(GroupOperation groupOperation) {
+        Objects.requireNonNull(groupOperation);
         if (operations == null) {
             operations = new HashSet<>();
         }
-        switch (type) {
-            case COUNT:
-                operations.add(new GroupOperation(type, null, name));
-                break;
-            default:
-                operations.add(new GroupOperation(type, Objects.requireNonNull(field), name));
-                break;
-        }
+        operations.add(groupOperation);
     }
 }

@@ -21,6 +21,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class AggregationOperationsTest {
+    /*
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullType() {
         Aggregation aggregation = new Aggregation();
@@ -109,4 +110,5 @@ public class AggregationOperationsTest {
 
         Assert.assertEquals(AggregationOperations.findStrategy(aggregation, config).getClass(), TopK.class);
     }
+    */
 }

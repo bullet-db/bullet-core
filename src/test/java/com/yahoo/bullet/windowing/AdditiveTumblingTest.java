@@ -36,7 +36,6 @@ public class AdditiveTumblingTest {
     private Window makeAdditiveTumblingWindow(int length) {
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, length, Window.Unit.ALL, null);
         window.configure(config);
-        window.initialize();
         return window;
     }
 
@@ -57,13 +56,11 @@ public class AdditiveTumblingTest {
     @Test
     public void testCreation() {
         AdditiveTumbling additiveTumbling = make(2000, 1000);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
     }
 
     @Test
     public void testClampingToMinimumEmit() {
         AdditiveTumbling additiveTumbling = make(1000, 5000);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
         // The window is what controls this so AdditiveTumbling has 5000 for the window size
         Assert.assertEquals(additiveTumbling.windowLength, 5000L);
     }
@@ -73,7 +70,6 @@ public class AdditiveTumblingTest {
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, Integer.MAX_VALUE, Window.Unit.ALL, null);
         ClosableStrategy strategy = new ClosableStrategy();
         AdditiveTumbling additiveTumbling = new AdditiveTumbling(strategy, window, config);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
 
         Assert.assertFalse(additiveTumbling.isClosed());
         Assert.assertFalse(additiveTumbling.isClosedForPartition());
@@ -85,7 +81,6 @@ public class AdditiveTumblingTest {
     @Test
     public void testWindowIsOpenIfWithinWindowLength() {
         AdditiveTumbling additiveTumbling = make(Integer.MAX_VALUE, 1000);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
         Assert.assertFalse(additiveTumbling.isClosed());
         Assert.assertFalse(additiveTumbling.isClosedForPartition());
     }
@@ -94,7 +89,6 @@ public class AdditiveTumblingTest {
     public void testClosedWindowAfterTime() throws Exception {
         // Change minimum length to 1 ms
         AdditiveTumbling additiveTumbling = make(1, 1);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -109,7 +103,6 @@ public class AdditiveTumblingTest {
         // Change minimum length to 1 ms
         AdditiveTumbling additiveTumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
         long originalCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(originalCloseTime >= started + 1);
 
@@ -134,7 +127,6 @@ public class AdditiveTumblingTest {
         // Change minimum length to 1 ms
         AdditiveTumbling additiveTumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
         long originalCloseTime = additiveTumbling.nextCloseTime;
         Assert.assertTrue(originalCloseTime >= started + 1);
 
@@ -158,7 +150,6 @@ public class AdditiveTumblingTest {
         long started = System.currentTimeMillis();
 
         AdditiveTumbling additiveTumbling = make(1, 1);
-        Assert.assertFalse(additiveTumbling.initialize().isPresent());
 
         Thread.sleep(1);
 

@@ -8,6 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Getter;
 
@@ -28,7 +29,7 @@ public class LinearDistributionAggregation extends DistributionAggregation {
     public LinearDistributionAggregation(String field, Distribution.Type type, Integer size, int numberOfPoints) {
         super(field, type, size);
         if (numberOfPoints <= 0) {
-            throw new IllegalArgumentException("Number of points in distribution must be positive.");
+            throw new BulletException("If specifying the distribution by number of points, the number must be positive.", "Please specify a positive number.");
         }
         this.numberOfPoints = numberOfPoints;
     }

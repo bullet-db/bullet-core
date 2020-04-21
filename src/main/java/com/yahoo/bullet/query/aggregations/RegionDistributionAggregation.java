@@ -8,6 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Getter;
@@ -33,10 +34,12 @@ public class RegionDistributionAggregation extends DistributionAggregation {
     public RegionDistributionAggregation(String field, Distribution.Type type, Integer size, double start, double end, double increment) {
         super(field, type, size);
         if (!areNumbersValid(start, end, increment)) {
-            throw new IllegalArgumentException("Start, end, and/or increment values are not valid.");
+            throw new BulletException("If specifying the distribution by range and interval, the start must be less than the end and the interval must be positive.",
+                                      "Please specify valid values for 'start', 'end', and 'increment'.");
         }
         if (isRangeInvalid(start, end, type)) {
-            throw new IllegalArgumentException("Start/end values not valid for quantile distribution type");
+            throw new BulletException("The quantile distribution requires points to be within the interval [0, 1] inclusive.",
+                                      "Please specify values for 'start' and 'end' within the interval [0, 1] inclusive.");
         }
         this.start = start;
         this.end = end;

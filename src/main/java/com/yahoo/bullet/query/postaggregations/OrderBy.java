@@ -6,6 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.postaggregations.OrderByStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
@@ -14,8 +15,6 @@ import lombok.Getter;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
-import static com.yahoo.bullet.common.BulletError.makeError;
 
 @Getter
 public class OrderBy extends PostAggregation {
@@ -47,15 +46,13 @@ public class OrderBy extends PostAggregation {
     private List<SortItem> fields;
 
     public static final BulletError ORDERBY_REQUIRES_FIELDS_ERROR =
-            makeError("The ORDERBY post aggregation needs at least one field", "Please add fields.");
-    public static final BulletError ORDERBY_REQUIRES_NON_EMPTY_FIELDS_ERROR =
-            makeError("The fields in ORDERBY post aggregation must not be empty", "Please add non-empty fields.");
+            new BulletError("The ORDERBY post aggregation needs at least one field", "Please add at least one field.");
 
     public OrderBy(List<SortItem> fields) {
         super(Type.ORDER_BY);
         Utilities.requireNonNullList(fields);
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException("List empty bad");
+            throw new BulletException(ORDERBY_REQUIRES_FIELDS_ERROR);
         }
         this.fields = fields;
     }

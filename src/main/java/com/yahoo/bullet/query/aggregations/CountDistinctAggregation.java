@@ -8,6 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.aggregations.CountDistinct;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import lombok.Getter;
 
@@ -31,7 +32,7 @@ public class CountDistinctAggregation extends Aggregation {
         super(null, Type.COUNT_DISTINCT);
         Utilities.requireNonNullList(fields);
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException("List empty bad");
+            throw new BulletException("COUNT DISTINCT requires at least one field.", "Please add at least one field.");
         }
         this.fields = fields;
         this.name = Objects.requireNonNull(name);

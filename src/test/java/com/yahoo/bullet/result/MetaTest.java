@@ -34,10 +34,10 @@ public class MetaTest {
 
     @Test
     public void testMetadataWithErrors() {
-        BulletError errorA = BulletError.makeError("foo", "bar");
-        BulletError errorB = BulletError.makeError("baz", "qux");
+        BulletError errorA = new BulletError("foo", "bar");
+        BulletError errorB = new BulletError("baz", "qux");
         Meta meta = Meta.of(Arrays.asList(errorA, errorB));
-        BulletError errorC = BulletError.makeError("norf", "foo");
+        BulletError errorC = new BulletError("norf", "foo");
         meta.addErrors(Collections.singletonList(errorC));
 
         Map<String, Object> actual = meta.asMap();
@@ -54,8 +54,8 @@ public class MetaTest {
 
     @Test
     public void testOfVarargs() {
-        BulletError errorA = BulletError.makeError("foo", "bar");
-        BulletError errorB = BulletError.makeError("baz", "qux");
+        BulletError errorA = new BulletError("foo", "bar");
+        BulletError errorB = new BulletError("baz", "qux");
         Meta meta = Meta.of(errorA, errorB);
 
         Map<String, Object> actual = meta.asMap();

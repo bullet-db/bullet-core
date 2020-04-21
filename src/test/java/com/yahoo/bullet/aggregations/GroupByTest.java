@@ -10,6 +10,7 @@ import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
 import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.GroupAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -31,10 +32,7 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.query.AggregationUtils.makeGroupFields;
-import static com.yahoo.bullet.query.AggregationUtils.makeGroupOperation;
-import static com.yahoo.bullet.query.aggregations.Aggregation.Type.GROUP;
+import static com.yahoo.bullet.query.aggregations.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -47,44 +45,31 @@ public class GroupByTest {
                    Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEstimate"),
                    Pair.of(Concept.SKETCH_UNIQUES_ESTIMATE, "uniquesApprox"),
                    Pair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "stddev"));
-
-    public static Aggregation makeAggregation(Map<String, String> fields, int size, List<Map<String, String>> operations) {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(GROUP);
-        aggregation.setFields(fields);
-        aggregation.setSize(size);
-        if (operations != null) {
-            aggregation.setAttributes(makeAttributes(operations));
-        }
-        return aggregation;
-    }
-
+/*
     public static GroupBy makeGroupBy(BulletConfig configuration, Aggregation aggregation,
                                       List<Map.Entry<Concept, String>> metadata) {
         GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata));
-        by.initialize();
         return by;
     }
-
+*/
     public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
-                                      List<Map<String, String>> operations,
-                                      List<Map.Entry<Concept, String>> metadata) {
-        return makeGroupBy(configuration, makeAggregation(fields, size, operations), metadata);
+                                      List<GroupOperation> operations, List<Map.Entry<Concept, String>> metadata) {
+        GroupAggregation aggregation = new GroupAggregation(size);
+        aggregation.setFields(fields);
+        operations.forEach(aggregation::addGroupOperation);
+        return (GroupBy) aggregation.getStrategy(addMetadata(configuration, metadata));
     }
 
-    @SafeVarargs
     public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
-                                      Map<String, String>... operations) {
+                                      GroupOperation... operations) {
         return makeGroupBy(configuration, fields, size, asList(operations), ALL_METADATA);
     }
 
-    @SafeVarargs
-    public static GroupBy makeGroupBy(Map<String, String> fields, int size, Map<String, String>... operations) {
+    public static GroupBy makeGroupBy(Map<String, String> fields, int size, GroupOperation... operations) {
         return makeGroupBy(makeConfiguration(16), fields, size, asList(operations), ALL_METADATA);
     }
 
-    @SafeVarargs
-    public static GroupBy makeGroupBy(List<String> fields, int size, Map<String, String>... operations) {
+    public static GroupBy makeGroupBy(List<String> fields, int size, GroupOperation... operations) {
         return makeGroupBy(makeGroupFields(fields), size, operations);
     }
 
@@ -110,18 +95,13 @@ public class GroupByTest {
                                  BulletConfig.DEFAULT_GROUP_AGGREGATION_SKETCH_SAMPLING,
                                  BulletConfig.DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR, k);
     }
-
+/*
     @Test
     public void testNoField() {
-        GroupBy groupBy = makeGroupBy(emptyMap(), 3, makeGroupOperation(SUM, null, null));
-
-        Optional<List<BulletError>> optionalErrors = groupBy.initialize();
-        Assert.assertTrue(optionalErrors.isPresent());
-        List<BulletError> errors = optionalErrors.get();
-        Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0).getError(), GroupOperation.GROUP_OPERATION_REQUIRES_FIELD + SUM);
+        GroupBy groupBy = makeGroupBy(emptyMap(), 3, new GroupOperation(SUM, null, null));
     }
-
+*/
+/*
     @Test
     public void testAttributeOperationsUnknownOperation() {
         Aggregation aggregation = makeAggregation(emptyMap(), 10, null);
@@ -132,7 +112,8 @@ public class GroupByTest {
         // The bad operation should have been thrown out.
         Assert.assertFalse(groupBy.initialize().isPresent());
     }
-
+*/
+/*
     @Test
     public void testAttributeOperationsDuplicateOperation() {
         Aggregation aggregation = makeAggregation(emptyMap(), 10, null);
@@ -146,11 +127,12 @@ public class GroupByTest {
         // The bad ones should be removed.
         Assert.assertFalse(groupBy.initialize().isPresent());
     }
-
+*/
+/*
     @Test
     public void testInitialize() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(AVG, null, null), makeGroupOperation(SUM, null, "sum"));
+        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(AVG, null, null), new GroupOperation(SUM, null, "sum"));
         Optional<List<BulletError>> optionalErrors = groupBy.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
@@ -164,7 +146,7 @@ public class GroupByTest {
         groupBy = makeDistinct(fields, 3);
         Assert.assertFalse(groupBy.initialize().isPresent());
     }
-
+*/
     @Test
     public void testDistincts() {
         List<String> fields = asList("fieldA", "fieldB", "fieldC");
@@ -204,8 +186,8 @@ public class GroupByTest {
     @Test
     public void testGroupByOperations() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, makeGroupOperation(COUNT, null, null),
-                                      makeGroupOperation(SUM, "price", "priceSum"));
+        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(COUNT, null, null),
+                                      new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordB = RecordBox.get().addNull("fieldA").add("fieldB", "bar").add("price", 1).getRecord();
@@ -245,7 +227,7 @@ public class GroupByTest {
 
         // Nominal Entries is 32. Aggregation size is also 32
         GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
-                                      singletonList(makeGroupOperation(COUNT, null, null)), ALL_METADATA);
+                                      singletonList(new GroupOperation(COUNT, null, null)), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
@@ -273,8 +255,8 @@ public class GroupByTest {
     @Test
     public void testCombining() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                                      makeGroupOperation(SUM, "price", "priceSum"));
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                                 new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar").add("price", 1).getRecord();
@@ -288,8 +270,8 @@ public class GroupByTest {
         byte[] firstSerialized = groupBy.getData();
 
         // Remake it
-        groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                              makeGroupOperation(SUM, "price", "priceSum"));
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                         new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordC = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordD = RecordBox.get().addNull("fieldA").addNull("fieldB").add("price", 10).getRecord();
@@ -299,8 +281,8 @@ public class GroupByTest {
 
         byte[] secondSerialized = groupBy.getData();
 
-        groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                              makeGroupOperation(SUM, "price", "priceSum"));
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                         new GroupOperation(SUM, "price", "priceSum"));
 
         groupBy.combine(firstSerialized);
         groupBy.combine(secondSerialized);
@@ -332,8 +314,8 @@ public class GroupByTest {
     @Test
     public void testCombiningAndConsuming() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                                      makeGroupOperation(SUM, "price", "priceSum"));
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                                 new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar").add("price", 1).getRecord();
@@ -344,8 +326,8 @@ public class GroupByTest {
         byte[] serialized = groupBy.getData();
 
         // Remake it
-        groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                              makeGroupOperation(SUM, "price", "priceSum"));
+        groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                         new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordC = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordD = RecordBox.get().addNull("fieldA").addNull("fieldB").add("price", 10).getRecord();
@@ -381,7 +363,7 @@ public class GroupByTest {
         Map<String, String> fields = singletonMap("fieldA", null);
         // Nominal Entries is 32. Aggregation size is also 32
         GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
-                                      singletonList(makeGroupOperation(COUNT, null, null)), ALL_METADATA);
+                                      singletonList(new GroupOperation(COUNT, null, null)), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i % 64).getRecord()).forEach(groupBy::consume);
@@ -431,8 +413,8 @@ public class GroupByTest {
     @Test
     public void testResetting() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, makeGroupOperation(COUNT, null, null),
-                                      makeGroupOperation(SUM, "price", "priceSum"));
+        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, null),
+                                                 new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
         BulletRecord recordB = RecordBox.get().add("fieldA", "null").add("fieldB", "bar").add("price", 1).getRecord();

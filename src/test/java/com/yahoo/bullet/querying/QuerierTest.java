@@ -7,7 +7,6 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -18,7 +17,6 @@ import com.yahoo.bullet.windowing.Scheme;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -85,8 +83,7 @@ public class QuerierTest {
         }
 
         @Override
-        public Optional<List<BulletError>> initialize() {
-            return Optional.empty();
+        public void start() {
         }
 
         @Override

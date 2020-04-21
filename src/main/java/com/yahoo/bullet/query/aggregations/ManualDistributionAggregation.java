@@ -8,6 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.aggregations.Distribution;
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import lombok.Getter;
@@ -34,10 +35,12 @@ public class ManualDistributionAggregation extends DistributionAggregation {
         super(field, type, size);
         Utilities.requireNonNullList(points);
         if (points.isEmpty()) {
-            throw new IllegalArgumentException("List cannot be empty.");
+            throw new BulletException("If specifying the distribution by a list of points, the list must contain at least one point.",
+                                      "Please specify at least one point.");
         }
         if (isListInvalid(points, type)) {
-            throw new IllegalArgumentException("List range bad");
+            throw new BulletException("The quantile distribution requires points to be within the interval [0, 1] inclusive.",
+                                      "Please specify a list of valid points.");
         }
         this.points = points.stream().distinct().sorted().collect(Collectors.toCollection(ArrayList::new));
     }

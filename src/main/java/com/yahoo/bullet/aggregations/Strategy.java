@@ -5,18 +5,10 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.result.Meta;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
-
 public interface Strategy extends Monoidal {
-    String REQUIRES_FEED_RESOLUTION = "Please add a field for this aggregation.";
-
-    BulletError REQUIRES_FIELD_ERROR =
-            makeError("This aggregation type requires at least one field", REQUIRES_FEED_RESOLUTION);
-
     /**
      * Returns false if more data should not be consumed or combined. This method can be used to avoid passing more
      * data into this Strategy. By default, returns false unless overridden.

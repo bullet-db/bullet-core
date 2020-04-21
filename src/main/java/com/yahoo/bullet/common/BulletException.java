@@ -5,20 +5,22 @@
  */
 package com.yahoo.bullet.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.List;
+@Getter @AllArgsConstructor
+public class BulletException extends RuntimeException {
+    private static final long serialVersionUID = 2868933191828758133L;
 
-@Getter
-public class BulletException extends Exception {
-    private List<BulletError> errors;
+    private BulletError error;
 
     /**
-     * Creates a BulletException from a {@link List} of {@link BulletError} objects.
+     * Creates a BulletException from an error and resolution.
      *
-     * @param errors The errors that this should wrap.
+     * @param error The error message.
+     * @param resolution The resolution message.
      */
-    public BulletException(List<BulletError> errors) {
-        this.errors = errors;
+    public BulletException(String error, String resolution) {
+        this.error = new BulletError(error, resolution);
     }
 }

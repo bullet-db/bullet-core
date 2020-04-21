@@ -31,8 +31,8 @@ public abstract class DistributionAggregation extends Aggregation {
      */
     protected DistributionAggregation(String field, Distribution.Type type, Integer size) {
         super(size, Type.DISTRIBUTION);
-        this.field = Objects.requireNonNull(field);
-        this.distributionType = Objects.requireNonNull(type);
+        this.field = Objects.requireNonNull(field, "The field must be non-null.");
+        this.distributionType = Objects.requireNonNull(type, "The distribution type must be non-null.");
     }
 
     @Override

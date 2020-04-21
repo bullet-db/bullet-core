@@ -7,18 +7,13 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.aggregations.DistributionAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.yahoo.bullet.common.Utilities.extractFieldAsNumber;
-import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * This {@link Strategy} uses {@link QuantileSketch} to find distributions of a numeric field. Based on the size
@@ -28,29 +23,12 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
     @Getter @AllArgsConstructor
     public enum Type {
         QUANTILE("QUANTILE"),
-        PMF("PMF"),
-        CDF("CDF");
+        PMF("FREQ"),
+        CDF("CUMFREQ");
 
         private String name;
     }
-
-    // Distribution fields
-    public static final String TYPE = "type";
-    public static final String POINTS = "points";
-    public static final String RANGE_START = "start";
-    public static final String RANGE_END = "end";
-    public static final String RANGE_INCREMENT = "increment";
-    public static final String NUMBER_OF_POINTS = "numberOfPoints";
-
-    private String field;
-
-    // Validation
-    public static final Map<String, Type> SUPPORTED_DISTRIBUTION_TYPES = new HashMap<>();
-    static {
-        SUPPORTED_DISTRIBUTION_TYPES.put(Type.QUANTILE.getName(), Type.QUANTILE);
-        SUPPORTED_DISTRIBUTION_TYPES.put(Type.PMF.getName(), Type.PMF);
-        SUPPORTED_DISTRIBUTION_TYPES.put(Type.CDF.getName(), Type.CDF);
-    }
+/*
     public static final BulletError REQUIRES_TYPE_ERROR =
             makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
                       String.join(", ", SUPPORTED_DISTRIBUTION_TYPES.keySet()));
@@ -64,6 +42,9 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
                       "Please add or generate points: 0 <= point <= 1");
     public static final BulletError REQUIRES_ONE_FIELD_ERROR =
             makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
+*/
+
+    private String field;
 
     /**
      * Constructor that requires an {@link Aggregation} and a {@link BulletConfig} configuration.

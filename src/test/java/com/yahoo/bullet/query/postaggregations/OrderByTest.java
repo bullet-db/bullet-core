@@ -3,28 +3,18 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the compute for terms.
  */
-package com.yahoo.bullet.query;
+package com.yahoo.bullet.query.postaggregations;
 
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.query.postaggregations.OrderBy;
-import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 public class OrderByTest {
     @Test
     public void testToString() {
-        OrderBy aggregation = new OrderBy();
-        aggregation.setType(PostAggregation.Type.ORDER_BY);
-        Assert.assertEquals(aggregation.toString(), "{type: ORDER_BY, fields: null}");
-
-        aggregation.setFields(Arrays.asList(new OrderBy.SortItem("1", OrderBy.Direction.ASC), new OrderBy.SortItem("2", OrderBy.Direction.DESC)));
-        Assert.assertEquals(aggregation.toString(), "{type: ORDER_BY, fields: [{field: 1, direction: ASC}, {field: 2, direction: DESC}]}");
+        OrderBy orderBy = new OrderBy(Arrays.asList(new OrderBy.SortItem("1", OrderBy.Direction.ASC), new OrderBy.SortItem("2", OrderBy.Direction.DESC)));
+        Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{field: 1, direction: ASC}, {field: 2, direction: DESC}]}");
     }
 /*
     @Test

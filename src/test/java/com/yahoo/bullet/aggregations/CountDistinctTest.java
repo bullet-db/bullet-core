@@ -7,8 +7,7 @@ package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -19,54 +18,32 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.query.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 
 public class CountDistinctTest {
-    public static Aggregation makeAggregation(Map<String, String> fields, Map<String, Object> attributes) {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setFields(fields);
-        aggregation.setAttributes(attributes);
-        return aggregation;
-    }
+    private static final String DEFAULT_NAME = "count";
 
-    public static CountDistinct makeCountDistinct(BulletConfig configuration, Aggregation aggregation,
-                                                  Map.Entry<Concept, String>... metadata) {
+    @SafeVarargs
+    public static CountDistinct makeCountDistinct(BulletConfig configuration, List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
+        CountDistinctAggregation aggregation = new CountDistinctAggregation(fields, name);
         return new CountDistinct(aggregation, addMetadata(configuration, metadata));
     }
 
     @SafeVarargs
-    public static CountDistinct makeCountDistinct(BulletConfig configuration, Map<String, Object> attributes,
-                                                  List<String> fields, Map.Entry<Concept, String>... metadata) {
-        CountDistinct countDistinct = makeCountDistinct(configuration, makeAggregation(makeGroupFields(fields), attributes), metadata);
-        countDistinct.initialize();
-        return countDistinct;
+    public static CountDistinct makeCountDistinct(List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
+        CountDistinctAggregation aggregation = new CountDistinctAggregation(fields, name);
+        BulletConfig configuration = makeConfiguration(8, 1024);
+        return new CountDistinct(aggregation, addMetadata(configuration, metadata));
     }
 
-    @SafeVarargs
-    public static CountDistinct makeCountDistinct(List<String> fields, String newName, Map.Entry<Concept, String>... metadata) {
-        return makeCountDistinct(makeConfiguration(8, 1024), makeAttributes(newName), fields, metadata);
-    }
-
-    public static CountDistinct makeCountDistinct(List<String> fields, String newName) {
-        return makeCountDistinct(fields, newName, (Map.Entry<Concept, String>[]) null);
-    }
-
-    public static CountDistinct makeCountDistinct(List<String> fields) {
-        return makeCountDistinct(fields, null);
-    }
-
-    @SafeVarargs
-    public static CountDistinct makeCountDistinct(BulletConfig configuration, List<String> fields,
-                                                  Map.Entry<Concept, String>... metadata) {
-        return makeCountDistinct(configuration, null, fields, metadata);
+    public static CountDistinct makeCountDistinct(List<String> fields, String name) {
+        return makeCountDistinct(fields, name, (Map.Entry<Concept, String>[]) null);
     }
 
     public static BulletConfig makeConfiguration(int resizeFactor, float sampling, String family, String separator, int k) {
@@ -107,22 +84,15 @@ public class CountDistinctTest {
         Assert.assertEquals(CountDistinct.getResizeFactor(17), ResizeFactor.X8);
         Assert.assertEquals(CountDistinct.getResizeFactor(-10), ResizeFactor.X8);
     }
-
+/*
     @Test
     public void testFailValidateOnCountDistinctFieldsMissing() {
-        Aggregation aggregation = makeAggregation(null, null);
-        CountDistinct countDistinct = makeCountDistinct(new BulletConfig(), aggregation, null);
-
-        Optional<List<BulletError>> optionalErrors = countDistinct.initialize();
-        Assert.assertTrue(optionalErrors.isPresent());
-        List<BulletError> errors = optionalErrors.get();
-        Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Strategy.REQUIRES_FIELD_ERROR);
+        CountDistinct countDistinct = makeCountDistinct(new BulletConfig(), null, null);
     }
-
+*/
     @Test
     public void testNoRecordCount() {
-        CountDistinct countDistinct = makeCountDistinct(asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         Assert.assertNotNull(countDistinct.getData());
         List<BulletRecord> aggregate = countDistinct.getResult().getRecords();
@@ -130,13 +100,13 @@ public class CountDistinctTest {
         Assert.assertEquals(aggregate.size(), 1);
 
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add(CountDistinct.DEFAULT_NEW_NAME, 0L).getRecord();
+        BulletRecord expected = RecordBox.get().add(DEFAULT_NAME, 0L).getRecord();
         Assert.assertEquals(actual, expected);
     }
 
     @Test
     public void testSingleFieldExactCountDistinctWithoutDuplicates() {
-        CountDistinct countDistinct = makeCountDistinct(asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
@@ -147,7 +117,7 @@ public class CountDistinctTest {
         Assert.assertEquals(aggregate.size(), 1);
 
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add(CountDistinct.DEFAULT_NEW_NAME, 1000L).getRecord();
+        BulletRecord expected = RecordBox.get().add(DEFAULT_NAME, 1000L).getRecord();
         Assert.assertEquals(actual, expected);
 
         Assert.assertEquals(countDistinct.getRecords(), aggregate);
@@ -157,7 +127,7 @@ public class CountDistinctTest {
 
     @Test
     public void testSingleFieldExactCountDistinctWithDuplicates() {
-        CountDistinct countDistinct = makeCountDistinct(asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
@@ -170,7 +140,7 @@ public class CountDistinctTest {
         Assert.assertEquals(aggregate.size(), 1);
 
         BulletRecord actual = aggregate.get(0);
-        BulletRecord expected = RecordBox.get().add(CountDistinct.DEFAULT_NEW_NAME, 1000L).getRecord();
+        BulletRecord expected = RecordBox.get().add(DEFAULT_NAME, 1000L).getRecord();
         Assert.assertEquals(actual, expected);
 
         Assert.assertEquals(countDistinct.getRecords(), aggregate);
@@ -180,7 +150,7 @@ public class CountDistinctTest {
     @Test
     public void testSingleFieldApproximateCountDistinctWithMetadata() {
         BulletConfig config = makeConfiguration(4, 512);
-        CountDistinct countDistinct = makeCountDistinct(config, asList("field"),
+        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), DEFAULT_NAME,
                                                         Pair.of(Concept.SKETCH_METADATA, "aggregate_stats"),
                                                         Pair.of(Concept.SKETCH_FAMILY, "family"),
                                                         Pair.of(Concept.SKETCH_SIZE, "size"),
@@ -216,7 +186,7 @@ public class CountDistinctTest {
 
         Assert.assertEquals(clip.getRecords().size(), 1);
         BulletRecord actual = clip.getRecords().get(0);
-        double roundedEstimate = (Long) actual.typedGet(CountDistinct.DEFAULT_NEW_NAME).getValue();
+        double roundedEstimate = (Long) actual.typedGet(DEFAULT_NAME).getValue();
 
         double upperOneSigma = standardDeviations.get(KMVSketch.META_STD_DEV_1).get(KMVSketch.META_STD_DEV_UB);
         double lowerOneSigma = standardDeviations.get(KMVSketch.META_STD_DEV_1).get(KMVSketch.META_STD_DEV_LB);
@@ -240,7 +210,7 @@ public class CountDistinctTest {
     @Test
     public void testNewNamingOfResult() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"),
+        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount",
                                                         Pair.of(Concept.SKETCH_METADATA, "stats"),
                                                         Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "est"));
 
@@ -268,7 +238,7 @@ public class CountDistinctTest {
     @Test
     public void testCombiningExact() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 512).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
@@ -276,7 +246,7 @@ public class CountDistinctTest {
         byte[] firstAggregate = countDistinct.getData();
 
         // Another one
-        countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+        countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(256, 768).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                  .forEach(countDistinct::consume);
@@ -284,7 +254,7 @@ public class CountDistinctTest {
         byte[] secondAggregate = countDistinct.getData();
 
         // Final one
-        countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"),
+        countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount",
                                           Pair.of(Concept.SKETCH_METADATA, "stats"),
                                           Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "est"));
 
@@ -312,7 +282,7 @@ public class CountDistinctTest {
     @Test
     public void testCombiningAndConsuming() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
@@ -320,7 +290,7 @@ public class CountDistinctTest {
         byte[] aggregate = countDistinct.getData();
 
         // New one
-        countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+        countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 768).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                  .forEach(countDistinct::consume);
@@ -345,7 +315,7 @@ public class CountDistinctTest {
     @Test
     public void testMultipleFieldsCountDistinct() {
         BulletConfig config = makeConfiguration(4, 512);
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("fieldA", "fieldB"));
+        CountDistinct countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i).add("fieldB", 255 - i).getRecord())
                                .forEach(countDistinct::consume);
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i).add("fieldB", 255 - i).getRecord())
@@ -366,7 +336,7 @@ public class CountDistinctTest {
         BulletConfig config = makeConfiguration(4, 512);
 
         String s = BulletConfig.DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR;
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("fieldA", "fieldB"));
+        CountDistinct countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
         BulletRecord first = RecordBox.get().add("fieldA", s).add("fieldB", s + s).getRecord();
         BulletRecord second = RecordBox.get().add("fieldA", s + s).add("fieldB", s).getRecord();
         // first and second will look the same to the Sketch. third will not
@@ -389,7 +359,7 @@ public class CountDistinctTest {
     @Test
     public void testResetting() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, makeAttributes("myCount"), asList("field"));
+        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);

@@ -8,6 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.aggregations.TopK;
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +38,7 @@ public class TopKAggregation extends Aggregation {
         super(size, Type.TOP_K);
         Utilities.requireNonNullMap(fields);
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException("Map empty bad");
+            throw new BulletException("TOP K requires at least one field.", "Please add at least one field.");
         }
         this.fields = fields;
     }

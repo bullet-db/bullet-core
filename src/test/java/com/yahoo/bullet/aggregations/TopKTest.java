@@ -6,8 +6,7 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.TopKAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -22,13 +21,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
-import static com.yahoo.bullet.query.AggregationUtils.makeGroupFields;
+import static com.yahoo.bullet.query.aggregations.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -44,23 +41,16 @@ public class TopKTest {
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
 
-    public static TopK makeTopK(BulletConfig configuration, Map<String, Object> attributes,
-                                Map<String, String> fields, int size, List<Map.Entry<Concept, String>> metadata) {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.TOP_K);
-        aggregation.setFields(fields);
-        aggregation.setAttributes(attributes);
-        aggregation.setSize(size);
-
-        TopK topK = new TopK(aggregation, addMetadata(configuration, metadata));
-        topK.initialize();
-        return topK;
+    public static TopK makeTopK(BulletConfig configuration, Map<String, String> fields, int size,
+                                String name, Long threshold, List<Map.Entry<Concept, String>> metadata) {
+        TopKAggregation aggregation = new TopKAggregation(fields, size);
+        aggregation.setName(name);
+        aggregation.setThreshold(threshold);
+        return (TopK) aggregation.getStrategy(addMetadata(configuration, metadata));
     }
 
-    public static TopK makeTopK(ErrorType type, List<String> fields, String newName, int maxMapSize, int size,
-                                Long threshold) {
-        return makeTopK(makeConfiguration(type, maxMapSize), makeAttributes(newName, threshold),
-                        makeGroupFields(fields), size, ALL_METADATA);
+    public static TopK makeTopK(ErrorType type, List<String> fields, String name, int maxMapSize, int size, Long threshold) {
+        return makeTopK(makeConfiguration(type, maxMapSize), makeGroupFields(fields), size, name, threshold, ALL_METADATA);
     }
 
     public static TopK makeTopK(List<String> fields, int maxMapSize, int size) {
@@ -71,10 +61,10 @@ public class TopKTest {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.TOP_K_AGGREGATION_SKETCH_ENTRIES, maxMapSize);
         config.set(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE,
-                errorType == ErrorType.NO_FALSE_POSITIVES ? TopK.NO_FALSE_POSITIVES : TopK.NO_FALSE_NEGATIVES);
+                   errorType == ErrorType.NO_FALSE_POSITIVES ? TopK.NO_FALSE_POSITIVES : TopK.NO_FALSE_NEGATIVES);
         return config;
     }
-
+/*
     @Test
     public void testInitialize() {
         TopK topK = makeTopK(null, 32, 10);
@@ -88,7 +78,7 @@ public class TopKTest {
         topK = makeTopK(asList("fieldA", "fieldB"), 32, 10);
         Assert.assertFalse(topK.initialize().isPresent());
     }
-
+*/
     @Test
     public void testExactTopK() {
         TopK topK = makeTopK(asList("A", "B"), 64, 20);
@@ -115,7 +105,7 @@ public class TopKTest {
             Assert.assertTrue(fieldA < 3);
             Assert.assertTrue(fieldB < 4);
             fields.add(fieldA * 3 + fieldB * 4);
-            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 83L);
+            Assert.assertEquals(actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue(), 83L);
         }
         Assert.assertEquals(fields.size(), 12);
 
@@ -209,7 +199,7 @@ public class TopKTest {
         for (int i = 0; i < 3; ++i) {
             BulletRecord actual = records.get(i);
             int fieldA = Integer.valueOf((String) actual.typedGet("A").getValue());
-            long count = (Long) actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue();
+            long count = (Long) actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue();
             if (fieldA == 0) {
                 Assert.assertTrue(count >= 23L);
                 Assert.assertTrue(count <= 23L + error);
@@ -225,7 +215,7 @@ public class TopKTest {
         }
         // The last one is one of the other records
         BulletRecord actual = records.get(3);
-        long count = (Long) actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue();
+        long count = (Long) actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue();
         Assert.assertTrue(count >= 1L);
         Assert.assertTrue(count <= 1L + error);
 
@@ -257,9 +247,9 @@ public class TopKTest {
 
         Assert.assertEquals(records.size(), 3);
 
-        BulletRecord expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 22L).getRecord();
-        BulletRecord expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 21L).getRecord();
-        BulletRecord expectedC = RecordBox.get().add("A", "2").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
+        BulletRecord expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 22L).getRecord();
+        BulletRecord expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 21L).getRecord();
+        BulletRecord expectedC = RecordBox.get().add("A", "2").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 20L).getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
         Assert.assertEquals(records.get(2), expectedC);
@@ -270,7 +260,7 @@ public class TopKTest {
 
     @Test
     public void testNullAttributes() {
-        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 32), null, singletonMap("A", "foo"), 16, null);
+        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 32), singletonMap("A", "foo"), 16, null, null, null);
         IntStream.range(0, 16).mapToObj(i -> RecordBox.get().add("A", i).getRecord()).forEach(topK::consume);
 
         Clip result = topK.getResult();
@@ -282,7 +272,7 @@ public class TopKTest {
             Assert.assertEquals(actual.fieldCount(), 2);
             int fieldA = Integer.valueOf((String) actual.typedGet("foo").getValue());
             Assert.assertTrue(fieldA < 16);
-            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
+            Assert.assertEquals(actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);
@@ -291,8 +281,8 @@ public class TopKTest {
 
     @Test
     public void testBadMaxMapEntries() {
-        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, -1), null, singletonMap("A", "foo"),
-                             BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null);
+        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, -1), singletonMap("A", "foo"),
+                             BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null, null, null);
         int uniqueGroups = BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES / 4;
 
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
@@ -307,15 +297,15 @@ public class TopKTest {
             Assert.assertEquals(actual.fieldCount(), 2);
             int fieldA = Integer.valueOf((String) actual.typedGet("foo").getValue());
             Assert.assertTrue(fieldA < uniqueGroups);
-            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
+            Assert.assertEquals(actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);
         Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
 
         // Not a power of 2
-        TopK another = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 5), null, singletonMap("A", "foo"),
-                                BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null);
+        TopK another = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, 5), singletonMap("A", "foo"),
+                                BulletConfig.DEFAULT_TOP_K_AGGREGATION_SKETCH_ENTRIES, null, null, null);
         IntStream.range(0, uniqueGroups).mapToObj(i -> RecordBox.get().add("A", i).getRecord())
                                         .forEach(another::consume);
 
@@ -335,7 +325,7 @@ public class TopKTest {
         fields.put("A", "foo");
         fields.put("fieldB", "");
 
-        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, -1), null, fields, 16, null);
+        TopK topK = makeTopK(makeConfiguration(ErrorType.NO_FALSE_NEGATIVES, -1), fields, 16, null, null, null);
         IntStream.range(0, 16).mapToObj(i -> RecordBox.get().add("A", i).add("fieldB", 32 - i).getRecord())
                               .forEach(topK::consume);
 
@@ -350,7 +340,7 @@ public class TopKTest {
             int fieldB = Integer.valueOf((String) actual.typedGet("fieldB").getValue());
             Assert.assertTrue(fieldA < 16);
             Assert.assertTrue(fieldB > 16);
-            Assert.assertEquals(actual.typedGet(TopK.DEFAULT_NEW_NAME).getValue(), 1L);
+            Assert.assertEquals(actual.typedGet(TopKAggregation.DEFAULT_NAME).getValue(), 1L);
         }
 
         Assert.assertEquals(topK.getRecords(), records);
@@ -362,9 +352,9 @@ public class TopKTest {
         TopK topK = makeTopK(asList("A", "B"), 64, 4);
         IntStream.range(0, 60).mapToObj(i -> RecordBox.get().add("A", i % 3).getRecord()).forEach(topK::consume);
 
-        BulletRecord expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
-        BulletRecord expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
-        BulletRecord expectedC = RecordBox.get().add("A", "2").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 20L).getRecord();
+        BulletRecord expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 20L).getRecord();
+        BulletRecord expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 20L).getRecord();
+        BulletRecord expectedC = RecordBox.get().add("A", "2").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 20L).getRecord();
 
         Clip result = topK.getResult();
         List<BulletRecord> records = result.getRecords();
@@ -384,8 +374,8 @@ public class TopKTest {
         records = result.getRecords();
         Assert.assertEquals(records.size(), 2);
 
-        expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 2L).getRecord();
-        expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopK.DEFAULT_NEW_NAME, 1L).getRecord();
+        expectedA = RecordBox.get().add("A", "0").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 2L).getRecord();
+        expectedB = RecordBox.get().add("A", "1").add("B", "null").add(TopKAggregation.DEFAULT_NAME, 1L).getRecord();
         Assert.assertEquals(records.get(0), expectedA);
         Assert.assertEquals(records.get(1), expectedB);
 

@@ -41,7 +41,6 @@ public class BasicTest {
     public void testCreation() {
         Basic basic = new Basic(strategy, null, config);
         Assert.assertNotNull(basic.getMetadata());
-        Assert.assertFalse(basic.initialize().isPresent());
     }
 
     @Test

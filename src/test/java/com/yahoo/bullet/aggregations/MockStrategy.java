@@ -5,14 +5,12 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 public class MockStrategy implements Strategy {
@@ -24,7 +22,6 @@ public class MockStrategy implements Strategy {
     private int metadataCalls = 0;
     private int resetCalls = 0;
     private int closedCalls = 0;
-    private int initializeCalls = 0;
 
     @Override
     public void consume(BulletRecord data) {
@@ -57,12 +54,6 @@ public class MockStrategy implements Strategy {
     @Override
     public void reset() {
         resetCalls++;
-    }
-
-    @Override
-    public Optional<List<BulletError>> initialize() {
-        initializeCalls++;
-        return Optional.empty();
     }
 
     @Override

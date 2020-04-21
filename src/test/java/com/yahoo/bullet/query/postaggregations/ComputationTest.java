@@ -3,7 +3,7 @@
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the compute for terms.
  */
-package com.yahoo.bullet.query;
+package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.query.postaggregations.Computation;

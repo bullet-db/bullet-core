@@ -6,7 +6,6 @@
 package com.yahoo.bullet.postaggregations;
 
 import com.yahoo.bullet.query.postaggregations.OrderBy;
-import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.RecordBox;
@@ -19,10 +18,7 @@ import java.util.List;
 
 public class OrderByStrategyTest {
     private OrderByStrategy makeOrderBy(List<OrderBy.SortItem> sortItems) {
-        OrderBy orderBy = new OrderBy();
-        orderBy.setType(PostAggregation.Type.ORDER_BY);
-        orderBy.setFields(sortItems);
-        return new OrderByStrategy(orderBy);
+        return (OrderByStrategy) new OrderBy(sortItems).getPostStrategy();
     }
 
     @Test

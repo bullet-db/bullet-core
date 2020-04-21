@@ -24,13 +24,11 @@ import static java.util.stream.Collectors.toList;
 
 public class RawTest {
     private static Raw makeRaw(int size, int maxSize) {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setSize(size);
+        Aggregation aggregation = new Aggregation(size);
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
-        Raw raw = new Raw(aggregation, config.validate());
-        raw.initialize();
-        return raw;
+        config.validate();
+        return (Raw) aggregation.getStrategy(config);
     }
 
     private static Raw makeRaw(int size) {
@@ -39,7 +37,7 @@ public class RawTest {
 
     @Test
     public void testInitialize() {
-        Assert.assertFalse(makeRaw(20, 15).initialize().isPresent());
+        makeRaw(20, 15);
     }
 
     @Test

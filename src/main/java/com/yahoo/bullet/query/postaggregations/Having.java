@@ -13,14 +13,12 @@ import lombok.Getter;
 
 import java.util.Objects;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
-
 @Getter
 public class Having extends PostAggregation {
     private static final long serialVersionUID = -123184459098221770L;
 
     public static final BulletError HAVING_REQUIRES_EXPRESSION =
-            makeError("The HAVING post-aggregation requires an expression.", "Please add an expression.");
+            new BulletError("The HAVING post-aggregation requires an expression.", "Please add an expression.");
 
     private Expression expression;
 

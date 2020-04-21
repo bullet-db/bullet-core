@@ -6,32 +6,25 @@
 package com.yahoo.bullet.aggregations.grouping;
 
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.common.BulletException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
 import static java.util.Arrays.asList;
 
 /**
  * This class captures an operation that will be performed on an entire group - counts, sums, mins etc.
  * Other than count, all other operations include a field name on which the operation is applied.
  */
-@AllArgsConstructor @Getter
+@Getter
 public class GroupOperation implements Serializable {
     // ************************************************ Definitions ************************************************
 
@@ -50,8 +43,6 @@ public class GroupOperation implements Serializable {
 
     public interface GroupOperator extends BiFunction<Number, Number, Number> {
     }
-
-    // ************************************************ Operations ************************************************
 
     // If either argument is null, a NullPointerException will be thrown.
     public static final GroupOperator MIN = (x, y) -> x.doubleValue() <  y.doubleValue() ? x : y;
@@ -73,26 +64,40 @@ public class GroupOperation implements Serializable {
             new HashSet<>(asList(GroupOperationType.COUNT, GroupOperationType.AVG, GroupOperationType.MAX,
                                  GroupOperationType.MIN, GroupOperationType.SUM));
 
-    // ************************************************ Fields ************************************************
-
     private static final long serialVersionUID = 40039294765462402L;
 
     public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
     public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";
     public static final BulletError REQUIRES_FIELD_OR_OPERATION_ERROR =
-            makeError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
-
-    public static final String OPERATIONS = "operations";
-    public static final String OPERATION_TYPE = "type";
-    public static final String OPERATION_FIELD = "field";
-    public static final String OPERATION_NEW_NAME = "newName";
+            new BulletError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
     private final GroupOperationType type;
     private final String field;
     // Ignored purposefully for hashCode and equals
     private final String name;
 
-    // ************************************************ Methods ************************************************
+    public GroupOperation(GroupOperationType type, String field, String name) {
+        switch (type) {
+            case COUNT:
+                if (field != null) {
+                    throw new BulletException("COUNT operation cannot have a field.", "Please remove the field.");
+                }
+                break;
+            case SUM:
+            case MIN:
+            case MAX:
+            case AVG:
+                if (field == null) {
+                    throw new BulletException(type.getName() + " operation requires a field.", "Please add a field for this operation.");
+                }
+                break;
+            default:
+                throw new BulletException("COUNT_FIELD is not a valid operation.", "Please remove this operation.");
+        }
+        this.type = type;
+        this.field = field;
+        this.name = Objects.requireNonNull(name);
+    }
 
     @Override
     public int hashCode() {

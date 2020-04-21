@@ -6,6 +6,8 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.record.BulletRecord;
@@ -39,13 +41,16 @@ public class SimpleEqualityPartitionerTest {
     }
 
     private Query createQuery() {
-        Query query = new Query();
+        Query query = new Query(new Projection(),
+                                null,
+                                new Aggregation(),
+                                null,
+                                new Window(),
+                                null);
         //if (filters != null) {
             //query.setFilters(asList(filters));
         //}
-        query.setAggregation(new Aggregation());
         query.configure(config);
-        query.initialize();
         return query;
     }
 

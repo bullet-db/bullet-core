@@ -8,14 +8,14 @@ package com.yahoo.bullet.common;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-
-import static com.yahoo.bullet.common.BulletError.makeError;
-
 public class BulletExceptionTest {
     @Test
     public void testWrappingExceptions() {
-        BulletException pe = new BulletException(Collections.singletonList(makeError("foo", "bar")));
-        Assert.assertEquals(pe.getErrors().size(), 1);
+        BulletException exception1 = new BulletException(new BulletError("foo", "bar"));
+        BulletException exception2 = new BulletException("foo", "bar");
+
+        Assert.assertNotNull(exception1.getError());
+        Assert.assertNotNull(exception2.getError());
+        Assert.assertEquals(exception1.getError(), exception2.getError());
     }
 }

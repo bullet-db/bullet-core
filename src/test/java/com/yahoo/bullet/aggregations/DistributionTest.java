@@ -6,8 +6,9 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.LinearDistributionAggregation;
+import com.yahoo.bullet.query.aggregations.ManualDistributionAggregation;
+import com.yahoo.bullet.query.aggregations.RegionDistributionAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -20,11 +21,9 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,7 +40,6 @@ import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.SEPARATOR;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.START_INCLUSIVE;
 import static com.yahoo.bullet.aggregations.sketches.QuantileSketch.VALUE_FIELD;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.AggregationUtils.makeAttributes;
 import static java.util.Arrays.asList;
 
 public class DistributionTest {
@@ -55,29 +53,22 @@ public class DistributionTest {
                Pair.of(Concept.SKETCH_MAXIMUM_VALUE, "max"),
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
-    public static Distribution makeDistribution(BulletConfig configuration, Map<String, Object> attributes,
-                                                String field, int size, List<Map.Entry<Concept, String>> metadata) {
-        Aggregation aggregation = new Aggregation();
-        aggregation.setFields(Collections.singletonMap(field, field));
-        aggregation.setSize(size);
-        aggregation.setAttributes(attributes);
-
-        Distribution distribution = new Distribution(aggregation, addMetadata(configuration, metadata));
-        distribution.initialize();
-        return distribution;
-    }
-
-    public static Distribution makeDistribution(String field, Distribution.Type type, long numberOfPoints) {
-        return makeDistribution(makeConfiguration(100, 512), makeAttributes(type, numberOfPoints), field, 20, ALL_METADATA);
+    public static Distribution makeDistribution(String field, Distribution.Type type, int numberOfPoints) {
+        LinearDistributionAggregation aggregation = new LinearDistributionAggregation(field, type, 20, numberOfPoints);
+        BulletConfig configuration = makeConfiguration(100, 512);
+        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
     public static Distribution makeDistribution(Distribution.Type type, int maxPoints, int rounding, double start, double end, double increment) {
-        return makeDistribution(makeConfiguration(maxPoints, 128, rounding), makeAttributes(type, start, end, increment),
-                                "field", 20, ALL_METADATA);
+        RegionDistributionAggregation aggregation = new RegionDistributionAggregation("field", type, 20, start, end, increment);
+        BulletConfig configuration = makeConfiguration(maxPoints, 128, rounding);
+        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
     public static Distribution makeDistribution(Distribution.Type type, List<Double> points) {
-        return makeDistribution(makeConfiguration(10, 128), makeAttributes(type, points), "field", 20, ALL_METADATA);
+        ManualDistributionAggregation aggregation = new ManualDistributionAggregation("field", type, 20, points);
+        BulletConfig configuration = makeConfiguration(10, 128);
+        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
     public static BulletConfig makeConfiguration(int maxPoints, int k, int rounding) {
@@ -91,7 +82,7 @@ public class DistributionTest {
     public static BulletConfig makeConfiguration(int maxPoints, int k) {
         return makeConfiguration(maxPoints, k, 4);
     }
-
+/*
     @Test
     public void testInitialize() {
         Optional<List<BulletError>> optionalErrors;
@@ -311,7 +302,7 @@ public class DistributionTest {
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
-
+*/
     @Test
     public void testQuantiles() {
         Distribution distribution = makeDistribution("field", Distribution.Type.QUANTILE, 3);
@@ -504,8 +495,7 @@ public class DistributionTest {
     public void testNegativeSize() {
         // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
         // and aggregation size, which is 1
-        Distribution distribution = makeDistribution(makeConfiguration(-1, 128), makeAttributes(Distribution.Type.PMF, 10L),
-                                                     "field", 1, ALL_METADATA);
+        Distribution distribution = makeDistribution("field", Distribution.Type.PMF, 10);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -606,15 +596,5 @@ public class DistributionTest {
         Assert.assertEquals(records.get(2), expectedC);
         Assert.assertEquals(distribution.getRecords(), records);
         Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
-    }
-
-    @Test
-    public void testDistributionTypeIdentifying() {
-        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("quantile"));
-        Assert.assertFalse(Distribution.Type.QUANTILE.isMe("foo"));
-        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(null));
-        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(""));
-        Assert.assertFalse(Distribution.Type.QUANTILE.isMe(Distribution.Type.PMF.getName()));
-        Assert.assertTrue(Distribution.Type.QUANTILE.isMe(Distribution.Type.QUANTILE.getName()));
     }
 }

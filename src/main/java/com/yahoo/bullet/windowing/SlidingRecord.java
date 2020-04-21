@@ -7,7 +7,6 @@ package com.yahoo.bullet.windowing;
 
 import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
@@ -18,14 +17,11 @@ import lombok.Getter;
 import java.io.Serializable;
 import java.util.Map;
 
-import static com.yahoo.bullet.common.BulletError.makeError;
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 public class SlidingRecord extends Basic {
     public static String NAME = "Sliding";
 
-    public static final BulletError NOT_RECORD = makeError("The \"type\" for \"emit\" was not \"RECORD\"",
-                                                           "Please set \"type\" to \"RECORD\"");
     private int maxCount;
     private int recordCount;
 

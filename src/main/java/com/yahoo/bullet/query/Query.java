@@ -7,6 +7,7 @@ package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -19,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
-import static com.yahoo.bullet.common.BulletError.makeError;
 
 /**
  * This class is the top level Bullet Query specification. It holds the definition of the Query.
@@ -36,12 +35,12 @@ public class Query implements Configurable, Serializable {
     private Window window;
     private Long duration;
 
-    public static final BulletError IMMUTABLE_RECORD = makeError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and pass-through projection",
-                                                                 "This is a bug if this query came from BQL");
-    public static final BulletError ONLY_RAW_RECORD = makeError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
-                                                                "Change your aggregation type or your window emit type to \"TIME\"");
-    public static final BulletError NO_RAW_ALL = makeError("The \"RAW\" aggregation types cannot have window include \"ALL\"",
-                                                           "Change your aggregation type or your window include type");
+    public static final BulletError IMMUTABLE_RECORD = new BulletError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and pass-through projection",
+                                                                       "This is a bug if this query came from BQL");
+    public static final BulletError ONLY_RAW_RECORD = new BulletError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
+                                                                      "Change your aggregation type or your window emit type to \"TIME\"");
+    public static final BulletError NO_RAW_ALL = new BulletError("The \"RAW\" aggregation type cannot have window include \"ALL\"",
+                                                                 "Change your aggregation type or your window include type");
 
     public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
         this.projection = Objects.requireNonNull(projection);
@@ -58,10 +57,10 @@ public class Query implements Configurable, Serializable {
         Aggregation.Type type = aggregation.getType();
         Window.Classification kind = window.getType();
         if (type != Aggregation.Type.RAW && kind == Window.Classification.RECORD_RECORD) {
-            throw new IllegalArgumentException("only RAW aggregation can have window emit type RECORD");
+            throw new BulletException(ONLY_RAW_RECORD);
         }
         if (type == Aggregation.Type.RAW && kind == Window.Classification.TIME_ALL) {
-            throw new IllegalArgumentException("RAW aggregation can't have window include ALL");
+            throw new BulletException(NO_RAW_ALL);
         }
     }
 
@@ -69,7 +68,7 @@ public class Query implements Configurable, Serializable {
         if (postAggregations == null || postAggregations.isEmpty()) {
             return;
         }
-        // make sure postaggregations are distinct and in order
+        // Make sure postaggregations are distinct and in order
         int prev = -1;
         for (PostAggregation postAggregation : postAggregations) {
             int priority = postAggregation.getType().getPriority();
@@ -81,11 +80,11 @@ public class Query implements Configurable, Serializable {
                 prev = priority;
             }
         }
-        // immutable record
+        // Immutable record
         if (projection.getType() == Projection.Type.PASS_THROUGH && aggregation.getType() == Aggregation.Type.RAW &&
             postAggregations.stream().anyMatch(postAggregation -> postAggregation instanceof Computation ||
                                                                   postAggregation instanceof Culling)) {
-            throw new IllegalArgumentException("Cannot have computation/culling post aggregation with RAW aggregation type and pass-through projection");
+            throw new BulletException(IMMUTABLE_RECORD);
         }
     }
 
@@ -97,9 +96,8 @@ public class Query implements Configurable, Serializable {
         boolean disableWindowing = config.getAs(BulletConfig.WINDOW_DISABLE, Boolean.class);
         if (disableWindowing) {
             window = new Window();
-        } else if (window != null) {
-            window.configure(config);
         }
+        window.configure(config);
 
         long durationDefault = config.getAs(BulletConfig.QUERY_DEFAULT_DURATION, Long.class);
         long durationMax = config.getAs(BulletConfig.QUERY_MAX_DURATION, Long.class);

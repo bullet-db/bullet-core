@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.aggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.avro.TypedAvroBulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -13,7 +12,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 public class StrategyTest {
     private static class EmptyStrategy implements Strategy {
@@ -42,11 +40,6 @@ public class StrategyTest {
 
         @Override
         public void reset() {
-        }
-
-        @Override
-        public Optional<List<BulletError>> initialize() {
-            return Optional.empty();
         }
     }
     @Test
