@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.ValueEvaluator;
 import com.yahoo.bullet.typesystem.Type;
@@ -14,8 +15,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * An expression that takes a value. A primitive type must be specified since the value is always represented by a string.
- * If the type isn't specified, it's assumed to be string unless the value is null.
+ * An expression that takes a value. A primitive or null must be specified.
  */
 @Getter
 public class ValueExpression extends Expression {
@@ -26,14 +26,9 @@ public class ValueExpression extends Expression {
     public ValueExpression(Serializable value) {
         this.value = value;
         this.type = Type.getType(value);
-    }
-
-    @Override
-    public String getName() {
-        if (type == Type.STRING) {
-            return "'" + value.toString() + "'";
+        if (!Type.isPrimitive(type) && !Type.isNull(type)) {
+            throw new BulletException("Value must be primitive or null.", "Please specify a valid value.");
         }
-        return value.toString();
     }
 
     @Override
@@ -58,8 +53,17 @@ public class ValueExpression extends Expression {
         return Objects.hash(value, type);
     }
 
+    private String toFormattedString() {
+        if (type == Type.STRING) {
+            return "'" + value.toString() + "'";
+        } else if (type == Type.NULL) {
+            return "null";
+        }
+        return value.toString();
+    }
+
     @Override
     public String toString() {
-        return "{value: " + getName() + ", " + super.toString() + "}";
+        return "{value: " + toFormattedString() + ", " + super.toString() + "}";
     }
 }

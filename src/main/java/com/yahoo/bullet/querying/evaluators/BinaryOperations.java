@@ -26,17 +26,15 @@ public class BinaryOperations {
         TypedObject rightValue = right.evaluate(record);
         Type type = getResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
-            case INTEGER:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) + getInteger(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) + getLong(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) + getFloat(rightValue));
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) + getDouble(rightValue));
+            case FLOAT:
+                return new TypedObject(Type.FLOAT, getFloat(leftValue) + getFloat(rightValue));
+            case LONG:
+                return new TypedObject(Type.LONG, getLong(leftValue) + getLong(rightValue));
+            default:
+                return new TypedObject(Type.INTEGER, getInteger(leftValue) + getInteger(rightValue));
         }
-        // TODO should not be reached after expressions type-checking
-        throw new UnsupportedOperationException("'+' operands must have numeric type.");
     };
 
     static BinaryOperator SUB = (left, right, record) -> {
@@ -44,17 +42,15 @@ public class BinaryOperations {
         TypedObject rightValue = right.evaluate(record);
         Type type = getResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
-            case INTEGER:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) - getInteger(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) - getLong(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) - getFloat(rightValue));
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) - getDouble(rightValue));
+            case FLOAT:
+                return new TypedObject(Type.FLOAT, getFloat(leftValue) - getFloat(rightValue));
+            case LONG:
+                return new TypedObject(Type.LONG, getLong(leftValue) - getLong(rightValue));
+            default:
+                return new TypedObject(Type.INTEGER, getInteger(leftValue) - getInteger(rightValue));
         }
-        // TODO should not be reached after expressions type-checking
-        throw new UnsupportedOperationException("'-' operands must have numeric type.");
     };
 
     static BinaryOperator MUL = (left, right, record) -> {
@@ -62,17 +58,15 @@ public class BinaryOperations {
         TypedObject rightValue = right.evaluate(record);
         Type type = getResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
-            case INTEGER:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) * getInteger(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) * getLong(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) * getFloat(rightValue));
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) * getDouble(rightValue));
+            case FLOAT:
+                return new TypedObject(Type.FLOAT, getFloat(leftValue) * getFloat(rightValue));
+            case LONG:
+                return new TypedObject(Type.LONG, getLong(leftValue) * getLong(rightValue));
+            default:
+                return new TypedObject(Type.INTEGER, getInteger(leftValue) * getInteger(rightValue));
         }
-        // TODO should not be reached after expressions type-checking
-        throw new UnsupportedOperationException("'*' operands must have numeric type.");
     };
 
     static BinaryOperator DIV = (left, right, record) -> {
@@ -80,17 +74,15 @@ public class BinaryOperations {
         TypedObject rightValue = right.evaluate(record);
         Type type = getResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
-            case INTEGER:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) / getLong(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) / getFloat(rightValue));
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) / getDouble(rightValue));
+            case FLOAT:
+                return new TypedObject(Type.FLOAT, getFloat(leftValue) / getFloat(rightValue));
+            case LONG:
+                return new TypedObject(Type.LONG, getLong(leftValue) / getLong(rightValue));
+            default:
+                return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
         }
-        // TODO should not be reached after expressions type-checking
-        throw new UnsupportedOperationException("'/' operands must have numeric type.");
     };
 
     static BinaryOperator EQUALS = (left, right, record) -> {
@@ -102,14 +94,14 @@ public class BinaryOperations {
     static BinaryOperator EQUALS_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
@@ -122,14 +114,14 @@ public class BinaryOperations {
     static BinaryOperator NOT_EQUALS_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> !leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static BinaryOperator NOT_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().noneMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
@@ -142,14 +134,14 @@ public class BinaryOperations {
     static BinaryOperator GREATER_THAN_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
     static BinaryOperator GREATER_THAN_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
@@ -162,14 +154,14 @@ public class BinaryOperations {
     static BinaryOperator LESS_THAN_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
     static BinaryOperator LESS_THAN_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
@@ -182,14 +174,14 @@ public class BinaryOperations {
     static BinaryOperator GREATER_THAN_OR_EQUALS_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
     static BinaryOperator GREATER_THAN_OR_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
@@ -202,42 +194,30 @@ public class BinaryOperations {
     static BinaryOperator LESS_THAN_OR_EQUALS_ANY = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 
     static BinaryOperator LESS_THAN_OR_EQUALS_ALL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType().getSubType();
+        Type subType = leftValue.getType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 
     static BinaryOperator REGEX_LIKE = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type leftType = leftValue.getType();
-        Type rightType = rightValue.getType();
-        // TODO push to expressions type-checking
-        if (leftType != Type.STRING) {
-            throw new UnsupportedOperationException("'RLIKE' left operand must have type STRING.");
-        }
-        if (rightType == Type.STRING) {
-            return new TypedObject(Type.BOOLEAN, Pattern.compile((String) rightValue.getValue()).matcher((String) leftValue.getValue()).matches());
-        }
-        // TODO push to expressions type-checking
-        //if (rightType == Type.LIST && leftType == rightValue.getPrimitiveType()) {
-        //    String value = leftValue.getString();
-        //    return new TypedObject(rightValue.getList().stream().map(o -> Pattern.compile((String) o).matcher(value)).anyMatch(Matcher::matches));
-        //}
-        throw new UnsupportedOperationException("'RLIKE' right operand must have type STRING or have type LIST with primitive type STRING.");
+        return new TypedObject(Type.BOOLEAN, Pattern.compile((String) rightValue.getValue()).matcher((String) leftValue.getValue()).matches());
+        // TODO REGEX_LIKE_ANY?
+        //String value = (String) leftValue.getValue();
+        //return new TypedObject(rightValue.getList().stream().map(o -> Pattern.compile((String) o).matcher(value)).anyMatch(Matcher::matches));
     };
 
     static BinaryOperator SIZE_IS = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        int size = leftValue.size();
-        return new TypedObject(Type.BOOLEAN, (int) rightValue.getValue() == size);
+        return new TypedObject(Type.BOOLEAN, leftValue.size() == (int) rightValue.getValue());
     };
 
     static BinaryOperator CONTAINS_KEY = (left, right, record) -> {
@@ -279,9 +259,6 @@ public class BinaryOperations {
     };
 
     private static Type getResultType(Type left, Type right) {
-        if (!Type.NUMERICS.contains(left) || !Type.NUMERICS.contains(right)) {
-            return Type.NULL;
-        }
         if (left == Type.DOUBLE || right == Type.DOUBLE) {
             return Type.DOUBLE;
         }

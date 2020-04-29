@@ -9,10 +9,14 @@ import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.expressions.NAryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+// For testing only
+@Getter(AccessLevel.PACKAGE)
 public class NAryEvaluator extends Evaluator {
     private List<Evaluator> operands;
     private NAryOperator op;

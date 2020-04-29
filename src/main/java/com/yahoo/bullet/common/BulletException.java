@@ -23,4 +23,9 @@ public class BulletException extends RuntimeException {
     public BulletException(String error, String resolution) {
         this.error = new BulletError(error, resolution);
     }
+
+    @Override
+    public String getMessage() {
+        return error.getError();
+    }
 }

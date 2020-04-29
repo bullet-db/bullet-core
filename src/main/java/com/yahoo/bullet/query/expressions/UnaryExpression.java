@@ -5,11 +5,14 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.UnaryEvaluator;
 import lombok.Getter;
 
 import java.util.Objects;
+
+import static com.yahoo.bullet.query.expressions.Operation.UNARY_OPERATIONS;
 
 /**
  * An expression that takes an operand and a unary operation. These fields are required; however, an optional
@@ -25,13 +28,16 @@ public class UnaryExpression extends Expression {
     public UnaryExpression(Expression operand, Operation op) {
         this.operand = Objects.requireNonNull(operand);
         this.op = Objects.requireNonNull(op);
+        if (!UNARY_OPERATIONS.contains(op)) {
+            throw new BulletException("Unary expression requires a unary operation.", "Please specify a unary operation.");
+        }
     }
-
+/*
     @Override
     public String getName() {
         return op + "(" + operand.getName() + ")";
     }
-
+*/
     @Override
     public Evaluator getEvaluator() {
         return new UnaryEvaluator(this);

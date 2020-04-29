@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.NAryEvaluator;
@@ -12,7 +13,8 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static com.yahoo.bullet.query.expressions.Operation.N_ARY_OPERATIONS;
 
 @Getter
 public class NAryExpression extends Expression {
@@ -25,11 +27,9 @@ public class NAryExpression extends Expression {
     public NAryExpression(List<Expression> operands, Operation op) {
         this.operands = Utilities.requireNonNullList(operands);
         this.op = Objects.requireNonNull(op);
-    }
-
-    @Override
-    public String getName() {
-        return op + "(" + operands.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + ")";
+        if (!N_ARY_OPERATIONS.contains(op)) {
+            throw new BulletException("N-ary expression requires an n-ary operation.", "Please specify an n-ary operation.");
+        }
     }
 
     @Override

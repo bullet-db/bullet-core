@@ -9,7 +9,11 @@ import com.yahoo.bullet.query.expressions.CastExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
+// For testing only
+@Getter(AccessLevel.PACKAGE)
 public class CastEvaluator extends Evaluator {
     private Evaluator value;
     private Type castType;

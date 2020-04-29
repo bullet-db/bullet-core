@@ -24,7 +24,7 @@ public class NAryOperations {
     static NAryOperator ANY_MATCH = (evaluators, record) -> {
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if (!((Boolean) value.getValue())) {
+            if ((Boolean) value.getValue()) {
                 return new TypedObject(Type.BOOLEAN, true);
             }
         }

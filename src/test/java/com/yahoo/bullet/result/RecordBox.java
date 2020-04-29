@@ -42,7 +42,7 @@ public class RecordBox {
     }
 
     @SafeVarargs
-    public final RecordBox addMap(String name, Pair<String, Object>... entries) {
+    public final RecordBox addMap(String name, Pair<String, Serializable>... entries) {
         if (entries != null && entries.length != 0) {
             Object value = findObject(entries);
             if (value instanceof Boolean) {
@@ -67,9 +67,9 @@ public class RecordBox {
     }
 
     @SafeVarargs
-    public final RecordBox addMapOfMaps(String name, Pair<String, Map<String, Object>>... entries) {
+    public final RecordBox addMapOfMaps(String name, Pair<String, Map<String, Serializable>>... entries) {
         if (entries != null && entries.length != 0) {
-            Map<String, Object>[] sampleEntries = (Map<String, Object>[]) Arrays.stream(entries).map(Pair::getRight).toArray(Map[]::new);
+            Map<String, Serializable>[] sampleEntries = (Map<String, Serializable>[]) Arrays.stream(entries).map(Pair::getRight).toArray(Map[]::new);
             Object value = findObject(sampleEntries);
             if (value instanceof Boolean) {
                 record.setMapOfBooleanMap(name, asMapOfMaps(Boolean.class, entries));
@@ -92,7 +92,7 @@ public class RecordBox {
         return this;
     }
 
-    public final RecordBox addList(String name, Object... entries) {
+    public final RecordBox addList(String name, Serializable... entries) {
         if (entries != null && entries.length != 0) {
             Object value = entries[0];
             if (value instanceof Boolean) {
@@ -117,7 +117,7 @@ public class RecordBox {
     }
 
     @SafeVarargs
-    public final RecordBox addListOfMaps(String name, Map<String, Object>... entries) {
+    public final RecordBox addListOfMaps(String name, Map<String, Serializable>... entries) {
         if (entries != null && entries.length != 0) {
             Object value = findObject(entries);
             if (value instanceof Boolean) {
@@ -141,7 +141,7 @@ public class RecordBox {
         return this;
     }
 
-    private Object findObject(Pair<String, Object>... entries) {
+    private Object findObject(Pair<String, Serializable>... entries) {
         try {
             return Stream.of(entries).filter(Objects::nonNull).filter(e -> e.getValue() != null).findAny().get().getValue();
         } catch (NoSuchElementException nsee) {
@@ -149,7 +149,7 @@ public class RecordBox {
         }
     }
 
-    private Object findObject(Map<String, Object>... entries) {
+    private Object findObject(Map<String, Serializable>... entries) {
         try {
             return Stream.of(entries).filter(Objects::nonNull).filter(e -> !e.isEmpty()).findAny()
                          .get().entrySet().stream().findAny().get().getValue();
@@ -158,11 +158,11 @@ public class RecordBox {
         }
     }
 
-    private <T> Map<String, T> asMap(Class<T> clazz, Map.Entry<String, Object>... entries) {
+    private <T> Map<String, T> asMap(Class<T> clazz, Map.Entry<String, Serializable>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         Map<String, T> newMap = new LinkedHashMap<>(entries.length);
-        for (Map.Entry<String, Object> entry : entries) {
+        for (Map.Entry<String, Serializable> entry : entries) {
             Object object = entry.getValue();
             if (object != null && !clazz.isInstance(object)) {
                 throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
@@ -172,11 +172,11 @@ public class RecordBox {
         return newMap;
     }
 
-    private <T> Map<String, T> asMap(Class<T> clazz, Map<String, Object> map) {
+    private <T> Map<String, T> asMap(Class<T> clazz, Map<String, Serializable> map) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(map);
         Map<String, T> newMap = new LinkedHashMap<>(map.size());
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, Serializable> entry : map.entrySet()) {
             Object object = entry.getValue();
             if (!clazz.isInstance(object)) {
                 throw new RuntimeException("Object " + object + " is not an instance of class " + clazz.getName());
@@ -186,11 +186,11 @@ public class RecordBox {
         return newMap;
     }
 
-    private <T> Map<String, Map<String, T>> asMapOfMaps(Class<T> clazz, Pair<String, Map<String, Object>>... entries) {
+    private <T> Map<String, Map<String, T>> asMapOfMaps(Class<T> clazz, Pair<String, Map<String, Serializable>>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         Map<String, Map<String, T>> newMap = new LinkedHashMap<>(entries.length);
-        for (Pair<String, Map<String, Object>> entry : entries) {
+        for (Pair<String, Map<String, Serializable>> entry : entries) {
             String key = entry.getKey();
             Map<String, T> casted = asMap(clazz, entry.getValue());
             if (casted == null) {
@@ -201,7 +201,7 @@ public class RecordBox {
         return newMap;
     }
 
-    private <T> List<T> asList(Class<T> clazz, Object... entries) {
+    private <T> List<T> asList(Class<T> clazz, Serializable... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         List<T> newList = new ArrayList<>(entries.length);
@@ -214,12 +214,12 @@ public class RecordBox {
         return newList;
     }
 
-    private <T> List<Map<String, T>> asListOfMaps(Class<T> clazz, Map<String, Object>... entries) {
+    private <T> List<Map<String, T>> asListOfMaps(Class<T> clazz, Map<String, Serializable>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
         List<Map<String, T>> newList = new ArrayList<>(entries.length);
-        for (Map<String, Object> entry : entries) {
-            Set<Map.Entry<String, Object>> data = entry.entrySet();
+        for (Map<String, Serializable> entry : entries) {
+            Set<Map.Entry<String, Serializable>> data = entry.entrySet();
             Map<String, T> newMap = asMap(clazz, data.toArray(new Map.Entry[data.size()]));
             newList.add(newMap);
         }

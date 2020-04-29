@@ -28,12 +28,12 @@ public class ListExpression extends Expression {
     public ListExpression(List<Expression> values) {
         this.values = Utilities.requireNonNullList(values);
     }
-
+/*
     @Override
     public String getName() {
         return "[" + values.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + "]";
     }
-
+*/
     @Override
     public Evaluator getEvaluator() {
         return new ListEvaluator(this);

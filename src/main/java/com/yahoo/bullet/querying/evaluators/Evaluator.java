@@ -10,6 +10,8 @@ import com.yahoo.bullet.query.expressions.Operation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -43,6 +45,8 @@ public abstract class Evaluator {
         TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
     }
 
+    // For testing only
+    @Getter(AccessLevel.PACKAGE)
     protected Type type;
 
     static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);

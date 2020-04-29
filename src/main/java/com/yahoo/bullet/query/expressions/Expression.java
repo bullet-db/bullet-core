@@ -49,7 +49,7 @@ public abstract class Expression implements Serializable {
      *
      * @return The name of this expression.
      */
-    public abstract String getName();
+    //public abstract String getName();
 
     /**
      * Constructs an evaluator for this expression and returns it.

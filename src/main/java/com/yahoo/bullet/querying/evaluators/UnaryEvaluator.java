@@ -8,10 +8,14 @@ package com.yahoo.bullet.querying.evaluators;
 import com.yahoo.bullet.query.expressions.UnaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 /**
  * Evaluator that evaluates the operand before applying a unary operator. Casts the result.
  */
+// For testing only
+@Getter(AccessLevel.PACKAGE)
 public class UnaryEvaluator extends Evaluator {
     private Evaluator operand;
     private UnaryOperator op;

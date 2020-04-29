@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.CastEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.typesystem.Type;
@@ -21,13 +22,16 @@ public class CastExpression extends Expression {
     public CastExpression(Expression value, Type castType) {
         this.value = Objects.requireNonNull(value);
         this.castType = Objects.requireNonNull(castType);
+        if (Type.isNull(castType) || Type.isUnknown(castType)) {
+            throw new BulletException("Cast type cannot be null or unknown.", "Please specify a valid cast type.");
+        }
     }
-
+/*
     @Override
     public String getName() {
         return "CAST (" + value.getName() + " AS " + castType + ")";
     }
-
+*/
     @Override
     public Evaluator getEvaluator() {
         return new CastEvaluator(this);

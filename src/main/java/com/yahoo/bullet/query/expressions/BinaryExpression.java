@@ -5,11 +5,14 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.BinaryEvaluator;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import lombok.Getter;
 
 import java.util.Objects;
+
+import static com.yahoo.bullet.query.expressions.Operation.BINARY_OPERATIONS;
 
 /**
  * An expression that takes two operands and a binary operation. These fields are required; however, an optional
@@ -39,17 +42,9 @@ public class BinaryExpression extends Expression {
         this.right = Objects.requireNonNull(right);
         this.op = Objects.requireNonNull(op);
         this.modifier = Objects.requireNonNull(modifier);
-    }
-
-    @Override
-    public String getName() {
-        if (op.isInfix()) {
-            if (modifier != null) {
-                return "(" + left.getName() + " " + op + " " + modifier + " " + right.getName() + ")";
-            }
-            return "(" + left.getName() + " " + op + " " + right.getName() + ")";
+        if (!BINARY_OPERATIONS.contains(op)) {
+            throw new BulletException("Binary expression requires a binary operation.", "Please specify a binary operation.");
         }
-        return op + "(" + left.getName() + ", " + right.getName() + ")";
     }
 
     @Override

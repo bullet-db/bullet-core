@@ -55,23 +55,6 @@ public class FieldExpression extends Expression {
         this.subKey = Objects.requireNonNull(subKey);
     }
 
-    @Override
-    public String getName() {
-        if (index != null) {
-            if (subKey != null) {
-                return field + "[" + index + "]." + subKey;
-            }
-            return field + "[" + index + "]";
-        }
-        if (key != null) {
-            if (subKey != null) {
-                return field + "." + key + "." + subKey;
-            }
-            return field + "." + key;
-        }
-        return field;
-    }
-
     public String getSimpleName() {
         if (index != null) {
             if (subKey != null) {

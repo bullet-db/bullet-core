@@ -5,25 +5,32 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import org.testng.Assert;
+
+import java.util.function.Supplier;
+
 public class ExpressionUtils {
-    /*
-    public static Expression makeLeafExpression(Value value) {
-        LeafExpression expression = new LeafExpression();
-        expression.setValue(value);
-        return expression;
-    }
+    /**
+     * Helper for testing equals() and hashCode() in classes that extend {@link Expression}.
+     *
+     * @param supplier A supplier that constructs the expression to compare to.
+     * @param expressions The other expressions to compare to that should be not equal.
+     */
+    public static void testEqualsAndHashCode(Supplier<Expression> supplier, Expression... expressions) {
+        Expression expression = supplier.get();
+        Assert.assertEquals(expression, expression);
+        Assert.assertEquals(expression.hashCode(), expression.hashCode());
 
-    public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression) {
-        return makeBinaryExpression(op, leftExpression, rightExpression, null);
-    }
+        for (Expression other : expressions) {
+            Assert.assertNotEquals(expression, other);
+            Assert.assertNotEquals(expression.hashCode(), other.hashCode());
+        }
 
-    public static Expression makeBinaryExpression(Expression.Operation op, Expression leftExpression, Expression rightExpression, Type type) {
-        BinaryExpression binaryExpression = new BinaryExpression();
-        binaryExpression.setOperation(op);
-        binaryExpression.setLeft(leftExpression);
-        binaryExpression.setRight(rightExpression);
-        binaryExpression.setType(type);
-        return binaryExpression;
+        Expression other = supplier.get();
+        Assert.assertEquals(expression, other);
+        Assert.assertEquals(expression.hashCode(), other.hashCode());
+
+        // coverage
+        Assert.assertFalse(expression.equals(null));
     }
-    */
 }
