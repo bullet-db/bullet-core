@@ -5,180 +5,57 @@
  */
 package com.yahoo.bullet.postaggregations;
 
-public class ComputationStrategyTest {
-    /*
-    private ComputationStrategy makeComputation(Expression expression, String newName) {
-        Computation postAggregation = new Computation();
-        postAggregation.setType(PostAggregation.Type.COMPUTATION);
-        postAggregation.setExpression(expression);
-        postAggregation.setNewName(newName);
-        postAggregation.initialize();
-        ComputationStrategy computationStrategy = new ComputationStrategy(postAggregation);
-        computationStrategy.initialize();
-        return computationStrategy;
-    }
+import com.yahoo.bullet.query.Field;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.ValueExpression;
+import com.yahoo.bullet.query.postaggregations.Computation;
+import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.result.Clip;
+import com.yahoo.bullet.result.RecordBox;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+public class ComputationStrategyTest {
     @Test
     public void testComputation() {
-        // (1 / 1.0) * 1.0 + 2.0 * FIELD("a") - cast(FIELD("a", "LONG")
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.SUB,
-                                     makeBinaryExpression(Expression.Operation.ADD,
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeBinaryExpression(Expression.Operation.DIV,
-                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
-                                                                                                    makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE))),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE))),
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
-                                                                               makeLeafExpression(new Value(Value.Kind.FIELD, "a")))),
-                                     makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.LONG)),
-                                     Type.FLOAT),
-                "newName");
+        // Computations are done using the fields in the original record and then the new fields are written at the end.
+        // a = 2 * a + 5 * b
+        // b = a * b
+        List<Field> fields = new ArrayList<>();
+        fields.add(new Field("a", new BinaryExpression(new BinaryExpression(new ValueExpression(2),
+                                                                            new FieldExpression("a"),
+                                                                            Operation.MUL),
+                                                       new BinaryExpression(new ValueExpression(5),
+                                                                            new FieldExpression("b"),
+                                                                            Operation.MUL),
+                                                       Operation.ADD)));
+        fields.add(new Field("b", new BinaryExpression(new FieldExpression("a"), new FieldExpression("b"), Operation.MUL)));
+
         List<BulletRecord> records = new ArrayList<>();
-        records.add(RecordBox.get().add("a", 5).getRecord());
-        records.add(RecordBox.get().add("a", 2).getRecord());
-        records.add(RecordBox.get().add("a", 1).getRecord());
+        records.add(RecordBox.get().add("a", 5).add("b", 2).add("c", 0).getRecord());
+        records.add(RecordBox.get().add("a", 2).add("b", 4).add("c", 1).getRecord());
+        records.add(RecordBox.get().add("a", 1).add("b", 7).add("c", 2).getRecord());
+
         Clip clip = new Clip();
         clip.add(records);
-        Clip result = computation.execute(clip);
 
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), 6.0f);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Float);
-        Assert.assertEquals(result.getRecords().get(1).get("newName"), 3.0f);
-        Assert.assertEquals(result.getRecords().get(2).get("newName"), 2.0f);
+        ComputationStrategy strategy = (ComputationStrategy) new Computation(fields).getPostStrategy();
+        Clip result = strategy.execute(clip);
+
+        Assert.assertEquals(result.getRecords().size(), 3);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 20);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("b").getValue(), 10);
+        Assert.assertEquals(result.getRecords().get(0).typedGet("c").getValue(), 0);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 24);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("b").getValue(), 8);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("c").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 37);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("b").getValue(), 7);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("c").getValue(), 2);
     }
-
-    @Test
-    public void testIntegerComputation() {
-        // cast(2, INTEGER) - cast(5, INTEGER) * cast(3, INTEGER) + (cast(1, INTEGER) / cast(1, INTEGER))
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.ADD,
-                                     makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)),
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5", Type.INTEGER)),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.INTEGER)))),
-                                     makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)))),
-                "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), -12);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Integer);
-    }
-
-    @Test
-    public void testLongComputation() {
-        // 2 - 5 * 3 + 1 / 1
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.ADD,
-                                     makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)),
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5", Type.LONG)),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3", Type.LONG)))),
-                                     makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)))),
-                "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), -12L);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Long);
-    }
-
-    @Test
-    public void testFloatComputation() {
-        // cast(2.0, FLOAT) - cast(5.0, FLOAT) * cast(3.0, FLOAT) + (cast(1.0, FLOAT) / cast(1.0, FLOAT))
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.ADD,
-                                     makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.FLOAT)),
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5.0", Type.FLOAT)),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3.0", Type.FLOAT)))),
-                                     makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.FLOAT)),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.FLOAT)))),
-                "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), -12.0f);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Float);
-    }
-
-    @Test
-    public void testDoubleComputation() {
-        // 2.0 - 5.0 * 3.0 + 1.0 / 1.0
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.ADD,
-                                     makeBinaryExpression(Expression.Operation.SUB,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "2.0", Type.DOUBLE)),
-                                                          makeBinaryExpression(Expression.Operation.MUL,
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "5.0", Type.DOUBLE)),
-                                                                               makeLeafExpression(new Value(Value.Kind.VALUE, "3.0", Type.DOUBLE)))),
-                                     makeBinaryExpression(Expression.Operation.DIV,
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)),
-                                                          makeLeafExpression(new Value(Value.Kind.VALUE, "1.0", Type.DOUBLE)))),
-                "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), -12.0);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Double);
-    }
-
-    @Test
-    public void testBooleanComputation() {
-        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "true", Type.BOOLEAN)), "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), true);
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof Boolean);
-    }
-
-    @Test
-    public void testStringComputation() {
-        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.VALUE, "abc", Type.STRING)), "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-        Assert.assertEquals(result.getRecords().get(0).get("newName"), "abc");
-        Assert.assertTrue(result.getRecords().get(0).get("newName") instanceof String);
-    }
-
-    @Test
-    public void testUnsupportedComputation() {
-        ComputationStrategy computation = makeComputation(
-                makeBinaryExpression(Expression.Operation.ADD,
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.LONG)),
-                                     makeLeafExpression(new Value(Value.Kind.VALUE, "true", Type.BOOLEAN))),
-                "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertFalse(result.getRecords().get(0).hasField("newName"));
-    }
-
-    @Test
-    public void testNonExistingFieldComputation() {
-        ComputationStrategy computation = makeComputation(makeLeafExpression(new Value(Value.Kind.FIELD, "a")), "newName");
-        Clip clip = new Clip();
-        clip.add(Collections.singletonList(RecordBox.get().getRecord()));
-        Clip result = computation.execute(clip);
-
-        Assert.assertFalse(result.getRecords().get(0).hasField("newName"));
-    }
-    */
 }
