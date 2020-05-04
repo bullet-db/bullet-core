@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the compute for terms.
+ *  See the LICENSE file associated with the project for terms.
  */
 package com.yahoo.bullet.aggregations.grouping;
 
@@ -256,24 +256,13 @@ public class GroupData implements Serializable {
     }
 
     /**
-     * Returns the name of the result field to use for the given {@link GroupOperation}. If the operation
-     * does specify a newName, it will be returned. Otherwise, a composite name containing the type of the
-     * operation as well as the field name will be used (if provided).
+     * Returns the name of the result field to use for the given {@link GroupOperation}.
      *
      * @param operation The operation to get the name for.
      * @return a String representing a name for the result of the operation.
      */
     public static String getResultName(GroupOperation operation) {
-        String name = operation.getName();
-        if (name != null) {
-            return name;
-        }
-        GroupOperation.GroupOperationType type = operation.getType();
-        String field = operation.getField();
-        if (field == null) {
-            return type.getName();
-        }
-        return type.getName() + NAME_SEPARATOR + operation.getField();
+        return operation.getName();
     }
 
     /*

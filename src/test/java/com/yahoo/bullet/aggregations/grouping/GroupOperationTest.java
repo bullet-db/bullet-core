@@ -1,7 +1,7 @@
 /*
  *  Copyright 2017, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
- *  See the LICENSE file associated with the compute for terms.
+ *  See the LICENSE file associated with the project for terms.
  */
 package com.yahoo.bullet.aggregations.grouping;
 
@@ -98,5 +98,14 @@ public class GroupOperationTest {
         Assert.assertNotEquals(c, d);
 
         Assert.assertFalse(a.equals(e));
+    }
+
+    @Test
+    public void testToString() {
+        GroupOperation a = new GroupOperation(AVG, "foo", "avg");
+        GroupOperation b = new GroupOperation(COUNT, "foo", "count");
+
+        Assert.assertEquals(a.toString(), "{type: AVG, field: foo, name: avg}");
+        Assert.assertEquals(b.toString(), "{type: COUNT, field: null, name: count}");
     }
 }
