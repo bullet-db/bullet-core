@@ -5,17 +5,29 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
+import com.yahoo.bullet.aggregations.Raw;
 import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
 
 import static com.yahoo.bullet.query.aggregations.Aggregation.Type.RAW;;
 
 public class AggregationTest {
     @Test
-    public void testType() {
+    public void testRawAggregation() {
         Aggregation aggregation = new Aggregation();
+        aggregation.configure(new BulletConfig());
+
         Assert.assertEquals(aggregation.getType(), RAW);
+        Assert.assertEquals(aggregation.getFields(), Collections.emptyList());
+        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof Raw);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testConstructorNullTypeThrows() {
+        new Aggregation(null, null);
     }
 
     @Test

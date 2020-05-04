@@ -42,4 +42,9 @@ public class CountDistinctAggregation extends Aggregation {
     public Strategy getStrategy(BulletConfig config) {
         return new CountDistinct(this, config);
     }
+
+    @Override
+    public String toString() {
+        return "{size: " + size + ", type: " + type + ", fields: " + fields + ", name: " + name + "}";
+    }
 }

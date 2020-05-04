@@ -60,4 +60,9 @@ public class TopKAggregation extends Aggregation {
     public String getName() {
         return name != null ? name : DEFAULT_NAME;
     }
+
+    @Override
+    public String toString() {
+        return "{size: " + size + ", type: " + type + ", fields: " + fields + ", threshold: " + threshold + ", name: " + getName() + "}";
+    }
 }

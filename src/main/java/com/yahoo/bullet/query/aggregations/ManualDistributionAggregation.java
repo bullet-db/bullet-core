@@ -60,4 +60,9 @@ public class ManualDistributionAggregation extends DistributionAggregation {
         // if type is QUANTILE, invalid range if start < 0 or end > 1
         return type == Distribution.Type.QUANTILE && (points.get(0) < 0.0 || points.get(points.size() - 1) > 1.0);
     }
+
+    @Override
+    public String toString() {
+        return "{size: " + size + ", type: " + type + ", field: " + field + ", distributionType: " + distributionType + ", points: " + points + "}";
+    }
 }

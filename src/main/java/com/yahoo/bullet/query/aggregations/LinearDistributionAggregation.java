@@ -10,12 +10,14 @@ import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import lombok.AccessLevel;
 import lombok.Getter;
 
-@Getter
 public class LinearDistributionAggregation extends DistributionAggregation {
     private static final long serialVersionUID = -5320252906943658246L;
 
+    // Exposed for testing only
+    @Getter(AccessLevel.PACKAGE)
     private final int numberOfPoints;
 
     /**
@@ -29,7 +31,7 @@ public class LinearDistributionAggregation extends DistributionAggregation {
     public LinearDistributionAggregation(String field, Distribution.Type type, Integer size, int numberOfPoints) {
         super(field, type, size);
         if (numberOfPoints <= 0) {
-            throw new BulletException("If specifying the distribution by number of points, the number must be positive.", "Please specify a positive number.");
+            throw new BulletException("If specifying the distribution by the number of points, the number must be positive.", "Please specify a positive number.");
         }
         this.numberOfPoints = numberOfPoints;
     }
@@ -42,5 +44,10 @@ public class LinearDistributionAggregation extends DistributionAggregation {
         int maxPoints = Math.min(pointLimit, size);
         BulletRecordProvider provider = config.getBulletRecordProvider();
         return new QuantileSketch(entries, rounding, distributionType, Math.min(numberOfPoints, maxPoints), provider);
+    }
+
+    @Override
+    public String toString() {
+        return "{size: " + size + ", type: " + type + ", field: " + field + ", distributionType: " + distributionType + ", numberOfPoints: " + numberOfPoints + "}";
     }
 }

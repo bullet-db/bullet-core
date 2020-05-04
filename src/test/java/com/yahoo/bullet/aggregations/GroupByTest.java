@@ -6,10 +6,8 @@
 package com.yahoo.bullet.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.aggregations.sketches.KMVSketch;
-import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.aggregations.GroupAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -22,19 +20,15 @@ import org.testng.annotations.Test;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.assertContains;
-import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.AVG;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT;
-import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.COUNT_FIELD;
 import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperationType.SUM;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.aggregations.AggregationUtils.makeGroupFields;
+import static com.yahoo.bullet.aggregations.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 

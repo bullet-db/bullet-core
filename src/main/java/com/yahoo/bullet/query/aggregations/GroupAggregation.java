@@ -74,4 +74,9 @@ public class GroupAggregation extends Aggregation {
         }
         operations.add(groupOperation);
     }
+
+    @Override
+    public String toString() {
+        return "{size: " + size + ", type: " + type + ", fields: " + fields + ", operations: " + operations + "}";
+    }
 }

@@ -114,4 +114,9 @@ public class GroupOperation implements Serializable {
         }
         return field != null && field.equals(other.field);
     }
+
+    @Override
+    public String toString() {
+        return "{type: " + type + ", field: " + field + ", name: " + name + "}";
+    }
 }

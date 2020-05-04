@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.yahoo.bullet.TestHelpers.addMetadata;
-import static com.yahoo.bullet.query.aggregations.AggregationUtils.makeGroupFields;
+import static com.yahoo.bullet.aggregations.AggregationUtils.makeGroupFields;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
