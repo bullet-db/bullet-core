@@ -5,136 +5,33 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
-import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.query.postaggregations.Computation;
-import com.yahoo.bullet.query.postaggregations.PostAggregation;
-import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.postaggregations.ComputationStrategy;
+import com.yahoo.bullet.query.Field;
+import com.yahoo.bullet.query.expressions.ValueExpression;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.Collections;
 
 public class ComputationTest {
-    /*
     @Test
-    public void testToString() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        Assert.assertEquals(aggregation.toString(), "{type: COMPUTATION, expression: null, newName: null}");
+    public void testComputation() {
+        Computation computation = new Computation(Collections.singletonList(new Field("abc", new ValueExpression(1))));
 
-        aggregation.setNewName("newName");
-        Assert.assertEquals(aggregation.toString(), "{type: COMPUTATION, expression: null, newName: newName}");
-
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)),
-                                                                       Type.DOUBLE));
-        Assert.assertEquals(aggregation.toString(),
-                            "{type: COMPUTATION, " +
-                                     "expression: {operation: ADD, " +
-                                                  "left: {operation: null, value: {kind: VALUE, value: 1, type: INTEGER}}, " +
-                                                  "right: {operation: null, value: {kind: VALUE, value: 2, type: INTEGER}}, " +
-                                                  "type: DOUBLE}, " +
-                                     "newName: newName}");
-    }
-*/
-    /*
-    @Test
-    public void testInitializeWithoutType() {
-        Computation aggregation = new Computation();
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), PostAggregation.TYPE_MISSING);
-    }
-    @Test
-    public void testInitializeWithoutExpression() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), Computation.COMPUTATION_REQUIRES_VALID_EXPRESSION_ERROR);
+        Assert.assertEquals(computation.getFields(), Collections.singletonList(new Field("abc", new ValueExpression(1))));
+        Assert.assertEquals(computation.getType(), PostAggregation.Type.COMPUTATION);
+        Assert.assertEquals(computation.toString(), "{type: COMPUTATION, fields: [{name: abc, value: {value: 1, type: INTEGER}}]}");
+        Assert.assertTrue(computation.getPostStrategy() instanceof ComputationStrategy);
     }
 
-    @Test
-    public void testInitializeWithInvalidBinaryExpression() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        BinaryExpression binaryExpression = new BinaryExpression();
-        aggregation.setExpression(binaryExpression);
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), BinaryExpression.BINARY_EXPRESSION_REQUIRES_VALID_EXPRESSIONS_ERROR);
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testConstructorNullFields() {
+        new Computation(null);
     }
 
-    @Test
-    public void testInitializeWithInvalidLeafExpression() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        aggregation.setExpression(ExpressionUtils.makeLeafExpression(null));
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_VALUE_FIELD_ERROR);
-
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.MAP)),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2"))));
-        errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_REQUIRES_PRIMITIVE_TYPE_ERROR);
-
-        aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(null, "1", Type.DOUBLE)));
-        errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_KIND_ERROR);
-
-        aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, null, Type.DOUBLE)));
-        errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), Value.VALUE_OBJECT_REQUIRES_NOT_NULL_VALUE_ERROR);
-
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2"))));
-        errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), LeafExpression.LEAF_EXPRESSION_VALUE_KIND_REQUIRES_TYPE_ERROR);
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The COMPUTATION post-aggregation requires at least one field\\.")
+    public void testConstructorMissingFields() {
+        new Computation(Collections.emptyList());
     }
-
-    @Test
-    public void testInitializeWithoutNewFieldName() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        aggregation.setExpression(ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "1", Type.INTEGER)));
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().get(0), Computation.COMPUTATION_REQUIRES_NEW_FIELD_ERROR);
-    }
-
-    @Test
-    public void testInitialize() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER)),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.INTEGER))));
-        aggregation.setNewName("newName");
-        Optional<List<BulletError>> errors = aggregation.initialize();
-        Assert.assertFalse(errors.isPresent());
-        Assert.assertEquals(aggregation.getNewName(), "newName");
-    }
-
-    @Test void testGetRequiredFields() {
-        Computation aggregation = new Computation();
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
-        aggregation.setExpression(ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
-                                                                       ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "b", Type.INTEGER))));
-        aggregation.setNewName("newName");
-        aggregation.initialize();
-        Assert.assertEquals(aggregation.getExpression().getRequiredFields(), new HashSet<>(Arrays.asList("a", "b")));
-    }
-    */
 }

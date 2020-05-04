@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.postaggregations.ComputationStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
@@ -17,13 +19,16 @@ import java.util.List;
 public class Computation extends PostAggregation {
     private static final long serialVersionUID = -1401910210528780976L;
 
+    public static final BulletError COMPUTATION_REQUIRES_FIELDS =
+            new BulletError("The COMPUTATION post-aggregation requires at least one field.", "Please add at least one field.");
+
     private List<Field> fields;
 
     public Computation(List<Field> fields) {
         super(Type.COMPUTATION);
         Utilities.requireNonNullList(fields);
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException("List empty bad");
+            throw new BulletException(COMPUTATION_REQUIRES_FIELDS);
         }
         this.fields = fields;
     }

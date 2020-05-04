@@ -6,6 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.postaggregations.HavingStrategy;
 import com.yahoo.bullet.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -24,11 +25,19 @@ public class Having extends PostAggregation {
 
     public Having(Expression expression) {
         super(Type.HAVING);
-        this.expression = Objects.requireNonNull(expression);
+        if (expression == null) {
+            throw new BulletException(HAVING_REQUIRES_EXPRESSION);
+        }
+        this.expression = expression;
     }
 
     @Override
     public PostStrategy getPostStrategy() {
         return new HavingStrategy(this);
+    }
+
+    @Override
+    public String toString() {
+        return "{type: " + type + ", expression: " + expression + "}";
     }
 }

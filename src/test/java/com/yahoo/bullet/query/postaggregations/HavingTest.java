@@ -5,5 +5,25 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
+import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.postaggregations.HavingStrategy;
+import com.yahoo.bullet.query.expressions.ValueExpression;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 public class HavingTest {
+    @Test
+    public void testHaving() {
+        Having having = new Having(new ValueExpression(true));
+
+        Assert.assertEquals(having.getExpression(), new ValueExpression(true));
+        Assert.assertEquals(having.getType(), PostAggregation.Type.HAVING);
+        Assert.assertEquals(having.toString(), "{type: HAVING, expression: {value: true, type: BOOLEAN}}");
+        Assert.assertTrue(having.getPostStrategy() instanceof HavingStrategy);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The HAVING post-aggregation requires an expression\\.")
+    public void testConstructorMissingExpression() {
+        new Having(null);
+    }
 }

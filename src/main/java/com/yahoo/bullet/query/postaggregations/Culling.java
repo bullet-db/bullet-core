@@ -36,4 +36,9 @@ public class Culling extends PostAggregation {
     public PostStrategy getPostStrategy() {
         return new CullingStrategy(this);
     }
+
+    @Override
+    public String toString() {
+        return "{type: " + type + ", transientFields: " + transientFields + "}";
+    }
 }
