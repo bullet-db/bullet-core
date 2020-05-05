@@ -34,8 +34,6 @@ import static com.yahoo.bullet.aggregations.grouping.GroupOperation.GroupOperati
 public class GroupData implements Serializable {
     public static final long serialVersionUID = 387461949277948303L;
 
-    public static final String NAME_SEPARATOR = "_";
-
     @Setter
     protected Map<String, String> groupFields;
     protected Map<String, String> mapping;

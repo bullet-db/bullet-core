@@ -16,6 +16,6 @@ public class BulletExceptionTest {
 
         Assert.assertNotNull(exception1.getError());
         Assert.assertNotNull(exception2.getError());
-        Assert.assertEquals(exception1.getError(), exception2.getError());
+        Assert.assertEquals(exception1.getError().asJSON(), exception2.getError().asJSON());
     }
 }

@@ -6,7 +6,7 @@
 package com.yahoo.bullet.common;
 
 import com.yahoo.bullet.result.JSONFormatter;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 
-@Data @RequiredArgsConstructor
+@Getter @RequiredArgsConstructor
 public class BulletError implements JSONFormatter, Serializable {
     private static final long serialVersionUID = -8557063189698127685L;
 
@@ -27,7 +27,7 @@ public class BulletError implements JSONFormatter, Serializable {
     private final List<String> resolutions;
 
     /**
-     * Creates a BulletError with the given error message and the resolution.
+     * Creates a BulletError with the given error message and resolution.
      *
      * @param error The message denoting the error.
      * @param resolution A resolution message.
