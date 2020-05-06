@@ -148,6 +148,24 @@ public class SimpleEqualityPartitioner implements Partitioner {
             mapFieldsToValues(binary.getLeft(), mapping);
             mapFieldsToValues(binary.getRight(), mapping);
         } else if (binary.getOp() == Operation.EQUALS) {
+            /*
+            FieldExpression fieldExpression;
+            ValueExpression valueExpression;
+            if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
+                fieldExpression = (FieldExpression) binary.getLeft();
+                valueExpression = (ValueExpression) binary.getRight();
+            } else if (binary.getRight() instanceof FieldExpression && binary.getLeft() instanceof ValueExpression) {
+                fieldExpression = (FieldExpression) binary.getRight();
+                valueExpression = (ValueExpression) binary.getLeft();
+            } else {
+                return;
+            }
+            String field = fieldExpression.getSimpleName();
+            if (fieldSet.contains(field)) {
+                Object value = valueExpression.getValue();
+                mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
+            }
+            */
             if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
                 String field = ((FieldExpression) binary.getLeft()).getSimpleName();
                 if (fieldSet.contains(field)) {

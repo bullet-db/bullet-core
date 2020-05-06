@@ -5,15 +5,19 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
-
-import static com.yahoo.bullet.querying.evaluators.Evaluator.UnaryOperator;
 
 /**
  * Unary operations used by UnaryEvaluator.
  */
 public class UnaryOperations {
+    @FunctionalInterface
+    public interface UnaryOperator {
+        TypedObject apply(Evaluator evaluator, BulletRecord record);
+    }
+
     static UnaryOperator NOT = (evaluator, record) -> {
         TypedObject value = evaluator.evaluate(record);
         return new TypedObject(Type.BOOLEAN, !((Boolean) value.forceCast(Type.BOOLEAN).getValue()));

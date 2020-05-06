@@ -6,7 +6,6 @@
 package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.Utilities;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +43,7 @@ public class Projection implements Serializable {
      * @param copy Whether the projection should copy or not copy.
      */
     public Projection(List<Field> fields, boolean copy) {
-        this.fields = Utilities.requireNonNullList(fields);
+        this.fields = Utilities.requireNonNull(fields);
         this.type = copy ? Type.COPY : Type.NO_COPY;
     }
 

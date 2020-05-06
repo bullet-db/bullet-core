@@ -5,12 +5,18 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
-import static com.yahoo.bullet.querying.evaluators.Evaluator.NAryOperator;
+import java.util.List;
 
 public class NAryOperations {
+    @FunctionalInterface
+    public interface NAryOperator {
+        TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
+    }
+
     static NAryOperator ALL_MATCH = (evaluators, record) -> {
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);

@@ -14,7 +14,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,30 +29,15 @@ import java.util.Map;
  * will cast their elements/values.
  */
 public abstract class Evaluator {
-    @FunctionalInterface
-    public interface BinaryOperator {
-        TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
-    }
-
-    @FunctionalInterface
-    public interface UnaryOperator {
-        TypedObject apply(Evaluator evaluator, BulletRecord record);
-    }
-
-    @FunctionalInterface
-    public interface NAryOperator {
-        TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
-    }
-
     // For testing only
     @Getter(AccessLevel.PACKAGE)
     protected Type type;
 
-    static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
-    static final Map<Operation, BinaryOperator> BINARY_ANY_OPERATORS = new EnumMap<>(Operation.class);
-    static final Map<Operation, BinaryOperator> BINARY_ALL_OPERATORS = new EnumMap<>(Operation.class);
-    static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
-    static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperations.BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperations.BinaryOperator> BINARY_ANY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperations.BinaryOperator> BINARY_ALL_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, UnaryOperations.UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, NAryOperations.NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
         BINARY_OPERATORS.put(Operation.ADD, BinaryOperations.ADD);

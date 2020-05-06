@@ -82,7 +82,7 @@ public class Utilities {
         return string == null || string.isEmpty();
     }
 
-    public static <T> List<T> requireNonNullList(List<T> list) {
+    public static <T> List<T> requireNonNull(List<T> list) {
         Objects.requireNonNull(list);
         for (T t : list) {
             Objects.requireNonNull(t);
@@ -90,7 +90,7 @@ public class Utilities {
         return list;
     }
 
-    public static <T> Set<T> requireNonNullSet(Set<T> set) {
+    public static <T> Set<T> requireNonNull(Set<T> set) {
         Objects.requireNonNull(set);
         for (T t : set) {
             Objects.requireNonNull(t);
@@ -98,7 +98,7 @@ public class Utilities {
         return set;
     }
 
-    public static <K, V> Map<K, V> requireNonNullMap(Map<K, V> map) {
+    public static <K, V> Map<K, V> requireNonNull(Map<K, V> map) {
         Objects.requireNonNull(map);
         for (Map.Entry<K, V> entry : map.entrySet()) {
             Objects.requireNonNull(entry.getKey());

@@ -18,7 +18,7 @@ import lombok.Getter;
 @Getter(AccessLevel.PACKAGE)
 public class UnaryEvaluator extends Evaluator {
     private Evaluator operand;
-    private UnaryOperator op;
+    private UnaryOperations.UnaryOperator op;
 
     public UnaryEvaluator(UnaryExpression unaryExpression) {
         super(unaryExpression);

@@ -9,7 +9,7 @@ public class CullingStrategy implements PostStrategy {
     private Set<String> transientFields;
 
     /**
-     * Constructor for Culling strategy;
+     * Constructor for Culling strategy.
      *
      * @param culling Culling post aggregation.
      */

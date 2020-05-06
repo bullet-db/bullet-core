@@ -69,14 +69,15 @@ public class GroupOperation implements Serializable {
     public static final BulletError REQUIRES_FIELD_OR_OPERATION_ERROR =
             new BulletError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
-    private GroupOperationType type;
-    private String field;
+    private final GroupOperationType type;
+    private final String field;
     // Ignored purposefully for hashCode and equals
-    private String name;
+    private final String name;
 
     public GroupOperation(GroupOperationType type, String field, String name) {
         switch (type) {
             case COUNT:
+                this.field = null;
                 this.name = Objects.requireNonNull(name);
                 break;
             case SUM:
@@ -86,8 +87,10 @@ public class GroupOperation implements Serializable {
                 this.field = Objects.requireNonNull(field);
                 this.name = Objects.requireNonNull(name);
                 break;
-            case COUNT_FIELD:
+            default:
+                // COUNT_FIELD
                 this.field = Objects.requireNonNull(field);
+                this.name = null;
                 break;
         }
         this.type = type;
@@ -102,6 +105,9 @@ public class GroupOperation implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        if (object == this) {
+            return true;
+        }
         if (!(object instanceof GroupOperation)) {
             return false;
         }

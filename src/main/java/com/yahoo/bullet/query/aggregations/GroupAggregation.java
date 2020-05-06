@@ -54,7 +54,7 @@ public class GroupAggregation extends Aggregation {
     }
 
     public void setFields(Map<String, String> fields) {
-        this.fields = Utilities.requireNonNullMap(fields);
+        this.fields = Utilities.requireNonNull(fields);
     }
 
     public Set<GroupOperation> getOperations() {

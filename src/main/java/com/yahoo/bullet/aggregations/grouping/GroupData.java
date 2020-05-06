@@ -36,7 +36,7 @@ public class GroupData implements Serializable {
 
     @Setter
     protected Map<String, String> groupFields;
-    protected Map<String, String> mapping;
+    protected Map<String, String> fieldAliases;
     protected Map<GroupOperation, Number> metrics;
 
     /**
@@ -68,7 +68,7 @@ public class GroupData implements Serializable {
      */
     public GroupData(Map<String, String> groupFields, Set<GroupOperation> operations) {
         this.groupFields = groupFields;
-        this.mapping = Collections.emptyMap();
+        this.fieldAliases = Collections.emptyMap();
         this.metrics = makeInitialMetrics(operations);
     }
 
@@ -86,12 +86,12 @@ public class GroupData implements Serializable {
      * a {@link Map} of Strings that represent the group fields. These arguments are not copied.
      *
      * @param groupFields The mapping of field names to their values that represent this group.
-     * @param mapping The mapping of field names to their aliases.
+     * @param fieldAliases The mapping of field names to their aliases.
      * @param metrics The non-null {@link Map} of metrics for this object.
      */
-    public GroupData(Map<String, String> groupFields, Map<String, String> mapping, Map<GroupOperation, Number> metrics) {
+    public GroupData(Map<String, String> groupFields, Map<String, String> fieldAliases, Map<GroupOperation, Number> metrics) {
         this.groupFields = groupFields;
-        this.mapping = mapping;
+        this.fieldAliases = fieldAliases;
         this.metrics = metrics;
     }
 
@@ -104,7 +104,7 @@ public class GroupData implements Serializable {
      */
     public GroupData(Map<String, String> groupFields, Map<GroupOperation, Number> metrics) {
         this.groupFields = groupFields;
-        this.mapping = Collections.emptyMap();
+        this.fieldAliases = Collections.emptyMap();
         this.metrics = metrics;
     }
 
@@ -161,7 +161,7 @@ public class GroupData implements Serializable {
      * @return A non-null {@link BulletRecord} containing the data stored in this object.
      */
     public BulletRecord getAsBulletRecord(BulletRecordProvider provider) {
-        return getAsBulletRecord(mapping, provider);
+        return getAsBulletRecord(fieldAliases, provider);
     }
 
     /**

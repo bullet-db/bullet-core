@@ -33,7 +33,7 @@ public class ManualDistributionAggregation extends DistributionAggregation {
      */
     public ManualDistributionAggregation(String field, Distribution.Type type, Integer size, List<Double> points) {
         super(field, type, size);
-        Utilities.requireNonNullList(points);
+        Utilities.requireNonNull(points);
         if (points.isEmpty()) {
             throw new BulletException("If specifying the distribution by a list of points, the list must contain at least one point.",
                                       "Please specify at least one point.");

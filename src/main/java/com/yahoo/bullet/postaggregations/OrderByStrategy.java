@@ -35,26 +35,7 @@ public class OrderByStrategy implements PostStrategy {
     }
 
     private static Comparator<BulletRecord> getComparator(OrderBy orderBy) {
-        /*
-        List<OrderBy.SortItem> fields = orderBy.getFields();
-        Comparator<BulletRecord> comparator = fieldComparator(fields.get(0));
-        int size = fields.size();
-        for (int i = 1; i < size; i++) {
-            comparator = comparator.thenComparing(fieldComparator(fields.get(i)));
-        }
-        return comparator;
-        */
-        // TODO Is above or below preferred? below is cleaner but has a repeated (but trivial) null check
-        // TODO Could also do the thenComparing backwards ..
-        Comparator<BulletRecord> comparator = null;
-        for (OrderBy.SortItem sortItem : orderBy.getFields()) {
-            if (comparator == null) {
-                comparator = fieldComparator(sortItem);
-            } else {
-                comparator = comparator.thenComparing(fieldComparator(sortItem));
-            }
-        }
-        return comparator;
+        return orderBy.getFields().stream().map(OrderByStrategy::fieldComparator).reduce(Comparator::thenComparing).get();
     }
 
     private static Comparator<BulletRecord> fieldComparator(OrderBy.SortItem sortItem) {

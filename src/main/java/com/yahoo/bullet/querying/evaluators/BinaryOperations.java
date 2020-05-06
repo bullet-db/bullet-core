@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
@@ -15,16 +16,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.yahoo.bullet.querying.evaluators.Evaluator.BinaryOperator;
-
 /**
  * Binary operations used by BinaryEvaluator.
  */
 public class BinaryOperations {
+    @FunctionalInterface
+    public interface BinaryOperator {
+        TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
+    }
+
     static BinaryOperator ADD = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type type = getResultType(leftValue.getType(), rightValue.getType());
+        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) + getDouble(rightValue));
@@ -40,7 +44,7 @@ public class BinaryOperations {
     static BinaryOperator SUB = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type type = getResultType(leftValue.getType(), rightValue.getType());
+        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) - getDouble(rightValue));
@@ -56,7 +60,7 @@ public class BinaryOperations {
     static BinaryOperator MUL = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type type = getResultType(leftValue.getType(), rightValue.getType());
+        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) * getDouble(rightValue));
@@ -72,7 +76,7 @@ public class BinaryOperations {
     static BinaryOperator DIV = (left, right, record) -> {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type type = getResultType(leftValue.getType(), rightValue.getType());
+        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
         switch (type) {
             case DOUBLE:
                 return new TypedObject(Type.DOUBLE, getDouble(leftValue) / getDouble(rightValue));
@@ -258,7 +262,7 @@ public class BinaryOperations {
         return new TypedObject(leftValue.getType(), IntStream.range(0, list.size()).filter(booleans::get).mapToObj(list::get).collect(Collectors.toCollection(ArrayList::new)));
     };
 
-    private static Type getResultType(Type left, Type right) {
+    private static Type getArithmeticResultType(Type left, Type right) {
         if (left == Type.DOUBLE || right == Type.DOUBLE) {
             return Type.DOUBLE;
         }

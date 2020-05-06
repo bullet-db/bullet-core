@@ -36,7 +36,7 @@ public class TopKAggregation extends Aggregation {
      */
     public TopKAggregation(Map<String, String> fields, Integer size) {
         super(size, Type.TOP_K);
-        Utilities.requireNonNullMap(fields);
+        Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
             throw new BulletException("TOP K requires at least one field.", "Please add at least one field.");
         }

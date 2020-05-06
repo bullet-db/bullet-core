@@ -30,7 +30,7 @@ public class CountDistinctAggregation extends Aggregation {
      */
     public CountDistinctAggregation(List<String> fields, String name) {
         super(null, Type.COUNT_DISTINCT);
-        Utilities.requireNonNullList(fields);
+        Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
             throw new BulletException("COUNT DISTINCT requires at least one field.", "Please add at least one field.");
         }

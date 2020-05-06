@@ -25,7 +25,7 @@ public class NAryExpression extends Expression {
     private final Operation op;
 
     public NAryExpression(List<Expression> operands, Operation op) {
-        this.operands = Utilities.requireNonNullList(operands);
+        this.operands = Utilities.requireNonNull(operands);
         this.op = Objects.requireNonNull(op);
         if (!N_ARY_OPERATIONS.contains(op)) {
             throw new BulletException("N-ary expression requires an n-ary operation.", "Please specify an n-ary operation.");

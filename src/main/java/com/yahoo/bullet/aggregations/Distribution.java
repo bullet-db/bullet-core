@@ -28,21 +28,6 @@ public class Distribution extends SketchingStrategy<QuantileSketch> {
 
         private String name;
     }
-/*
-    public static final BulletError REQUIRES_TYPE_ERROR =
-            makeError("The DISTRIBUTION type requires specifying a type", "Please set type to one of: " +
-                      String.join(", ", SUPPORTED_DISTRIBUTION_TYPES.keySet()));
-    public static final BulletError REQUIRES_POINTS_ERROR =
-            makeError("The DISTRIBUTION type requires at least one point specified in attributes",
-                      "Please add a list of numeric points with points, OR " +
-                      "specify a number of equidistant points to generate with numberOfPoints OR " +
-                      "specify a range to generate points for with start, end and increment (start < end, increment > 0)");
-    public static final BulletError REQUIRES_POINTS_PROPER_RANGE =
-            makeError(Type.QUANTILE.getName() + " requires points in the proper range",
-                      "Please add or generate points: 0 <= point <= 1");
-    public static final BulletError REQUIRES_ONE_FIELD_ERROR =
-            makeError("The aggregation type requires exactly one field", "Please add exactly one field to fields");
-*/
 
     private String field;
 

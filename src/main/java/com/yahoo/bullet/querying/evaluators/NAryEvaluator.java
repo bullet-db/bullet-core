@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Getter(AccessLevel.PACKAGE)
 public class NAryEvaluator extends Evaluator {
     private List<Evaluator> operands;
-    private NAryOperator op;
+    private NAryOperations.NAryOperator op;
 
     public NAryEvaluator(NAryExpression nAryExpression) {
         super(nAryExpression);

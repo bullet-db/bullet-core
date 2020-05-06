@@ -12,7 +12,6 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * An expression that holds a list of expressions. A primitive type
@@ -26,7 +25,7 @@ public class ListExpression extends Expression {
     private final List<Expression> values;
 
     public ListExpression(List<Expression> values) {
-        this.values = Utilities.requireNonNullList(values);
+        this.values = Utilities.requireNonNull(values);
     }
 /*
     @Override

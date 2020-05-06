@@ -19,7 +19,7 @@ import lombok.Getter;
 public class BinaryEvaluator extends Evaluator {
     private Evaluator left;
     private Evaluator right;
-    private BinaryOperator op;
+    private BinaryOperations.BinaryOperator op;
 
     public BinaryEvaluator(BinaryExpression binaryExpression) {
         super(binaryExpression);

@@ -26,7 +26,7 @@ public class Computation extends PostAggregation {
 
     public Computation(List<Field> fields) {
         super(Type.COMPUTATION);
-        Utilities.requireNonNullList(fields);
+        Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
             throw new BulletException(COMPUTATION_REQUIRES_FIELDS);
         }
