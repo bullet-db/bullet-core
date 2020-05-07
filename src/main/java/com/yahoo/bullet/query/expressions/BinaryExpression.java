@@ -24,14 +24,9 @@ import static com.yahoo.bullet.query.expressions.Operation.BINARY_OPERATIONS;
 public class BinaryExpression extends Expression {
     private static final long serialVersionUID = -7911485746578844403L;
 
-    public enum Modifier {
-        ANY, ALL, NONE
-    }
-
     private final Expression left;
     private final Expression right;
     private final Operation op;
-    private final Modifier modifier;
 
     public BinaryExpression(Expression left, Expression right, Operation op) {
         this(left, right, op, Modifier.NONE);

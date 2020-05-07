@@ -5,20 +5,12 @@
  */
 package com.yahoo.bullet.querying.operations;
 
-import com.yahoo.bullet.aggregations.CountDistinct;
-import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.aggregations.GroupAll;
-import com.yahoo.bullet.aggregations.GroupBy;
-import com.yahoo.bullet.aggregations.Raw;
-import com.yahoo.bullet.aggregations.TopK;
-import com.yahoo.bullet.aggregations.grouping.GroupOperation;
-import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.query.aggregations.Aggregation;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+import com.yahoo.bullet.querying.aggregations.CountDistinct;
+import com.yahoo.bullet.querying.aggregations.Distribution;
+import com.yahoo.bullet.querying.aggregations.GroupAll;
+import com.yahoo.bullet.querying.aggregations.GroupBy;
+import com.yahoo.bullet.querying.aggregations.Raw;
+import com.yahoo.bullet.querying.aggregations.TopK;
 
 public class AggregationOperationsTest {
     /*

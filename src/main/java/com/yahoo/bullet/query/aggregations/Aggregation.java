@@ -5,8 +5,6 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.aggregations.Raw;
-import com.yahoo.bullet.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Configurable;
 import lombok.Getter;

@@ -5,9 +5,9 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.aggregations.Strategy;
-import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
+import com.yahoo.bullet.querying.aggregations.Distribution;
+import com.yahoo.bullet.querying.aggregations.Strategy;
+import com.yahoo.bullet.querying.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import lombok.Getter;
 

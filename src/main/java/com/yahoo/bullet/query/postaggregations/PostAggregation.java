@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
-import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

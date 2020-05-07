@@ -23,12 +23,25 @@ public enum Operation {
     MUL("*", true),
     DIV("/", true),
     EQUALS("=", true),
+    EQUALS_ANY("= ANY", true),
+    EQUALS_ALL("= ALL", true),
     NOT_EQUALS("!=", true),
+    NOT_EQUALS_ANY("!= ANY", true),
+    NOT_EQUALS_ALL("!= ALL", true),
     GREATER_THAN(">", true),
+    GREATER_THAN_ANY("> ANY", true),
+    GREATER_THAN_ALL("> ALL", true),
     LESS_THAN("<", true),
+    LESS_THAN_ANY("< ANY", true),
+    LESS_THAN_ALL("< ALL", true),
     GREATER_THAN_OR_EQUALS(">=", true),
+    GREATER_THAN_OR_EQUALS_ANY(">= ANY", true),
+    GREATER_THAN_OR_EQUALS_ALL(">= ALL", true),
     LESS_THAN_OR_EQUALS("<=", true),
+    LESS_THAN_OR_EQUALS_ANY("<= ANY", true),
+    LESS_THAN_OR_EQUALS_ALL("<= ALL", true),
     REGEX_LIKE("RLIKE", false),
+    REGEX_LIKE_ANY("RLIKE_ANY", false),
     SIZE_IS("SIZEIS", false),
     CONTAINS_KEY("CONTAINSKEY", false),
     CONTAINS_VALUE("CONTAINSVALUE", false),
@@ -45,16 +58,13 @@ public enum Operation {
 
     public static final Set<Operation> BINARY_OPERATIONS =
             new HashSet<>(asList(ADD, SUB, MUL, DIV,
-                                 EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS,
-                                 REGEX_LIKE, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN,
-                                 AND, OR, XOR,
-                                 FILTER));
+                                 EQUALS, EQUALS_ANY, EQUALS_ALL, NOT_EQUALS, NOT_EQUALS_ANY, NOT_EQUALS_ALL,
+                                 GREATER_THAN, GREATER_THAN_ANY, GREATER_THAN_ALL, LESS_THAN, LESS_THAN_ANY, LESS_THAN_ALL,
+                                 GREATER_THAN_OR_EQUALS, GREATER_THAN_OR_EQUALS_ANY, GREATER_THAN_OR_EQUALS_ALL,
+                                 LESS_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS_ANY, LESS_THAN_OR_EQUALS_ALL, REGEX_LIKE, REGEX_LIKE_ANY,
+                                 SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN, AND, OR, XOR, FILTER));
     public static final Set<Operation> UNARY_OPERATIONS = new HashSet<>(asList(NOT, SIZE_OF, IS_NULL, IS_NOT_NULL));
     public static final Set<Operation> N_ARY_OPERATIONS = new HashSet<>(asList(AND, OR, IF));
-    public static final Set<Operation> LOGICALS = new HashSet<>(asList(AND, OR, XOR, NOT));
-    public static final Set<Operation> RELATIONALS =
-            new HashSet<>(asList(EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS,
-                                 REGEX_LIKE, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE));
 
     private String name;
     private boolean infix;

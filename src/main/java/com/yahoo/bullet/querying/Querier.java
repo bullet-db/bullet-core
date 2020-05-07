@@ -6,13 +6,13 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
-import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.Window;
-import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;

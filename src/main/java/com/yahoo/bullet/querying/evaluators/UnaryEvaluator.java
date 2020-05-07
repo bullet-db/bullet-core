@@ -23,7 +23,7 @@ public class UnaryEvaluator extends Evaluator {
     public UnaryEvaluator(UnaryExpression unaryExpression) {
         super(unaryExpression);
         operand = unaryExpression.getOperand().getEvaluator();
-        op = UNARY_OPERATORS.get(unaryExpression.getOp());
+        op = UnaryOperations.UNARY_OPERATORS.get(unaryExpression.getOp());
     }
 
     @Override

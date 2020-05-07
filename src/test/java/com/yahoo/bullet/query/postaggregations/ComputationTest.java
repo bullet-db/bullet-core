@@ -6,7 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.postaggregations.ComputationStrategy;
+import com.yahoo.bullet.querying.postaggregations.ComputationStrategy;
 import com.yahoo.bullet.query.Field;
 import com.yahoo.bullet.query.expressions.ValueExpression;
 import org.testng.Assert;

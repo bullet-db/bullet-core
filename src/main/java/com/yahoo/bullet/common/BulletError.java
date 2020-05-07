@@ -43,4 +43,16 @@ public class BulletError implements JSONFormatter, Serializable {
         map.put(RESOLUTIONS_KEY, resolutions);
         return JSONFormatter.asJSON(map);
     }
+
+    /**
+     * Creates a BulletError with the given error message and resolution.
+     *
+     * @param error The message denoting the error.
+     * @param resolution A resolution message.
+     *
+     * @return A BulletError representing this cause.
+     */
+    public static BulletError makeError(String error, String resolution) {
+        return new BulletError(error, resolution);
+    }
 }

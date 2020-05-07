@@ -25,17 +25,7 @@ public class BinaryEvaluator extends Evaluator {
         super(binaryExpression);
         left = binaryExpression.getLeft().getEvaluator();
         right = binaryExpression.getRight().getEvaluator();
-        switch (binaryExpression.getModifier()) {
-            case ANY:
-                op = BINARY_ANY_OPERATORS.get(binaryExpression.getOp());
-                break;
-            case ALL:
-                op = BINARY_ALL_OPERATORS.get(binaryExpression.getOp());
-                break;
-            default:
-                op = BINARY_OPERATORS.get(binaryExpression.getOp());
-                break;
-        }
+        op = BinaryOperations.BINARY_OPERATORS.get(binaryExpression.getOp());
     }
 
     @Override

@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.aggregations.Distribution;
-import com.yahoo.bullet.aggregations.sketches.QuantileSketch;
+import com.yahoo.bullet.querying.aggregations.Distribution;
+import com.yahoo.bullet.querying.aggregations.sketches.QuantileSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.record.BulletRecordProvider;

@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.MockStrategy;
+import com.yahoo.bullet.querying.aggregations.MockStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.query.WindowUtils;

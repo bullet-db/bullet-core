@@ -7,12 +7,10 @@ package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.postaggregations.HavingStrategy;
-import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.querying.postaggregations.HavingStrategy;
+import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.expressions.Expression;
 import lombok.Getter;
-
-import java.util.Objects;
 
 @Getter
 public class Having extends PostAggregation {

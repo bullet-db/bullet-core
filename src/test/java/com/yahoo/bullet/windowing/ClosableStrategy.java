@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.MockStrategy;
+import com.yahoo.bullet.querying.aggregations.MockStrategy;
 import lombok.Setter;
 
 public class ClosableStrategy extends MockStrategy {

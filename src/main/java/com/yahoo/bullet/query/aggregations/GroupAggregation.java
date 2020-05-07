@@ -5,10 +5,10 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.aggregations.GroupAll;
-import com.yahoo.bullet.aggregations.GroupBy;
-import com.yahoo.bullet.aggregations.Strategy;
-import com.yahoo.bullet.aggregations.grouping.GroupOperation;
+import com.yahoo.bullet.querying.aggregations.GroupAll;
+import com.yahoo.bullet.querying.aggregations.GroupBy;
+import com.yahoo.bullet.querying.aggregations.Strategy;
+import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;

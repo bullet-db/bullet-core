@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.query;
 
-import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;

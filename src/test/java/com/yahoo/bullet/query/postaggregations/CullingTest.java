@@ -6,7 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.postaggregations.CullingStrategy;
+import com.yahoo.bullet.querying.postaggregations.CullingStrategy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

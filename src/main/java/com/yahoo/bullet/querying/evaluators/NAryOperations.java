@@ -5,11 +5,14 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.query.expressions.Operation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class NAryOperations {
     @FunctionalInterface
@@ -17,10 +20,18 @@ public class NAryOperations {
         TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
     }
 
+    public static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
+
+    static {
+        N_ARY_OPERATORS.put(Operation.AND, NAryOperations.ALL_MATCH);
+        N_ARY_OPERATORS.put(Operation.OR, NAryOperations.ANY_MATCH);
+        N_ARY_OPERATORS.put(Operation.IF, NAryOperations.IF);
+    }
+
     static NAryOperator ALL_MATCH = (evaluators, record) -> {
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if (!((Boolean) value.getValue())) {
+            if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
                 return new TypedObject(Type.BOOLEAN, false);
             }
         }

@@ -5,13 +5,16 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.query.expressions.Operation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -23,6 +26,42 @@ public class BinaryOperations {
     @FunctionalInterface
     public interface BinaryOperator {
         TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
+    }
+
+    public static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
+
+    static  {
+        BINARY_OPERATORS.put(Operation.ADD, BinaryOperations.ADD);
+        BINARY_OPERATORS.put(Operation.SUB, BinaryOperations.SUB);
+        BINARY_OPERATORS.put(Operation.MUL, BinaryOperations.MUL);
+        BINARY_OPERATORS.put(Operation.DIV, BinaryOperations.DIV);
+        BINARY_OPERATORS.put(Operation.EQUALS, BinaryOperations.EQUALS);
+        BINARY_OPERATORS.put(Operation.EQUALS_ANY, BinaryOperations.EQUALS_ANY);
+        BINARY_OPERATORS.put(Operation.EQUALS_ALL, BinaryOperations.EQUALS_ALL);
+        BINARY_OPERATORS.put(Operation.NOT_EQUALS, BinaryOperations.NOT_EQUALS);
+        BINARY_OPERATORS.put(Operation.NOT_EQUALS_ANY, BinaryOperations.NOT_EQUALS_ANY);
+        BINARY_OPERATORS.put(Operation.NOT_EQUALS_ALL, BinaryOperations.NOT_EQUALS_ALL);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN, BinaryOperations.GREATER_THAN);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN_ANY, BinaryOperations.GREATER_THAN_ANY);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN_ALL, BinaryOperations.GREATER_THAN_ALL);
+        BINARY_OPERATORS.put(Operation.LESS_THAN, BinaryOperations.LESS_THAN);
+        BINARY_OPERATORS.put(Operation.LESS_THAN_ANY, BinaryOperations.LESS_THAN_ANY);
+        BINARY_OPERATORS.put(Operation.LESS_THAN_ALL, BinaryOperations.LESS_THAN_ALL);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN_OR_EQUALS, BinaryOperations.GREATER_THAN_OR_EQUALS);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN_OR_EQUALS_ANY, BinaryOperations.GREATER_THAN_OR_EQUALS_ANY);
+        BINARY_OPERATORS.put(Operation.GREATER_THAN_OR_EQUALS_ALL, BinaryOperations.GREATER_THAN_OR_EQUALS_ALL);
+        BINARY_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS, BinaryOperations.LESS_THAN_OR_EQUALS);
+        BINARY_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS_ANY, BinaryOperations.LESS_THAN_OR_EQUALS_ANY);
+        BINARY_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS_ALL, BinaryOperations.LESS_THAN_OR_EQUALS_ALL);
+        BINARY_OPERATORS.put(Operation.REGEX_LIKE, BinaryOperations.REGEX_LIKE);
+        BINARY_OPERATORS.put(Operation.SIZE_IS, BinaryOperations.SIZE_IS);
+        BINARY_OPERATORS.put(Operation.CONTAINS_KEY, BinaryOperations.CONTAINS_KEY);
+        BINARY_OPERATORS.put(Operation.CONTAINS_VALUE, BinaryOperations.CONTAINS_VALUE);
+        BINARY_OPERATORS.put(Operation.IN, BinaryOperations.IN);
+        BINARY_OPERATORS.put(Operation.AND, BinaryOperations.AND);
+        BINARY_OPERATORS.put(Operation.OR, BinaryOperations.OR);
+        BINARY_OPERATORS.put(Operation.XOR, BinaryOperations.XOR);
+        BINARY_OPERATORS.put(Operation.FILTER, BinaryOperations.FILTER);
     }
 
     static BinaryOperator ADD = (left, right, record) -> {

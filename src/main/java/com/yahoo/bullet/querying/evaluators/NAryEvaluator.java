@@ -24,7 +24,7 @@ public class NAryEvaluator extends Evaluator {
     public NAryEvaluator(NAryExpression nAryExpression) {
         super(nAryExpression);
         operands = nAryExpression.getOperands().stream().map(Expression::getEvaluator).collect(Collectors.toList());
-        op = N_ARY_OPERATORS.get(nAryExpression.getOp());
+        op = NAryOperations.N_ARY_OPERATORS.get(nAryExpression.getOp());
     }
 
     @Override

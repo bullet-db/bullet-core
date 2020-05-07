@@ -5,9 +5,8 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
@@ -16,7 +15,6 @@ import com.yahoo.bullet.result.Meta;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 

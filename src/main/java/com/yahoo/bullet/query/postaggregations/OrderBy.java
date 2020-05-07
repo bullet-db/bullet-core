@@ -8,8 +8,8 @@ package com.yahoo.bullet.query.postaggregations;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.postaggregations.OrderByStrategy;
-import com.yahoo.bullet.postaggregations.PostStrategy;
+import com.yahoo.bullet.querying.postaggregations.OrderByStrategy;
+import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import lombok.Getter;
 
 import java.io.Serializable;

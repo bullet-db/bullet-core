@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.aggregations.TopK;
+import com.yahoo.bullet.querying.aggregations.TopK;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
