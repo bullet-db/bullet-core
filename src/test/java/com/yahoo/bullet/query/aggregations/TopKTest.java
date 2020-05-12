@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.TopK;
+import com.yahoo.bullet.querying.aggregations.FrequentItemsSketchingStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
@@ -13,58 +13,51 @@ import org.testng.annotations.Test;
 
 import java.util.Collections;
 
-public class TopKAggregationTest {
+public class TopKTest {
+    private static final String COUNT_NAME = "count";
     private BulletConfig config = new BulletConfig();
 
     @Test
     public void testTopKAggregation() {
-        TopKAggregation aggregation = new TopKAggregation(Collections.singletonMap("abc", "def"), null);
+        TopK aggregation = new TopK(Collections.singletonMap("abc", "def"), null, null, COUNT_NAME);
         aggregation.configure(config);
 
-        Assert.assertEquals(aggregation.getType(), Aggregation.Type.TOP_K);
+        Assert.assertEquals(aggregation.getType(), AggregationType.TOP_K);
         Assert.assertEquals(aggregation.getFields(), Collections.singletonList("abc"));
         Assert.assertEquals(aggregation.getFieldsToNames(), Collections.singletonMap("abc", "def"));
-        Assert.assertTrue(aggregation.getStrategy(config) instanceof TopK);
+        Assert.assertTrue(aggregation.getStrategy(config) instanceof FrequentItemsSketchingStrategy);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testConstructorNullFieldsThrows() {
-        new TopKAggregation(null, null);
+        new TopK(null, null, null, null);
     }
 
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "TOP K requires at least one field\\.")
     public void testConstructorEmptyFieldsThrows() {
-        new TopKAggregation(Collections.emptyMap(), null);
+        new TopK(Collections.emptyMap(), null, null, null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testConstructorNullNameThrows() {
+        new TopK(Collections.singletonMap("abc", "def"), null, null, null);
     }
 
     @Test
     public void testGetThreshold() {
-        TopKAggregation aggregation = new TopKAggregation(Collections.singletonMap("abc", "def"), null);
-
-        Assert.assertNull(aggregation.getThreshold());
-
-        aggregation.setThreshold(100L);
-
+        TopK aggregation = new TopK(Collections.singletonMap("abc", "def"), null, 100L, COUNT_NAME);
         Assert.assertEquals(aggregation.getThreshold(), (Long) 100L);
     }
 
     @Test
     public void testGetName() {
-        TopKAggregation aggregation = new TopKAggregation(Collections.singletonMap("abc", "def"), null);
-
-        Assert.assertEquals(aggregation.getName(), TopKAggregation.DEFAULT_NAME);
-
-        aggregation.setName("count");
-
-        Assert.assertEquals(aggregation.getName(), "count");
+        TopK aggregation = new TopK(Collections.singletonMap("abc", "def"), null, null, COUNT_NAME);
+        Assert.assertEquals(aggregation.getName(), COUNT_NAME);
     }
 
     @Test
     public void testGetToString() {
-        TopKAggregation aggregation = new TopKAggregation(Collections.singletonMap("abc", "def"), 500);
-        aggregation.setThreshold(100L);
-        aggregation.setName("count");
-
+        TopK aggregation = new TopK(Collections.singletonMap("abc", "def"), 500, 100L, COUNT_NAME);
         Assert.assertEquals(aggregation.toString(), "{size: 500, type: TOP_K, fields: {abc=def}, threshold: 100, name: count}");
     }
 }

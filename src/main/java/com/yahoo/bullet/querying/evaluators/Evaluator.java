@@ -9,8 +9,6 @@ import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 /**
  * Evaluators do the work of expressions.
@@ -25,11 +23,9 @@ import lombok.Getter;
  * will cast their elements/values.
  */
 public abstract class Evaluator {
-    // For testing only
-    @Getter(AccessLevel.PACKAGE)
-    protected Type type;
+    final Type type;
 
-    Evaluator(Expression expression) {
+    protected Evaluator(Expression expression) {
         type = expression.getType();
     }
 

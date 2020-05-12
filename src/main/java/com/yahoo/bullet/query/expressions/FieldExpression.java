@@ -12,17 +12,13 @@ import lombok.Getter;
 import java.util.Objects;
 
 /**
- * An expression that takes a field name. A primitive type can be provided.
- *
- * Note, a type should NOT be provided if the field is expected to be a List of Maps or a Map of Maps since only
- * primitive type-casting is supported.
- *
- * For example, if a field is extracted as a list of boolean maps and the type specified is boolean, then the evaluator
- * will try to cast those boolean maps to boolean objects (and fail).
+ * An expression that requires a field name. An index or key can be provided for lists and maps as well as a subkey
+ * for lists of maps and maps of maps.
  */
 @Getter
 public class FieldExpression extends Expression {
     private static final long serialVersionUID = -1659250076242321771L;
+    private static final String DELIMITER = ".";
 
     private String field;
     private Integer index;
@@ -58,15 +54,15 @@ public class FieldExpression extends Expression {
     public String getSimpleName() {
         if (index != null) {
             if (subKey != null) {
-                return field + "." + index + "." + subKey;
+                return field + DELIMITER + index + DELIMITER + subKey;
             }
-            return field + "." + index;
+            return field + DELIMITER + index;
         }
         if (key != null) {
             if (subKey != null) {
-                return field + "." + key + "." + subKey;
+                return field + DELIMITER + key + DELIMITER + subKey;
             }
-            return field + "." + key;
+            return field + DELIMITER + key;
         }
         return field;
     }

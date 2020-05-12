@@ -19,7 +19,7 @@ public class OrderByTest {
         OrderBy orderBy = new OrderBy(Arrays.asList(new OrderBy.SortItem("1", OrderBy.Direction.ASC), new OrderBy.SortItem("2", OrderBy.Direction.DESC)));
 
         Assert.assertEquals(orderBy.getFields().size(), 2);
-        Assert.assertEquals(orderBy.getType(), PostAggregation.Type.ORDER_BY);
+        Assert.assertEquals(orderBy.getType(), PostAggregationType.ORDER_BY);
         Assert.assertTrue(orderBy.getPostStrategy() instanceof OrderByStrategy);
         Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{field: 1, direction: ASC}, {field: 2, direction: DESC}]}");
     }

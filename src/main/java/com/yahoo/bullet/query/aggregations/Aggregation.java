@@ -7,51 +7,20 @@ package com.yahoo.bullet.query.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Configurable;
+import com.yahoo.bullet.querying.aggregations.Strategy;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
-@Getter
-public class Aggregation implements Configurable, Serializable {
+@Getter @AllArgsConstructor
+public abstract class Aggregation implements Configurable, Serializable {
     private static final long serialVersionUID = -4451469769203362270L;
 
-    /** Represents the type of the Aggregation. */
-    public enum Type {
-        GROUP,
-        COUNT_DISTINCT,
-        TOP_K,
-        DISTRIBUTION,
-        RAW
-    }
-
     protected Integer size;
-    protected Type type;
-
-    /**
-     * Default constructor that creates a RAW aggregation with no specified size.
-     */
-    public Aggregation() {
-        size = null;
-        type = Type.RAW;
-    }
-
-    /**
-     * Constructor that creates a RAW aggregation with a specified max size.
-     *
-     * @param size The max size of the RAW aggregation. Can be null.
-     */
-    public Aggregation(Integer size) {
-        this.size = size;
-        this.type = Type.RAW;
-    }
-
-    protected Aggregation(Integer size, Type type) {
-        this.size = size;
-        this.type = Objects.requireNonNull(type);
-    }
+    protected AggregationType type;
 
     @Override
     public void configure(BulletConfig config) {
@@ -69,9 +38,7 @@ public class Aggregation implements Configurable, Serializable {
      *
      * @return The created instance of a strategy that can implement this aggregation.
      */
-    public Strategy getStrategy(BulletConfig config) {
-        return new Raw(this, config);
-    }
+    public abstract Strategy getStrategy(BulletConfig config);
 
     public List<String> getFields() {
         return Collections.emptyList();

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.google.gson.JsonParseException;
+import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.query.Projection.Type.COPY;
+import static com.yahoo.bullet.query.Projection.Type.PASS_THROUGH;
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
@@ -296,8 +299,6 @@ public class Querier implements Monoidal {
     @Getter
     private Projection projection;
 
-    private boolean copy;
-
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
 
@@ -382,22 +383,14 @@ public class Querier implements Monoidal {
         }
 
         Query query = runningQuery.getQuery();
-
-        if (query.getFilter() != null) {
-            filter = new Filter(query.getFilter());
+        Expression filter = query.getFilter();
+        if (filter != null) {
+            this.filter = new Filter(filter);
         }
 
-        switch (query.getProjection().getType()) {
-            case COPY:
-                projection = new Projection(query.getProjection().getFields());
-                copy = true;
-                break;
-            case NO_COPY:
-                projection = new Projection(query.getProjection().getFields());
-                copy = false;
-                break;
-            default:
-                break;
+        com.yahoo.bullet.query.Projection projection = query.getProjection();
+        if (projection.getType() != PASS_THROUGH) {
+            this.projection = new Projection(projection.getFields());
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
@@ -631,7 +624,7 @@ public class Querier implements Monoidal {
     public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
         boolean noWindow = window == null;
-        // Only buffer if there is no window (including Raw) or if it's a record based window.
+        // Only buffer if there is no window (including RawStrategy) or if it's a record based window.
         return noWindow || !window.isTimeBased();
     }
 
@@ -663,7 +656,7 @@ public class Querier implements Monoidal {
     private BulletRecord project(BulletRecord record) {
         if (projection == null) {
             return record;
-        } else if (copy) {
+        } else if (runningQuery.getQuery().getProjection().getType() == COPY) {
             return projection.project(record.copy());
         } else {
             return projection.project(record, provider);

@@ -20,7 +20,7 @@ public class ComputationTest {
         Computation computation = new Computation(Collections.singletonList(new Field("abc", new ValueExpression(1))));
 
         Assert.assertEquals(computation.getFields(), Collections.singletonList(new Field("abc", new ValueExpression(1))));
-        Assert.assertEquals(computation.getType(), PostAggregation.Type.COMPUTATION);
+        Assert.assertEquals(computation.getType(), PostAggregationType.COMPUTATION);
         Assert.assertEquals(computation.toString(), "{type: COMPUTATION, fields: [{name: abc, value: {value: 1, type: INTEGER}}]}");
         Assert.assertTrue(computation.getPostStrategy() instanceof ComputationStrategy);
     }

@@ -15,7 +15,7 @@ public class BinaryExpressionTest {
     @Test
     public void testConstructor() {
         BinaryExpression expression = new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.ADD);
-        Assert.assertEquals(expression.toString(), "{left: {value: 1, type: INTEGER}, right: {value: 2, type: INTEGER}, op: +, modifier: NONE, type: null}");
+        Assert.assertEquals(expression.toString(), "{left: {value: 1, type: INTEGER}, right: {value: 2, type: INTEGER}, op: +, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof BinaryEvaluator);
     }
 
@@ -33,12 +33,6 @@ public class BinaryExpressionTest {
     public void testConstructorNullOp() {
         new BinaryExpression(new ValueExpression(1), new ValueExpression(2), null);
     }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testConstructorNullModifier() {
-        new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.ADD, null);
-    }
-
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Binary expression requires a binary operation\\.")
     public void testConstructorNotBinaryOp() {
         new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.SIZE_OF);
@@ -53,7 +47,6 @@ public class BinaryExpressionTest {
                 new BinaryExpression(new ValueExpression(2), new ValueExpression(2), Operation.ADD),
                 new BinaryExpression(new ValueExpression(1), new ValueExpression(1), Operation.ADD),
                 new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.SUB),
-                new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.ADD, BinaryExpression.Modifier.ALL),
                 expression);
     }
 }

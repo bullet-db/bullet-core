@@ -13,21 +13,7 @@ import lombok.Setter;
 import java.io.Serializable;
 
 /**
- * Expressions are currently used in queries for filters and projections.
- *
- * A filter is simply an expression. We accept a record iff the expression evaluates to true (with a forced cast to Boolean if necessary), e.g.
- *
- * "filter": {"left": {"field": "id"}, "right": {"value": "123456", "type": "STRING"}, "op": "EQUALS"}
- *
- * A projection is a Map (i.e. Json object) from names to expressions, e.g.
- *
- * "projection": {
- *     "candy": {"field": "candy"},
- *     "price": {"value": "5.0", "type": "DOUBLE"},
- *     "properties": {"values": [{"field": "candy_type"}, {"field": "candy_rarity"}, {"field": "candy_score"}], "type": "STRING"}
- * }
- *
- * Currently, the supported expressions are:
+ * The supported expressions are:
  * - ValueExpression
  * - FieldExpression
  * - UnaryExpression
@@ -36,20 +22,13 @@ import java.io.Serializable;
  * - ListExpression
  * - CastExpression
  *
- * Look at the Evaluator class to see how expressions are evaluated.
+ * Look at {@link Evaluator} to see how expressions are evaluated.
  */
 @Getter @Setter
 public abstract class Expression implements Serializable {
     private static final long serialVersionUID = -769774785327135375L;
 
     protected Type type;
-
-    /**
-     * Gets the name of this expression from its values and operations.
-     *
-     * @return The name of this expression.
-     */
-    //public abstract String getName();
 
     /**
      * Constructs an evaluator for this expression and returns it.

@@ -8,7 +8,7 @@ package com.yahoo.bullet.querying.aggregations;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.querying.aggregations.sketches.KMVSketch;
-import com.yahoo.bullet.query.aggregations.GroupAggregation;
+import com.yahoo.bullet.query.aggregations.Group;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -32,7 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-public class GroupByTest {
+public class TupleSketchingStrategyTest {
     private static List<Map.Entry<Concept, String>> ALL_METADATA =
             asList(Pair.of(Concept.SKETCH_METADATA, "aggregate_stats"),
                    Pair.of(Concept.SKETCH_THETA, "theta"),
@@ -40,38 +40,38 @@ public class GroupByTest {
                    Pair.of(Concept.SKETCH_UNIQUES_ESTIMATE, "uniquesApprox"),
                    Pair.of(Concept.SKETCH_STANDARD_DEVIATIONS, "stddev"));
 /*
-    public static GroupBy makeGroupBy(BulletConfig configuration, Aggregation aggregation,
+    public static TupleSketchingStrategy makeGroupBy(BulletConfig configuration, Aggregation aggregation,
                                       List<Map.Entry<Concept, String>> metadata) {
-        GroupBy by = new GroupBy(aggregation, addMetadata(configuration, metadata));
+        TupleSketchingStrategy by = new TupleSketchingStrategy(aggregation, addMetadata(configuration, metadata));
         return by;
     }
 */
-    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
-                                      List<GroupOperation> operations, List<Map.Entry<Concept, String>> metadata) {
-        GroupAggregation aggregation = new GroupAggregation(size);
+    public static TupleSketchingStrategy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
+                                                     List<GroupOperation> operations, List<Map.Entry<Concept, String>> metadata) {
+        Group aggregation = new Group(size);
         aggregation.setFields(fields);
         operations.forEach(aggregation::addGroupOperation);
-        return (GroupBy) aggregation.getStrategy(addMetadata(configuration, metadata));
+        return (TupleSketchingStrategy) aggregation.getStrategy(addMetadata(configuration, metadata));
     }
 
-    public static GroupBy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
-                                      GroupOperation... operations) {
+    public static TupleSketchingStrategy makeGroupBy(BulletConfig configuration, Map<String, String> fields, int size,
+                                                     GroupOperation... operations) {
         return makeGroupBy(configuration, fields, size, asList(operations), ALL_METADATA);
     }
 
-    public static GroupBy makeGroupBy(Map<String, String> fields, int size, GroupOperation... operations) {
+    public static TupleSketchingStrategy makeGroupBy(Map<String, String> fields, int size, GroupOperation... operations) {
         return makeGroupBy(makeConfiguration(16), fields, size, asList(operations), ALL_METADATA);
     }
 
-    public static GroupBy makeGroupBy(List<String> fields, int size, GroupOperation... operations) {
+    public static TupleSketchingStrategy makeGroupBy(List<String> fields, int size, GroupOperation... operations) {
         return makeGroupBy(makeGroupFields(fields), size, operations);
     }
 
-    public static GroupBy makeDistinct(Map<String, String> fields, int size) {
+    public static TupleSketchingStrategy makeDistinct(Map<String, String> fields, int size) {
         return makeGroupBy(fields, size);
     }
 
-    public static GroupBy makeDistinct(List<String> fields, int size) {
+    public static TupleSketchingStrategy makeDistinct(List<String> fields, int size) {
         return makeDistinct(makeGroupFields(fields), size);
     }
 
@@ -92,7 +92,7 @@ public class GroupByTest {
 /*
     @Test
     public void testNoField() {
-        GroupBy groupBy = makeGroupBy(emptyMap(), 3, new GroupOperation(SUM, null, null));
+        TupleSketchingStrategy groupBy = makeGroupBy(emptyMap(), 3, new GroupOperation(SUM, null, null));
     }
 */
 /*
@@ -101,7 +101,7 @@ public class GroupByTest {
         Aggregation aggregation = makeAggregation(emptyMap(), 10, null);
         aggregation.setAttributes(makeAttributes(makeGroupOperation(COUNT, null, "bar"),
                                                  makeGroupOperation(COUNT_FIELD, "foo", "foo_avg")));
-        GroupBy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
+        TupleSketchingStrategy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
 
         // The bad operation should have been thrown out.
         Assert.assertFalse(groupBy.initialize().isPresent());
@@ -117,7 +117,7 @@ public class GroupByTest {
                                                  makeGroupOperation(SUM, "bar", null),
                                                  makeGroupOperation(SUM, "foo", null),
                                                  makeGroupOperation(SUM, "bar", null)));
-        GroupBy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
+        TupleSketchingStrategy groupBy = makeGroupBy(new BulletConfig(), aggregation, ALL_METADATA);
         // The bad ones should be removed.
         Assert.assertFalse(groupBy.initialize().isPresent());
     }
@@ -126,7 +126,7 @@ public class GroupByTest {
     @Test
     public void testInitialize() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(AVG, null, null), new GroupOperation(SUM, null, "sum"));
+        TupleSketchingStrategy groupBy = makeGroupBy(fields, 3, new GroupOperation(AVG, null, null), new GroupOperation(SUM, null, "sum"));
         Optional<List<BulletError>> optionalErrors = groupBy.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
@@ -144,7 +144,7 @@ public class GroupByTest {
     @Test
     public void testDistincts() {
         List<String> fields = asList("fieldA", "fieldB", "fieldC");
-        GroupBy groupBy = makeDistinct(fields, 3);
+        TupleSketchingStrategy groupBy = makeDistinct(fields, 3);
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("fieldC", "baz").getRecord();
         IntStream.range(0, 9).forEach(i -> groupBy.consume(recordA));
@@ -180,7 +180,7 @@ public class GroupByTest {
     @Test
     public void testGroupByOperations() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 3, new GroupOperation(COUNT, null, "count"),
+        TupleSketchingStrategy groupBy = makeGroupBy(fields, 3, new GroupOperation(COUNT, null, "count"),
                                       new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -220,7 +220,7 @@ public class GroupByTest {
         Map<String, String> fields = singletonMap("fieldA", "A");
 
         // Nominal Entries is 32. Aggregation size is also 32
-        GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
+        TupleSketchingStrategy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
                                       singletonList(new GroupOperation(COUNT, null, "count")), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
@@ -249,7 +249,7 @@ public class GroupByTest {
     @Test
     public void testCombining() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
+        TupleSketchingStrategy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -308,7 +308,7 @@ public class GroupByTest {
     @Test
     public void testCombiningAndConsuming() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
+        TupleSketchingStrategy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();
@@ -356,7 +356,7 @@ public class GroupByTest {
     public void testMetadata() {
         Map<String, String> fields = singletonMap("fieldA", "fieldA");
         // Nominal Entries is 32. Aggregation size is also 32
-        GroupBy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
+        TupleSketchingStrategy groupBy = makeGroupBy(makeConfiguration(32), fields, 32,
                                       singletonList(new GroupOperation(COUNT, null, "count")), ALL_METADATA);
 
         // Generate 4 batches of 64 records with 0 - 63 in fieldA.
@@ -407,7 +407,7 @@ public class GroupByTest {
     @Test
     public void testResetting() {
         List<String> fields = asList("fieldA", "fieldB");
-        GroupBy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
+        TupleSketchingStrategy groupBy = makeGroupBy(fields, 5, new GroupOperation(COUNT, null, "count"),
                                                  new GroupOperation(SUM, "price", "priceSum"));
 
         BulletRecord recordA = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").add("price", 3).getRecord();

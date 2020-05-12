@@ -10,7 +10,7 @@ import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.query.aggregations.Aggregation;
-import com.yahoo.bullet.query.aggregations.GroupAggregation;
+import com.yahoo.bullet.query.aggregations.Group;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class GroupAll implements Strategy {
+public class GroupStrategy implements Strategy {
     // We only have a single group.
     private GroupData data;
 
@@ -33,7 +33,7 @@ public class GroupAll implements Strategy {
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
      * @param config The BulletConfig.
      */
-    public GroupAll(GroupAggregation aggregation, BulletConfig config) {
+    public GroupStrategy(Group aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result
         operations = aggregation.getOperations();
         data = new GroupData(operations);

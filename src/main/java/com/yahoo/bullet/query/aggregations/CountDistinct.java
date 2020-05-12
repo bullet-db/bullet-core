@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.CountDistinct;
+import com.yahoo.bullet.querying.aggregations.ThetaSketchingStrategy;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-public class CountDistinctAggregation extends Aggregation {
+public class CountDistinct extends Aggregation {
     private static final long serialVersionUID = 3079494553075374672L;
+    private static final BulletException COUNT_DISTINCT_REQUIRES_FIELDS =
+            new BulletException("COUNT DISTINCT requires at least one field.", "Please add at least one field.");
 
     private List<String> fields;
     private String name;
@@ -26,13 +28,13 @@ public class CountDistinctAggregation extends Aggregation {
      * Constructor that creates a COUNT_DISTINCT aggregation.
      *
      * @param fields List of fields to count distinct on.
-     * @param name Name of count distinct field.
+     * @param name The name of the count distinct field.
      */
-    public CountDistinctAggregation(List<String> fields, String name) {
-        super(null, Type.COUNT_DISTINCT);
+    public CountDistinct(List<String> fields, String name) {
+        super(null, AggregationType.COUNT_DISTINCT);
         Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
-            throw new BulletException("COUNT DISTINCT requires at least one field.", "Please add at least one field.");
+            throw COUNT_DISTINCT_REQUIRES_FIELDS;
         }
         this.fields = fields;
         this.name = Objects.requireNonNull(name);
@@ -40,7 +42,7 @@ public class CountDistinctAggregation extends Aggregation {
 
     @Override
     public Strategy getStrategy(BulletConfig config) {
-        return new CountDistinct(this, config);
+        return new ThetaSketchingStrategy(this, config);
     }
 
     @Override

@@ -22,7 +22,7 @@ public class Having extends PostAggregation {
     private Expression expression;
 
     public Having(Expression expression) {
-        super(Type.HAVING);
+        super(PostAggregationType.HAVING);
         if (expression == null) {
             throw new BulletException(HAVING_REQUIRES_EXPRESSION);
         }

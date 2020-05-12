@@ -170,7 +170,7 @@ public class QuerierTest {
         query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, emitInterval, Window.Unit.ALL, null));
 
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.GROUP);
+        aggregation.setType(Aggregation.DistributionType.GROUP);
         Map<String, String> count = Collections.singletonMap(GroupOperation.OPERATION_TYPE,
                                                              GroupOperation.GroupOperationType.COUNT.getName());
         aggregation.setAttributes(Collections.singletonMap(GroupOperation.OPERATIONS, Collections.singletonList(count)));
@@ -190,7 +190,7 @@ public class QuerierTest {
         Query query = querier.getQuery();
         Assert.assertSame(runningQuery.getQuery(), query);
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
-        Assert.assertEquals(query.getAggregation().getType(), Aggregation.Type.RAW);
+        Assert.assertEquals(query.getAggregation().getType(), Aggregation.DistributionType.RAW);
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
@@ -399,7 +399,7 @@ public class QuerierTest {
     @Test
     public void testBasicWindowMaximumEmitted() {
         Querier querier = make(Querier.Mode.PARTITION,
-                               makeAggregationQuery(Aggregation.Type.RAW, 2));
+                               makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -427,7 +427,7 @@ public class QuerierTest {
     @Test
     public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
         Querier querier = make(Querier.Mode.PARTITION,
-                               makeRawFullQuery("mid", Arrays.asList("1", "23"), Clause.Operation.EQUALS, Aggregation.Type.RAW,
+                               makeRawFullQuery("mid", Arrays.asList("1", "23"), Clause.Operation.EQUALS, Aggregation.DistributionType.RAW,
                                                 2, Pair.of("mid", "mid")));
 
         byte[] expected = getListBytes(RecordBox.get().add("mid", "23").getRecord());
@@ -522,8 +522,8 @@ public class QuerierTest {
 
     @Test
     public void testMerging() {
-        Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2));
-        Querier querierB = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.Type.RAW, 2));
+        Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
+        Querier querierB = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -541,7 +541,7 @@ public class QuerierTest {
         Assert.assertEquals(querierB.getData(), expected);
 
 
-        Querier querierC = make(Querier.Mode.ALL, makeAggregationQuery(Aggregation.Type.RAW, 2));
+        Querier querierC = make(Querier.Mode.ALL, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
         querierC.merge(querierA);
         querierC.merge(querierB);
         Assert.assertTrue(querierC.isClosed());
@@ -595,7 +595,7 @@ public class QuerierTest {
 
         Query query = new Query();
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
+        aggregation.setType(Aggregation.DistributionType.COUNT_DISTINCT);
         aggregation.setFields(singletonMap("foo", "bar"));
         query.setAggregation(aggregation);
         query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
@@ -642,7 +642,7 @@ public class QuerierTest {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
+        aggregation.setType(Aggregation.DistributionType.COUNT_DISTINCT);
         query.setAggregation(aggregation);
         query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 1));
         query.configure(config);
@@ -661,7 +661,7 @@ public class QuerierTest {
 
         Query query = new Query();
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
+        aggregation.setType(Aggregation.DistributionType.RAW);
         query.setAggregation(aggregation);
         query.configure(config);
         Querier querier = make(Querier.Mode.ALL, query, config);
@@ -689,7 +689,7 @@ public class QuerierTest {
 
         Query query = new Query();
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
+        aggregation.setType(Aggregation.DistributionType.RAW);
         query.setAggregation(aggregation);
         query.configure(config);
 
@@ -792,7 +792,7 @@ public class QuerierTest {
 
         Query query = new Query();
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
+        aggregation.setType(Aggregation.DistributionType.RAW);
         query.setAggregation(aggregation);
         query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
         query.configure(config);
@@ -838,7 +838,7 @@ public class QuerierTest {
         BulletConfig config = new BulletConfig();
         Query query = new Query();
         PostAggregation postAggregation = new OrderBy();
-        postAggregation.setType(PostAggregation.Type.ORDER_BY);
+        postAggregation.setType(PostAggregation.DistributionType.ORDER_BY);
         query.setPostAggregations(singletonList(postAggregation));
         query.configure(config);
         Querier querier = new Querier(new RunningQuery("", query), config);
@@ -850,7 +850,7 @@ public class QuerierTest {
 
     @Test
     public void testOrderBy() {
-        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.Type.RAW, 500,
+        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.DistributionType.RAW, 500,
                                         Collections.singletonList(makeOrderBy(new OrderBy.SortItem("a", OrderBy.Direction.DESC))), Pair.of("b", "b"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
@@ -872,9 +872,9 @@ public class QuerierTest {
     @Test
     public void testComputation() {
         Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", Type.INTEGER)),
-                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", Type.LONG)));
-        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.Type.RAW, 500, Collections.singletonList(makeComputation(expression, "newName")), Pair.of("b", "b"));
+                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", DistributionType.INTEGER)),
+                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", DistributionType.LONG)));
+        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.DistributionType.RAW, 500, Collections.singletonList(makeComputation(expression, "newName")), Pair.of("b", "b"));
         Querier querier = make(Querier.Mode.ALL, query);
         querier.initialize();
 

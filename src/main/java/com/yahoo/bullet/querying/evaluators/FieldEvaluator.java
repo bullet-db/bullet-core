@@ -10,8 +10,8 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Evaluator that extracts the given field from a BulletRecord. The is the only evaluator
- * that directly takes a BulletRecord.
+ * An evaluator that extracts a given field from a {@link BulletRecord}. This is the only evaluator that directly takes a
+ * {@link BulletRecord}.
  */
 public class FieldEvaluator extends Evaluator {
     @FunctionalInterface
@@ -19,7 +19,7 @@ public class FieldEvaluator extends Evaluator {
         TypedObject extract(BulletRecord record);
     }
 
-    private FieldExtractor fieldExtractor;
+    private final FieldExtractor fieldExtractor;
 
     public FieldEvaluator(FieldExpression fieldExpression) {
         super(fieldExpression);

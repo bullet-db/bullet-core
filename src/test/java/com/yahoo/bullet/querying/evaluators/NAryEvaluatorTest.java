@@ -16,6 +16,8 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static com.yahoo.bullet.querying.evaluators.NAryOperations.N_ARY_OPERATORS;
+
 public class NAryEvaluatorTest {
     @Test
     public void testConstructor() {
@@ -26,11 +28,11 @@ public class NAryEvaluatorTest {
         expression.setType(Type.INTEGER);
 
         NAryEvaluator evaluator = new NAryEvaluator(expression);
-        Assert.assertTrue(evaluator.getOperands().get(0) instanceof ValueEvaluator);
-        Assert.assertTrue(evaluator.getOperands().get(1) instanceof ValueEvaluator);
-        Assert.assertTrue(evaluator.getOperands().get(2) instanceof ValueEvaluator);
-        Assert.assertEquals(evaluator.getOp(), NAryOperations.IF);
-        Assert.assertEquals(evaluator.getType(), Type.INTEGER);
+        Assert.assertTrue(evaluator.operands.get(0) instanceof ValueEvaluator);
+        Assert.assertTrue(evaluator.operands.get(1) instanceof ValueEvaluator);
+        Assert.assertTrue(evaluator.operands.get(2) instanceof ValueEvaluator);
+        Assert.assertEquals(evaluator.op, N_ARY_OPERATORS.get(Operation.IF));
+        Assert.assertEquals(evaluator.type, Type.INTEGER);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.INTEGER, 2));
     }
 }

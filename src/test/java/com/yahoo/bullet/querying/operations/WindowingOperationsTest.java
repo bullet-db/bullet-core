@@ -34,7 +34,7 @@ public class WindowingOperationsTest {
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
+        aggregation.setType(Aggregation.DistributionType.RAW);
         query.setAggregation(aggregation);
 
         Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), SlidingRecord.class);
@@ -48,7 +48,7 @@ public class WindowingOperationsTest {
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.GROUP);
+        aggregation.setType(Aggregation.DistributionType.GROUP);
         query.setAggregation(aggregation);
 
         Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), AdditiveTumbling.class);
@@ -62,7 +62,7 @@ public class WindowingOperationsTest {
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.RAW);
+        aggregation.setType(Aggregation.DistributionType.RAW);
         query.setAggregation(aggregation);
 
         Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), AdditiveTumbling.class);
@@ -76,7 +76,7 @@ public class WindowingOperationsTest {
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.GROUP);
+        aggregation.setType(Aggregation.DistributionType.GROUP);
         query.setAggregation(aggregation);
 
         Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), SlidingRecord.class);
@@ -90,7 +90,7 @@ public class WindowingOperationsTest {
         window.configure(config);
         query.setWindow(window);
         Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.Type.COUNT_DISTINCT);
+        aggregation.setType(Aggregation.DistributionType.COUNT_DISTINCT);
         query.setAggregation(aggregation);
 
         Assert.assertEquals(WindowingOperations.findScheme(query, null, config).getClass(), Tumbling.class);

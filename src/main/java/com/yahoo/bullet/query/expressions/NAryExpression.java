@@ -16,9 +16,14 @@ import java.util.Objects;
 
 import static com.yahoo.bullet.query.expressions.Operation.N_ARY_OPERATIONS;
 
+/**
+ * An expression that requires a list of operands and an n-ary operation.
+ */
 @Getter
 public class NAryExpression extends Expression {
     private static final long serialVersionUID = -1000391436451418013L;
+    private static final BulletException N_ARY_EXPRESSION_REQUIRES_N_ARY_OPERATION =
+            new BulletException("N-ary expression requires an n-ary operation.", "Please specify an n-ary operation.");
     private static final String DELIMITER = ", ";
 
     private final List<Expression> operands;
@@ -28,7 +33,7 @@ public class NAryExpression extends Expression {
         this.operands = Utilities.requireNonNull(operands);
         this.op = Objects.requireNonNull(op);
         if (!N_ARY_OPERATIONS.contains(op)) {
-            throw new BulletException("N-ary expression requires an n-ary operation.", "Please specify an n-ary operation.");
+            throw N_ARY_EXPRESSION_REQUIRES_N_ARY_OPERATION;
         }
     }
 

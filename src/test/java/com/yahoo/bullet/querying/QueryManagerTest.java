@@ -10,6 +10,7 @@ import com.yahoo.bullet.query.Projection;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.query.expressions.Operation;
@@ -76,7 +77,7 @@ public class QueryManagerTest {
         }
         Query query = new Query(new Projection(),
                                 expression,
-                                new Aggregation(),
+                                new Raw(null),
                                 null,
                                 new Window(),
                                 null);

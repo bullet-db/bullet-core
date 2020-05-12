@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.GroupAll;
-import com.yahoo.bullet.querying.aggregations.GroupBy;
+import com.yahoo.bullet.querying.aggregations.GroupStrategy;
+import com.yahoo.bullet.querying.aggregations.TupleSketchingStrategy;
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
@@ -16,19 +16,19 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class GroupAggregationTest {
+public class GroupTest {
     private BulletConfig config = new BulletConfig();
 
     @Test
     public void testGetType() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
 
-        Assert.assertEquals(aggregation.getType(), Aggregation.Type.GROUP);
+        Assert.assertEquals(aggregation.getType(), AggregationType.GROUP);
     }
 
     @Test
     public void testFields() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
 
         Assert.assertEquals(aggregation.getFields(), Collections.emptyList());
         Assert.assertEquals(aggregation.getFieldsToNames(), Collections.emptyMap());
@@ -46,7 +46,7 @@ public class GroupAggregationTest {
 
     @Test
     public void testOperations() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
 
         Assert.assertEquals(aggregation.getOperations(), Collections.emptyList());
 
@@ -59,31 +59,31 @@ public class GroupAggregationTest {
 
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "COUNT_FIELD is not a valid operation\\.")
     public void testAddGroupOperationCountFieldThrows() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
 
         aggregation.addGroupOperation(GroupOperation.GroupOperationType.COUNT_FIELD, "abc", null);
     }
 
     @Test
     public void testGetStrategyGroupAll() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
         aggregation.configure(config);
 
-        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof GroupAll);
+        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof GroupStrategy);
     }
 
     @Test
     public void testGetStrategyGroupBy() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
         aggregation.setFields(Collections.singletonMap("abc", "def"));
         aggregation.configure(config);
 
-        Assert.assertTrue(aggregation.getStrategy(config) instanceof GroupBy);
+        Assert.assertTrue(aggregation.getStrategy(config) instanceof TupleSketchingStrategy);
     }
 
     @Test
     public void testToString() {
-        GroupAggregation aggregation = new GroupAggregation(null);
+        Group aggregation = new Group(null);
         aggregation.setFields(Collections.singletonMap("abc", "def"));
         aggregation.addGroupOperation(GroupOperation.GroupOperationType.SUM, "abc", "sum");
 

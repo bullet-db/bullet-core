@@ -23,12 +23,12 @@ public class NAryOperations {
     public static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
-        N_ARY_OPERATORS.put(Operation.AND, NAryOperations.ALL_MATCH);
-        N_ARY_OPERATORS.put(Operation.OR, NAryOperations.ANY_MATCH);
-        N_ARY_OPERATORS.put(Operation.IF, NAryOperations.IF);
+        N_ARY_OPERATORS.put(Operation.AND, NAryOperations::allMatch);
+        N_ARY_OPERATORS.put(Operation.OR, NAryOperations::anyMatch);
+        N_ARY_OPERATORS.put(Operation.IF, NAryOperations::ternary);
     }
 
-    static NAryOperator ALL_MATCH = (evaluators, record) -> {
+    static TypedObject allMatch(List<Evaluator> evaluators, BulletRecord record) {
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
             if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
@@ -38,7 +38,7 @@ public class NAryOperations {
         return new TypedObject(Type.BOOLEAN, true);
     };
 
-    static NAryOperator ANY_MATCH = (evaluators, record) -> {
+    static TypedObject anyMatch(List<Evaluator> evaluators, BulletRecord record) {
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
             if ((Boolean) value.getValue()) {
@@ -48,7 +48,7 @@ public class NAryOperations {
         return new TypedObject(Type.BOOLEAN, false);
     };
 
-    static NAryOperator IF = (evaluators, record) -> {
+    static TypedObject ternary(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject condition = evaluators.get(0).evaluate(record);
         return (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) : evaluators.get(2).evaluate(record);
     };

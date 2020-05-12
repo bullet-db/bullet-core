@@ -20,9 +20,9 @@ public class CastEvaluatorTest {
         expression.setType(Type.STRING);
 
         CastEvaluator evaluator = new CastEvaluator(expression);
-        Assert.assertTrue(evaluator.getValue() instanceof ValueEvaluator);
-        Assert.assertEquals(evaluator.getCastType(), Type.STRING);
-        Assert.assertEquals(evaluator.getType(), Type.STRING);
+        Assert.assertTrue(evaluator.value instanceof ValueEvaluator);
+        Assert.assertEquals(evaluator.castType, Type.STRING);
+        Assert.assertEquals(evaluator.type, Type.STRING);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.STRING, "5"));
     }
 }

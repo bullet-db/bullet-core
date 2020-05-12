@@ -5,35 +5,35 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.Distribution;
+import com.yahoo.bullet.querying.aggregations.QuantileSketchingStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class LinearDistributionAggregationTest {
+public class LinearDistributionTest {
     private BulletConfig config = new BulletConfig();
 
     @Test
     public void testLinearDistributionAggregation() {
-        LinearDistributionAggregation aggregation = new LinearDistributionAggregation("foo", Distribution.Type.QUANTILE, 500, 10);
+        LinearDistribution aggregation = new LinearDistribution("foo", DistributionType.QUANTILE, 500, 10);
         aggregation.configure(config);
 
-        Assert.assertEquals(aggregation.getType(), Aggregation.Type.DISTRIBUTION);
-        Assert.assertEquals(aggregation.getDistributionType(), Distribution.Type.QUANTILE);
+        Assert.assertEquals(aggregation.getType(), AggregationType.DISTRIBUTION);
+        Assert.assertEquals(aggregation.getDistributionType(), DistributionType.QUANTILE);
         Assert.assertEquals(aggregation.getNumberOfPoints(), 10);
-        Assert.assertTrue(aggregation.getStrategy(config) instanceof Distribution);
+        Assert.assertTrue(aggregation.getStrategy(config) instanceof QuantileSketchingStrategy);
     }
 
     @Test(expectedExceptions = BulletException.class,
           expectedExceptionsMessageRegExp = "If specifying the distribution by the number of points, the number must be positive\\.")
     public void testConstructorNumberOfPointsNonPositiveThrows() {
-        new LinearDistributionAggregation("foo", Distribution.Type.QUANTILE, 10, 0);
+        new LinearDistribution("foo", DistributionType.QUANTILE, 10, 0);
     }
 
     @Test
     public void testToString() {
-        LinearDistributionAggregation aggregation = new LinearDistributionAggregation("foo", Distribution.Type.QUANTILE, null, 10);
+        LinearDistribution aggregation = new LinearDistribution("foo", DistributionType.QUANTILE, null, 10);
 
         Assert.assertEquals(aggregation.toString(), "{size: null, type: DISTRIBUTION, field: foo, distributionType: QUANTILE, numberOfPoints: 10}");
     }

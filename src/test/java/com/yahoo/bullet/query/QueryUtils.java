@@ -14,7 +14,7 @@ public class QueryUtils {
     /*
     @SafeVarargs
     public static String makeRawWindowQuery(String field, List<String> values, Clause.Operation operation,
-                                            Aggregation.Type aggregation, Integer size,  Window.Unit emit,
+                                            Aggregation.DistributionType aggregation, Integer size,  Window.Unit emit,
                                             Integer emitValue, Window.Unit include, Integer includeValue,
                                             Pair<String, String>... projections) {
         return makeRawWindowQuery(field, values, operation, aggregation, size, null,
@@ -23,7 +23,7 @@ public class QueryUtils {
 
     @SafeVarargs
     public static String makeRawWindowQuery(String field, List<String> values, Clause.Operation operation,
-                                            Aggregation.Type aggregation, Integer size,
+                                            Aggregation.DistributionType aggregation, Integer size,
                                             List<String> postAggregations, Window.Unit emit,
                                             Integer emitValue, Window.Unit include, Integer includeValue,
                                             Pair<String, String>... projections) {
@@ -38,14 +38,14 @@ public class QueryUtils {
 
     @SafeVarargs
     public static String makeGroupFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                              Aggregation.Type aggregation, Integer size,
+                                              Aggregation.DistributionType aggregation, Integer size,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return makeGroupFilterQuery(field, values, operation, aggregation, size, null, operations, fields);
     }
 
     @SafeVarargs
     public static String makeGroupFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                              Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                              Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return "{" +
                  "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
@@ -56,14 +56,14 @@ public class QueryUtils {
 
     @SafeVarargs
     public static String makeGroupFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                              Aggregation.Type aggregation, Integer size,
+                                              Aggregation.DistributionType aggregation, Integer size,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return makeGroupFilterQuery(clauses, operation, aggregation, size, null, operations, fields);
     }
 
     @SafeVarargs
     public static String makeGroupFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                              Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                              Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                               List<GroupOperation> operations, Pair<String, String>... fields) {
         return "{" +
                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
@@ -74,14 +74,14 @@ public class QueryUtils {
 
     @SafeVarargs
     public static String makeRawFullQuery(String field, List<String> values, Clause.Operation operation,
-                                          Aggregation.Type aggregation, Integer size,
+                                          Aggregation.DistributionType aggregation, Integer size,
                                           Pair<String, String>... projections) {
         return makeRawFullQuery(field, values, operation, aggregation, size, null, projections);
     }
 
     @SafeVarargs
     public static String makeRawFullQuery(String field, List<String> values, Clause.Operation operation,
-                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                           Pair<String, String>... projections) {
         return "{" +
                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
@@ -93,14 +93,14 @@ public class QueryUtils {
 
     @SafeVarargs
     public static String makeRawFullQuery(List<Clause> clauses, Clause.Operation operation,
-                                          Aggregation.Type aggregation, Integer size,
+                                          Aggregation.DistributionType aggregation, Integer size,
                                           Pair<String, String>... projections) {
         return makeRawFullQuery(clauses, operation, aggregation, size, null, projections);
     }
 
     @SafeVarargs
     public static String makeRawFullQuery(List<Clause> clauses, Clause.Operation operation,
-                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                           Pair<String, String>... projections) {
         return "{" +
                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
@@ -143,14 +143,14 @@ public class QueryUtils {
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, Window.Unit emit,
+                                                          Aggregation.DistributionType aggregation, Integer size, Window.Unit emit,
                                                           Integer emitValue, Window.Unit include, Integer includeValue) {
         return makeSimpleAggregationFilterQuery(field, values, operation, aggregation, size, null,
                                                 emit, emitValue, include, includeValue);
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                                           Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
@@ -161,14 +161,14 @@ public class QueryUtils {
     }
 
     public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, Window.Unit emit,
+                                                          Aggregation.DistributionType aggregation, Integer size, Window.Unit emit,
                                                           Integer emitValue, Window.Unit include, Integer includeValue) {
         return makeSimpleAggregationFilterQuery(clauses, operation, aggregation, size, null,
                                                 emit, emitValue, include, includeValue);
     }
 
     public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations,
+                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
                                                           Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
@@ -179,12 +179,12 @@ public class QueryUtils {
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size) {
+                                                          Aggregation.DistributionType aggregation, Integer size) {
         return makeSimpleAggregationFilterQuery(field, values, operation, aggregation, size, null);
     }
 
     public static String makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations) {
+                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations) {
         return "{" +
                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
@@ -193,12 +193,12 @@ public class QueryUtils {
     }
 
     public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size) {
+                                                          Aggregation.DistributionType aggregation, Integer size) {
         return makeSimpleAggregationFilterQuery(clauses, operation, aggregation, size, null);
     }
 
     public static String makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.Type aggregation, Integer size, List<String> postAggregations) {
+                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations) {
         return "{" +
                 "'filters' : [" + makeFilter(clauses, operation) + "], " +
                 "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
@@ -227,7 +227,7 @@ public class QueryUtils {
         return "{'projection' : " + makeProjections(projections) + "}";
     }
 
-    public static String makeAggregationQuery(Aggregation.Type operation, Integer size, Window.Unit emit,
+    public static String makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Window.Unit emit,
                                               Integer emitValue, Window.Unit include, Integer includeValue) {
         return "{" +
                  "'aggregation' : " + makeSimpleAggregation(size, operation) + ", " +
@@ -235,17 +235,17 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeAggregationQuery(Aggregation.Type operation, Integer size) {
+    public static String makeAggregationQuery(Aggregation.DistributionType operation, Integer size) {
         return "{'aggregation' : " + makeSimpleAggregation(size, operation) + "}";
     }
 
     @SafeVarargs
-    public static String makeAggregationQuery(Aggregation.Type operation, Integer size, Map<String, String> attributes,
+    public static String makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Map<String, String> attributes,
                                               Pair<String, String>... fields) {
         return "{'aggregation' : " + makeStringAttributesAggregation(size, operation, attributes, fields) + "}";
     }
 
-    public static String makeAggregationQuery(Aggregation.Type operation, Integer size, Distribution.Type type,
+    public static String makeAggregationQuery(Aggregation.DistributionType operation, Integer size, QuantileSketchingStrategy.DistributionType type,
                                               String field, List<Double> points, Double start, Double end,
                                               Double increment, Integer numberOfPoints) {
         return "{'aggregation' : " + makeDistributionAggregation(size, operation, type, field, points, start, end,
@@ -253,7 +253,7 @@ public class QueryUtils {
     }
 
     @SafeVarargs
-    public static String makeAggregationQuery(Aggregation.Type operation, Integer size, Long threshold,
+    public static String makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Long threshold,
                                               String newName, Pair<String, String>... fields) {
         return "{'aggregation' : " + makeTopKAggregation(size, operation, threshold, newName, fields) + "}";
     }
@@ -294,12 +294,12 @@ public class QueryUtils {
         return "{'fields' : " + makeMap(pairs) + "}";
     }
 
-    public static String makeSimpleAggregation(Integer size, Aggregation.Type operation) {
+    public static String makeSimpleAggregation(Integer size, Aggregation.DistributionType operation) {
         return "{'type' : '" + getTypeFor(operation) + "', 'size' : " + size + "}";
     }
 
     @SafeVarargs
-    public static String makeGroupAggregation(Integer size, Aggregation.Type operation, List<GroupOperation> operations,
+    public static String makeGroupAggregation(Integer size, Aggregation.DistributionType operation, List<GroupOperation> operations,
                                               Pair<String, String>... fields) {
         return "{" +
                  "'type' : '" + getTypeFor(operation) + "', " +
@@ -313,7 +313,7 @@ public class QueryUtils {
                "}";
     }
 
-    public static String makeDistributionAggregation(Integer size, Aggregation.Type operation, Distribution.Type type,
+    public static String makeDistributionAggregation(Integer size, Aggregation.DistributionType operation, QuantileSketchingStrategy.DistributionType type,
                                                      String field, List<Double> points, Double start, Double end,
                                                      Double increment, Integer numberOfPoints) {
         return "{" +
@@ -325,7 +325,7 @@ public class QueryUtils {
     }
 
     @SafeVarargs
-    public static String makeTopKAggregation(Integer size, Aggregation.Type operation, Long threshold,
+    public static String makeTopKAggregation(Integer size, Aggregation.DistributionType operation, Long threshold,
                                              String newName, Pair<String, String>... fields) {
         return "{" +
                  "'type' : '" + getTypeFor(operation) + "', " +
@@ -336,7 +336,7 @@ public class QueryUtils {
     }
 
     @SafeVarargs
-    public static String makeStringAttributesAggregation(Integer size, Aggregation.Type operation,
+    public static String makeStringAttributesAggregation(Integer size, Aggregation.DistributionType operation,
                                                          Map<String, String> attributes,
                                                          Pair<String, String>... fields) {
         return "{" +
@@ -388,22 +388,22 @@ public class QueryUtils {
 
     }
 
-    public static String makeMap(Distribution.Type type, List<Double> points, Double start, Double end, Double increment,
+    public static String makeMap(QuantileSketchingStrategy.DistributionType type, List<Double> points, Double start, Double end, Double increment,
                                  Integer numberOfPoints) {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        builder.append("'" + Distribution.TYPE + "' : '").append(type.getName()).append("', ");
+        builder.append("'" + QuantileSketchingStrategy.TYPE + "' : '").append(type.getName()).append("', ");
 
         if (points != null) {
-            builder.append("'" + Distribution.POINTS + "' : [")
+            builder.append("'" + QuantileSketchingStrategy.POINTS + "' : [")
                    .append(points.stream().map(Object::toString).collect(Collectors.joining(",")))
                    .append("]");
         } else if (numberOfPoints != null) {
-            builder.append("'" + Distribution.NUMBER_OF_POINTS + "' : ").append(numberOfPoints);
+            builder.append("'" + QuantileSketchingStrategy.NUMBER_OF_POINTS + "' : ").append(numberOfPoints);
         } else {
-            builder.append("'" + Distribution.RANGE_START + "' : ").append(start).append(", ");
-            builder.append("'" + Distribution.RANGE_END + "' : ").append(end).append(", ");
-            builder.append("'" + Distribution.RANGE_INCREMENT + "' : ").append(increment);
+            builder.append("'" + QuantileSketchingStrategy.RANGE_START + "' : ").append(start).append(", ");
+            builder.append("'" + QuantileSketchingStrategy.RANGE_END + "' : ").append(end).append(", ");
+            builder.append("'" + QuantileSketchingStrategy.RANGE_INCREMENT + "' : ").append(increment);
         }
         builder.append("}");
         return builder.toString();
@@ -413,13 +413,13 @@ public class QueryUtils {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
         if (threshold != null) {
-            builder.append("'" + TopK.THRESHOLD_FIELD + "' : ").append(threshold);
+            builder.append("'" + FrequentItemsSketchingStrategy.THRESHOLD_FIELD + "' : ").append(threshold);
         }
         if (threshold != null && newName != null) {
             builder.append(", ");
         }
         if (newName != null) {
-            builder.append("'" + TopK.NEW_NAME_FIELD + "' : ").append(newName);
+            builder.append("'" + FrequentItemsSketchingStrategy.NEW_NAME_FIELD + "' : ").append(newName);
         }
         builder.append("}");
         return builder.toString();
@@ -544,7 +544,7 @@ public class QueryUtils {
         }
     }
 
-    public static String getTypeFor(Aggregation.Type type) {
+    public static String getTypeFor(Aggregation.DistributionType type) {
         switch (type) {
             case TOP_K:
                 return "TOP K";

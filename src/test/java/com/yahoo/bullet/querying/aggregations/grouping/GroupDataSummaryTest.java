@@ -74,7 +74,7 @@ public class GroupDataSummaryTest {
             case MAX:
                 return start + i + end;
             default:
-                throw new IllegalArgumentException("Type not supported");
+                throw new IllegalArgumentException("DistributionType not supported");
         }
     }
 

@@ -9,6 +9,7 @@ import com.yahoo.bullet.TestHelpers;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
@@ -22,16 +23,16 @@ import java.util.stream.IntStream;
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static java.util.stream.Collectors.toList;
 
-public class RawTest {
-    private static Raw makeRaw(int size, int maxSize) {
-        Aggregation aggregation = new Aggregation(size);
+public class RawStrategyTest {
+    private static RawStrategy makeRaw(int size, int maxSize) {
+        Aggregation aggregation = new Raw(size);
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, maxSize);
         config.validate();
-        return (Raw) aggregation.getStrategy(config);
+        return (RawStrategy) aggregation.getStrategy(config);
     }
 
-    private static Raw makeRaw(int size) {
+    private static RawStrategy makeRaw(int size) {
         return makeRaw(size, BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE);
     }
 
@@ -43,7 +44,7 @@ public class RawTest {
     @Test
     public void testIsClosed() {
         BulletRecord record = RecordBox.get().add("foo", "bar").getRecord();
-        Raw raw = makeRaw(2);
+        RawStrategy raw = makeRaw(2);
 
         Assert.assertFalse(raw.isClosed());
 
@@ -56,7 +57,7 @@ public class RawTest {
 
     @Test
     public void testNull() {
-        Raw raw = makeRaw(1);
+        RawStrategy raw = makeRaw(1);
         raw.consume(null);
         Assert.assertNull(raw.getData());
         raw.combine(null);
@@ -68,14 +69,14 @@ public class RawTest {
     public void testWritingBadRecord() {
         BulletRecord mocked = new NoSerDeBulletRecord();
 
-        Raw raw = makeRaw(1);
+        RawStrategy raw = makeRaw(1);
         raw.consume(mocked);
         Assert.assertNull(raw.getData());
     }
 
     @Test
     public void testReadingBadSerialization() {
-        Raw raw = makeRaw(1);
+        RawStrategy raw = makeRaw(1);
         raw.combine(new byte[0]);
 
         Assert.assertNull(raw.getData());
@@ -83,14 +84,14 @@ public class RawTest {
 
     @Test
     public void testReadingEmpty() {
-        Raw raw = makeRaw(1);
+        RawStrategy raw = makeRaw(1);
         raw.combine(SerializerDeserializer.toBytes(new ArrayList<>()));
         Assert.assertNull(raw.getData());
     }
 
     @Test
     public void testSerializationOnConsumedRecord() {
-        Raw raw = makeRaw(2);
+        RawStrategy raw = makeRaw(2);
 
         BulletRecord recordA = RecordBox.get().add("foo", "bar").getRecord();
         raw.consume(recordA);
@@ -115,7 +116,7 @@ public class RawTest {
 
     @Test
     public void testLimitZero() {
-        Raw raw = makeRaw(0);
+        RawStrategy raw = makeRaw(0);
 
         List<BulletRecord> aggregate = raw.getResult().getRecords();
         Assert.assertTrue(raw.isClosed());
@@ -131,7 +132,7 @@ public class RawTest {
 
     @Test
     public void testLimitLessThanSpecified() {
-        Raw raw = makeRaw(10);
+        RawStrategy raw = makeRaw(10);
         List<BulletRecord> records = IntStream.range(0, 5).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
 
@@ -150,7 +151,7 @@ public class RawTest {
 
     @Test
     public void testLimitExact() {
-        Raw raw = makeRaw(10);
+        RawStrategy raw = makeRaw(10);
 
         List<BulletRecord> records = IntStream.range(0, 10).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
@@ -170,7 +171,7 @@ public class RawTest {
 
     @Test
     public void testLimitMoreThanMaximum() {
-        Raw raw = makeRaw(10);
+        RawStrategy raw = makeRaw(10);
 
         List<BulletRecord> records = IntStream.range(0, 20).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
@@ -189,7 +190,7 @@ public class RawTest {
 
     @Test
     public void testLimitDifferentMicroBatches() {
-        Raw raw = makeRaw(20);
+        RawStrategy raw = makeRaw(20);
         List<BulletRecord> records = IntStream.range(0, 20).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(Collectors.toCollection(ArrayList::new));
 
@@ -223,7 +224,7 @@ public class RawTest {
 
     @Test
     public void testLimitConfiguredMaximums() {
-        Raw raw = makeRaw(50000, 200);
+        RawStrategy raw = makeRaw(50000, 200);
         List<BulletRecord> records = IntStream.range(0, 300).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
         records.stream().map(TestHelpers::getListBytes).forEach(raw::combine);
@@ -238,7 +239,7 @@ public class RawTest {
 
     @Test
     public void testResetting() {
-        Raw raw = makeRaw(10);
+        RawStrategy raw = makeRaw(10);
         List<BulletRecord> records = IntStream.range(0, 10).mapToObj(x -> RecordBox.get().add("i", x).getRecord())
                                               .collect(toList());
 

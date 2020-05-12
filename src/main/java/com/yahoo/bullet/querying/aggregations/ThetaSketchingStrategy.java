@@ -8,7 +8,7 @@ package com.yahoo.bullet.querying.aggregations;
 import com.yahoo.bullet.querying.aggregations.sketches.ThetaSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.aggregations.Aggregation;
-import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
+import com.yahoo.bullet.query.aggregations.CountDistinct;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.sketches.Family;
@@ -16,7 +16,7 @@ import com.yahoo.sketches.ResizeFactor;
 
 import java.util.List;
 
-public class CountDistinct extends KMVStrategy<ThetaSketch> {
+public class ThetaSketchingStrategy extends KMVStrategy<ThetaSketch> {
     // Theta Sketch defaults
     // Recommended for real-time systems
     public static final String DEFAULT_UPDATE_SKETCH_FAMILY = Family.ALPHA.getFamilyName();
@@ -33,7 +33,7 @@ public class CountDistinct extends KMVStrategy<ThetaSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public CountDistinct(CountDistinctAggregation aggregation, BulletConfig config) {
+    public ThetaSketchingStrategy(CountDistinct aggregation, BulletConfig config) {
         super(aggregation, config);
 
         ResizeFactor resizeFactor = getResizeFactor(config, BulletConfig.COUNT_DISTINCT_AGGREGATION_SKETCH_RESIZE_FACTOR);

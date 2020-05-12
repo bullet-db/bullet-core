@@ -6,9 +6,10 @@
 package com.yahoo.bullet.querying.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.query.aggregations.LinearDistributionAggregation;
-import com.yahoo.bullet.query.aggregations.ManualDistributionAggregation;
-import com.yahoo.bullet.query.aggregations.RegionDistributionAggregation;
+import com.yahoo.bullet.query.aggregations.DistributionType;
+import com.yahoo.bullet.query.aggregations.LinearDistribution;
+import com.yahoo.bullet.query.aggregations.ManualDistribution;
+import com.yahoo.bullet.query.aggregations.RegionDistribution;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -42,7 +43,7 @@ import static com.yahoo.bullet.querying.aggregations.sketches.QuantileSketch.VAL
 import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static java.util.Arrays.asList;
 
-public class DistributionTest {
+public class QuantileSketchingStrategyTest {
     private static final List<Map.Entry<Concept, String>> ALL_METADATA =
         asList(Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEst"),
                Pair.of(Concept.SKETCH_FAMILY, "family"),
@@ -53,27 +54,27 @@ public class DistributionTest {
                Pair.of(Concept.SKETCH_MAXIMUM_VALUE, "max"),
                Pair.of(Concept.SKETCH_METADATA, "meta"));
 
-    public static Distribution makeDistribution(BulletConfig configuration, int size, String field, Distribution.Type type, int numberOfPoints) {
-        LinearDistributionAggregation aggregation = new LinearDistributionAggregation(field, type, size, numberOfPoints);
-        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
+    public static QuantileSketchingStrategy makeDistribution(BulletConfig configuration, int size, String field, DistributionType type, int numberOfPoints) {
+        LinearDistribution aggregation = new LinearDistribution(field, type, size, numberOfPoints);
+        return new QuantileSketchingStrategy(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
-    public static Distribution makeDistribution(String field, Distribution.Type type, int numberOfPoints) {
-        LinearDistributionAggregation aggregation = new LinearDistributionAggregation(field, type, 20, numberOfPoints);
+    public static QuantileSketchingStrategy makeDistribution(String field, DistributionType type, int numberOfPoints) {
+        LinearDistribution aggregation = new LinearDistribution(field, type, 20, numberOfPoints);
         BulletConfig configuration = makeConfiguration(100, 512);
-        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
+        return new QuantileSketchingStrategy(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
-    public static Distribution makeDistribution(Distribution.Type type, int maxPoints, int rounding, double start, double end, double increment) {
-        RegionDistributionAggregation aggregation = new RegionDistributionAggregation("field", type, 20, start, end, increment);
+    public static QuantileSketchingStrategy makeDistribution(DistributionType type, int maxPoints, int rounding, double start, double end, double increment) {
+        RegionDistribution aggregation = new RegionDistribution("field", type, 20, start, end, increment);
         BulletConfig configuration = makeConfiguration(maxPoints, 128, rounding);
-        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
+        return new QuantileSketchingStrategy(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
-    public static Distribution makeDistribution(Distribution.Type type, List<Double> points) {
-        ManualDistributionAggregation aggregation = new ManualDistributionAggregation("field", type, 20, points);
+    public static QuantileSketchingStrategy makeDistribution(DistributionType type, List<Double> points) {
+        ManualDistribution aggregation = new ManualDistribution("field", type, 20, points);
         BulletConfig configuration = makeConfiguration(10, 128);
-        return new Distribution(aggregation, addMetadata(configuration, ALL_METADATA));
+        return new QuantileSketchingStrategy(aggregation, addMetadata(configuration, ALL_METADATA));
     }
 
     public static BulletConfig makeConfiguration(int maxPoints, int k, int rounding) {
@@ -94,35 +95,35 @@ public class DistributionTest {
         List<BulletError> errors;
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
-        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        QuantileSketchingStrategy distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
 
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_ONE_FIELD_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_ONE_FIELD_ERROR);
 
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        distribution = new Distribution(aggregation, new BulletConfig());
+        distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_TYPE_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_TYPE_ERROR);
 
-        aggregation.setAttributes(Collections.singletonMap(Distribution.TYPE, "foo"));
-        distribution = new Distribution(aggregation, new BulletConfig());
+        aggregation.setAttributes(Collections.singletonMap(QuantileSketchingStrategy.TYPE, "foo"));
+        distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_TYPE_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_TYPE_ERROR);
 
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(Distribution.TYPE, Distribution.Type.CDF.getName());
-        attributes.put(Distribution.NUMBER_OF_POINTS, 10L);
+        attributes.put(QuantileSketchingStrategy.TYPE, QuantileSketchingStrategy.DistributionType.CDF.getName());
+        attributes.put(QuantileSketchingStrategy.NUMBER_OF_POINTS, 10L);
         aggregation.setAttributes(attributes);
-        distribution = new Distribution(aggregation, new BulletConfig());
+        distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         Assert.assertFalse(distribution.initialize().isPresent());
     }
 
@@ -131,74 +132,74 @@ public class DistributionTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        QuantileSketchingStrategy distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         Optional<List<BulletError>> optionalErrors;
         List<BulletError> errors;
 
         // start  < 0
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, -1, 1, 0.5));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, -1, 1, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
         // end > 1
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, 0, 2, 0.1));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, 0, 2, 0.1));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
         // both out of range
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, 3, 4, 0.1));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, 3, 4, 0.1));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, 0, 1, 0.2));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, 0, 1, 0.2));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
         // start null
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, null, 0.5, 0.2, null, null));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, null, 0.5, 0.2, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
         // end null
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, 1.0, null, 0.2, null, null));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, 1.0, null, 0.2, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
         // increment null
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, 1.0, 2.0, null, null, null));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, 1.0, 2.0, null, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
         // end < start
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, 25, -2, 0.5));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, 25, -2, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, 25, 200, 0.5));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, 25, 200, 0.5));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
@@ -208,44 +209,44 @@ public class DistributionTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        QuantileSketchingStrategy distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         Optional<List<BulletError>> optionalErrors;
         List<BulletError> errors;
 
         // Null points
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, null, null, null, null, null));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, null, null, null, null, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
         // Negative points
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, -10));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, -10));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
         // 0 points
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, 0));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, 0));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, 0));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, 0));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, 1));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, 1));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
@@ -255,62 +256,62 @@ public class DistributionTest {
         Aggregation aggregation = new Aggregation();
         aggregation.setSize(20);
         aggregation.setFields(Collections.singletonMap("foo", "bar"));
-        Distribution distribution = new Distribution(aggregation, new BulletConfig());
+        QuantileSketchingStrategy distribution = new QuantileSketchingStrategy(aggregation, new BulletConfig());
         Optional<List<BulletError>> optionalErrors;
         List<BulletError> errors;
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, null));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, null));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, Collections.emptyList()));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, Collections.emptyList()));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, Collections.singletonList(2.0)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, Collections.singletonList(2.0)));
         optionalErrors = distribution.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         errors = optionalErrors.get();
         Assert.assertEquals(errors.size(), 2);
-        Assert.assertEquals(errors.get(0), Distribution.REQUIRES_POINTS_ERROR);
-        Assert.assertEquals(errors.get(1), Distribution.REQUIRES_POINTS_PROPER_RANGE);
+        Assert.assertEquals(errors.get(0), QuantileSketchingStrategy.REQUIRES_POINTS_ERROR);
+        Assert.assertEquals(errors.get(1), QuantileSketchingStrategy.REQUIRES_POINTS_PROPER_RANGE);
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, Collections.singletonList(1.0)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, Collections.singletonList(1.0)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(distribution.initialize().isPresent());
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.QUANTILE, asList(0.4, 0.03, 0.99, 0.5, 0.35)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, Collections.singletonList(0.4)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, Collections.singletonList(0.4)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
 
-        aggregation.setAttributes(makeAttributes(Distribution.Type.PMF, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
+        aggregation.setAttributes(makeAttributes(QuantileSketchingStrategy.DistributionType.PMF, asList(0.4, 0.03, 0.99, 0.5, 14.0)));
         optionalErrors = distribution.initialize();
         Assert.assertFalse(optionalErrors.isPresent());
     }
 */
     @Test
     public void testQuantiles() {
-        Distribution distribution = makeDistribution("field", Distribution.Type.QUANTILE, 3);
+        QuantileSketchingStrategy distribution = makeDistribution("field", DistributionType.QUANTILE, 3);
 
         IntStream.range(0, 2000).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(distribution::consume);
@@ -355,7 +356,7 @@ public class DistributionTest {
 
     @Test
     public void testPMF() {
-        Distribution distribution = makeDistribution(Distribution.Type.PMF, asList(5.0, 2.5));
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.PMF, asList(5.0, 2.5));
 
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -388,7 +389,7 @@ public class DistributionTest {
 
     @Test
     public void testCDF() {
-        Distribution distribution = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(0, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -421,17 +422,17 @@ public class DistributionTest {
 
     @Test
     public void testCombining() {
-        Distribution distribution = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(0, 25).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                               .forEach(distribution::consume);
 
-        Distribution anotherDistribution = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+        QuantileSketchingStrategy anotherDistribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(50, 100).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                 .forEach(anotherDistribution::consume);
 
-        Distribution union = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+        QuantileSketchingStrategy union = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
         union.combine(distribution.getData());
         union.combine(anotherDistribution.getData());
         Clip result = union.getResult();
@@ -462,7 +463,7 @@ public class DistributionTest {
 
     @Test
     public void testCasting() {
-        Distribution distribution = makeDistribution(Distribution.Type.PMF, Collections.singletonList(50.0));
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.PMF, Collections.singletonList(50.0));
 
         IntStream.range(0, 25).mapToObj(String::valueOf).map(s -> RecordBox.get().add("field", s).getRecord())
                               .forEach(distribution::consume);
@@ -500,7 +501,7 @@ public class DistributionTest {
     public void testNegativeSize() {
         // MAX_POINTS is configured to -1 and we will use the min BulletConfig.DEFAULT_DISTRIBUTION_AGGREGATION_MAX_POINTS
         // and aggregation size, which is 1
-        Distribution distribution = makeDistribution(makeConfiguration(-1, 128), 1, "field", Distribution.Type.PMF, 10);
+        QuantileSketchingStrategy distribution = makeDistribution(makeConfiguration(-1, 128), 1, "field", DistributionType.PMF, 10);
 
         IntStream.range(0, 100).mapToDouble(i -> i).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                                .forEach(distribution::consume);
@@ -529,7 +530,7 @@ public class DistributionTest {
 
     @Test
     public void testRounding() {
-        Distribution distribution = makeDistribution(Distribution.Type.QUANTILE, 20, 6, 0.0, 1.0, 0.1);
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.QUANTILE, 20, 6, 0.0, 1.0, 0.1);
 
         IntStream.range(0, 10).mapToDouble(i -> i * 0.1).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                               .forEach(distribution::consume);
@@ -554,7 +555,7 @@ public class DistributionTest {
 
     @Test
     public void testResetting() {
-        Distribution distribution = makeDistribution(Distribution.Type.CDF, asList(5.0, 2.5));
+        QuantileSketchingStrategy distribution = makeDistribution(DistributionType.CDF, asList(5.0, 2.5));
 
         IntStream.range(0, 25).mapToDouble(i -> (i * 0.1)).mapToObj(d -> RecordBox.get().add("field", d).getRecord())
                  .forEach(distribution::consume);

@@ -11,8 +11,9 @@ import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.querying.aggregations.sketches.TupleSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.aggregations.Aggregation;
-import com.yahoo.bullet.query.aggregations.GroupAggregation;
+import com.yahoo.bullet.query.aggregations.Group;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.sketches.ResizeFactor;
 
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import java.util.Objects;
  * sum and count when summed across the uniform sample and divided the sketch theta gives an approximate estimate
  * of the total sum and count across all the groups.
  */
-public class GroupBy extends KMVStrategy<TupleSketch> {
+public class TupleSketchingStrategy extends KMVStrategy<TupleSketch> {
     // This is reused for the duration of the strategy.
     private final CachingGroupData container;
 
@@ -37,7 +38,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public GroupBy(GroupAggregation aggregation, BulletConfig config) {
+    public TupleSketchingStrategy(Group aggregation, BulletConfig config) {
         super(aggregation, config);
 
         Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(aggregation.getOperations());
@@ -70,7 +71,7 @@ public class GroupBy extends KMVStrategy<TupleSketch> {
     private Map<String, String> getFields(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            String value = Objects.toString(record.typedGet(field).getValue());
+            String value = Objects.toString(record.typedGet(field).forceCast(Type.STRING).getValue());
             fieldValues.put(field, value);
         }
         return fieldValues;

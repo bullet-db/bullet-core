@@ -18,7 +18,7 @@ public class CullingTest {
         Culling culling = new Culling(Collections.singleton("abc"));
 
         Assert.assertEquals(culling.getTransientFields(), Collections.singleton("abc"));
-        Assert.assertEquals(culling.getType(), PostAggregation.Type.CULLING);
+        Assert.assertEquals(culling.getType(), PostAggregationType.CULLING);
         Assert.assertEquals(culling.toString(), "{type: CULLING, transientFields: [abc]}");
         Assert.assertTrue(culling.getPostStrategy() instanceof CullingStrategy);
     }

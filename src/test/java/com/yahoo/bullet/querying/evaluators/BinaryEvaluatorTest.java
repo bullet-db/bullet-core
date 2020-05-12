@@ -14,6 +14,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.yahoo.bullet.querying.evaluators.BinaryOperations.BINARY_OPERATORS;
+
 public class BinaryEvaluatorTest {
     @Test
     public void testConstructor() {
@@ -21,37 +23,10 @@ public class BinaryEvaluatorTest {
         expression.setType(Type.INTEGER);
 
         BinaryEvaluator evaluator = new BinaryEvaluator(expression);
-        Assert.assertTrue(evaluator.getLeft() instanceof ValueEvaluator);
-        Assert.assertTrue(evaluator.getRight() instanceof ValueEvaluator);
-        Assert.assertEquals(evaluator.getOp(), BinaryOperations.ADD);
-        Assert.assertEquals(evaluator.getType(), Type.INTEGER);
+        Assert.assertTrue(evaluator.left instanceof ValueEvaluator);
+        Assert.assertTrue(evaluator.right instanceof ValueEvaluator);
+        Assert.assertEquals(evaluator.op, BINARY_OPERATORS.get(Operation.ADD));
+        Assert.assertEquals(evaluator.type, Type.INTEGER);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.INTEGER, 3));
-    }
-
-    @Test
-    public void testModifierNone() {
-        BinaryEvaluator evaluator = new BinaryEvaluator(new BinaryExpression(new ValueExpression(1),
-                                                                             new ValueExpression(2),
-                                                                             Operation.EQUALS,
-                                                                             BinaryExpression.Modifier.NONE));
-        Assert.assertEquals(evaluator.getOp(), BinaryOperations.EQUALS);
-    }
-
-    @Test
-    public void testModifierAll() {
-        BinaryEvaluator evaluator = new BinaryEvaluator(new BinaryExpression(new ValueExpression(1),
-                                                                             new ValueExpression(2),
-                                                                             Operation.EQUALS,
-                                                                             BinaryExpression.Modifier.ALL));
-        Assert.assertEquals(evaluator.getOp(), BinaryOperations.EQUALS_ALL);
-    }
-
-    @Test
-    public void testModifierAny() {
-        BinaryEvaluator evaluator = new BinaryEvaluator(new BinaryExpression(new ValueExpression(1),
-                                                                             new ValueExpression(2),
-                                                                             Operation.EQUALS,
-                                                                             BinaryExpression.Modifier.ANY));
-        Assert.assertEquals(evaluator.getOp(), BinaryOperations.EQUALS_ANY);
     }
 }

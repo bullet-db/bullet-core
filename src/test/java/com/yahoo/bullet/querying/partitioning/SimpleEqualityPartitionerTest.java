@@ -10,6 +10,7 @@ import com.yahoo.bullet.query.Projection;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -43,7 +44,7 @@ public class SimpleEqualityPartitionerTest {
     private Query createQuery() {
         Query query = new Query(new Projection(),
                                 null,
-                                new Aggregation(),
+                                new Raw(null),
                                 null,
                                 new Window(),
                                 null);
@@ -143,7 +144,7 @@ public class SimpleEqualityPartitionerTest {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         // Has an ObjectFilterClause with type forced to STRING (so a == "null" as opposed to is not null)
         Query query = createQuery(makeClause(Clause.Operation.AND,
-                                             makeObjectClause("A", singletonList(new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, Type.STRING)), Clause.Operation.EQUALS),
+                                             makeObjectClause("A", singletonList(new Value(Value.Kind.VALUE, DistributionType.NULL_EXPRESSION, DistributionType.STRING)), Clause.Operation.EQUALS),
                                              makeStringClause("B", null, Clause.Operation.EQUALS)));
 
         Assert.assertEquals(partitioner.getKeys(query), singleton("null.-null"));

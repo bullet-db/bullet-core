@@ -9,7 +9,7 @@ import com.yahoo.bullet.querying.aggregations.sketches.FrequentItemsSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.Aggregation;
-import com.yahoo.bullet.query.aggregations.TopKAggregation;
+import com.yahoo.bullet.query.aggregations.TopK;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -18,13 +18,9 @@ import com.yahoo.sketches.frequencies.ErrorType;
 import java.util.List;
 import java.util.Map;
 
-public class TopK extends SketchingStrategy<FrequentItemsSketch> {
-    public static final String NEW_NAME_FIELD = "newName";
-
+public class FrequentItemsSketchingStrategy extends SketchingStrategy<FrequentItemsSketch> {
     public static final String NO_FALSE_NEGATIVES = "NFN";
     public static final String NO_FALSE_POSITIVES = "NFP";
-
-    public static final String THRESHOLD_FIELD = "threshold";
 
     private final Map<String, String> fieldsToNames;
     private final String name;
@@ -36,7 +32,7 @@ public class TopK extends SketchingStrategy<FrequentItemsSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public TopK(TopKAggregation aggregation, BulletConfig config) {
+    public FrequentItemsSketchingStrategy(TopK aggregation, BulletConfig config) {
         super(aggregation, config);
 
         String errorConfiguration = config.getAs(BulletConfig.TOP_K_AGGREGATION_SKETCH_ERROR_TYPE, String.class);

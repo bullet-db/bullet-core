@@ -49,7 +49,7 @@ public class OrderBy extends PostAggregation {
     private List<SortItem> fields;
 
     public OrderBy(List<SortItem> fields) {
-        super(Type.ORDER_BY);
+        super(PostAggregationType.ORDER_BY);
         Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
             throw new BulletException(ORDER_BY_REQUIRES_FIELDS);

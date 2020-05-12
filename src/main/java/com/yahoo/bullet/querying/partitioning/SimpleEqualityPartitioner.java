@@ -16,6 +16,7 @@ import com.yahoo.bullet.query.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +66,10 @@ import java.util.stream.IntStream;
  * seen by exactly only the queries that need to see it.
  */
 public class SimpleEqualityPartitioner implements Partitioner {
+    /*
+    NULL represents the null value (as opposed to the string "null"). ANY represents all values and is a wildcard used
+    when a field doesn't have a filter, i.e. the field's value does not matter.
+    */
     private static final String ANY = "*";
     private static final String NULL = "null";
     private static final int LOWEST_BIT_MASK = 1;
@@ -113,7 +118,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         }
 
         // Map each field to the values that it is checked for equality against
-        Map<String, Set<Object>> equalityClauses = new HashMap<>();
+        Map<String, Set<Serializable>> equalityClauses = new HashMap<>();
         mapFieldsToValues(filter, equalityClauses);
 
         // If not exactly one equality per field, default partition
@@ -139,7 +144,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         return IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toSet());
     }
 
-    private void mapFieldsToValues(Expression expression, Map<String, Set<Object>> mapping) {
+    private void mapFieldsToValues(Expression expression, Map<String, Set<Serializable>> mapping) {
         if (!(expression instanceof BinaryExpression)) {
             return;
         }
@@ -148,45 +153,27 @@ public class SimpleEqualityPartitioner implements Partitioner {
             mapFieldsToValues(binary.getLeft(), mapping);
             mapFieldsToValues(binary.getRight(), mapping);
         } else if (binary.getOp() == Operation.EQUALS) {
-            /*
-            FieldExpression fieldExpression;
-            ValueExpression valueExpression;
             if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
-                fieldExpression = (FieldExpression) binary.getLeft();
-                valueExpression = (ValueExpression) binary.getRight();
+                addFieldToMapping((FieldExpression) binary.getLeft(), (ValueExpression) binary.getRight(), mapping);
             } else if (binary.getRight() instanceof FieldExpression && binary.getLeft() instanceof ValueExpression) {
-                fieldExpression = (FieldExpression) binary.getRight();
-                valueExpression = (ValueExpression) binary.getLeft();
-            } else {
-                return;
-            }
-            String field = fieldExpression.getSimpleName();
-            if (fieldSet.contains(field)) {
-                Object value = valueExpression.getValue();
-                mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
-            }
-            */
-            if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
-                String field = ((FieldExpression) binary.getLeft()).getSimpleName();
-                if (fieldSet.contains(field)) {
-                    Object value = ((ValueExpression) binary.getRight()).getValue();
-                    mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
-                }
-            } else if (binary.getRight() instanceof FieldExpression && binary.getLeft() instanceof ValueExpression) {
-                String field = ((FieldExpression) binary.getRight()).getSimpleName();
-                if (fieldSet.contains(field)) {
-                    Object value = ((ValueExpression) binary.getLeft()).getValue();
-                    mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
-                }
+                addFieldToMapping((FieldExpression) binary.getRight(), (ValueExpression) binary.getLeft(), mapping);
             }
         }
     }
 
-    private String getFilterValue(Set<Object> values) {
+    private void addFieldToMapping(FieldExpression fieldExpression, ValueExpression valueExpression, Map<String, Set<Serializable>> mapping) {
+        String field = fieldExpression.getSimpleName();
+        if (fieldSet.contains(field)) {
+            Serializable value = valueExpression.getValue();
+            mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
+        }
+    }
+
+    private String getFilterValue(Set<Serializable> values) {
         if (values == null) {
             return ANY;
         }
-        Object value = values.iterator().next();
+        Serializable value = values.iterator().next();
         if (value == null) {
             return NULL;
         }

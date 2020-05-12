@@ -14,6 +14,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.yahoo.bullet.querying.evaluators.UnaryOperations.UNARY_OPERATORS;
+
 public class UnaryEvaluatorTest {
     @Test
     public void testConstructor() {
@@ -21,9 +23,9 @@ public class UnaryEvaluatorTest {
         expression.setType(Type.BOOLEAN);
 
         UnaryEvaluator evaluator = new UnaryEvaluator(expression);
-        Assert.assertTrue(evaluator.getOperand() instanceof ValueEvaluator);
-        Assert.assertEquals(evaluator.getOp(), UnaryOperations.IS_NOT_NULL);
-        Assert.assertEquals(evaluator.getType(), Type.BOOLEAN);
+        Assert.assertTrue(evaluator.operand instanceof ValueEvaluator);
+        Assert.assertEquals(evaluator.op, UNARY_OPERATORS.get(Operation.IS_NOT_NULL));
+        Assert.assertEquals(evaluator.type, Type.BOOLEAN);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.BOOLEAN, true));
     }
 }

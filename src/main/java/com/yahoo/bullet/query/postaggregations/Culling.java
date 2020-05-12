@@ -24,7 +24,7 @@ public class Culling extends PostAggregation {
     private Set<String> transientFields;
 
     public Culling(Set<String> transientFields) {
-        super(Type.CULLING);
+        super(PostAggregationType.CULLING);
         Utilities.requireNonNull(transientFields);
         if (transientFields.isEmpty()) {
             throw new BulletException(CULLING_REQUIRES_FIELDS);

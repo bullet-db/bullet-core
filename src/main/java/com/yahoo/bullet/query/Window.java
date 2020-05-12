@@ -7,7 +7,6 @@ package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
@@ -40,14 +39,14 @@ public class Window implements Configurable, Serializable {
         TIME_TIME, RECORD_RECORD, TIME_RECORD, RECORD_TIME, TIME_ALL, RECORD_ALL
     }
 
-    public static final BulletError IMPROPER_EMIT = new BulletError("The emit type cannot be \"ALL\"",
-                                                                    "Please set type to one of: \"TIME\" or \"RECORD\"");
-    public static final BulletError IMPROPER_EVERY = new BulletError("The emit every field must be positive. ",
-                                                                     "Please set the emit every field to a positive integer.");
-    public static final BulletError IMPROPER_INCLUDE = new BulletError("The include field must match the emit field if not type \"ALL\"",
-                                                                       "Please match the include field to the emit field.");
-    public static final BulletError NO_RECORD_ALL = new BulletError("The emit type was \"RECORD\" and the include type was \"ALL\"",
-                                                                    "Please set the emit type to \"TIME\" or match the include type to the emit type.");
+    public static final BulletException IMPROPER_EMIT = new BulletException("The emit type cannot be \"ALL\"",
+                                                                            "Please set type to one of: \"TIME\" or \"RECORD\"");
+    public static final BulletException IMPROPER_EVERY = new BulletException("The emit every field must be positive. ",
+                                                                             "Please set the emit every field to a positive integer.");
+    public static final BulletException IMPROPER_INCLUDE = new BulletException("The include field must match the emit field if not type \"ALL\"",
+                                                                               "Please match the include field to the emit field.");
+    public static final BulletException NO_RECORD_ALL = new BulletException("The emit type was \"RECORD\" and the include type was \"ALL\"",
+                                                                            "Please set the emit type to \"TIME\" or match the include type to the emit type.");
 
     private Integer emitEvery;
     private Unit emitType;
@@ -58,23 +57,16 @@ public class Window implements Configurable, Serializable {
         this.emitEvery = Objects.requireNonNull(emitEvery);
         this.emitType = Objects.requireNonNull(emitType);
         if (emitEvery <= 0) {
-            throw new BulletException(IMPROPER_EVERY);
+            throw IMPROPER_EVERY;
         }
         if (emitType == Unit.ALL) {
-            throw new BulletException(IMPROPER_EMIT);
+            throw IMPROPER_EMIT;
         }
     }
 
     public Window(Integer emitEvery, Unit emitType, Unit includeType, Integer includeFirst) {
-        this.emitEvery = Objects.requireNonNull(emitEvery);
-        this.emitType = Objects.requireNonNull(emitType);
+        this(emitEvery, emitType);
         this.includeType = Objects.requireNonNull(includeType);
-        if (emitEvery <= 0) {
-            throw new BulletException(IMPROPER_EVERY);
-        }
-        if (emitType == Unit.ALL) {
-            throw new BulletException(IMPROPER_EMIT);
-        }
         // This is temporary. For now, emit needs to be equal to include if include is not ALL.
         // Change when other windows are supported.
         switch (includeType) {
@@ -82,13 +74,13 @@ public class Window implements Configurable, Serializable {
             case RECORD:
                 Objects.requireNonNull(includeFirst);
                 if (includeType != emitType || includeFirst.intValue() != emitEvery.intValue()) {
-                    throw new BulletException(IMPROPER_INCLUDE);
+                    throw IMPROPER_INCLUDE;
                 }
                 this.includeFirst = includeFirst;
                 break;
             default:
                 if (emitType == Unit.RECORD) {
-                    throw new BulletException(NO_RECORD_ALL);
+                    throw NO_RECORD_ALL;
                 }
                 break;
         }

@@ -15,11 +15,14 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * An expression that takes a value. A primitive or null must be specified.
+ * An expression that requires a primitive or null value.
  */
 @Getter
 public class ValueExpression extends Expression {
     private static final long serialVersionUID = -6979831483897873098L;
+    private static final BulletException VALUE_EXPRESSION_REQUIRES_PRIMITIVE_OR_NULL =
+            new BulletException("Value must be primitive or null.", "Please specify a valid value.");
+    private static final String SINGLE_QUOTE = "'";
 
     private final Serializable value;
 
@@ -27,7 +30,7 @@ public class ValueExpression extends Expression {
         this.value = value;
         this.type = Type.getType(value);
         if (!Type.isPrimitive(type) && !Type.isNull(type)) {
-            throw new BulletException("Value must be primitive or null.", "Please specify a valid value.");
+            throw VALUE_EXPRESSION_REQUIRES_PRIMITIVE_OR_NULL;
         }
     }
 
@@ -54,12 +57,8 @@ public class ValueExpression extends Expression {
     }
 
     private String toFormattedString() {
-        if (type == Type.STRING) {
-            return "'" + value.toString() + "'";
-        } else if (type == Type.NULL) {
-            return "null";
-        }
-        return value.toString();
+        String asString = Objects.toString(value);
+        return type == Type.STRING ? SINGLE_QUOTE + asString + SINGLE_QUOTE : asString;
     }
 
     @Override

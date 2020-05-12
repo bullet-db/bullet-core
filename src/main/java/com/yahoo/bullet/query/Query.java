@@ -6,13 +6,11 @@
 package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Configurable;
 import com.yahoo.bullet.query.aggregations.Aggregation;
+import com.yahoo.bullet.query.aggregations.AggregationType;
 import com.yahoo.bullet.query.expressions.Expression;
-import com.yahoo.bullet.query.postaggregations.Computation;
-import com.yahoo.bullet.query.postaggregations.Culling;
 import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,19 +26,17 @@ import java.util.Objects;
 public class Query implements Configurable, Serializable {
     private static final long serialVersionUID = 592082288228551406L;
 
-    private Projection projection;
-    private Expression filter;
-    private Aggregation aggregation;
-    private List<PostAggregation> postAggregations;
+    private final Projection projection;
+    private final Expression filter;
+    private final Aggregation aggregation;
+    private final List<PostAggregation> postAggregations;
     private Window window;
     private Long duration;
 
-    public static final BulletError IMMUTABLE_RECORD = new BulletError("Cannot have computation/culling post aggregation with \"RAW\" aggregation type and pass-through projection",
-                                                                       "This is a bug if this query came from BQL");
-    public static final BulletError ONLY_RAW_RECORD = new BulletError("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
-                                                                      "Change your aggregation type or your window emit type to \"TIME\"");
-    public static final BulletError NO_RAW_ALL = new BulletError("The \"RAW\" aggregation type cannot have window include \"ALL\"",
-                                                                 "Change your aggregation type or your window include type");
+    public static final BulletException ONLY_RAW_RECORD = new BulletException("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
+                                                                              "Change your aggregation type or your window emit type to \"TIME\"");
+    public static final BulletException NO_RAW_ALL = new BulletException("The \"RAW\" aggregation type cannot have window include \"ALL\"",
+                                                                         "Change your aggregation type or your window include type");
 
     public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
         this.projection = Objects.requireNonNull(projection);
@@ -49,42 +45,18 @@ public class Query implements Configurable, Serializable {
         this.postAggregations = postAggregations;
         this.window = Objects.requireNonNull(window);
         this.duration = duration;
+        // Required since there are window types that are not yet supported.
         validateWindow();
-        validatePostAggregations();
     }
 
     private void validateWindow() {
-        Aggregation.Type type = aggregation.getType();
+        AggregationType type = aggregation.getType();
         Window.Classification kind = window.getType();
-        if (type != Aggregation.Type.RAW && kind == Window.Classification.RECORD_RECORD) {
-            throw new BulletException(ONLY_RAW_RECORD);
+        if (type != AggregationType.RAW && kind == Window.Classification.RECORD_RECORD) {
+            throw ONLY_RAW_RECORD;
         }
-        if (type == Aggregation.Type.RAW && kind == Window.Classification.TIME_ALL) {
-            throw new BulletException(NO_RAW_ALL);
-        }
-    }
-
-    private void validatePostAggregations() {
-        if (postAggregations == null || postAggregations.isEmpty()) {
-            return;
-        }
-        // Make sure postaggregations are distinct and in order
-        int prev = -1;
-        for (PostAggregation postAggregation : postAggregations) {
-            int priority = postAggregation.getType().getPriority();
-            if (priority < prev) {
-                throw new IllegalArgumentException("order of post aggregations is incorrect");
-            } else if (priority == prev) {
-                throw new IllegalArgumentException("cannot have more than one of a postaggregation");
-            } else {
-                prev = priority;
-            }
-        }
-        // Immutable record
-        if (projection.getType() == Projection.Type.PASS_THROUGH && aggregation.getType() == Aggregation.Type.RAW &&
-            postAggregations.stream().anyMatch(postAggregation -> postAggregation instanceof Computation ||
-                                                                  postAggregation instanceof Culling)) {
-            throw new BulletException(IMMUTABLE_RECORD);
+        if (type == AggregationType.RAW && kind == Window.Classification.TIME_ALL) {
+            throw NO_RAW_ALL;
         }
     }
 

@@ -14,25 +14,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * An expression that holds a list of expressions. A primitive type
- * must be specified as only lists of primitives are supported at the moment.
+ * An expression that holds a list of expressions.
  */
 @Getter
 public class ListExpression extends Expression {
     private static final long serialVersionUID = 311789452858823415L;
-    private static final String DELIMITER = ", ";
 
     private final List<Expression> values;
 
     public ListExpression(List<Expression> values) {
         this.values = Utilities.requireNonNull(values);
     }
-/*
-    @Override
-    public String getName() {
-        return "[" + values.stream().map(Expression::getName).collect(Collectors.joining(DELIMITER)) + "]";
-    }
-*/
+
     @Override
     public Evaluator getEvaluator() {
         return new ListEvaluator(this);

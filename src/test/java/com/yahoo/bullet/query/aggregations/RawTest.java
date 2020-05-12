@@ -5,29 +5,22 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.Raw;
+import com.yahoo.bullet.querying.aggregations.RawStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
 
-import static com.yahoo.bullet.query.aggregations.Aggregation.Type.RAW;;
-
-public class AggregationTest {
+public class RawTest {
     @Test
     public void testRawAggregation() {
-        Aggregation aggregation = new Aggregation();
+        Aggregation aggregation = new Raw(null);
         aggregation.configure(new BulletConfig());
 
-        Assert.assertEquals(aggregation.getType(), RAW);
+        Assert.assertEquals(aggregation.getType(), AggregationType.RAW);
         Assert.assertEquals(aggregation.getFields(), Collections.emptyList());
-        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof Raw);
-    }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testConstructorNullTypeThrows() {
-        new Aggregation(null, null);
+        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof RawStrategy);
     }
 
     @Test
@@ -35,27 +28,27 @@ public class AggregationTest {
         Aggregation aggregation;
         BulletConfig config = new BulletConfig();
 
-        aggregation = new Aggregation();
+        aggregation = new Raw(null);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
-        aggregation = new Aggregation(-10);
+        aggregation = new Raw(-10);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
-        aggregation = new Aggregation(0);
+        aggregation = new Raw(0);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
-        aggregation = new Aggregation(1);
+        aggregation = new Raw(1);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 1);
 
-        aggregation = new Aggregation(BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        aggregation = new Raw(BulletConfig.DEFAULT_AGGREGATION_SIZE);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
 
-        aggregation = new Aggregation(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE + 1);
+        aggregation = new Raw(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE + 1);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE);
     }
@@ -71,38 +64,38 @@ public class AggregationTest {
 
         Aggregation aggregation;
 
-        aggregation = new Aggregation();
+        aggregation = new Raw(null);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 10);
 
-        aggregation = new Aggregation(-10);
+        aggregation = new Raw(-10);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 10);
 
-        aggregation = new Aggregation(0);
+        aggregation = new Raw(0);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 10);
 
-        aggregation = new Aggregation(1);
+        aggregation = new Raw(1);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 1);
 
-        aggregation = new Aggregation(10);
+        aggregation = new Raw(10);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 10);
 
-        aggregation = new Aggregation(2000);
+        aggregation = new Raw(2000);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 200);
 
-        aggregation = new Aggregation(4000);
+        aggregation = new Raw(4000);
         aggregation.configure(config);
         Assert.assertEquals(aggregation.getSize(), (Integer) 200);
     }
 
     @Test
     public void testToString() {
-        Aggregation aggregation = new Aggregation();
+        Aggregation aggregation = new Raw(null);
         aggregation.configure(new BulletConfig());
         Assert.assertEquals(aggregation.toString(), "{size: 500, type: RAW}");
     }

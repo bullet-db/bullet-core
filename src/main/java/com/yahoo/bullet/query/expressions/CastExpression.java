@@ -13,9 +13,15 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+/**
+ * An expression that requires a value and a cast type.
+ */
 @Getter
 public class CastExpression extends Expression {
     private static final long serialVersionUID = -1732511101513444236L;
+    private static final BulletException CAST_EXPRESSION_REQUIRES_VALID_TYPE =
+            new BulletException("Cast type cannot be null or unknown.", "Please specify a valid cast type.");
+
     private final Expression value;
     private final Type castType;
 
@@ -23,15 +29,10 @@ public class CastExpression extends Expression {
         this.value = Objects.requireNonNull(value);
         this.castType = Objects.requireNonNull(castType);
         if (Type.isNull(castType) || Type.isUnknown(castType)) {
-            throw new BulletException("Cast type cannot be null or unknown.", "Please specify a valid cast type.");
+            throw CAST_EXPRESSION_REQUIRES_VALID_TYPE;
         }
     }
-/*
-    @Override
-    public String getName() {
-        return "CAST (" + value.getName() + " AS " + castType + ")";
-    }
-*/
+
     @Override
     public Evaluator getEvaluator() {
         return new CastEvaluator(this);

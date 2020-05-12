@@ -7,7 +7,7 @@ package com.yahoo.bullet.querying.aggregations;
 
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.query.aggregations.GroupAggregation;
+import com.yahoo.bullet.query.aggregations.Group;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
 import org.testng.Assert;
@@ -18,20 +18,20 @@ import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 
-public class GroupAllTest {
-    public static GroupAll makeGroupAll(List<GroupOperation> groupOperations) {
-        GroupAggregation aggregation = new GroupAggregation(null);
+public class GroupStrategyTest {
+    public static GroupStrategy makeGroupAll(List<GroupOperation> groupOperations) {
+        Group aggregation = new Group(null);
         groupOperations.forEach(aggregation::addGroupOperation);
-        return (GroupAll) aggregation.getStrategy(new BulletConfig());
+        return (GroupStrategy) aggregation.getStrategy(new BulletConfig());
     }
 
-    public static GroupAll makeGroupAll(GroupOperation... groupOperations) {
+    public static GroupStrategy makeGroupAll(GroupOperation... groupOperations) {
         return makeGroupAll(asList(groupOperations));
     }
 /*
     @Test
     public void testUnsupportedOperation() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(COUNT_FIELD, "someField", "myCountField"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(COUNT_FIELD, "someField", "myCountField"));
 
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
@@ -44,7 +44,7 @@ public class GroupAllTest {
     @Test
     public void testAttributeOperationMissing() {
         Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, null));
-        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
+        GroupStrategy groupAll = new GroupStrategy(aggregation, new BulletConfig());
 
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
@@ -57,7 +57,7 @@ public class GroupAllTest {
     @Test
     public void testAttributeOperationBadFormat() {
         Aggregation aggregation = makeAggregation(singletonMap(GroupOperation.OPERATIONS, asList("foo")));
-        GroupAll groupAll = new GroupAll(aggregation, new BulletConfig());
+        GroupStrategy groupAll = new GroupStrategy(aggregation, new BulletConfig());
 
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
@@ -69,7 +69,7 @@ public class GroupAllTest {
 /*
     @Test
     public void testInitialize() {
-        GroupAll groupAll = makeGroupAll(Collections.emptyMap());
+        GroupStrategy groupAll = makeGroupAll(Collections.emptyMap());
         Optional<List<BulletError>> optionalErrors = groupAll.initialize();
         Assert.assertTrue(optionalErrors.isPresent());
         List<BulletError> errors = optionalErrors.get();
@@ -93,7 +93,7 @@ public class GroupAllTest {
 */
     @Test
     public void testNoRecordCount() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
 
         Assert.assertNotNull(groupAll.getData());
         List<BulletRecord> aggregate = groupAll.getResult().getRecords();
@@ -108,7 +108,7 @@ public class GroupAllTest {
 
     @Test
     public void testNullRecordCount() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         groupAll.consume(RecordBox.get().add("foo", "bar").getRecord());
         Assert.assertNotNull(groupAll.getData());
         List<BulletRecord> aggregate = groupAll.getResult().getRecords();
@@ -125,7 +125,7 @@ public class GroupAllTest {
 
     @Test
     public void testCounting() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1L).getRecord();
 
         IntStream.range(0, 10).forEach(i -> groupAll.consume(someRecord));
@@ -143,7 +143,7 @@ public class GroupAllTest {
 
     @Test
     public void testCountingMoreThanMaximum() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1L).getRecord();
 
         IntStream.range(0, 2 * BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE).forEach(i -> groupAll.consume(someRecord));
@@ -168,12 +168,12 @@ public class GroupAllTest {
                                                  new GroupOperation(GroupOperation.GroupOperationType.MIN, "groupField", "groupMin"),
                                                  new GroupOperation(GroupOperation.GroupOperationType.SUM, "groupField", "groupSum"));
 
-        GroupAll groupAll = makeGroupAll(operations);
+        GroupStrategy groupAll = makeGroupAll(operations);
         groupAll.consume(RecordBox.get().add("minField", -8.8).add("groupField", 3.14).getRecord());
         groupAll.consume(RecordBox.get().add("minField", 0.0).addNull("groupField").getRecord());
         groupAll.consume(RecordBox.get().add("minField", 51.44).add("groupField", -4.88).getRecord());
 
-        GroupAll another = makeGroupAll(operations);
+        GroupStrategy another = makeGroupAll(operations);
         another.consume(RecordBox.get().add("minField", -8.8).add("groupField", 12345.67).getRecord());
         another.consume(RecordBox.get().addNull("minField").add("groupField", 2.718).getRecord());
         another.consume(RecordBox.get().add("minField", -51.0).addNull("groupField").getRecord());
@@ -198,7 +198,7 @@ public class GroupAllTest {
 
     @Test
     public void testCombiningMetricsFail() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count"));
         BulletRecord someRecord = RecordBox.get().add("foo", 1).getRecord();
         IntStream.range(0, 10).forEach(i -> groupAll.consume(someRecord));
 
@@ -219,7 +219,7 @@ public class GroupAllTest {
 
     @Test
     public void testMin() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.MIN, "someField", "min"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.MIN, "someField", "min"));
         Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
@@ -248,7 +248,7 @@ public class GroupAllTest {
 
     @Test
     public void testMax() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.MAX, "someField", "max"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.MAX, "someField", "max"));
         Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
@@ -277,7 +277,7 @@ public class GroupAllTest {
 
     @Test
     public void testSum() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"));
         Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
@@ -306,7 +306,7 @@ public class GroupAllTest {
 
     @Test
     public void testAvg() {
-        GroupAll groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.AVG, "someField", "avg"));
+        GroupStrategy groupAll = makeGroupAll(new GroupOperation(GroupOperation.GroupOperationType.AVG, "someField", "avg"));
         Assert.assertNotNull(groupAll.getData());
 
         groupAll.consume(RecordBox.get().addNull("someField").getRecord());
@@ -341,7 +341,7 @@ public class GroupAllTest {
                                                  new GroupOperation(GroupOperation.GroupOperationType.MIN, "groupField", "groupMin"),
                                                  new GroupOperation(GroupOperation.GroupOperationType.SUM, "groupField", "groupSum"));
 
-        GroupAll groupAll = makeGroupAll(operations);
+        GroupStrategy groupAll = makeGroupAll(operations);
         groupAll.consume(RecordBox.get().add("minField", -8.8).add("groupField", 3.14).getRecord());
         groupAll.consume(RecordBox.get().add("minField", 0.0).addNull("groupField").getRecord());
         groupAll.consume(RecordBox.get().add("minField", 51.44).add("groupField", -4.88).getRecord());

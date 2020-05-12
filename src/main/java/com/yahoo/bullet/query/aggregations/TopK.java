@@ -5,47 +5,50 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
+import com.yahoo.bullet.querying.aggregations.FrequentItemsSketchingStrategy;
 import com.yahoo.bullet.querying.aggregations.Strategy;
-import com.yahoo.bullet.querying.aggregations.TopK;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public class TopKAggregation extends Aggregation {
+@Getter
+public class TopK extends Aggregation {
     private static final long serialVersionUID = 2934123789816778466L;
-
-    public static final String DEFAULT_NAME = "COUNT";
+    private static final BulletException TOP_K_REQUIRES_FIELDS =
+            new BulletException("TOP K requires at least one field.", "Please add at least one field.");
 
     private Map<String, String> fields;
-    @Getter @Setter
     private Long threshold;
-    @Setter
     private String name;
 
     /**
      * Constructor that creates a TOP_K aggregation with a specified max size.
      *
      * @param fields The fields of the Top K aggregation. Must not be empty.
-     * @param size The max size of the TOP_K aggregation. Can be null.
+     * @param size The max size of the Top K aggregation. Can be null.
+     * @param threshold The minimum threshold of the Top K aggregation. Can be null.
+     * @param name The name of the count field.
      */
-    public TopKAggregation(Map<String, String> fields, Integer size) {
-        super(size, Type.TOP_K);
+    public TopK(Map<String, String> fields, Integer size, Long threshold, String name) {
+        super(size, AggregationType.TOP_K);
         Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
-            throw new BulletException("TOP K requires at least one field.", "Please add at least one field.");
+            throw TOP_K_REQUIRES_FIELDS;
         }
         this.fields = fields;
+        this.threshold = threshold;
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public Strategy getStrategy(BulletConfig config) {
-        return new TopK(this, config);
+        return new FrequentItemsSketchingStrategy(this, config);
     }
 
     @Override
@@ -55,10 +58,6 @@ public class TopKAggregation extends Aggregation {
 
     public Map<String, String> getFieldsToNames() {
         return fields;
-    }
-
-    public String getName() {
-        return name != null ? name : DEFAULT_NAME;
     }
 
     @Override

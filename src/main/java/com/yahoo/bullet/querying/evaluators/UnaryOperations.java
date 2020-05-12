@@ -25,25 +25,27 @@ public class UnaryOperations {
     public static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
-        UNARY_OPERATORS.put(Operation.NOT, UnaryOperations.NOT);
-        UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations.SIZE_OF);
-        UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations.IS_NULL);
-        UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations.IS_NOT_NULL);
+        UNARY_OPERATORS.put(Operation.NOT, UnaryOperations::not);
+        UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations::sizeOf);
+        UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations::isNull);
+        UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations::isNotNull);
     }
 
-    static UnaryOperator NOT = (evaluator, record) -> {
+    static TypedObject not(Evaluator evaluator, BulletRecord record) {
         TypedObject value = evaluator.evaluate(record);
         return new TypedObject(Type.BOOLEAN, !((Boolean) value.forceCast(Type.BOOLEAN).getValue()));
     };
 
-    static UnaryOperator SIZE_OF = (evaluator, record) -> {
+    static TypedObject sizeOf(Evaluator evaluator, BulletRecord record) {
         TypedObject value = evaluator.evaluate(record);
         return new TypedObject(Type.INTEGER, value.size());
     };
 
-    static UnaryOperator IS_NULL = (evaluator, record) ->
-            new TypedObject(Type.BOOLEAN, Type.isNull(evaluator.evaluate(record).getType()));
+    static TypedObject isNull(Evaluator evaluator, BulletRecord record) {
+        return new TypedObject(Type.BOOLEAN, evaluator.evaluate(record).isNull());
+    }
 
-    static UnaryOperator IS_NOT_NULL = (evaluator, record) ->
-            new TypedObject(Type.BOOLEAN, !Type.isNull(evaluator.evaluate(record).getType()));
+    static TypedObject isNotNull(Evaluator evaluator, BulletRecord record) {
+        return new TypedObject(Type.BOOLEAN, !evaluator.evaluate(record).isNull());
+    }
 }

@@ -9,14 +9,13 @@ import com.yahoo.bullet.query.expressions.CastExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.AccessLevel;
-import lombok.Getter;
 
-// For testing only
-@Getter(AccessLevel.PACKAGE)
+/**
+ * An evaluator that force casts the result of an evaluator to a given type.
+ */
 public class CastEvaluator extends Evaluator {
-    private Evaluator value;
-    private Type castType;
+    final Evaluator value;
+    final Type castType;
 
     public CastEvaluator(CastExpression castExpression) {
         super(castExpression);

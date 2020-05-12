@@ -18,15 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Projection consists of a map of names to evaluators built from the projection map in the bullet query. If there's no projection,
- * the entire record is returned.
+ * Projection consists of a mapping of names to evaluators built from the projection in the Bullet query.
  *
- * Null values will not be projected.
+ * If an evaluator fails, only the corresponding field will not be projected, i.e. an evaluator failing does not fail
+ * the entire projection. If all evaluators fail, there will be an empty record.
  *
- * Also, if an evaluator fails, only the corresponding field will not be projected, i.e. an evaluator failing won't fail
- * the entire projection. (Not sure if this  behavior is expected/wanted)
- *
- * For now, if all evaluators fail, it is possible to have an empty record.
+ * Nulls are not projected.
  */
 @Getter
 public class Projection {

@@ -27,7 +27,7 @@ import java.util.List;
  * This {@link Strategy} will only consume or combine till the specified aggregation size is reached.
  */
 @Slf4j
-public class Raw implements Strategy {
+public class RawStrategy implements Strategy {
     private ArrayList<BulletRecord> aggregate = new ArrayList<>();
 
     private Integer size;
@@ -42,7 +42,7 @@ public class Raw implements Strategy {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public Raw(Aggregation aggregation, BulletConfig config) {
+    public RawStrategy(Aggregation aggregation, BulletConfig config) {
         int maximumSize = config.getAs(BulletConfig.RAW_AGGREGATION_MAX_SIZE, Integer.class);
         size = Math.min(aggregation.getSize(), maximumSize);
     }
@@ -54,9 +54,9 @@ public class Raw implements Strategy {
 
     @Override
     public void consume(BulletRecord data) {
-        // Since Raw is the only strategy that can close and is really a special case, it should check before
+        // Since RawStrategy is the only strategy that can close and is really a special case, it should check before
         // consumption. Otherwise, Windows will need to expose the fact that the aggregation should not be fed more data
-        // in order to prevent Raw from accidentally consuming/combining till only the Window is closed.
+        // in order to prevent RawStrategy from accidentally consuming/combining till only the Window is closed.
         if (data == null || isClosed()) {
             return;
         }

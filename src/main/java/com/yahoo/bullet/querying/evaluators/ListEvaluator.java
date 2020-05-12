@@ -9,20 +9,16 @@ import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.expressions.ListExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Evaluator that evaluates a list of evaluators on a BulletRecord and then returns the list of results.
+ * An evaluator that returns a list of the results of a list of evaluators.
  */
-// For testing only
-@Getter(AccessLevel.PACKAGE)
 public class ListEvaluator extends Evaluator {
-    private List<Evaluator> evaluators;
+    final List<Evaluator> evaluators;
 
     public ListEvaluator(ListExpression listExpression) {
         super(listExpression);

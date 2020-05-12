@@ -17,7 +17,7 @@ public class HavingTest {
         Having having = new Having(new ValueExpression(true));
 
         Assert.assertEquals(having.getExpression(), new ValueExpression(true));
-        Assert.assertEquals(having.getType(), PostAggregation.Type.HAVING);
+        Assert.assertEquals(having.getType(), PostAggregationType.HAVING);
         Assert.assertEquals(having.toString(), "{type: HAVING, expression: {value: true, type: BOOLEAN}}");
         Assert.assertTrue(having.getPostStrategy() instanceof HavingStrategy);
     }

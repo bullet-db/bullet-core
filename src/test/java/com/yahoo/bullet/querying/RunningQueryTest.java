@@ -42,7 +42,7 @@ public class RunningQueryTest {
     @Test
     public void testInitialization() {
         BulletConfig config = new BulletConfig();
-        String query = makeAggregationQuery(Aggregation.Type.RAW, null, Window.Unit.RECORD, 10, Window.Unit.TIME, 2000);
+        String query = makeAggregationQuery(Aggregation.DistributionType.RAW, null, Window.Unit.RECORD, 10, Window.Unit.TIME, 2000);
         RunningQuery runningQuery = new RunningQuery("foo", query, config);
 
         Optional<List<BulletError>> errors = runningQuery.initialize();

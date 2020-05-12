@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EvaluatorUtils {
-    public static ValueEvaluator valueEvaluator(Serializable value) {
+    static ValueEvaluator valueEvaluator(Serializable value) {
         return new ValueEvaluator(new ValueExpression(value));
     }
 
-    public static ListEvaluator listEvaluator(Serializable... values) {
+    static ListEvaluator listEvaluator(Serializable... values) {
         return new ListEvaluator(new ListExpression(Stream.of(values).map(ValueExpression::new).collect(Collectors.toCollection(ArrayList::new))));
     }
 
-    public static FieldEvaluator fieldEvaluator(String field) {
+    static FieldEvaluator fieldEvaluator(String field) {
         return new FieldEvaluator(new FieldExpression(field));
     }
 }

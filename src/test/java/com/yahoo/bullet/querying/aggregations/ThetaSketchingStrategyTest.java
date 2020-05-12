@@ -7,7 +7,7 @@ package com.yahoo.bullet.querying.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.querying.aggregations.sketches.KMVSketch;
-import com.yahoo.bullet.query.aggregations.CountDistinctAggregation;
+import com.yahoo.bullet.query.aggregations.CountDistinct;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta.Concept;
@@ -26,23 +26,23 @@ import java.util.stream.IntStream;
 import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static java.util.Arrays.asList;
 
-public class CountDistinctTest {
+public class ThetaSketchingStrategyTest {
     private static final String DEFAULT_NAME = "count";
 
     @SafeVarargs
-    public static CountDistinct makeCountDistinct(BulletConfig configuration, List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
-        CountDistinctAggregation aggregation = new CountDistinctAggregation(fields, name);
-        return new CountDistinct(aggregation, addMetadata(configuration, metadata));
+    public static ThetaSketchingStrategy makeCountDistinct(BulletConfig configuration, List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
+        CountDistinct aggregation = new CountDistinct(fields, name);
+        return new ThetaSketchingStrategy(aggregation, addMetadata(configuration, metadata));
     }
 
     @SafeVarargs
-    public static CountDistinct makeCountDistinct(List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
-        CountDistinctAggregation aggregation = new CountDistinctAggregation(fields, name);
+    public static ThetaSketchingStrategy makeCountDistinct(List<String> fields, String name, Map.Entry<Concept, String>... metadata) {
+        CountDistinct aggregation = new CountDistinct(fields, name);
         BulletConfig configuration = makeConfiguration(8, 1024);
-        return new CountDistinct(aggregation, addMetadata(configuration, metadata));
+        return new ThetaSketchingStrategy(aggregation, addMetadata(configuration, metadata));
     }
 
-    public static CountDistinct makeCountDistinct(List<String> fields, String name) {
+    public static ThetaSketchingStrategy makeCountDistinct(List<String> fields, String name) {
         return makeCountDistinct(fields, name, (Map.Entry<Concept, String>[]) null);
     }
 
@@ -64,35 +64,35 @@ public class CountDistinctTest {
 
     @Test
     public void testFamilyConversion() {
-        Assert.assertEquals(CountDistinct.getFamily(Family.ALPHA.getFamilyName()), Family.ALPHA);
-        Assert.assertEquals(CountDistinct.getFamily(Family.QUICKSELECT.getFamilyName()), Family.QUICKSELECT);
-        Assert.assertEquals(CountDistinct.getFamily(Family.COMPACT.getFamilyName()), Family.ALPHA);
-        Assert.assertEquals(CountDistinct.getFamily("foo"), Family.ALPHA);
-        Assert.assertEquals(CountDistinct.getFamily(null), Family.ALPHA);
-        Assert.assertEquals(CountDistinct.getFamily(""), Family.ALPHA);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily(Family.ALPHA.getFamilyName()), Family.ALPHA);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily(Family.QUICKSELECT.getFamilyName()), Family.QUICKSELECT);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily(Family.COMPACT.getFamilyName()), Family.ALPHA);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily("foo"), Family.ALPHA);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily(null), Family.ALPHA);
+        Assert.assertEquals(ThetaSketchingStrategy.getFamily(""), Family.ALPHA);
     }
 
     @Test
     public void testResizeFactorConversion() {
-        Assert.assertEquals(CountDistinct.getResizeFactor(1), ResizeFactor.X1);
-        Assert.assertEquals(CountDistinct.getResizeFactor(2), ResizeFactor.X2);
-        Assert.assertEquals(CountDistinct.getResizeFactor(4), ResizeFactor.X4);
-        Assert.assertEquals(CountDistinct.getResizeFactor(8), ResizeFactor.X8);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(1), ResizeFactor.X1);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(2), ResizeFactor.X2);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(4), ResizeFactor.X4);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(8), ResizeFactor.X8);
 
-        Assert.assertEquals(CountDistinct.getResizeFactor(0), ResizeFactor.X8);
-        Assert.assertEquals(CountDistinct.getResizeFactor(3), ResizeFactor.X8);
-        Assert.assertEquals(CountDistinct.getResizeFactor(17), ResizeFactor.X8);
-        Assert.assertEquals(CountDistinct.getResizeFactor(-10), ResizeFactor.X8);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(0), ResizeFactor.X8);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(3), ResizeFactor.X8);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(17), ResizeFactor.X8);
+        Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(-10), ResizeFactor.X8);
     }
 /*
     @Test
     public void testFailValidateOnCountDistinctFieldsMissing() {
-        CountDistinct countDistinct = makeCountDistinct(new BulletConfig(), null, null);
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(new BulletConfig(), null, null);
     }
 */
     @Test
     public void testNoRecordCount() {
-        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         Assert.assertNotNull(countDistinct.getData());
         List<BulletRecord> aggregate = countDistinct.getResult().getRecords();
@@ -106,7 +106,7 @@ public class CountDistinctTest {
 
     @Test
     public void testSingleFieldExactCountDistinctWithoutDuplicates() {
-        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
@@ -127,7 +127,7 @@ public class CountDistinctTest {
 
     @Test
     public void testSingleFieldExactCountDistinctWithDuplicates() {
-        CountDistinct countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);
 
         IntStream.range(0, 1000).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                 .forEach(countDistinct::consume);
@@ -150,7 +150,7 @@ public class CountDistinctTest {
     @Test
     public void testSingleFieldApproximateCountDistinctWithMetadata() {
         BulletConfig config = makeConfiguration(4, 512);
-        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), DEFAULT_NAME,
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, Collections.singletonList("field"), DEFAULT_NAME,
                                                         Pair.of(Concept.SKETCH_METADATA, "aggregate_stats"),
                                                         Pair.of(Concept.SKETCH_FAMILY, "family"),
                                                         Pair.of(Concept.SKETCH_SIZE, "size"),
@@ -210,7 +210,7 @@ public class CountDistinctTest {
     @Test
     public void testNewNamingOfResult() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount",
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount",
                                                         Pair.of(Concept.SKETCH_METADATA, "stats"),
                                                         Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "est"));
 
@@ -238,7 +238,7 @@ public class CountDistinctTest {
     @Test
     public void testCombiningExact() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 512).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
@@ -282,7 +282,7 @@ public class CountDistinctTest {
     @Test
     public void testCombiningAndConsuming() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);
@@ -315,7 +315,7 @@ public class CountDistinctTest {
     @Test
     public void testMultipleFieldsCountDistinct() {
         BulletConfig config = makeConfiguration(4, 512);
-        CountDistinct countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i).add("fieldB", 255 - i).getRecord())
                                .forEach(countDistinct::consume);
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("fieldA", i).add("fieldB", 255 - i).getRecord())
@@ -336,7 +336,7 @@ public class CountDistinctTest {
         BulletConfig config = makeConfiguration(4, 512);
 
         String s = BulletConfig.DEFAULT_AGGREGATION_COMPOSITE_FIELD_SEPARATOR;
-        CountDistinct countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, asList("fieldA", "fieldB"), "myCount");
         BulletRecord first = RecordBox.get().add("fieldA", s).add("fieldB", s + s).getRecord();
         BulletRecord second = RecordBox.get().add("fieldA", s + s).add("fieldB", s).getRecord();
         // first and second will look the same to the Sketch. third will not
@@ -359,7 +359,7 @@ public class CountDistinctTest {
     @Test
     public void testResetting() {
         BulletConfig config = makeConfiguration(4, 1024);
-        CountDistinct countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
+        ThetaSketchingStrategy countDistinct = makeCountDistinct(config, Collections.singletonList("field"), "myCount");
 
         IntStream.range(0, 256).mapToObj(i -> RecordBox.get().add("field", i).getRecord())
                                .forEach(countDistinct::consume);

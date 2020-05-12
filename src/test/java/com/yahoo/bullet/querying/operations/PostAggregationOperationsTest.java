@@ -17,14 +17,14 @@ public class PostAggregationOperationsTest {
     @Test
     public void testOrderByPostStrategy() {
         PostAggregation aggregation = new OrderBy();
-        aggregation.setType(PostAggregation.Type.ORDER_BY);
+        aggregation.setType(PostAggregation.DistributionType.ORDER_BY);
         Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), OrderByStrategy.class);
     }
 
     @Test
     public void testComputationPostStrategy() {
         PostAggregation aggregation = new Computation(Collections.emptyList());
-        aggregation.setType(PostAggregation.Type.COMPUTATION);
+        aggregation.setType(PostAggregation.DistributionType.COMPUTATION);
         Assert.assertEquals(PostAggregationOperations.findPostStrategy(aggregation).getClass(), ComputationStrategy.class);
     }
     */

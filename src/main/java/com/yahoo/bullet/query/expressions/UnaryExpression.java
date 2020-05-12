@@ -15,12 +15,13 @@ import java.util.Objects;
 import static com.yahoo.bullet.query.expressions.Operation.UNARY_OPERATIONS;
 
 /**
- * An expression that takes an operand and a unary operation. These fields are required; however, an optional
- * primitive type may be specified.
+ * An expression that requires an operand and a unary operation.
  */
 @Getter
 public class UnaryExpression extends Expression {
     private static final long serialVersionUID = -1893522779659725928L;
+    private static final BulletException UNARY_EXPRESSION_REQUIRES_UNARY_OPERATION =
+            new BulletException("Unary expression requires a unary operation.", "Please specify a unary operation.");
 
     private final Expression operand;
     private final Operation op;
@@ -29,15 +30,10 @@ public class UnaryExpression extends Expression {
         this.operand = Objects.requireNonNull(operand);
         this.op = Objects.requireNonNull(op);
         if (!UNARY_OPERATIONS.contains(op)) {
-            throw new BulletException("Unary expression requires a unary operation.", "Please specify a unary operation.");
+            throw UNARY_EXPRESSION_REQUIRES_UNARY_OPERATION;
         }
     }
-/*
-    @Override
-    public String getName() {
-        return op + "(" + operand.getName() + ")";
-    }
-*/
+
     @Override
     public Evaluator getEvaluator() {
         return new UnaryEvaluator(this);

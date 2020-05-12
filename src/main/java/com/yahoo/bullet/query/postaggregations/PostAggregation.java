@@ -15,18 +15,7 @@ import java.io.Serializable;
 public abstract class PostAggregation implements Serializable {
     private static final long serialVersionUID = -3083946184345104820L;
 
-    /** Represents the type of the PostAggregation. */
-    @Getter @AllArgsConstructor
-    public enum Type {
-        HAVING(0),
-        COMPUTATION(1),
-        ORDER_BY(2),
-        CULLING(3);
-
-        private int priority;
-    }
-
-    protected final Type type;
+    protected final PostAggregationType type;
 
     public abstract PostStrategy getPostStrategy();
 }

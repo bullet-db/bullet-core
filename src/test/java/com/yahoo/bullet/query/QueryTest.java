@@ -18,7 +18,7 @@ public class QueryTest {
         Assert.assertNull(query.getProjection());
         Assert.assertNull(query.getFilters());
         Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
-        Assert.assertEquals(query.getAggregation().getType(), Aggregation.Type.RAW);
+        Assert.assertEquals(query.getAggregation().getType(), Aggregation.DistributionType.RAW);
         Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
     }
 
@@ -157,10 +157,10 @@ public class QueryTest {
         query.setProjection(mockProjection);
 
         OrderBy orderByA = new OrderBy();
-        orderByA.setType(PostAggregation.Type.ORDER_BY);
+        orderByA.setType(PostAggregation.DistributionType.ORDER_BY);
         orderByA.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
         OrderBy orderByB = new OrderBy();
-        orderByB.setType(PostAggregation.Type.ORDER_BY);
+        orderByB.setType(PostAggregation.DistributionType.ORDER_BY);
         orderByB.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
         query.setPostAggregations(Arrays.asList(orderByA, orderByB));
 
@@ -235,7 +235,7 @@ public class QueryTest {
         StringFilterClause equals = new StringFilterClause();
         equals.setOperation(Clause.Operation.EQUALS);
         equals.setField("A");
-        equals.setValues(singletonList(Type.NULL_EXPRESSION));
+        equals.setValues(singletonList(DistributionType.NULL_EXPRESSION));
         and.setClauses(asList(or, equals));
 
         query.setFilters(singletonList(and));
@@ -256,7 +256,7 @@ public class QueryTest {
         Assert.assertEquals(rewritten.getField(), "A");
         Assert.assertEquals(rewritten.getOperation(), Clause.Operation.EQUALS);
         Assert.assertEquals(rewritten.getValues().size(), 1);
-        Value expectedValue = new Value(Value.Kind.VALUE, Type.NULL_EXPRESSION, null);
+        Value expectedValue = new Value(Value.Kind.VALUE, DistributionType.NULL_EXPRESSION, null);
         Value actualValue = rewritten.getValues().get(0);
         Assert.assertEquals(actualValue.getType(), expectedValue.getType());
         Assert.assertEquals(actualValue.getValue(), expectedValue.getValue());

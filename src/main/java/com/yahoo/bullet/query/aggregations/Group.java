@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-import com.yahoo.bullet.querying.aggregations.GroupAll;
-import com.yahoo.bullet.querying.aggregations.GroupBy;
+import com.yahoo.bullet.querying.aggregations.GroupStrategy;
+import com.yahoo.bullet.querying.aggregations.TupleSketchingStrategy;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.common.BulletConfig;
@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GroupAggregation extends Aggregation {
+public class Group extends Aggregation {
     private static final long serialVersionUID = -6974294259446732772L;
+    private static final BulletException COUNT_FIELD_INVALID_OPERATION =
+            new BulletException("COUNT_FIELD is not a valid operation.", "Please remove this operation.");
 
     private Map<String, String> fields;
     private Set<GroupOperation> operations;
@@ -31,13 +33,13 @@ public class GroupAggregation extends Aggregation {
      *
      * @param size The max size of the GROUP aggregation. Can be null.
      */
-    public GroupAggregation(Integer size) {
-        super(size, Type.GROUP);
+    public Group(Integer size) {
+        super(size, AggregationType.GROUP);
     }
 
     @Override
     public Strategy getStrategy(BulletConfig config) {
-        return hasFields() ? new GroupBy(this, config) : new GroupAll(this, config);
+        return hasFields() ? new TupleSketchingStrategy(this, config) : new GroupStrategy(this, config);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class GroupAggregation extends Aggregation {
 
     public void addGroupOperation(GroupOperation groupOperation) {
         if (groupOperation.getType() == GroupOperation.GroupOperationType.COUNT_FIELD) {
-            throw new BulletException("COUNT_FIELD is not a valid operation.", "Please remove this operation.");
+            throw COUNT_FIELD_INVALID_OPERATION;
         }
         if (operations == null) {
             operations = new HashSet<>();

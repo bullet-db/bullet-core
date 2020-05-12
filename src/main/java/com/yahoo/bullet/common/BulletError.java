@@ -55,4 +55,9 @@ public class BulletError implements JSONFormatter, Serializable {
     public static BulletError makeError(String error, String resolution) {
         return new BulletError(error, resolution);
     }
+
+    @Override
+    public String toString() {
+        return "{error: " + error + ", resolutions: " + resolutions + "}";
+    }
 }

@@ -8,18 +8,14 @@ package com.yahoo.bullet.querying.evaluators;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 /**
- * Evaluator that evaluates the left and right before applying a binary operator. Casts the result.
+ * An evaluator that applies a binary operator to the result of a left evaluator and the result of a right evaluator.
  */
-// For testing only
-@Getter(AccessLevel.PACKAGE)
 public class BinaryEvaluator extends Evaluator {
-    private Evaluator left;
-    private Evaluator right;
-    private BinaryOperations.BinaryOperator op;
+    final Evaluator left;
+    final Evaluator right;
+    final BinaryOperations.BinaryOperator op;
 
     public BinaryEvaluator(BinaryExpression binaryExpression) {
         super(binaryExpression);
