@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.query;
 
-import static org.mockito.Mockito.mock;
 
 public class QueryTest {
     /*

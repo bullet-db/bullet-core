@@ -6,7 +6,6 @@
 package com.yahoo.bullet.querying.aggregations.sketches;
 
 import com.yahoo.bullet.query.aggregations.DistributionType;
-import com.yahoo.bullet.querying.aggregations.QuantileSketchingStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;

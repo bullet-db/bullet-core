@@ -6,7 +6,6 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.Expression;

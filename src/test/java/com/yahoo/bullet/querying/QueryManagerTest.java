@@ -68,18 +68,13 @@ public class QueryManagerTest {
                     and.setType(Type.BOOLEAN);
                     return and;
                 }, (left, right) -> {
-                    BinaryExpression and = new BinaryExpression(left, right, Operation.AND);
-                    and.setType(Type.BOOLEAN);
-                    return and;
-                });
+                        BinaryExpression and = new BinaryExpression(left, right, Operation.AND);
+                        and.setType(Type.BOOLEAN);
+                        return and;
+                    });
             }
         }
-        Query query = new Query(new Projection(),
-                                expression,
-                                new Raw(null),
-                                null,
-                                new Window(),
-                                null);
+        Query query = new Query(new Projection(), expression, new Raw(null), null, new Window(), null);
         query.configure(new BulletConfig());
         return query;
     }
