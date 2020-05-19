@@ -29,24 +29,31 @@ public class Window implements Configurable, Serializable {
      * Represents the type of the Window Unit for either emit or include.
      */
     public enum Unit {
-        RECORD, TIME, ALL;
+        RECORD,
+        TIME,
+        ALL
     }
 
     /**
      * Represents the type of window.
      */
     public enum Classification {
-        TIME_TIME, RECORD_RECORD, TIME_RECORD, RECORD_TIME, TIME_ALL, RECORD_ALL
+        TIME_TIME,
+        RECORD_RECORD,
+        TIME_RECORD,
+        RECORD_TIME,
+        TIME_ALL,
+        RECORD_ALL
     }
 
-    public static final BulletException IMPROPER_EMIT = new BulletException("The emit type cannot be \"ALL\"",
-                                                                            "Please set type to one of: \"TIME\" or \"RECORD\"");
-    public static final BulletException IMPROPER_EVERY = new BulletException("The emit every field must be positive. ",
+    public static final BulletException IMPROPER_EMIT = new BulletException("The emit type cannot be ALL.",
+                                                                            "Please set type to one of: TIME or RECORD");
+    public static final BulletException IMPROPER_EVERY = new BulletException("The emit every field must be positive.",
                                                                              "Please set the emit every field to a positive integer.");
-    public static final BulletException IMPROPER_INCLUDE = new BulletException("The include field must match the emit field if not type \"ALL\"",
+    public static final BulletException IMPROPER_INCLUDE = new BulletException("The include field must match the emit field if not type ALL.",
                                                                                "Please match the include field to the emit field.");
-    public static final BulletException NO_RECORD_ALL = new BulletException("The emit type was \"RECORD\" and the include type was \"ALL\"",
-                                                                            "Please set the emit type to \"TIME\" or match the include type to the emit type.");
+    public static final BulletException NO_RECORD_ALL = new BulletException("The emit type was RECORD and the include type was ALL.",
+                                                                            "Please set the emit type to TIME or match the include type to the emit type.");
 
     private Integer emitEvery;
     private Unit emitType;

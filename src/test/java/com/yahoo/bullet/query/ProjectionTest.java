@@ -5,44 +5,36 @@
  */
 package com.yahoo.bullet.query;
 
+import com.yahoo.bullet.query.expressions.ValueExpression;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 @SuppressWarnings("unchecked")
 public class ProjectionTest {
-    /*
     @Test
-    public void testDefaults() {
+    public void testDefault() {
         Projection projection = new Projection();
         Assert.assertNull(projection.getFields());
+        Assert.assertEquals(projection.getType(), Projection.Type.PASS_THROUGH);
+        Assert.assertEquals(projection.toString(), "{fields: null, type: PASS_THROUGH}");
     }
 
     @Test
-    public void testProjection() {
-        Projection projection = new Projection();
-        projection.setFields(singletonMap("map_field.foo", "bar"));
-        Assert.assertNotNull(projection.getFields());
+    public void testProjectionCopy() {
+        Projection projection = new Projection(Arrays.asList(new Field("foo", new ValueExpression(5))), true);
+        Assert.assertEquals(projection.getFields(), Collections.singletonList(new Field("foo", new ValueExpression(5))));
+        Assert.assertEquals(projection.getType(), Projection.Type.COPY);
+        Assert.assertEquals(projection.toString(), "{fields: [{name: foo, value: {value: 5, type: INTEGER}}], type: COPY}");
     }
 
     @Test
-    public void testInitialize() {
-        Projection projection = new Projection();
-        Optional<List<BulletError>> errors = projection.initialize();
-        Assert.assertFalse(errors.isPresent());
+    public void testProjectionNoCopy() {
+        Projection projection = new Projection(Arrays.asList(new Field("foo", new ValueExpression(5))), false);
+        Assert.assertEquals(projection.getFields(), Collections.singletonList(new Field("foo", new ValueExpression(5))));
+        Assert.assertEquals(projection.getType(), Projection.Type.NO_COPY);
+        Assert.assertEquals(projection.toString(), "{fields: [{name: foo, value: {value: 5, type: INTEGER}}], type: NO_COPY}");
     }
-
-    @Test
-    public void testToString() {
-        Projection projection = new Projection();
-
-        Assert.assertEquals(projection.toString(), "{fields: null}");
-
-        projection.setFields(emptyMap());
-        Assert.assertEquals(projection.toString(), "{fields: {}}");
-
-        Map<String, String> fields = new HashMap<>();
-        fields.put(null, "test");
-        fields.put("map_field.foo", "foo");
-        projection.setFields(fields);
-
-        Assert.assertEquals(projection.toString(), "{fields: {null=test, map_field.foo=foo}}");
-    }
-    */
 }

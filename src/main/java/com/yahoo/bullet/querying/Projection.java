@@ -10,7 +10,6 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.typesystem.TypedObject;
-import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +24,8 @@ import java.util.stream.Collectors;
  *
  * Nulls are not projected.
  */
-@Getter
 public class Projection {
-    private Map<String, Evaluator> evaluators;
+    private final Map<String, Evaluator> evaluators;
 
     /**
      * Constructor that creates a Projection from the given fields.

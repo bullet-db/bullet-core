@@ -41,7 +41,7 @@ public enum Operation {
     LESS_THAN_OR_EQUALS_ANY("<= ANY"),
     LESS_THAN_OR_EQUALS_ALL("<= ALL"),
     REGEX_LIKE("RLIKE"),
-    REGEX_LIKE_ANY("RLIKE ANY"),
+    REGEX_LIKE_ANY("RLIKEANY"),
     SIZE_IS("SIZEIS"),
     CONTAINS_KEY("CONTAINSKEY"),
     CONTAINS_VALUE("CONTAINSVALUE"),
@@ -52,8 +52,8 @@ public enum Operation {
     FILTER("FILTER"),
     NOT("NOT"),
     SIZE_OF("SIZEOF"),
-    IS_NULL("ISNULL"),
-    IS_NOT_NULL("ISNOTNULL"),
+    IS_NULL("IS NULL"),
+    IS_NOT_NULL("IS NOT NULL"),
     IF("IF");
 
     public static final Set<Operation> BINARY_OPERATIONS =

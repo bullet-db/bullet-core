@@ -49,6 +49,6 @@ public class Projection implements Serializable {
 
     @Override
     public String toString() {
-        return "{fields: " + fields + ", type: " + type + " }";
+        return "{fields: " + fields + ", type: " + type + "}";
     }
 }

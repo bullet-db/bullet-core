@@ -5,57 +5,37 @@
  */
 package com.yahoo.bullet.querying;
 
-//import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.aggregations.Raw;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class RunningQueryTest {
-    /*
-    @Test
-    public void testCreatingWithStringQuery() {
-        BulletConfig config = new BulletConfig();
-        RunningQuery runningQuery = new RunningQuery("foo", "{}", config);
-        Assert.assertFalse(runningQuery.initialize().isPresent());
-        Assert.assertEquals(runningQuery.getId(), "foo");
-        Assert.assertNotNull(runningQuery.getQuery());
-        Assert.assertEquals(runningQuery.toString(), "{}");
-    }
-
     @Test
     public void testCreatingWithQuery() {
         BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setAggregation(new Aggregation());
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
 
-        Assert.assertFalse(query.initialize().isPresent());
         RunningQuery runningQuery = new RunningQuery("foo", query);
-        Assert.assertFalse(runningQuery.initialize().isPresent());
         Assert.assertEquals(runningQuery.getId(), "foo");
         Assert.assertNotNull(runningQuery.getQuery());
-        String actual = runningQuery.toString();
-        Assert.assertTrue(actual.contains("{"));
-        Assert.assertTrue(actual.contains("filter: null, projection: null,"));
-        Assert.assertTrue(actual.contains("aggregation: {size: 500, type: RAW, fields: null, attributes: null},"));
-        Assert.assertTrue(actual.contains("window: null, duration:"));
-        Assert.assertTrue(actual.contains("}"));
-    }
-
-    @Test
-    public void testInitialization() {
-        BulletConfig config = new BulletConfig();
-        String query = makeAggregationQuery(Aggregation.DistributionType.RAW, null, Window.Unit.RECORD, 10, Window.Unit.TIME, 2000);
-        RunningQuery runningQuery = new RunningQuery("foo", query, config);
-
-        Optional<List<BulletError>> errors = runningQuery.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), Collections.singletonList(Window.IMPROPER_INCLUDE));
+        Assert.assertEquals(runningQuery.toString(), query.toString());
     }
 
     @Test
     public void testStartTime() {
         long start = System.currentTimeMillis();
         BulletConfig config = new BulletConfig();
-        RunningQuery runningQuery = new RunningQuery("foo", "{}", config);
-        Assert.assertFalse(runningQuery.initialize().isPresent());
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
+        query.configure(config);
+
+        RunningQuery runningQuery = new RunningQuery("foo", query);
+        runningQuery.start();
+
         long end = System.currentTimeMillis();
         Assert.assertTrue(runningQuery.getStartTime() >= start);
         Assert.assertTrue(runningQuery.getStartTime() <= end);
@@ -65,18 +45,15 @@ public class RunningQueryTest {
     @Test
     public void testTimingOut() throws Exception {
         BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setAggregation(new Aggregation());
-        query.setDuration(1L);
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), 1L);
         query.configure(config);
-        Assert.assertFalse(query.initialize().isPresent());
+
         RunningQuery runningQuery = new RunningQuery("foo", query);
-        Assert.assertFalse(runningQuery.initialize().isPresent());
+        runningQuery.start();
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
 
         Assert.assertTrue(runningQuery.isTimedOut());
     }
-    */
 }

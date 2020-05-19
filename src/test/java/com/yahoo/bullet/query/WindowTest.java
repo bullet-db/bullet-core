@@ -6,6 +6,7 @@
 package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -44,6 +45,7 @@ public class WindowTest {
 
         config.set(BulletConfig.WINDOW_MIN_EMIT_EVERY, 5000);
         config.validate();
+
         window = WindowUtils.makeTumblingWindow(1000);
         Assert.assertEquals(window.getEmitEvery(), (Integer) 1000);
         window.configure(config);
@@ -65,10 +67,6 @@ public class WindowTest {
         Assert.assertEquals(window.getType(), Window.Classification.TIME_TIME);
         Assert.assertTrue(window.isTimeBased());
 
-        //window = new Window(500, Window.Unit.TIME, Window.Unit.RECORD, 500);
-        //Assert.assertEquals(window.getType(), Window.Classification.TIME_RECORD);
-        //Assert.assertTrue(window.isTimeBased());
-
         window = new Window(500, Window.Unit.TIME, Window.Unit.ALL, null);
         Assert.assertEquals(window.getType(), Window.Classification.TIME_ALL);
         Assert.assertTrue(window.isTimeBased());
@@ -80,14 +78,6 @@ public class WindowTest {
         window = new Window(500, Window.Unit.RECORD, Window.Unit.RECORD, 500);
         Assert.assertEquals(window.getType(), Window.Classification.RECORD_RECORD);
         Assert.assertFalse(window.isTimeBased());
-
-        //window = new Window(500, Window.Unit.RECORD, Window.Unit.TIME, 500);
-        //Assert.assertEquals(window.getType(), Window.Classification.RECORD_TIME);
-        //Assert.assertFalse(window.isTimeBased());
-
-        //window = new Window(500, Window.Unit.RECORD, Window.Unit.ALL, null);
-        //Assert.assertEquals(window.getType(), Window.Classification.RECORD_ALL);
-        //Assert.assertFalse(window.isTimeBased());
     }
 
     @Test
@@ -110,87 +100,35 @@ public class WindowTest {
         window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
         window.configure(config);
     }
-/*
-    @Test
-    public void testErrorsInInitialization() {
-        BulletConfig config = new BulletConfig();
-        Window window;
-        Optional<List<BulletError>> errors;
 
-        window = new Window();
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EMIT));
-
-        window = WindowUtils.makeWindow(Window.Unit.ALL, 10);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EMIT));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, null);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, -1);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 0);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_EVERY));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.ALL, null);
-        window.getInclude().put(Window.INCLUDE_FIRST_FIELD, 1000);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_FIRST));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 1, Window.Unit.ALL, null);
-        window.getInclude().put(Window.INCLUDE_FIRST_FIELD, 10);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.NO_RECORD_ALL));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, 1, Window.Unit.ALL, null);
-        window.getInclude().put(Window.INCLUDE_FIRST_FIELD, 10);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_FIRST));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.TIME, null);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_INCLUDE));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.TIME, 2000);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_INCLUDE));
-
-        window = WindowUtils.makeWindow(Window.Unit.TIME, 1000, Window.Unit.RECORD, 5);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_INCLUDE));
-
-        window = WindowUtils.makeWindow(Window.Unit.RECORD, 1, Window.Unit.RECORD, 5);
-        window.configure(config);
-        errors = window.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Window.IMPROPER_INCLUDE));
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The emit every field must be positive\\.")
+    public void testImproperEmitEvery() {
+        new Window(0, Window.Unit.TIME);
     }
-*/
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The emit type cannot be ALL\\.")
+    public void testImproperEmit() {
+        new Window(5000, Window.Unit.ALL);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The include field must match the emit field if not type ALL\\.")
+    public void testImproperIncludeTypeMismatch() {
+        new Window(5000, Window.Unit.TIME, Window.Unit.RECORD, 5000);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The include field must match the emit field if not type ALL\\.")
+    public void testImproperIncludeTimeMismatch() {
+        new Window(5000, Window.Unit.TIME, Window.Unit.TIME, 1000);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The emit type was RECORD and the include type was ALL\\.")
+    public void testNoRecordAll() {
+        new Window(5000, Window.Unit.RECORD, Window.Unit.ALL, null);
+    }
+
+    @Test
+    public void testToString() {
+        Window window = new Window(500, Window.Unit.TIME, Window.Unit.TIME, 500);
+        Assert.assertEquals(window.toString(), "{emitEvery: 500, emitType: TIME, includeType: TIME, includeFirst: 500}");
+    }
 }

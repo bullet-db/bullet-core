@@ -5,29 +5,54 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.common.BulletConfigTest;
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.query.Field;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.WindowUtils;
+import com.yahoo.bullet.query.aggregations.AggregationType;
+import com.yahoo.bullet.query.aggregations.CountDistinct;
+import com.yahoo.bullet.query.aggregations.Group;
+import com.yahoo.bullet.query.aggregations.Raw;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.ListExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.UnaryExpression;
+import com.yahoo.bullet.query.expressions.ValueExpression;
+import com.yahoo.bullet.query.postaggregations.Computation;
+import com.yahoo.bullet.query.postaggregations.Culling;
+import com.yahoo.bullet.query.postaggregations.OrderBy;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.windowing.AdditiveTumbling;
+import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
+import com.yahoo.bullet.windowing.Tumbling;
+import org.apache.commons.lang3.tuple.Pair;
+import org.mockito.AdditionalAnswers;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-//import static com.yahoo.bullet.parsing.FilterUtils.getFieldFilter;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeAggregationQuery;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeComputation;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeFilter;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeOrderBy;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeProjectionFilterQuery;
-//import static com.yahoo.bullet.parsing.QueryUtils.makeRawFullQuery;
+import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static org.mockito.Mockito.spy;
 
 public class QuerierTest {
@@ -109,34 +134,8 @@ public class QuerierTest {
         return IntStream.range(0, count).mapToObj(x -> RecordBox.get().getRecord());
     }
 
-    private static ArrayList<BulletRecord> makeList(int count) {
-        return makeStream(count).collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private static int size(BulletRecord record) {
-        int size = 0;
-        for (Object ignored : record) {
-            size++;
-        }
-        return size;
-    }
-/*
-    private static Querier make(Querier.Mode mode, String id, String query, BulletConfig config) {
-        Querier querier = new Querier(mode, id, query, config);
-        Optional<List<BulletError>> errors = querier.initialize();
-        if (errors.isPresent()) {
-            throw new RuntimeException(errors.toString());
-        }
-        return querier;
-    }
-
     private static Querier make(Querier.Mode mode, String id, Query query, BulletConfig config) {
-        Querier querier = new Querier(mode, new RunningQuery(id, query), config);
-        Optional<List<BulletError>> errors = querier.initialize();
-        if (errors.isPresent()) {
-            throw new RuntimeException(errors.toString());
-        }
-        return querier;
+        return new Querier(mode, id, query, config);
     }
 
     private static Querier make(Querier.Mode mode, Query query, BulletConfig config) {
@@ -149,114 +148,83 @@ public class QuerierTest {
         return make(mode, query, config);
     }
 
-    private static Querier make(Querier.Mode mode, String query) {
-        BulletConfig config = new BulletConfig();
-        return make(mode, "", query, config);
-    }
-
-    private static Querier make(Querier.Mode mode, String id, String query, Map<String, Object> configuration) {
+    private static Querier make(Querier.Mode mode, String id, Query query, Map<String, Object> configuration) {
         BulletConfig config = new BulletConfig();
         configuration.forEach(config::set);
         config.validate();
         return make(mode, id, query, config);
     }
 
-    private static Querier make(Querier.Mode mode, String query, Map<String, Object> configuration) {
-        return make(mode, "", query, configuration);
+    private static Query makeRawQuery() {
+        return new Query(new Projection(), null, new Raw(null), null, new Window(), null);
     }
 
     private static RunningQuery makeCountQueryWithAllWindow(BulletConfig config, int emitInterval) {
-        Query query = new Query();
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, emitInterval, Window.Unit.ALL, null));
+        Group group = new Group(null);
+        group.addGroupOperation(GroupOperation.GroupOperationType.COUNT, null, "COUNT");
+        Window window = WindowUtils.makeWindow(Window.Unit.TIME, emitInterval, Window.Unit.ALL, null);
 
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.GROUP);
-        Map<String, String> count = Collections.singletonMap(GroupOperation.OPERATION_TYPE,
-                                                             GroupOperation.GroupOperationType.COUNT.getName());
-        aggregation.setAttributes(Collections.singletonMap(GroupOperation.OPERATIONS, Collections.singletonList(count)));
-        query.setAggregation(aggregation);
+        Query query = new Query(new Projection(), null, group, null, window, null);
         query.configure(config);
 
         RunningQuery runningQuery = spy(new RunningQuery("", query));
-        doReturn(false).when(runningQuery).isTimedOut();
+        Mockito.doReturn(false).when(runningQuery).isTimedOut();
+
         return runningQuery;
     }
 
     @Test
     public void testDefaults() {
-        Querier querier = make(Querier.Mode.ALL, new Query());
+        Querier querier = make(Querier.Mode.ALL, new Query(new Projection(), null, new Raw(null), null, new Window(), null));
 
         RunningQuery runningQuery = querier.getRunningQuery();
         Query query = querier.getQuery();
         Assert.assertSame(runningQuery.getQuery(), query);
-        Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
-        Assert.assertEquals(query.getAggregation().getType(), Aggregation.DistributionType.RAW);
+        Assert.assertEquals(query.getAggregation().getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        Assert.assertEquals(query.getAggregation().getType(), AggregationType.RAW);
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.isDone());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
         // RAW query without window should buffer
         Assert.assertTrue(querier.shouldBuffer());
-        Assert.assertEquals(querier.getResult().getRecords(), emptyList());
+        Assert.assertEquals(querier.getResult().getRecords(), Collections.emptyList());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullConfig() {
-        new Querier("", "{}", null);
-    }
-
-    @Test(expectedExceptions = JsonParseException.class)
-    public void testBadJSON() {
-        make(Querier.Mode.ALL, "", "{", new BulletConfig());
-    }
-
-    @Test
-    public void testMissingAggregationType() {
-        Querier querier = new Querier("", "{ 'aggregation': { 'type': null }}", new BulletConfig());
-        Optional<List<BulletError>> errors = querier.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().size(), 1);
-        Assert.assertEquals(errors.get().get(0), Aggregation.TYPE_NOT_SUPPORTED_ERROR);
-    }
-
-    @Test
-    public void testBadAggregation() {
-        Querier querier = new Querier("", "{'aggregation': {'type': 'COUNT DISTINCT'}}", new BulletConfig());
-        Optional<List<BulletError>> errors = querier.initialize();
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get().size(), 1);
-        Assert.assertEquals(errors.get().get(0), SketchingStrategy.REQUIRES_FIELD_ERROR);
+        new Querier("", new Query(new Projection(), null, new Raw(null), null, new Window(), null), null);
     }
 
     @Test
     public void testQueryAsString() {
-        Querier querier = make(Querier.Mode.ALL, "ahdf3", "{}", emptyMap());
-        Assert.assertEquals(querier.toString(), "ahdf3 : {}");
-
         BulletConfig config = new BulletConfig();
-        Query query = new Query();
+        Query query = makeRawQuery();
         query.configure(config);
-        query.initialize();
-        querier = make(Querier.Mode.ALL, "ahdf3", query, config);
-        Assert.assertEquals(querier.toString(), "ahdf3 : " + query.toString());
+
+        Querier querier = make(Querier.Mode.ALL, "foo", query, config);
+        Assert.assertEquals(querier.toString(), "foo : " + query.toString());
     }
 
     @Test
     public void testAggregateIsNotNull() {
-        Querier querier = make(Querier.Mode.ALL, "{}", emptyMap());
-        Assert.assertNotNull(querier.getResult());
-        querier = make(Querier.Mode.ALL, "{'aggregation': {}}", emptyMap());
-        Assert.assertNotNull(querier.getResult());
-        querier = make(Querier.Mode.ALL, "{'aggregation': null}", emptyMap());
+        BulletConfig config = new BulletConfig();
+        Query query = makeRawQuery();
+        query.configure(config);
+
+        Querier querier = make(Querier.Mode.ALL, query, config);
         Assert.assertNotNull(querier.getResult());
     }
 
     @Test
     public void testDisabledQueryMeta() {
         BulletConfig defaults = new BulletConfig();
-        defaults.set(BulletConfig.RESULT_METADATA_METRICS, emptyMap());
+        defaults.set(BulletConfig.RESULT_METADATA_METRICS, Collections.emptyMap());
 
-        Querier querier = make(Querier.Mode.ALL, "", "{'aggregation' : {}}", defaults);
+        Query query = makeRawQuery();
+        query.configure(defaults);
+
+        Querier querier = make(Querier.Mode.ALL, "", query, defaults);
         Assert.assertTrue(querier.getMetadata().asMap().isEmpty());
 
         Clip result = querier.finish();
@@ -271,7 +239,7 @@ public class QuerierTest {
         Map<String, String> names = (Map<String, String>) defaults.get(BulletConfig.RESULT_METADATA_METRICS);
 
         long startTime = System.currentTimeMillis();
-        Querier querier = make(Querier.Mode.ALL, "", "{'aggregation' : {}}", emptyMap());
+        Querier querier = make(Querier.Mode.ALL, makeRawQuery());
         Map<String, Object> meta = querier.getMetadata().asMap();
         Assert.assertEquals(meta.size(), 2);
         Map<String, Object> queryMeta = (Map<String, Object>) meta.get(names.get(Meta.Concept.QUERY_METADATA.getName()));
@@ -300,7 +268,7 @@ public class QuerierTest {
 
     @Test
     public void testMeetingWindowSize() {
-        Querier querier = make(Querier.Mode.ALL, "", "{}", emptyMap());
+        Querier querier = make(Querier.Mode.ALL, makeRawQuery());
 
         makeStream(BulletConfig.DEFAULT_RAW_AGGREGATION_MAX_SIZE - 1).forEach(querier::consume);
         Assert.assertFalse(querier.isClosed());
@@ -327,9 +295,13 @@ public class QuerierTest {
 
     @Test
     public void testFiltering() {
-        Query query = new Query();
-        //query.setFilters(singletonList(getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
-        query.setWindow(WindowUtils.makeSlidingWindow(1));
+        Expression filter = new BinaryExpression(new FieldExpression("field"),
+                                                 new ListExpression(Arrays.asList(new ValueExpression("foo"),
+                                                                                  new ValueExpression("bar"))),
+                                                 Operation.EQUALS_ANY);
+        Window window = WindowUtils.makeSlidingWindow(1);
+        Query query = new Query(new Projection(), filter, new Raw(null), null, window, null);
+
         Querier querier = make(Querier.Mode.PARTITION, query);
 
         querier.consume(RecordBox.get().add("field", "foo").getRecord());
@@ -346,9 +318,14 @@ public class QuerierTest {
 
     @Test
     public void testFilteringProjection() {
-        Querier querier = make(Querier.Mode.PARTITION,
-                               makeProjectionFilterQuery("map_field.id", Arrays.asList("1", "23"),
-                                                         Clause.Operation.EQUALS, Pair.of("map_field.id", "mid")));
+        Projection projection = new Projection(Collections.singletonList(new Field("mid", new FieldExpression("map_field", "id"))), false);
+        Expression filter = new BinaryExpression(new FieldExpression("map_field", "id"),
+                                                 new ListExpression(Arrays.asList(new ValueExpression("1"),
+                                                                                  new ValueExpression("23"))),
+                                                 Operation.EQUALS_ANY);
+        Query query = new Query(projection, filter, new Raw(null), null, new Window(), null);
+
+        Querier querier = make(Querier.Mode.PARTITION, query);
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
         Assert.assertFalse(querier.isClosed());
@@ -364,7 +341,7 @@ public class QuerierTest {
     @Test
     public void testExceptionWrapping() {
         FailingScheme failingScheme = new FailingScheme(null, null, new BulletConfig());
-        Querier querier = make(Querier.Mode.ALL, new Query());
+        Querier querier = make(Querier.Mode.ALL, makeRawQuery());
         querier.setWindow(failingScheme);
 
         querier.consume(RecordBox.get().getRecord());
@@ -379,7 +356,7 @@ public class QuerierTest {
         Map<String, Object> actualMeta = meta.asMap();
         Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
         BulletError expected = BulletError.makeError("Getting metadata failure", Querier.TRY_AGAIN_LATER);
-        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
+        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY).toString(), Collections.singletonList(expected).toString());
 
         Clip actual = querier.getResult();
         Assert.assertNotNull(actual.getMeta());
@@ -388,7 +365,7 @@ public class QuerierTest {
         Assert.assertEquals(actualMeta.size(), 1);
         Assert.assertNotNull(actualMeta.get(Meta.ERROR_KEY));
         expected = BulletError.makeError("Getting result failure", Querier.TRY_AGAIN_LATER);
-        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY), singletonList(expected));
+        Assert.assertEquals(actualMeta.get(Meta.ERROR_KEY).toString(), Collections.singletonList(expected).toString());
 
         Assert.assertEquals(failingScheme.consumptionFailure, 1);
         Assert.assertEquals(failingScheme.combiningFailure, 1);
@@ -398,8 +375,9 @@ public class QuerierTest {
 
     @Test
     public void testBasicWindowMaximumEmitted() {
-        Querier querier = make(Querier.Mode.PARTITION,
-                               makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
+        Query query = new Query(new Projection(), null, new Raw(2), null, new Window(), null);
+
+        Querier querier = make(Querier.Mode.PARTITION, query);
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -426,9 +404,13 @@ public class QuerierTest {
 
     @Test
     public void testBasicWindowMaximumEmittedWithNonMatchingRecords() {
-        Querier querier = make(Querier.Mode.PARTITION,
-                               makeRawFullQuery("mid", Arrays.asList("1", "23"), Clause.Operation.EQUALS, Aggregation.DistributionType.RAW,
-                                                2, Pair.of("mid", "mid")));
+        Expression filter = new BinaryExpression(new FieldExpression("mid"),
+                                                 new ListExpression(Arrays.asList(new ValueExpression("1"),
+                                                                                  new ValueExpression("23"))),
+                                                 Operation.EQUALS_ANY);
+        Query query = new Query(new Projection(), filter, new Raw(2), null, new Window(), null);
+
+        Querier querier = make(Querier.Mode.PARTITION, query);
 
         byte[] expected = getListBytes(RecordBox.get().add("mid", "23").getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().add("mid", "23").getRecord(),
@@ -469,8 +451,10 @@ public class QuerierTest {
 
     @Test
     public void testLogicFilterNot() {
-        Clause clause = getFieldFilter(Clause.Operation.EQUALS, "abc");
-        String query = "{'filters' : [" + makeFilter(singletonList(clause), Clause.Operation.NOT) + "]}";
+        // legacy test
+        Expression filter = new BinaryExpression(new FieldExpression("field"), new ValueExpression("abc"), Operation.NOT_EQUALS);
+        Query query = new Query(new Projection(), filter, new Raw(null), null, new Window(), null);
+
         Querier querier = make(Querier.Mode.PARTITION, query);
 
         querier.consume(RecordBox.get().add("field", "abc").getRecord());
@@ -482,9 +466,12 @@ public class QuerierTest {
 
     @Test
     public void testLogicFilterAnd() {
-        Clause clause1 = getFieldFilter(Clause.Operation.EQUALS, "abc");
-        Clause clause2 = getFieldFilter("id", Clause.Operation.EQUALS, "1");
-        String query = "{'filters' : [" + makeFilter(Arrays.asList(clause1, clause2), Clause.Operation.AND) + "]}";
+        // legacy test
+        Expression filter = new BinaryExpression(new BinaryExpression(new FieldExpression("field"), new ValueExpression("abc"), Operation.EQUALS),
+                                                 new BinaryExpression(new FieldExpression("id"), new ValueExpression("1"), Operation.EQUALS),
+                                                 Operation.AND);
+        Query query = new Query(new Projection(), filter, new Raw(null), null, new Window(), null);
+
         Querier querier = make(Querier.Mode.PARTITION, query);
 
         querier.consume(RecordBox.get().add("field", "abc").add("id", "2").getRecord());
@@ -496,9 +483,12 @@ public class QuerierTest {
 
     @Test
     public void testLogicFilterOr() {
-        Clause clause1 = getFieldFilter(Clause.Operation.EQUALS, "abc");
-        Clause clause2 = getFieldFilter("id", Clause.Operation.EQUALS, "1");
-        String query = "{'filters' : [" + makeFilter(Arrays.asList(clause1, clause2), Clause.Operation.OR) + "]}";
+        // legacy test
+        Expression filter = new BinaryExpression(new BinaryExpression(new FieldExpression("field"), new ValueExpression("abc"), Operation.EQUALS),
+                                                 new BinaryExpression(new FieldExpression("id"), new ValueExpression("1"), Operation.EQUALS),
+                                                 Operation.OR);
+        Query query = new Query(new Projection(), filter, new Raw(null), null, new Window(), null);
+
         Querier querier = make(Querier.Mode.PARTITION, query);
 
         querier.consume(RecordBox.get().add("field", "abc").add("id", "2").getRecord());
@@ -508,22 +498,12 @@ public class QuerierTest {
         Assert.assertTrue(querier.hasNewData());
     }
 
-    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected STRING but was BEGIN_OBJECT at.*")
-    public void testStringFilterClauseMixWithObjectFilterCaluse() {
-        String query = "{'filters' : [{'operation': '==', 'field': 'field', 'values': ['1', {'kind': 'VALUE', 'value': '2'}]}]}";
-        make(Querier.Mode.PARTITION, query);
-    }
-
-    @Test(expectedExceptions = JsonParseException.class, expectedExceptionsMessageRegExp = ".*Expected BEGIN_OBJECT but was STRING at.*")
-    public void testObjectFilterClauseMixWithStringFilterCaluse() {
-        String query = "{'filters' : [{'operation': '==', 'field': 'field', 'values': [{'kind': 'VALUE', 'value': '2'}, '1']}]}";
-        make(Querier.Mode.PARTITION, query);
-    }
-
     @Test
     public void testMerging() {
-        Querier querierA = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
-        Querier querierB = make(Querier.Mode.PARTITION, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
+        Query query = new Query(new Projection(), null, new Raw(2), null, new Window(), null);
+
+        Querier querierA = make(Querier.Mode.PARTITION, query);
+        Querier querierB = make(Querier.Mode.PARTITION, query);
 
         byte[] expected = getListBytes(RecordBox.get().getRecord());
         byte[] expectedTwice = getListBytes(RecordBox.get().getRecord(), RecordBox.get().getRecord());
@@ -541,7 +521,7 @@ public class QuerierTest {
         Assert.assertEquals(querierB.getData(), expected);
 
 
-        Querier querierC = make(Querier.Mode.ALL, makeAggregationQuery(Aggregation.DistributionType.RAW, 2));
+        Querier querierC = make(Querier.Mode.ALL, query);
         querierC.merge(querierA);
         querierC.merge(querierB);
         Assert.assertTrue(querierC.isClosed());
@@ -558,7 +538,10 @@ public class QuerierTest {
         config.set(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, 1);
         config.validate();
 
-        Querier querier = make(Querier.Mode.ALL, "", "{}", config);
+        Query query = makeRawQuery();
+        query.configure(config);
+
+        Querier querier = make(Querier.Mode.ALL, "", query, config);
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
 
@@ -580,7 +563,10 @@ public class QuerierTest {
         config.set(BulletConfig.RATE_LIMIT_MAX_EMIT_COUNT, 1);
         config.validate();
 
-        Querier querier = make(Querier.Mode.ALL, "", "{}", config);
+        Query query = makeRawQuery();
+        query.configure(config);
+
+        Querier querier = make(Querier.Mode.ALL, "", query, config);
         IntStream.range(0, 1000).forEach(i -> querier.getRecords());
         Assert.assertFalse(querier.isExceedingRateLimit());
         Assert.assertNull(querier.getRateLimitError());
@@ -593,13 +579,11 @@ public class QuerierTest {
         // Should clear out the default metadata
         config.validate();
 
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.COUNT_DISTINCT);
-        aggregation.setFields(singletonMap("foo", "bar"));
-        query.setAggregation(aggregation);
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
+        CountDistinct aggregation = new CountDistinct(Collections.singletonList("foo"), "count");
+        Window window = WindowUtils.makeTumblingWindow(1);
+        Query query = new Query(new Projection(), null, aggregation, null, window, null);
         query.configure(config);
+
         Querier querier = make(Querier.Mode.PARTITION, query, config);
 
         querier.consume(RecordBox.get().add("foo", "A").getRecord());
@@ -608,24 +592,12 @@ public class QuerierTest {
     }
 
     @Test
-    public void testRawQueriesWithAllIncludeWindowsAreErrors() {
-        BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1, Window.Unit.ALL, null));
-        query.configure(config);
-        Querier querier = new Querier(new RunningQuery("", query), config);
-        Optional<List<BulletError>> errors = querier.initialize();
-
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Query.NO_RAW_ALL));
-    }
-
-    @Test
     public void testRawQueriesWithTimeWindowsAreNotChanged() {
         BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, Integer.MAX_VALUE));
+        Window window = WindowUtils.makeTumblingWindow(Integer.MAX_VALUE);
+        Query query = new Query(new Projection(), null, new Raw(null), null, window, null);
         query.configure(config);
+
         Querier querier = make(Querier.Mode.PARTITION, query, config);
 
         Assert.assertFalse(querier.isClosed());
@@ -638,32 +610,14 @@ public class QuerierTest {
     }
 
     @Test
-    public void testNonRawQueriesWithRecordWindowsAreErrors() {
-        BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.COUNT_DISTINCT);
-        query.setAggregation(aggregation);
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.RECORD, 1));
-        query.configure(config);
-        Querier querier = new Querier(new RunningQuery("", query), config);
-        Optional<List<BulletError>> errors = querier.initialize();
-
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(Query.ONLY_RAW_RECORD));
-    }
-
-    @Test
     public void testRawQueriesWithoutWindowsThatAreClosedAreRecordBased() {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
 
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.RAW);
-        query.setAggregation(aggregation);
+        Query query = makeRawQuery();
         query.configure(config);
+
         Querier querier = make(Querier.Mode.ALL, query, config);
 
         Assert.assertFalse(querier.isClosed());
@@ -687,17 +641,13 @@ public class QuerierTest {
         config.set(BulletConfig.RAW_AGGREGATION_MAX_SIZE, 10);
         config.validate();
 
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.RAW);
-        query.setAggregation(aggregation);
+        Query query = makeRawQuery();
         query.configure(config);
 
         RunningQuery runningQuery = spy(new RunningQuery("", query));
-        doAnswer(returnsElementsOf(asList(false, true))).when(runningQuery).isTimedOut();
+        Mockito.doAnswer(AdditionalAnswers.returnsElementsOf(Arrays.asList(false, true))).when(runningQuery).isTimedOut();
 
         Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
-        querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertTrue(querier.shouldBuffer());
@@ -716,7 +666,6 @@ public class QuerierTest {
         RunningQuery runningQuery = makeCountQueryWithAllWindow(config, 2000);
 
         Querier querier = new Querier(Querier.Mode.PARTITION, runningQuery, config);
-        querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.shouldBuffer());
@@ -729,13 +678,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
 
         // This will reset
         querier.reset();
@@ -744,7 +693,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 5L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 5L);
     }
 
     @Test
@@ -753,7 +702,6 @@ public class QuerierTest {
         RunningQuery runningQuery = makeCountQueryWithAllWindow(config, 2000);
 
         Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
-        querier.initialize();
 
         Assert.assertFalse(querier.isClosed());
         Assert.assertFalse(querier.shouldBuffer());
@@ -766,13 +714,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
 
         // This will not reset
         querier.reset();
@@ -781,7 +729,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.get(GroupOperation.GroupOperationType.COUNT.getName()), 25L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 25L);
     }
 
     @Test
@@ -790,16 +738,11 @@ public class QuerierTest {
         config.set(BulletConfig.RESULT_METADATA_ENABLE, true);
         config.validate();
 
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(Aggregation.DistributionType.RAW);
-        query.setAggregation(aggregation);
-        query.setWindow(WindowUtils.makeWindow(Window.Unit.TIME, 1));
+        Query query = new Query(new Projection(), null, new Raw(null), null, WindowUtils.makeTumblingWindow(1), null);
         query.configure(config);
         RunningQuery runningQuery = new RunningQuery("", query);
 
         Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
-        querier.initialize();
 
         querier.consume(RecordBox.get().getRecord());
         Assert.assertEquals(querier.getRecords().size(), 1);
@@ -834,66 +777,54 @@ public class QuerierTest {
     }
 
     @Test
-    public void testPostAggregationWithErrors() {
-        BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        PostAggregation postAggregation = new OrderBy();
-        postAggregation.setType(PostAggregation.DistributionType.ORDER_BY);
-        query.setPostAggregations(singletonList(postAggregation));
-        query.configure(config);
-        Querier querier = new Querier(new RunningQuery("", query), config);
-        Optional<List<BulletError>> errors = querier.initialize();
-
-        Assert.assertTrue(errors.isPresent());
-        Assert.assertEquals(errors.get(), singletonList(OrderBy.ORDERBY_REQUIRES_FIELDS_ERROR));
-    }
-
-    @Test
     public void testOrderBy() {
-        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.DistributionType.RAW, 500,
-                                        Collections.singletonList(makeOrderBy(new OrderBy.SortItem("a", OrderBy.Direction.DESC))), Pair.of("b", "b"));
+        Expression filter = new UnaryExpression(new FieldExpression("a"), Operation.IS_NOT_NULL);
+        OrderBy orderBy = new OrderBy(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.DESC)));
+        Query query = new Query(new Projection(), filter, new Raw(500), Collections.singletonList(orderBy), new Window(), null);
+
         Querier querier = make(Querier.Mode.ALL, query);
-        querier.initialize();
 
         IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", 10 - i).add("b", i + 10).getRecord()));
 
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 4);
-        Assert.assertEquals(result.get(0).get("b"), 10);
-        Assert.assertFalse(result.get(0).hasField("a"));
-        Assert.assertEquals(result.get(1).get("b"), 11);
-        Assert.assertFalse(result.get(1).hasField("a"));
-        Assert.assertEquals(result.get(2).get("b"), 12);
-        Assert.assertFalse(result.get(2).hasField("a"));
-        Assert.assertEquals(result.get(3).get("b"), 13);
-        Assert.assertFalse(result.get(3).hasField("a"));
+        Assert.assertEquals(result.get(0).typedGet("a").getValue(), 10);
+        Assert.assertEquals(result.get(0).typedGet("b").getValue(), 10);
+        Assert.assertEquals(result.get(1).typedGet("a").getValue(), 9);
+        Assert.assertEquals(result.get(1).typedGet("b").getValue(), 11);
+        Assert.assertEquals(result.get(2).typedGet("a").getValue(), 8);
+        Assert.assertEquals(result.get(2).typedGet("b").getValue(), 12);
+        Assert.assertEquals(result.get(3).typedGet("a").getValue(), 7);
+        Assert.assertEquals(result.get(3).typedGet("b").getValue(), 13);
     }
 
     @Test
-    public void testComputation() {
-        Expression expression = ExpressionUtils.makeBinaryExpression(Expression.Operation.ADD,
-                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.FIELD, "a", DistributionType.INTEGER)),
-                                                                     ExpressionUtils.makeLeafExpression(new Value(Value.Kind.VALUE, "2", DistributionType.LONG)));
-        String query = makeRawFullQuery("a", Arrays.asList("null"), Clause.Operation.NOT_EQUALS, Aggregation.DistributionType.RAW, 500, Collections.singletonList(makeComputation(expression, "newName")), Pair.of("b", "b"));
+    public void testComputationAndCulling() {
+        Projection projection = new Projection(Arrays.asList(new Field("a", new FieldExpression("a")),
+                                                             new Field("b", new FieldExpression("b"))), false);
+        Expression filter = new UnaryExpression(new FieldExpression("a"), Operation.IS_NOT_NULL);
+        Expression expression = new BinaryExpression(new FieldExpression("a"), new ValueExpression(2L), Operation.ADD);
+        Computation computation = new Computation(Collections.singletonList(new Field("newName", expression)));
+        Culling culling = new Culling(Collections.singleton("a"));
+        Query query = new Query(projection, filter, new Raw(500), Arrays.asList(computation, culling), new Window(), null);
+
         Querier querier = make(Querier.Mode.ALL, query);
-        querier.initialize();
 
         IntStream.range(0, 4).forEach(i -> querier.consume(RecordBox.get().add("a", i).add("b", i).getRecord()));
 
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 4);
-        Assert.assertEquals(result.get(0).get("newName"), 2L);
+        Assert.assertEquals(result.get(0).typedGet("newName").getValue(), 2L);
         Assert.assertFalse(result.get(0).hasField("a"));
-        Assert.assertEquals(result.get(0).get("b"), 0);
-        Assert.assertEquals(result.get(1).get("newName"), 3L);
+        Assert.assertEquals(result.get(0).typedGet("b").getValue(), 0);
+        Assert.assertEquals(result.get(1).typedGet("newName").getValue(), 3L);
         Assert.assertFalse(result.get(1).hasField("a"));
-        Assert.assertEquals(result.get(1).get("b"), 1);
-        Assert.assertEquals(result.get(2).get("newName"), 4L);
+        Assert.assertEquals(result.get(1).typedGet("b").getValue(), 1);
+        Assert.assertEquals(result.get(2).typedGet("newName").getValue(), 4L);
         Assert.assertFalse(result.get(2).hasField("a"));
-        Assert.assertEquals(result.get(2).get("b"), 2);
-        Assert.assertEquals(result.get(3).get("newName"), 5L);
+        Assert.assertEquals(result.get(2).typedGet("b").getValue(), 2);
+        Assert.assertEquals(result.get(3).typedGet("newName").getValue(), 5L);
         Assert.assertFalse(result.get(3).hasField("a"));
-        Assert.assertEquals(result.get(3).get("b"), 3);
+        Assert.assertEquals(result.get(3).typedGet("b").getValue(), 3);
     }
-    */
 }
