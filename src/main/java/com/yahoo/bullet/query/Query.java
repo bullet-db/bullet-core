@@ -33,10 +33,10 @@ public class Query implements Configurable, Serializable {
     private Window window;
     private Long duration;
 
-    public static final BulletException ONLY_RAW_RECORD = new BulletException("Only \"RAW\" aggregation types can have window emit type \"RECORD\"",
-                                                                              "Change your aggregation type or your window emit type to \"TIME\"");
-    public static final BulletException NO_RAW_ALL = new BulletException("The \"RAW\" aggregation type cannot have window include \"ALL\"",
-                                                                         "Change your aggregation type or your window include type");
+    private static final BulletException ONLY_RAW_RECORD = new BulletException("Only RAW aggregation type can have window emit type RECORD.",
+                                                                               "Change your aggregation type or your window emit type to TIME.");
+    private static final BulletException NO_RAW_ALL = new BulletException("RAW aggregation type cannot have window include type ALL.",
+                                                                          "Change your aggregation type or your window include type");
 
     public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
         this.projection = Objects.requireNonNull(projection);
@@ -80,7 +80,7 @@ public class Query implements Configurable, Serializable {
 
     @Override
     public String toString() {
-        return "{filter: " + filter + ", projection: " + projection + ", aggregation: " + aggregation +
+        return "{projection: " + projection + ", filter: " + filter + ", aggregation: " + aggregation +
                 ", postAggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + "}";
     }
 }

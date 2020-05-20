@@ -63,6 +63,11 @@ public class WindowTest {
         Assert.assertEquals(window.getType(), Window.Classification.TIME_TIME);
         Assert.assertTrue(window.isTimeBased());
 
+        window = new Window(500, Window.Unit.TIME);
+        window.setIncludeType(Window.Unit.RECORD);
+        Assert.assertEquals(window.getType(), Window.Classification.TIME_RECORD);
+        Assert.assertTrue(window.isTimeBased());
+
         window = new Window(500, Window.Unit.TIME, Window.Unit.TIME, 500);
         Assert.assertEquals(window.getType(), Window.Classification.TIME_TIME);
         Assert.assertTrue(window.isTimeBased());
@@ -77,6 +82,16 @@ public class WindowTest {
 
         window = new Window(500, Window.Unit.RECORD, Window.Unit.RECORD, 500);
         Assert.assertEquals(window.getType(), Window.Classification.RECORD_RECORD);
+        Assert.assertFalse(window.isTimeBased());
+
+        window = new Window(500, Window.Unit.RECORD);
+        window.setIncludeType(Window.Unit.TIME);
+        Assert.assertEquals(window.getType(), Window.Classification.RECORD_TIME);
+        Assert.assertFalse(window.isTimeBased());
+
+        window = new Window(500, Window.Unit.RECORD);
+        window.setIncludeType(Window.Unit.ALL);
+        Assert.assertEquals(window.getType(), Window.Classification.RECORD_ALL);
         Assert.assertFalse(window.isTimeBased());
     }
 

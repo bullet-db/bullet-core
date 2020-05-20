@@ -6,81 +6,81 @@
 package com.yahoo.bullet.query;
 
 
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.query.aggregations.Group;
+import com.yahoo.bullet.query.aggregations.Raw;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 public class QueryTest {
-    /*
     @Test
     public void testDefaults() {
-        Query query = new Query();
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         BulletConfig config = new BulletConfig();
         query.configure(config);
 
-        Assert.assertNull(query.getProjection());
-        Assert.assertNull(query.getFilters());
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
-        Assert.assertEquals(query.getAggregation().getType(), Aggregation.DistributionType.RAW);
-        Assert.assertEquals((Object) query.getAggregation().getSize(), BulletConfig.DEFAULT_AGGREGATION_SIZE);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_DURATION);
+        Assert.assertEquals(query.getAggregation().getSize(), (Integer) BulletConfig.DEFAULT_AGGREGATION_SIZE);
     }
 
-    @Test
-    public void testAggregationForced() {
-        Query query = new Query();
-        query.setAggregation(null);
-        Assert.assertNull(query.getProjection());
-        Assert.assertNull(query.getFilters());
-        // If you had null for aggregation
-        Assert.assertNull(query.getAggregation());
-        query.configure(new BulletConfig());
-        Assert.assertNotNull(query.getAggregation());
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testMissingProjection() {
+        new Query(null, null, new Raw(null), null, new Window(), null);
     }
 
-    @Test
-    public void testAggregationDefault() {
-        Query query = new Query();
-        Aggregation aggregation = new Aggregation();
-        aggregation.setType(null);
-        aggregation.setSize(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE - 1);
-        query.setAggregation(aggregation);
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testMissingAggregation() {
+        new Query(new Projection(), null, null, null, new Window(), null);
+    }
 
-        Assert.assertNull(aggregation.getType());
-        query.configure(new BulletConfig());
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testMissingWindow() {
+        new Query(new Projection(), null, new Raw(null), null, null, null);
+    }
 
-        // Query no longer fixes type
-        Assert.assertNull(aggregation.getType());
-        Assert.assertEquals(aggregation.getSize(), new Integer(BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE - 1));
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Only RAW aggregation type can have window emit type RECORD\\.")
+    public void testValidateWindowOnlyRawRecord() {
+        new Query(new Projection(), null, new Group(null), null, new Window(1, Window.Unit.RECORD), null);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "RAW aggregation type cannot have window include type ALL\\.")
+    public void testValidateWindowNoRawAll() {
+        new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.TIME, Window.Unit.ALL, null), null);
     }
 
     @Test
     public void testDuration() {
         BulletConfig config = new BulletConfig();
 
-        Query query = new Query();
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(-1000L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), -1000L);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(0L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 0L);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(1L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 1L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 1L);
 
-        query.setDuration(BulletConfig.DEFAULT_QUERY_DURATION);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), BulletConfig.DEFAULT_QUERY_DURATION);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_DURATION);
 
-        query.setDuration(BulletConfig.DEFAULT_QUERY_MAX_DURATION);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), BulletConfig.DEFAULT_QUERY_MAX_DURATION);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_MAX_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_MAX_DURATION);
 
         // Overflow
-        query.setDuration(BulletConfig.DEFAULT_QUERY_MAX_DURATION * 2);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), BulletConfig.DEFAULT_QUERY_MAX_DURATION * 2L);
         query.configure(config);
-        Assert.assertEquals((Object) query.getDuration(), BulletConfig.DEFAULT_QUERY_MAX_DURATION);
+        Assert.assertEquals(query.getDuration(), (Long) BulletConfig.DEFAULT_QUERY_MAX_DURATION);
     }
 
     @Test
@@ -90,93 +90,56 @@ public class QueryTest {
         config.set(BulletConfig.QUERY_MAX_DURATION, 1000);
         config.validate();
 
-        Query query = new Query();
-
-        query.setDuration(null);
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(-1000L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), -1000L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(0L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 0L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(1L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 1L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 1L);
 
-        query.setDuration(200L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 200L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 200L);
 
-        query.setDuration(1000L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 1000L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 1000L);
 
-        query.setDuration(2000L);
+        query = new Query(new Projection(), null, new Raw(null), null, new Window(), 2000L);
         query.configure(config);
         Assert.assertEquals(query.getDuration(), (Long) 1000L);
     }
 
     @Test
-    public void testWindowForced() {
+    public void testWindowing() {
         BulletConfig config = new BulletConfig();
-        Query query = new Query();
-        query.setWindow(WindowUtils.makeSlidingWindow(1));
+        Query query = new Query(new Projection(), null, new Raw(null), null, WindowUtils.makeTumblingWindow(1), null);
         query.configure(config);
-        Assert.assertNotNull(query.getWindow());
+        Assert.assertEquals(query.getWindow().getEmitEvery(), (Integer) BulletConfig.DEFAULT_WINDOW_MIN_EMIT_EVERY);
+    }
 
+    @Test
+    public void testDisableWindowing() {
+        BulletConfig config = new BulletConfig();
         config.set(BulletConfig.WINDOW_DISABLE, true);
         config.validate();
-        query.setWindow(WindowUtils.makeSlidingWindow(1));
+
+        Query query = new Query(new Projection(), null, new Raw(null), null, WindowUtils.makeSlidingWindow(1), null);
         query.configure(config);
-        Assert.assertNull(query.getWindow());
-    }
 
-    @Test
-    public void testInitialize() {
-        Query query = new Query();
-        Aggregation mockAggregation = mock(Aggregation.class);
-        Optional<List<BulletError>> aggregationErrors = Optional.of(asList(new ParsingError("foo", new ArrayList<>()),
-                                                                           new ParsingError("bar", new ArrayList<>())));
-        when(mockAggregation.initialize()).thenReturn(aggregationErrors);
-        query.setAggregation(mockAggregation);
-
-        Clause mockClauseA = mock(Clause.class);
-        Clause mockClauseB = mock(Clause.class);
-        when(mockClauseA.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("baz", new ArrayList<>()))));
-        when(mockClauseB.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("qux", new ArrayList<>()))));
-        query.setFilters(asList(mockClauseA, mockClauseB));
-
-        Projection mockProjection = mock(Projection.class);
-        when(mockProjection.initialize()).thenReturn(Optional.of(singletonList(new ParsingError("quux", new ArrayList<>()))));
-        query.setProjection(mockProjection);
-
-        OrderBy orderByA = new OrderBy();
-        orderByA.setType(PostAggregation.DistributionType.ORDER_BY);
-        orderByA.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
-        OrderBy orderByB = new OrderBy();
-        orderByB.setType(PostAggregation.DistributionType.ORDER_BY);
-        orderByB.setFields(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.ASC)));
-        query.setPostAggregations(Arrays.asList(orderByA, orderByB));
-
-        Optional<List<BulletError>> errorList = query.initialize();
-        Assert.assertTrue(errorList.isPresent());
-        Assert.assertEquals(errorList.get().size(), 6);
-    }
-
-    @Test
-    public void testInitializeNullValues() {
-        Query query = new Query();
-        query.setProjection(null);
-        query.setFilters(null);
-        query.setAggregation(null);
-        query.configure(new BulletConfig());
-        Optional<List<BulletError>> errorList = query.initialize();
-        Assert.assertFalse(errorList.isPresent());
+        Assert.assertNull(query.getWindow().getEmitEvery());
+        Assert.assertNull(query.getWindow().getEmitType());
+        Assert.assertNull(query.getWindow().getIncludeType());
+        Assert.assertNull(query.getWindow().getIncludeFirst());
     }
 
     @Test
@@ -184,82 +147,11 @@ public class QueryTest {
         BulletConfig config = new BulletConfig();
         config.set(BulletConfig.AGGREGATION_DEFAULT_SIZE, 1);
         config.set(BulletConfig.QUERY_DEFAULT_DURATION, 30000L);
-        Query query = new Query();
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config.validate());
-
-        Assert.assertEquals(query.toString(),
-                "{" +
-                "filters: null, projection: null, " +
-                "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
-                "postAggregations: null, " +
-                "window: null, " +
-                "duration: 30000" +
-                "}");
-
-        query.setFilters(singletonList(FilterUtils.getFieldFilter(Clause.Operation.EQUALS, "foo", "bar")));
-        query.setProjection(ProjectionUtils.makeProjection("field", "bid"));
-        query.configure(config);
-
-        Assert.assertEquals(query.toString(),
-                            "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo, type: null}, {kind: VALUE, value: bar, type: null}]}], " +
-                            "projection: {fields: {field=bid}}, " +
-                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
-                            "postAggregations: null, " +
-                            "window: null, " +
-                            "duration: 30000" +
-                            "}");
-
-        query.setWindow(WindowUtils.makeTumblingWindow(4000));
-        query.configure(config);
-        Assert.assertEquals(query.toString(),
-                            "{" +
-                            "filters: [{operation: EQUALS, field: field, values: [{kind: VALUE, value: foo, type: null}, {kind: VALUE, value: bar, type: null}]}], " +
-                            "projection: {fields: {field=bid}}, " +
-                            "aggregation: {size: 1, type: RAW, fields: null, attributes: null}, " +
-                            "postAggregations: null, " +
-                            "window: {emit: {type=TIME, every=4000}, include: null}, " +
-                            "duration: 30000" +
-                            "}");
+        Assert.assertEquals(query.toString(), "{projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
+                                              "aggregation: {size: 1, type: RAW}, postAggregations: null, " +
+                                              "window: {emitEvery: null, emitType: null, includeType: null, includeFirst: null}, " +
+                                              "duration: 30000}");
     }
-
-    @Test
-    public void testRewritingClauses() {
-        Query query = new Query();
-        LogicalClause and = new LogicalClause();
-        and.setOperation(Clause.Operation.AND);
-
-        LogicalClause or = new LogicalClause();
-        or.setOperation(Clause.Operation.OR);
-        StringFilterClause equals = new StringFilterClause();
-        equals.setOperation(Clause.Operation.EQUALS);
-        equals.setField("A");
-        equals.setValues(singletonList(DistributionType.NULL_EXPRESSION));
-        and.setClauses(asList(or, equals));
-
-        query.setFilters(singletonList(and));
-        query.configure(new BulletConfig());
-
-        List<Clause> filters = query.getFilters();
-        Assert.assertEquals(filters.size(), 1);
-        LogicalClause rewrittenAnd = (LogicalClause) filters.get(0);
-        Assert.assertEquals(rewrittenAnd.getClauses().size(), 2);
-
-        LogicalClause rewrittenOr = (LogicalClause) rewrittenAnd.getClauses().get(0);
-        Assert.assertNull(rewrittenOr.getClauses());
-        Assert.assertEquals(rewrittenOr.getOperation(), Clause.Operation.OR);
-
-        Clause rewrittenStringFilterClause = rewrittenAnd.getClauses().get(1);
-        Assert.assertTrue(rewrittenStringFilterClause instanceof ObjectFilterClause);
-        ObjectFilterClause rewritten = (ObjectFilterClause) rewrittenStringFilterClause;
-        Assert.assertEquals(rewritten.getField(), "A");
-        Assert.assertEquals(rewritten.getOperation(), Clause.Operation.EQUALS);
-        Assert.assertEquals(rewritten.getValues().size(), 1);
-        Value expectedValue = new Value(Value.Kind.VALUE, DistributionType.NULL_EXPRESSION, null);
-        Value actualValue = rewritten.getValues().get(0);
-        Assert.assertEquals(actualValue.getType(), expectedValue.getType());
-        Assert.assertEquals(actualValue.getValue(), expectedValue.getValue());
-        Assert.assertEquals(actualValue.getKind(), expectedValue.getKind());
-    }
-    */
 }

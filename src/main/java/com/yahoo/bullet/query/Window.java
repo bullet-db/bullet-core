@@ -14,8 +14,10 @@ import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
 import com.yahoo.bullet.windowing.SlidingRecord;
 import com.yahoo.bullet.windowing.Tumbling;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -57,6 +59,8 @@ public class Window implements Configurable, Serializable {
 
     private Integer emitEvery;
     private Unit emitType;
+    // Exposed for testing only
+    @Setter(AccessLevel.PACKAGE)
     private Unit includeType;
     private Integer includeFirst;
 
