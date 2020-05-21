@@ -124,20 +124,21 @@ public class Window implements Configurable, Serializable {
     }
 
     /**
-     * Returns the appropriate window scheme based on this window's classification.
-     *
-     * The windows we support at the moment:
-     * 1. No window -> Basic
-     * 2. Window is emit RECORD and include RECORD -> SlidingRecord
-     * 3. Window is emit TIME and include ALL -> Additive Tumbling
-     * 4. All other windows -> Tumbling (RAW can be Tumbling too)
+     * Returns the appropriate window scheme based on the Window {@link Classification}.
      *
      * @param strategy The {@link Strategy} to be passed on to the window scheme.
      * @param config The {@link BulletConfig} to be passed on to the window scheme.
-     * @return The appropriate window scheme based on this window's classification.
+     * @return The appropriate window scheme based on the window classification.
      */
     public Scheme getScheme(Strategy strategy, BulletConfig config) {
-        // TODO: Support other windows
+        /*
+         * TODO: Support other windows
+         * The windows we support at the moment:
+         * 1. No window - Basic
+         * 2. Window is emit RECORD and include RECORD -\> SlidingRecord
+         * 3. Window is emit TIME and include ALL - Additive Tumbling
+         * 4. All other windows -> Tumbling (RAW can be Tumbling too)
+         */
         if (emitType == null) {
             return new Basic(strategy, null, config);
         }
