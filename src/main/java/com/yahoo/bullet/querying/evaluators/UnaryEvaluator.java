@@ -16,8 +16,12 @@ public class UnaryEvaluator extends Evaluator {
     final Evaluator operand;
     final UnaryOperations.UnaryOperator op;
 
+    /**
+     * Constructor that creates a unary evaluator from a {@link UnaryExpression}.
+     *
+     * @param unaryExpression The unary expression to construct the evaluator from.
+     */
     public UnaryEvaluator(UnaryExpression unaryExpression) {
-        super(unaryExpression);
         operand = unaryExpression.getOperand().getEvaluator();
         op = UnaryOperations.UNARY_OPERATORS.get(unaryExpression.getOp());
     }

@@ -32,7 +32,6 @@ public class NAryEvaluatorTest {
         Assert.assertTrue(evaluator.operands.get(1) instanceof ValueEvaluator);
         Assert.assertTrue(evaluator.operands.get(2) instanceof ValueEvaluator);
         Assert.assertEquals(evaluator.op, N_ARY_OPERATORS.get(Operation.IF));
-        Assert.assertEquals(evaluator.type, Type.INTEGER);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.INTEGER, 2));
     }
 }

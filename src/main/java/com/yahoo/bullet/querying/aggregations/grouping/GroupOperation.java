@@ -73,6 +73,13 @@ public class GroupOperation implements Serializable {
     // Ignored purposefully for hashCode and equals
     private final String name;
 
+    /**
+     * Constructor that creates a group operation.
+     *
+     * @param type The non-null type of the group operation.
+     * @param field The field of the group operation. Can be null for COUNT operation.
+     * @param name The name of the group operation. Can be null for COUNT_FIELD operation.
+     */
     public GroupOperation(GroupOperationType type, String field, String name) {
         switch (type) {
             case COUNT:

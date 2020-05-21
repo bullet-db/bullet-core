@@ -13,6 +13,9 @@ import lombok.Setter;
 import java.io.Serializable;
 
 /**
+ * Expressions are used in Bullet queries to filter on, project, and compute potentially complex values based on
+ * Bullet record fields.
+ *
  * The supported expressions are:
  * - ValueExpression
  * - FieldExpression
@@ -31,7 +34,7 @@ public abstract class Expression implements Serializable {
     protected Type type;
 
     /**
-     * Constructs an evaluator for this expression and returns it.
+     * Gets a new instance of an evaluator for this expression.
      *
      * @return A newly-constructed evaluator for this expression.
      */

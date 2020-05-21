@@ -20,8 +20,12 @@ public class NAryEvaluator extends Evaluator {
     final List<Evaluator> operands;
     final NAryOperations.NAryOperator op;
 
+    /**
+     * Constructor that creates an n-ary evaluator from a {@link NAryExpression}.
+     *
+     * @param nAryExpression The n-ary expression to construct the evaluator from.
+     */
     public NAryEvaluator(NAryExpression nAryExpression) {
-        super(nAryExpression);
         operands = nAryExpression.getOperands().stream().map(Expression::getEvaluator).collect(Collectors.toList());
         op = NAryOperations.N_ARY_OPERATORS.get(nAryExpression.getOp());
     }

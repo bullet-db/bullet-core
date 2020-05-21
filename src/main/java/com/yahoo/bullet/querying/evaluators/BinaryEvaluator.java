@@ -17,8 +17,12 @@ public class BinaryEvaluator extends Evaluator {
     final Evaluator right;
     final BinaryOperations.BinaryOperator op;
 
+    /**
+     * Constructor that creates a binary evaluator from a {@link BinaryExpression}.
+     *
+     * @param binaryExpression The binary expression to construct the evaluator from.
+     */
     public BinaryEvaluator(BinaryExpression binaryExpression) {
-        super(binaryExpression);
         left = binaryExpression.getLeft().getEvaluator();
         right = binaryExpression.getRight().getEvaluator();
         op = BinaryOperations.BINARY_OPERATORS.get(binaryExpression.getOp());

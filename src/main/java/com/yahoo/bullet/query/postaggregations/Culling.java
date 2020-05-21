@@ -23,6 +23,11 @@ public class Culling extends PostAggregation {
 
     private Set<String> transientFields;
 
+    /**
+     * Constructor that creates a Culling post-aggregation.
+     *
+     * @param transientFields The non-null set of fields to remove after aggregation.
+     */
     public Culling(Set<String> transientFields) {
         super(PostAggregationType.CULLING);
         Utilities.requireNonNull(transientFields);

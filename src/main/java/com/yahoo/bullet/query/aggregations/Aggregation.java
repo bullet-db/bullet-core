@@ -32,7 +32,7 @@ public abstract class Aggregation implements Configurable, Serializable {
     }
 
     /**
-     * Returns a new {@link Strategy} instance that can handle this aggregation.
+     * Returns a new {@link Strategy} instance that handles this aggregation.
      *
      * @param config The {@link BulletConfig} containing configuration for the strategy.
      *
@@ -40,6 +40,11 @@ public abstract class Aggregation implements Configurable, Serializable {
      */
     public abstract Strategy getStrategy(BulletConfig config);
 
+    /**
+     * Gets the aggregation fields.
+     *
+     * @return The aggregation fields.
+     */
     public List<String> getFields() {
         return Collections.emptyList();
     }

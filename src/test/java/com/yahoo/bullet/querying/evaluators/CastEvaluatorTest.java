@@ -22,7 +22,6 @@ public class CastEvaluatorTest {
         CastEvaluator evaluator = new CastEvaluator(expression);
         Assert.assertTrue(evaluator.value instanceof ValueEvaluator);
         Assert.assertEquals(evaluator.castType, Type.STRING);
-        Assert.assertEquals(evaluator.type, Type.STRING);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.STRING, "5"));
     }
 }

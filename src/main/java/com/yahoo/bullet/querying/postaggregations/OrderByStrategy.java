@@ -19,9 +19,9 @@ public class OrderByStrategy implements PostStrategy {
     private final Comparator<BulletRecord> comparator;
 
     /**
-     * Constructor for OrderBy strategy.
+     * Constructor that creates an OrderBy post-strategy.
      *
-     * @param orderBy OrderBy post aggregation.
+     * @param orderBy The OrderBy post-aggregation to create a strategy for.
      */
     public OrderByStrategy(OrderBy orderBy) {
         comparator = getComparator(orderBy);

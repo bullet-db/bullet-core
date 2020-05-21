@@ -28,7 +28,7 @@ public class Window implements Configurable, Serializable {
     private static final long serialVersionUID = 3671691728693727956L;
 
     /**
-     * Represents the type of the Window Unit for either emit or include.
+     * Represents the type of the window unit for either emit or include.
      */
     public enum Unit {
         RECORD,
@@ -64,6 +64,12 @@ public class Window implements Configurable, Serializable {
     private Unit includeType;
     private Integer includeFirst;
 
+    /**
+     * Constructor that creates a window with only emit fields.
+     *
+     * @param emitEvery The non-null emit every field.
+     * @param emitType The non-null emit unit type.
+     */
     public Window(Integer emitEvery, Unit emitType) {
         this.emitEvery = Objects.requireNonNull(emitEvery);
         this.emitType = Objects.requireNonNull(emitType);
@@ -75,6 +81,14 @@ public class Window implements Configurable, Serializable {
         }
     }
 
+    /**
+     * Constructor that creates a window with emit and include fields.
+     *
+     * @param emitEvery The non-null emit every field.
+     * @param emitType The non-null emit unit type.
+     * @param includeType The non-null include unit type.
+     * @param includeFirst The include first field. Can be null if the include unit type is ALL.
+     */
     public Window(Integer emitEvery, Unit emitType, Unit includeType, Integer includeFirst) {
         this(emitEvery, emitType);
         this.includeType = Objects.requireNonNull(includeType);
@@ -109,15 +123,21 @@ public class Window implements Configurable, Serializable {
         }
     }
 
+    /**
+     * Returns the appropriate window scheme based on this window's classification.
+     *
+     * The windows we support at the moment:
+     * 1. No window -> Basic
+     * 2. Window is emit RECORD and include RECORD -> SlidingRecord
+     * 3. Window is emit TIME and include ALL -> Additive Tumbling
+     * 4. All other windows -> Tumbling (RAW can be Tumbling too)
+     *
+     * @param strategy The {@link Strategy} to be passed on to the window scheme.
+     * @param config The {@link BulletConfig} to be passed on to the window scheme.
+     * @return The appropriate window scheme based on this window's classification.
+     */
     public Scheme getScheme(Strategy strategy, BulletConfig config) {
-        /*
-         * TODO: Support other windows
-         * The windows we support at the moment:
-         * 1. No window -> Basic
-         * 2. Window is emit RECORD and include RECORD -> SlidingRecord
-         * 3. Window is emit TIME and include ALL -> Additive Tumbling
-         * 4. All other windows -> Tumbling (RAW can be Tumbling too)
-         */
+        // TODO: Support other windows
         if (emitType == null) {
             return new Basic(strategy, null, config);
         }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This class is the top level Bullet Query specification. It holds the definition of the Query.
+ * This class is the top level Bullet query specification. It holds the definition of the query.
  */
 @Getter @Slf4j
 public class Query implements Configurable, Serializable {
@@ -38,6 +38,16 @@ public class Query implements Configurable, Serializable {
     private static final BulletException NO_RAW_ALL = new BulletException("RAW aggregation type cannot have window include type ALL.",
                                                                           "Change your aggregation type or your window include type");
 
+    /**
+     * Constructor that creates the Bullet query.
+     *
+     * @param projection The non-null projection that decides which fields are selected from a Bullet record before aggregation.
+     * @param filter The filter expression records must pass before projection. Can be null.
+     * @param aggregation The non-null aggregation that takes projected records.
+     * @param postAggregations The list of post-aggregations that are executed on records before getting results. Can be null.
+     * @param window The non-null window that decides when and how results are returned.
+     * @param duration The duration of the query. Can be null.
+     */
     public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
         this.projection = Objects.requireNonNull(projection);
         this.filter = filter;

@@ -14,9 +14,9 @@ public class CullingStrategy implements PostStrategy {
     private Set<String> transientFields;
 
     /**
-     * Constructor for Culling strategy.
+     * Constructor that creates a Culling post-strategy.
      *
-     * @param culling Culling post aggregation.
+     * @param culling The culling post-aggregation to create a strategy for.
      */
     public CullingStrategy(Culling culling) {
         transientFields = culling.getTransientFields();

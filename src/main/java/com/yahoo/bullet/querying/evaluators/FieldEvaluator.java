@@ -21,8 +21,12 @@ public class FieldEvaluator extends Evaluator {
 
     private final FieldExtractor fieldExtractor;
 
+    /**
+     * Constructor that creates a field evaluator from a {@link FieldExpression}.
+     *
+     * @param fieldExpression The field expression to construct the evaluator from.
+     */
     public FieldEvaluator(FieldExpression fieldExpression) {
-        super(fieldExpression);
         fieldExtractor = getFieldExtractor(fieldExpression);
     }
 

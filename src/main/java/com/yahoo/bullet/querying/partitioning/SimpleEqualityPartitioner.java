@@ -161,7 +161,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
     }
 
     private void addFieldToMapping(FieldExpression fieldExpression, ValueExpression valueExpression, Map<String, Set<Serializable>> mapping) {
-        String field = fieldExpression.getSimpleName();
+        String field = fieldExpression.getName();
         if (fieldSet.contains(field)) {
             Serializable value = valueExpression.getValue();
             mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);

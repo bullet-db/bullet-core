@@ -25,7 +25,6 @@ public class ListEvaluatorTest {
         ListEvaluator evaluator = new ListEvaluator(expression);
         Assert.assertTrue(evaluator.evaluators.get(0) instanceof ValueEvaluator);
         Assert.assertTrue(evaluator.evaluators.get(1) instanceof ValueEvaluator);
-        Assert.assertEquals(evaluator.type, Type.INTEGER_LIST);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.INTEGER_LIST, new ArrayList<>(Arrays.asList(1, 2))));
     }
 }

@@ -25,6 +25,12 @@ public class CastExpression extends Expression {
     private final Expression value;
     private final Type castType;
 
+    /**
+     * Constructor that creates a cast expression.
+     *
+     * @param value The non-null value to cast.
+     * @param castType The non-null cast type to cast the value to.
+     */
     public CastExpression(Expression value, Type castType) {
         this.value = Objects.requireNonNull(value);
         this.castType = Objects.requireNonNull(castType);

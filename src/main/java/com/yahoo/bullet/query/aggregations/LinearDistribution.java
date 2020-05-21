@@ -17,7 +17,8 @@ public class LinearDistribution extends Distribution {
     private final int numberOfPoints;
 
     /**
-     * Constructor that creates a DISTRIBUTION aggregation with a specified max size.
+     * Constructor that creates a DISTRIBUTION aggregation with a specified max size. The number of equidistant
+     * points in this distribution are specified.
      *
      * @param field The non-null field
      * @param type The non-null distribution type

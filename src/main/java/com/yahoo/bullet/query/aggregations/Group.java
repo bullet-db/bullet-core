@@ -47,6 +47,11 @@ public class Group extends Aggregation {
         return hasFields() ? new ArrayList<>(fields.keySet()) : Collections.emptyList();
     }
 
+    /**
+     * Gets a map from field names to aliases.
+     *
+     * @return A {@link Map} from field names to aliases. If there are no fields, returns an empty map.
+     */
     public Map<String, String> getFieldsToNames() {
         return fields != null ? fields : Collections.emptyMap();
     }
@@ -55,18 +60,40 @@ public class Group extends Aggregation {
         return fields != null && !fields.isEmpty();
     }
 
+    /**
+     * Sets the map of field names to aliases for this aggregation.
+     *
+     * @param fields The map of field names to aliases to set. Must not be null.
+     */
     public void setFields(Map<String, String> fields) {
         this.fields = Utilities.requireNonNull(fields);
     }
 
+    /**
+     * Gets the set of {@link GroupOperation} in this aggregation.
+     *
+     * @return The set of {@link GroupOperation} in this aggregation. If there are no operations, returns an empty set.
+     */
     public Set<GroupOperation> getOperations() {
         return operations != null ? operations : Collections.emptySet();
     }
 
+    /**
+     * Adds a {@link GroupOperation} to this aggregation.
+     *
+     * @param type The type of {@link GroupOperation} to add.
+     * @param field The field of the {@link GroupOperation} to add.
+     * @param name The name of the {@link GroupOperation} to add.
+     */
     public void addGroupOperation(GroupOperation.GroupOperationType type, String field, String name) {
         addGroupOperation(new GroupOperation(type, field, name));
     }
 
+    /**
+     * Adds a {@link GroupOperation} to this aggregation.
+     *
+     * @param groupOperation The {@link GroupOperation} to add.
+     */
     public void addGroupOperation(GroupOperation groupOperation) {
         if (groupOperation.getType() == GroupOperation.GroupOperationType.COUNT_FIELD) {
             throw COUNT_FIELD_INVALID_OPERATION;

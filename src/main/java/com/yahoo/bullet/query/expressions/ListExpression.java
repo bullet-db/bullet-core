@@ -22,6 +22,11 @@ public class ListExpression extends Expression {
 
     private final List<Expression> values;
 
+    /**
+     * Constructor that creates a list expression.
+     *
+     * @param values The non-null list of values to be wrapped.
+     */
     public ListExpression(List<Expression> values) {
         this.values = Utilities.requireNonNull(values);
     }

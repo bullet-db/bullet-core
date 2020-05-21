@@ -20,8 +20,12 @@ import java.util.stream.Collectors;
 public class ListEvaluator extends Evaluator {
     final List<Evaluator> evaluators;
 
+    /**
+     * Constructor that creates a list evaluator from a {@link ListExpression}.
+     *
+     * @param listExpression The list expression to construct the evaluator from.
+     */
     public ListEvaluator(ListExpression listExpression) {
-        super(listExpression);
         evaluators = listExpression.getValues().stream().map(Expression::getEvaluator).collect(Collectors.toList());
     }
 

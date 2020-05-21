@@ -5,7 +5,9 @@
  */
 package com.yahoo.bullet.query.aggregations;
 
-/** Represents the type of the Aggregation. */
+/**
+ * Represents the type of the {@link Aggregation}.
+ */
 public enum AggregationType {
     GROUP,
     COUNT_DISTINCT,

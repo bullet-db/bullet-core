@@ -14,9 +14,9 @@ public class HavingStrategy implements PostStrategy {
     private final Evaluator evaluator;
 
     /**
-     * Constructor for Having strategy.
+     * Constructor that creates a Having post-strategy.
      *
-     * @param having Having post aggregation.
+     * @param having The Having post-aggregation to create a strategy for.
      */
     public HavingStrategy(Having having) {
         evaluator = having.getExpression().getEvaluator();

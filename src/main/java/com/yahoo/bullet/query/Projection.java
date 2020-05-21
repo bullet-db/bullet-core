@@ -29,7 +29,7 @@ public class Projection implements Serializable {
     private final Type type;
 
     /**
-     * Default constructor that creates a PASS_THROUGH Projection.
+     * Default constructor that creates a PASS_THROUGH projection.
      */
     public Projection() {
         fields = null;
@@ -37,7 +37,7 @@ public class Projection implements Serializable {
     }
 
     /**
-     * Constructor that creates a COPY or NO_COPY Projection.
+     * Constructor that creates a COPY or NO_COPY projection.
      *
      * @param fields The list of fields to project. Must not be null or contain null fields.
      * @param copy Whether the projection should copy or not copy.

@@ -17,12 +17,10 @@ public class ValueEvaluatorTest {
     public void testConstructor() {
         ValueEvaluator evaluator = new ValueEvaluator(new ValueExpression(5));
         Assert.assertEquals(evaluator.value, new TypedObject(Type.INTEGER, 5));
-        Assert.assertEquals(evaluator.type, Type.INTEGER);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), evaluator.value);
 
         evaluator = new ValueEvaluator(new ValueExpression("5"));
         Assert.assertEquals(evaluator.value, new TypedObject(Type.STRING, "5"));
-        Assert.assertEquals(evaluator.type, Type.STRING);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), evaluator.value);
     }
 }

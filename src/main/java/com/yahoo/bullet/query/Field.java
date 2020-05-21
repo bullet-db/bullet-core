@@ -18,6 +18,12 @@ public class Field implements Serializable {
     private String name;
     private Expression value;
 
+    /**
+     * Constructor that creates a field used in projection and computation.
+     *
+     * @param name The non-null name of the field.
+     * @param value The non-null value of the field.
+     */
     public Field(String name, Expression value) {
         this.name = Objects.requireNonNull(name);
         this.value = Objects.requireNonNull(value);

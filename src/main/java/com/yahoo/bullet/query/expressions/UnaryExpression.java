@@ -26,6 +26,12 @@ public class UnaryExpression extends Expression {
     private final Expression operand;
     private final Operation op;
 
+    /**
+     * Constructor that creates a unary expression.
+     *
+     * @param operand The non-null operand.
+     * @param op The non-null unary operation.
+     */
     public UnaryExpression(Expression operand, Operation op) {
         this.operand = Objects.requireNonNull(operand);
         this.op = Objects.requireNonNull(op);

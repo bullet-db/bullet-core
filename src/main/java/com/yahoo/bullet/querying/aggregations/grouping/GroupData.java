@@ -64,7 +64,7 @@ public class GroupData implements Serializable {
      * Strings that represent the group fields.
      *
      * @param groupFields The mappings of field names to their values that represent this group.
-     * @param operations  the non-null operations that this will compute metrics for.
+     * @param operations The non-null operations that this will compute metrics for.
      */
     public GroupData(Map<String, String> groupFields, Set<GroupOperation> operations) {
         this.groupFields = groupFields;
@@ -92,19 +92,6 @@ public class GroupData implements Serializable {
     public GroupData(Map<String, String> groupFields, Map<String, String> fieldAliases, Map<GroupOperation, Number> metrics) {
         this.groupFields = groupFields;
         this.fieldAliases = fieldAliases;
-        this.metrics = metrics;
-    }
-
-    /**
-     * Constructor that initializes the GroupData with an existing {@link Map} of {@link GroupOperation} to values and
-     * a {@link Map} of Strings that represent the group fields. These arguments are not copied.
-     *
-     * @param groupFields The mappings of field names to their values that represent this group.
-     * @param metrics     the non-null {@link Map} of metrics for this object.
-     */
-    public GroupData(Map<String, String> groupFields, Map<GroupOperation, Number> metrics) {
-        this.groupFields = groupFields;
-        this.fieldAliases = Collections.emptyMap();
         this.metrics = metrics;
     }
 

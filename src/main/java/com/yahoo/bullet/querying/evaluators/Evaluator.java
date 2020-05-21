@@ -5,29 +5,19 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
-import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
- * Evaluators do the work of expressions.
- *
- * Each expression is built into a corresponding evaluator. Note, evaluators are constructed after a query has been
- * initialized so assume all expressions are valid.
- *
- * Evaluators are evaluated given a BulletRecord and will throw exceptions on any errors. These errors are virtually all
- * from some form of type check.
- *
- * Also, note the type cast in evaluator. For primitives, this acts as how you think it would, but for lists and maps, it
- * will cast their elements/values.
+ * Evaluators are built from expressions. They are evaluated given a {@link BulletRecord} and will throw exceptions on
+ * any errors which are most likely to be the result of missing fields or incorrect types.
  */
 public abstract class Evaluator {
-    final Type type;
-
-    protected Evaluator(Expression expression) {
-        type = expression.getType();
-    }
-
+    /**
+     * Evaluates this evaluator on the given {@link BulletRecord}.
+     *
+     * @param record The Bullet record to evaluate this evaluator on.
+     * @return The result of this evaluator on the given Bullet record.
+     */
     public abstract TypedObject evaluate(BulletRecord record);
 }

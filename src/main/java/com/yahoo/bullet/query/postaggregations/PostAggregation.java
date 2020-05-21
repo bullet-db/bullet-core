@@ -17,5 +17,10 @@ public abstract class PostAggregation implements Serializable {
 
     protected final PostAggregationType type;
 
+    /**
+     * Returns a new {@link PostStrategy} that handles this post-aggregation.
+
+     * @return A new instance of a strategy that handles this post-aggregation.
+     */
     public abstract PostStrategy getPostStrategy();
 }

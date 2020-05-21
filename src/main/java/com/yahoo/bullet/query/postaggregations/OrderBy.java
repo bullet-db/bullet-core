@@ -32,6 +32,12 @@ public class OrderBy extends PostAggregation {
         private String field;
         private Direction direction;
 
+        /**
+         * Constructor that creates an {@link OrderBy} item.
+         *
+         * @param field The non-null field to sort by.
+         * @param direction The non-null direction to sort by.
+         */
         public SortItem(String field, Direction direction) {
             this.field = Objects.requireNonNull(field);
             this.direction = Objects.requireNonNull(direction);
@@ -48,6 +54,11 @@ public class OrderBy extends PostAggregation {
 
     private List<SortItem> fields;
 
+    /**
+     * Constructor that creates an OrderBy post-aggregation.
+     *
+     * @param fields The non-null list of fields to order by.
+     */
     public OrderBy(List<SortItem> fields) {
         super(PostAggregationType.ORDER_BY);
         Utilities.requireNonNull(fields);

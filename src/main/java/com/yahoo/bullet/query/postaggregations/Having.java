@@ -21,6 +21,11 @@ public class Having extends PostAggregation {
 
     private Expression expression;
 
+    /**
+     * Constructor that creates a Having post-aggregation.
+     *
+     * @param expression The non-null expression to filter by after aggregation.
+     */
     public Having(Expression expression) {
         super(PostAggregationType.HAVING);
         if (expression == null) {

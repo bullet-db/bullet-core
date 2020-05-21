@@ -14,7 +14,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 /**
- * The type of the operation in binary/unary expressions.
+ * The operations in binary, unary, and n-ary expressions.
  */
 @Getter @AllArgsConstructor
 public enum Operation {

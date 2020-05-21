@@ -58,6 +58,6 @@ public class TopKTest {
     @Test
     public void testGetToString() {
         TopK aggregation = new TopK(Collections.singletonMap("abc", "def"), 500, 100L, COUNT_NAME);
-        Assert.assertEquals(aggregation.toString(), "{size: 500, type: TOP_K, fields: {abc=def}, threshold: 100, name: count}");
+        Assert.assertEquals(aggregation.toString(), "{size: 500, type: TOP_K, fieldsToNames: {abc=def}, threshold: 100, name: count}");
     }
 }

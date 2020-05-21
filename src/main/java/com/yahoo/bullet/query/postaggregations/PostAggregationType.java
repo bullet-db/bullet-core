@@ -6,7 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 /**
- * Represents the type of the PostAggregation.
+ * Represents the type of the {@link PostAggregation}.
  */
 public enum PostAggregationType {
     HAVING,

@@ -26,7 +26,6 @@ public class BinaryEvaluatorTest {
         Assert.assertTrue(evaluator.left instanceof ValueEvaluator);
         Assert.assertTrue(evaluator.right instanceof ValueEvaluator);
         Assert.assertEquals(evaluator.op, BINARY_OPERATORS.get(Operation.ADD));
-        Assert.assertEquals(evaluator.type, Type.INTEGER);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.INTEGER, 3));
     }
 }

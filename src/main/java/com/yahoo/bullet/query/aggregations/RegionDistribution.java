@@ -23,7 +23,8 @@ public class RegionDistribution extends Distribution {
     private double increment;
 
     /**
-     * Constructor that creates a DISTRIBUTION aggregation with a specified max size.
+     * Constructor that creates a DISTRIBUTION aggregation with a specified max size. The points of this distribution
+     * are specified by a given range and interval between points.
      *
      * @param field The non-null field
      * @param type The non-null distribution type

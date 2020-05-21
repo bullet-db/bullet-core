@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.windowing;
 
+import com.yahoo.bullet.querying.Querier;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
@@ -65,6 +66,9 @@ public abstract class Scheme implements Monoidal {
      */
     public abstract void resetForPartition();
 
+    /**
+     * Readies the window for querying. This is called in {@link Querier#restart()}.
+     */
     public abstract void start();
 
     /**

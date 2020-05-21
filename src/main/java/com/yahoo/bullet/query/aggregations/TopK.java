@@ -23,25 +23,25 @@ public class TopK extends Aggregation {
     private static final BulletException TOP_K_REQUIRES_FIELDS =
             new BulletException("TOP K requires at least one field.", "Please add at least one field.");
 
-    private Map<String, String> fields;
+    private Map<String, String> fieldsToNames;
     private Long threshold;
     private String name;
 
     /**
      * Constructor that creates a TOP_K aggregation with a specified max size.
      *
-     * @param fields The fields of the Top K aggregation. Must not be empty.
+     * @param fieldsToNames The mapping of fields to aliases of the Top K aggregation. Must not be empty.
      * @param size The max size of the Top K aggregation. Can be null.
      * @param threshold The minimum threshold of the Top K aggregation. Can be null.
      * @param name The name of the count field.
      */
-    public TopK(Map<String, String> fields, Integer size, Long threshold, String name) {
+    public TopK(Map<String, String> fieldsToNames, Integer size, Long threshold, String name) {
         super(size, AggregationType.TOP_K);
-        Utilities.requireNonNull(fields);
-        if (fields.isEmpty()) {
+        Utilities.requireNonNull(fieldsToNames);
+        if (fieldsToNames.isEmpty()) {
             throw TOP_K_REQUIRES_FIELDS;
         }
-        this.fields = fields;
+        this.fieldsToNames = fieldsToNames;
         this.threshold = threshold;
         this.name = Objects.requireNonNull(name);
     }
@@ -53,15 +53,11 @@ public class TopK extends Aggregation {
 
     @Override
     public List<String> getFields() {
-        return new ArrayList<>(fields.keySet());
-    }
-
-    public Map<String, String> getFieldsToNames() {
-        return fields;
+        return new ArrayList<>(fieldsToNames.keySet());
     }
 
     @Override
     public String toString() {
-        return "{size: " + size + ", type: " + type + ", fields: " + fields + ", threshold: " + threshold + ", name: " + getName() + "}";
+        return "{size: " + size + ", type: " + type + ", fieldsToNames: " + fieldsToNames + ", threshold: " + threshold + ", name: " + getName() + "}";
     }
 }

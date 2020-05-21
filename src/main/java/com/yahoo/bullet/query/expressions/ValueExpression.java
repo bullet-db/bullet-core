@@ -26,6 +26,11 @@ public class ValueExpression extends Expression {
 
     private final Serializable value;
 
+    /**
+     * Constructor that creates a value expression.
+     *
+     * @param value The non-null value to be wrapped.
+     */
     public ValueExpression(Serializable value) {
         this.value = value;
         this.type = Type.getType(value);

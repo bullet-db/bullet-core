@@ -27,6 +27,13 @@ public class BinaryExpression extends Expression {
     private final Expression right;
     private final Operation op;
 
+    /**
+     * Constructor that creates a binary expression.
+     *
+     * @param left The non-null left operand.
+     * @param right The non-null right operand.
+     * @param op The non-null binary operation.
+     */
     public BinaryExpression(Expression left, Expression right, Operation op) {
         this.left = Objects.requireNonNull(left);
         this.right = Objects.requireNonNull(right);

@@ -25,33 +25,69 @@ public class FieldExpression extends Expression {
     private String key;
     private String subKey;
 
+    /**
+     * Constructor that creates a field expression.
+     *
+     * @param field The non-null field to get.
+     */
     public FieldExpression(String field) {
         this.field = Objects.requireNonNull(field);
     }
 
+    /**
+     * Constructor that creates a field expression with a list index.
+     *
+     * @param field The non-null field to get.
+     * @param index The non-null index to get from the field.
+     */
     public FieldExpression(String field, Integer index) {
         this.field = Objects.requireNonNull(field);
         this.index = Objects.requireNonNull(index);
     }
 
+    /**
+     * Constructor that creates a field expression with a map key.
+     *
+     * @param field The non-null field to get.
+     * @param key The non-null key to get from the field.
+     */
     public FieldExpression(String field, String key) {
         this.field = Objects.requireNonNull(field);
         this.key = Objects.requireNonNull(key);
     }
 
+    /**
+     * Constructor that creates a field expression with a list index and a map subkey.
+     *
+     * @param field The non-null field to get.
+     * @param index The non-null index to get from the field.
+     * @param subKey The non-null subkey to get from the field[index].
+     */
     public FieldExpression(String field, Integer index, String subKey) {
         this.field = Objects.requireNonNull(field);
         this.index = Objects.requireNonNull(index);
         this.subKey = Objects.requireNonNull(subKey);
     }
 
+    /**
+     * Constructor that creates a field expression with map key and a map subkey.
+     *
+     * @param field The non-null field to get.
+     * @param key The non-null key to get from the field.
+     * @param subKey The non-null subkey to get from the field.key.
+     */
     public FieldExpression(String field, String key, String subKey) {
         this.field = Objects.requireNonNull(field);
         this.key = Objects.requireNonNull(key);
         this.subKey = Objects.requireNonNull(subKey);
     }
 
-    public String getSimpleName() {
+    /**
+     * Gets the name of this field expression formatted with delimiters for any index and/or keys.
+     *
+     * @return The name of this field expression.
+     */
+    public String getName() {
         if (index != null) {
             if (subKey != null) {
                 return field + DELIMITER + index + DELIMITER + subKey;

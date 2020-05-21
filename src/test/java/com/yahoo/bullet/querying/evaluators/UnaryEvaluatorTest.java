@@ -25,7 +25,6 @@ public class UnaryEvaluatorTest {
         UnaryEvaluator evaluator = new UnaryEvaluator(expression);
         Assert.assertTrue(evaluator.operand instanceof ValueEvaluator);
         Assert.assertEquals(evaluator.op, UNARY_OPERATORS.get(Operation.IS_NOT_NULL));
-        Assert.assertEquals(evaluator.type, Type.BOOLEAN);
         Assert.assertEquals(evaluator.evaluate(RecordBox.get().getRecord()), new TypedObject(Type.BOOLEAN, true));
     }
 }

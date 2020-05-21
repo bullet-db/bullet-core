@@ -15,9 +15,13 @@ import com.yahoo.bullet.typesystem.TypedObject;
 public class ValueEvaluator extends Evaluator {
     final TypedObject value;
 
+    /**
+     * Constructor that creates a value evaluator from a {@link ValueExpression}.
+     *
+     * @param valueExpression The value expression to construct the evaluator from.
+     */
     public ValueEvaluator(ValueExpression valueExpression) {
-        super(valueExpression);
-        value = new TypedObject(type, valueExpression.getValue());
+        value = new TypedObject(valueExpression.getType(), valueExpression.getValue());
     }
 
     @Override

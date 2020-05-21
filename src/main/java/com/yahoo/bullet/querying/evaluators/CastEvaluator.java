@@ -17,8 +17,12 @@ public class CastEvaluator extends Evaluator {
     final Evaluator value;
     final Type castType;
 
+    /**
+     * Constructor that creates a cast evaluator from a {@link CastExpression}.
+     *
+     * @param castExpression The cast expression to construct the evaluator from.
+     */
     public CastEvaluator(CastExpression castExpression) {
-        super(castExpression);
         value = castExpression.getValue().getEvaluator();
         castType = castExpression.getCastType();
     }

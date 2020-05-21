@@ -29,6 +29,12 @@ public class NAryExpression extends Expression {
     private final List<Expression> operands;
     private final Operation op;
 
+    /**
+     * Constructor that creates an n-ary expression.
+     *
+     * @param operands The non-null list of operands.
+     * @param op The non-null n-ary operation.
+     */
     public NAryExpression(List<Expression> operands, Operation op) {
         this.operands = Utilities.requireNonNull(operands);
         this.op = Objects.requireNonNull(op);

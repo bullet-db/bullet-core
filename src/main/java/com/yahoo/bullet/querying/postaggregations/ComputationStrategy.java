@@ -15,9 +15,9 @@ public class ComputationStrategy implements PostStrategy {
     private Projection projection;
 
     /**
-     * Constructor for Computation strategy.
+     * Constructor that creates a Computation post-strategy.
      *
-     * @param computation Computation post aggregation.
+     * @param computation The computation post-aggregation to create a strategy for.
      */
     public ComputationStrategy(Computation computation) {
         projection = new Projection(computation.getFields());

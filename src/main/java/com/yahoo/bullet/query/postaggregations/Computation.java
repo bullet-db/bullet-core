@@ -24,6 +24,11 @@ public class Computation extends PostAggregation {
 
     private List<Field> fields;
 
+    /**
+     * Constructor that creates a Computation post-aggregation.
+     *
+     * @param fields The non-null list of fields to compute after aggregation.
+     */
     public Computation(List<Field> fields) {
         super(PostAggregationType.COMPUTATION);
         Utilities.requireNonNull(fields);

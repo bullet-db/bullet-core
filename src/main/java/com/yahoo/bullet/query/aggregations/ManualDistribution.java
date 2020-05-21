@@ -27,7 +27,8 @@ public class ManualDistribution extends Distribution {
     private List<Double> points;
 
     /**
-     * Constructor that creates a DISTRIBUTION aggregation with a specified max size.
+     * Constructor that creates a DISTRIBUTION aggregation with a specified max size. The points in this distribution
+     * are specified manually.
      *
      * @param field The non-null field
      * @param type The non-null distribution type

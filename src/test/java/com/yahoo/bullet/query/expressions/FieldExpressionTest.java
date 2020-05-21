@@ -14,27 +14,27 @@ public class FieldExpressionTest {
     @Test
     public void testConstructor() {
         FieldExpression expression = new FieldExpression("abc");
-        Assert.assertEquals(expression.getSimpleName(), "abc");
+        Assert.assertEquals(expression.getName(), "abc");
         Assert.assertEquals(expression.toString(), "{field: abc, index: null, key: null, subKey: null, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", 0);
-        Assert.assertEquals(expression.getSimpleName(), "abc.0");
+        Assert.assertEquals(expression.getName(), "abc.0");
         Assert.assertEquals(expression.toString(), "{field: abc, index: 0, key: null, subKey: null, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", 0, "def");
-        Assert.assertEquals(expression.getSimpleName(), "abc.0.def");
+        Assert.assertEquals(expression.getName(), "abc.0.def");
         Assert.assertEquals(expression.toString(), "{field: abc, index: 0, key: null, subKey: def, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", "def");
-        Assert.assertEquals(expression.getSimpleName(), "abc.def");
+        Assert.assertEquals(expression.getName(), "abc.def");
         Assert.assertEquals(expression.toString(), "{field: abc, index: null, key: def, subKey: null, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", "def", "ghi");
-        Assert.assertEquals(expression.getSimpleName(), "abc.def.ghi");
+        Assert.assertEquals(expression.getName(), "abc.def.ghi");
         Assert.assertEquals(expression.toString(), "{field: abc, index: null, key: def, subKey: ghi, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
     }

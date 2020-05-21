@@ -82,6 +82,13 @@ public class Utilities {
         return string == null || string.isEmpty();
     }
 
+    /**
+     * Throws a {@link NullPointerException} if the {@link List} is null or contains any null elements.
+     *
+     * @param list The list to check.
+     * @param <T> The type of the list.
+     * @return The list.
+     */
     public static <T> List<T> requireNonNull(List<T> list) {
         Objects.requireNonNull(list);
         for (T t : list) {
@@ -90,6 +97,13 @@ public class Utilities {
         return list;
     }
 
+    /**
+     * Throws a {@link NullPointerException} if the {@link Set} is null or contains any null elements.
+     *
+     * @param set The set to check.
+     * @param <T> The type of the set.
+     * @return The set.
+     */
     public static <T> Set<T> requireNonNull(Set<T> set) {
         Objects.requireNonNull(set);
         for (T t : set) {
@@ -98,6 +112,14 @@ public class Utilities {
         return set;
     }
 
+    /**
+     * Throws a {@link NullPointerException} if the {@link Map} is null or contains any null keys or null values.
+     *
+     * @param map The map to check.
+     * @param <K> The type of the map key.
+     * @param <V> The type of the map value.
+     * @return The map.
+     */
     public static <K, V> Map<K, V> requireNonNull(Map<K, V> map) {
         Objects.requireNonNull(map);
         for (Map.Entry<K, V> entry : map.entrySet()) {
