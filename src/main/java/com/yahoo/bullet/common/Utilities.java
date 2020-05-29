@@ -142,11 +142,20 @@ public class Utilities {
                value : BigDecimal.valueOf(value).setScale(places, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
+    /**
+     * Generates an array of points from the given arguments.
+     *
+     * @param start The first point to begin with.
+     * @param generator A function that returns the next point given the previous.
+     * @param numberOfPoints The size of the resulting array.
+     * @param rounding The number of maximum decimal places to round up to.
+     * @return An array of points generated from the given arguments.
+     */
     public static double[] generatePoints(double start, Function<Double, Double> generator, int numberOfPoints, int rounding) {
         double[] points = new double[numberOfPoints];
         double begin = start;
         for (int i = 0; i < numberOfPoints; ++i) {
-            points[i] = Utilities.round(begin, rounding);
+            points[i] = round(begin, rounding);
             begin = generator.apply(begin);
         }
         return points;
