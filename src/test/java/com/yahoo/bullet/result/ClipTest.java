@@ -46,7 +46,7 @@ public class ClipTest {
     @Test
     public void testNullValueInRecord() {
         BulletRecord record = new RecordBox().addMap("map_field", Pair.of("bar", true), Pair.of("foo", null)).getRecord();
-        assertJSONEquals(Clip.of(record).asJSON(), makeJSON("[{'map_field':{'value':{'bar':true,'foo':null},'type':'BOOLEAN_MAP'}}]"));
+        assertJSONEquals(Clip.of(record).asJSON(), makeJSON("[{'map_field':{'bar':true,'foo':null}}]"));
     }
 
 
@@ -55,7 +55,7 @@ public class ClipTest {
         BulletRecord record = new RecordBox().add("field", "sample").addMap("map_field", Pair.of("foo", "bar"))
                                              .addListOfMaps("list_field", new HashMap<>(), singletonMap("foo", 1L))
                                              .getRecord();
-        assertJSONEquals(Clip.of(record).asJSON(), makeJSON("[{'list_field':{'value':[{},{'foo':1}], 'type':'LONG_MAP_LIST'},'field':{'value':'sample', 'type':'STRING'}, 'map_field':{'value':{'foo':'bar'}, 'type':'STRING_MAP'}}]"));
+        assertJSONEquals(Clip.of(record).asJSON(), makeJSON("[{'list_field':[{},{'foo':1}],'field':'sample','map_field':{'foo':'bar'}}]"));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ClipTest {
         list.add(another);
         list.add(record);
         assertJSONEquals(Clip.of(list).asJSON(),
-                         makeJSON("[{'field':{'value':'another','type':'STRING'}}, {'list_field':{'value':[{},{'foo':1}],'type':'LONG_MAP_LIST'},'field':{'value':'sample','type':'STRING'},'map_field':{'value':{'foo':'bar'},'type':'STRING_MAP'}}]"));
+                         makeJSON("[{'field':'another'}, {'list_field':[{},{'foo':1}],'field':'sample','map_field':{'foo':'bar'}}]"));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class ClipTest {
 
         assertJSONEquals(Clip.of(record).add(meta).asJSON(),
                          makeJSON("{'foo': 'Infinity', 'baz': '-Infinity', 'bar': 'NaN'}",
-                                 "[{'field':{'value':null,'type':'NULL'},'plus_inf':{'value':'Infinity','type':'DOUBLE'},'neg_inf':{'value':'-Infinity','type':'DOUBLE'},'not_a_number':{'value':'NaN','type':'DOUBLE'}}]"));
+                                  "[{'field': null, 'plus_inf': 'Infinity', 'neg_inf': '-Infinity', 'not_a_number': 'NaN'}]"));
     }
 
     @Test
@@ -101,12 +101,12 @@ public class ClipTest {
         clip.add(RecordBox.get().add("foo", "bar").getRecord());
 
         clip.add((Clip) null);
-        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo':{'value':'bar','type':'STRING'}}]"));
+        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo': 'bar'}]"));
 
         clip.add(Clip.of(RecordBox.get().add("foo", "bar").getRecord()));
-        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo':{'value':'bar','type':'STRING'}}, {'foo':{'value':'bar','type':'STRING'}}]"));
+        assertJSONEquals(clip.asJSON(), makeJSON("[{'foo': 'bar'}, {'foo': 'bar'}]"));
 
         clip.add(Clip.of(new Meta().add("baz", "qux")));
-        assertJSONEquals(clip.asJSON(), makeJSON("{'baz': 'qux'}", "[{'foo':{'value':'bar','type':'STRING'}}, {'foo':{'value':'bar','type':'STRING'}}]"));
+        assertJSONEquals(clip.asJSON(), makeJSON("{'baz': 'qux'}", "[{'foo': 'bar'}, {'foo': 'bar'}]"));
     }
 }

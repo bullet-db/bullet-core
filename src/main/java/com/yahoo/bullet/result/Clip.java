@@ -8,7 +8,6 @@ package com.yahoo.bullet.result;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.Getter;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,12 +21,6 @@ public class Clip implements JSONFormatter {
 
     private Meta meta = new Meta();
     private List<BulletRecord> records = new ArrayList<>();
-
-    private static <T extends Serializable> Map<String, T> asMap(BulletRecord<T> record) {
-        Map<String, T> mapped = new HashMap<>();
-        record.forEach(entry -> mapped.put(entry.getKey(), entry.getValue()));
-        return mapped;
-    }
 
     /**
      * Adds a {@link BulletRecord} to the records in the Clip.
@@ -87,7 +80,7 @@ public class Clip implements JSONFormatter {
     public String asJSON() {
         Map<String, Object> wrapper = new HashMap<>();
         wrapper.put(META_KEY, meta.asMap());
-        wrapper.put(RECORDS_KEY, records.stream().map(Clip::asMap).collect(Collectors.toList()));
+        wrapper.put(RECORDS_KEY, records.stream().map(BulletRecord::toUnmodifiableDataMap).collect(Collectors.toList()));
         return JSONFormatter.asJSON(wrapper);
     }
 
