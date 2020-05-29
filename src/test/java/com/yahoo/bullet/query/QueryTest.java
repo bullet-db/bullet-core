@@ -8,10 +8,13 @@ package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.query.aggregations.Group;
+import com.yahoo.bullet.query.aggregations.GroupAll;
+import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.query.aggregations.Raw;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
 
 public class QueryTest {
     @Test
@@ -41,7 +44,7 @@ public class QueryTest {
 
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Only RAW aggregation type can have window emit type RECORD\\.")
     public void testValidateWindowOnlyRawRecord() {
-        new Query(new Projection(), null, new Group(null), null, new Window(1, Window.Unit.RECORD), null);
+        new Query(new Projection(), null, new GroupAll(Collections.emptySet()), null, new Window(1, Window.Unit.RECORD), null);
     }
 
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "RAW aggregation type cannot have window include type ALL\\.")

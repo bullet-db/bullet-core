@@ -11,7 +11,7 @@ import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import com.yahoo.bullet.querying.aggregations.sketches.TupleSketch;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.aggregations.Aggregation;
-import com.yahoo.bullet.query.aggregations.Group;
+import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.sketches.ResizeFactor;
@@ -38,7 +38,7 @@ public class TupleSketchingStrategy extends KMVStrategy<TupleSketch> {
      * @param config The config that has relevant configs for this strategy.
      */
     @SuppressWarnings("unchecked")
-    public TupleSketchingStrategy(Group aggregation, BulletConfig config) {
+    public TupleSketchingStrategy(GroupBy aggregation, BulletConfig config) {
         super(aggregation, config);
 
         Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(aggregation.getOperations());

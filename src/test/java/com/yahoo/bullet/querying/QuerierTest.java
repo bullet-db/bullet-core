@@ -13,7 +13,8 @@ import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.WindowUtils;
 import com.yahoo.bullet.query.aggregations.AggregationType;
 import com.yahoo.bullet.query.aggregations.CountDistinct;
-import com.yahoo.bullet.query.aggregations.Group;
+import com.yahoo.bullet.query.aggregations.GroupAll;
+import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -158,11 +159,10 @@ public class QuerierTest {
     }
 
     private static RunningQuery makeCountQueryWithAllWindow(BulletConfig config, int emitInterval) {
-        Group group = new Group(null);
-        group.addGroupOperation(GroupOperation.GroupOperationType.COUNT, null, "COUNT");
+        GroupAll groupAll = new GroupAll(Collections.singleton(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "COUNT")));
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, emitInterval, Window.Unit.ALL, null);
 
-        Query query = new Query(new Projection(), null, group, null, window, null);
+        Query query = new Query(new Projection(), null, groupAll, null, window, null);
         query.configure(config);
 
         RunningQuery runningQuery = spy(new RunningQuery("", query));

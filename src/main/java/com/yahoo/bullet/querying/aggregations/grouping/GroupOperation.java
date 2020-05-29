@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying.aggregations.grouping;
 
-import com.yahoo.bullet.common.BulletError;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -62,11 +61,6 @@ public class GroupOperation implements Serializable {
     public static final Set<GroupOperationType> SUPPORTED_GROUP_OPERATIONS =
             new HashSet<>(asList(GroupOperationType.COUNT, GroupOperationType.AVG, GroupOperationType.MAX,
                                  GroupOperationType.MIN, GroupOperationType.SUM));
-
-    public static final String OPERATION_REQUIRES_FIELD_RESOLUTION = "Please add a field for this operation.";
-    public static final String GROUP_OPERATION_REQUIRES_FIELD = "Group operation requires a field: ";
-    public static final BulletError REQUIRES_FIELD_OR_OPERATION_ERROR =
-            new BulletError("This aggregation needs at least one field or operation", "Please add a field or valid operation.");
 
     private final GroupOperationType type;
     private final String field;

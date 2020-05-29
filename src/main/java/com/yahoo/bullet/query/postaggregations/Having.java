@@ -16,8 +16,8 @@ import lombok.Getter;
 public class Having extends PostAggregation {
     private static final long serialVersionUID = -123184459098221770L;
 
-    public static final BulletError HAVING_REQUIRES_EXPRESSION =
-            new BulletError("The HAVING post-aggregation requires an expression.", "Please add an expression.");
+    public static final BulletException HAVING_REQUIRES_EXPRESSION =
+            new BulletException("The HAVING post-aggregation requires an expression.", "Please add an expression.");
 
     private Expression expression;
 
@@ -29,7 +29,7 @@ public class Having extends PostAggregation {
     public Having(Expression expression) {
         super(PostAggregationType.HAVING);
         if (expression == null) {
-            throw new BulletException(HAVING_REQUIRES_EXPRESSION);
+            throw HAVING_REQUIRES_EXPRESSION;
         }
         this.expression = expression;
     }

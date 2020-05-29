@@ -67,9 +67,7 @@ public class GroupData implements Serializable {
      * @param operations The non-null operations that this will compute metrics for.
      */
     public GroupData(Map<String, String> groupFields, Set<GroupOperation> operations) {
-        this.groupFields = groupFields;
-        this.fieldAliases = Collections.emptyMap();
-        this.metrics = makeInitialMetrics(operations);
+        this(groupFields, Collections.emptyMap(), makeInitialMetrics(operations));
     }
 
     /**

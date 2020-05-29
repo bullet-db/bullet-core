@@ -15,19 +15,19 @@ public class RegionDistribution extends Distribution {
             new BulletException("If specifying the distribution by range and interval, the start must be less than the end and the interval must be positive.",
                                 "Please specify valid values for 'start', 'end', and 'increment'.");
     private static final BulletException QUANTILE_POINTS_INVALID_RANGE =
-            new BulletException("The quantile distribution requires points to be within the interval [0, 1] inclusive.",
+            new BulletException("The QUANTILE distribution requires points to be within the interval [0, 1] inclusive.",
                                 "Please specify values for 'start' and 'end' within the interval [0, 1] inclusive.");
 
-    private double start;
-    private double end;
-    private double increment;
+    private final double start;
+    private final double end;
+    private final double increment;
 
     /**
      * Constructor that creates a DISTRIBUTION aggregation with a specified max size. The points of this distribution
      * are specified by a given range and interval between points.
      *
-     * @param field The non-null field
-     * @param type The non-null distribution type
+     * @param field The non-null field.
+     * @param type The non-null distribution type.
      * @param size The max size of the DISTRIBUTION aggregation. Can be null.
      * @param start The start of the range of the distribution.
      * @param end The end of the range of the distribution.

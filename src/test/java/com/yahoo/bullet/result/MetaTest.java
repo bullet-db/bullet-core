@@ -53,7 +53,7 @@ public class MetaTest {
     }
 
     @Test
-    public void testOfVarargs() {
+    public void testMetadataWithErrorsVarargs() {
         BulletError errorA = new BulletError("foo", "bar");
         BulletError errorB = new BulletError("baz", "qux");
         Meta meta = Meta.of(errorA, errorB);

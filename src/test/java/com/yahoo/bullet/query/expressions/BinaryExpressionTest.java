@@ -44,9 +44,9 @@ public class BinaryExpressionTest {
         expression.setType(Type.INTEGER);
 
         ExpressionUtils.testEqualsAndHashCode(() -> new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.ADD),
-                new BinaryExpression(new ValueExpression(2), new ValueExpression(2), Operation.ADD),
-                new BinaryExpression(new ValueExpression(1), new ValueExpression(1), Operation.ADD),
-                new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.SUB),
-                expression);
+                                              new BinaryExpression(new ValueExpression(2), new ValueExpression(2), Operation.ADD),
+                                              new BinaryExpression(new ValueExpression(1), new ValueExpression(1), Operation.ADD),
+                                              new BinaryExpression(new ValueExpression(1), new ValueExpression(2), Operation.SUB),
+                                              expression);
     }
 }

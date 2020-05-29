@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying.aggregations.sketches;
 
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.aggregations.DistributionType;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
@@ -261,22 +262,9 @@ public class QuantileSketch extends DualSketch {
         if  (numberOfPoints <= 1 || start >= end) {
             return new double[] { round(start, rounding) };
         }
-
-        double[] points = new double[numberOfPoints];
-
-        // Subtract one to generate [start, start + increment, ..., start + (N-1)*increment]
-        int count = numberOfPoints - 1;
-        double increment = (end - start) / count;
-        double begin = start;
-        for (int i = 0; i < count; ++i) {
-            points[i] = round(begin, rounding);
-            begin += increment;
-        }
-        // Add start + N*increment = end after
-        points[count] = round(end, rounding);
-        return points;
+        double increment = (end - start) / (numberOfPoints - 1);
+        return Utilities.generatePoints(start, num -> num + increment, numberOfPoints, rounding);
     }
-
 
     private List<BulletRecord> zipQuantiles(double[] domain, double[] range) {
         List<BulletRecord> records = new ArrayList<>();

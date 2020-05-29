@@ -67,19 +67,13 @@ public class QuantileSketchingStrategy extends SketchingStrategy<QuantileSketch>
             double start = distribution.getStart();
             double end = distribution.getEnd();
             double increment = distribution.getIncrement();
-            return new QuantileSketch(entries, aggregation.getDistributionType(), generatePoints(start, end, increment, maxPoints, rounding), provider);
+            return new QuantileSketch(entries, aggregation.getDistributionType(), getPoints(start, end, increment, maxPoints, rounding), provider);
         }
-        return null;
+        throw new IllegalArgumentException("Unknown distribution input mode.");
     }
 
-    private static double[] generatePoints(double start, double end, double increment, int maxPoints, int rounding) {
-        int numPoints = Math.min((int) ((end - start) / increment) + 1, maxPoints);
-        double[] points = new double[numPoints];
-        double d = start;
-        for (int i = 0; i < numPoints; ++i) {
-            points[i] = Utilities.round(d, rounding);
-            d += increment;
-        }
-        return points;
+    private static double[] getPoints(double start, double end, double increment, int maxPoints, int rounding) {
+        int numberOfPoints = Math.min((int) ((end - start) / increment) + 1, maxPoints);
+        return Utilities.generatePoints(start, num -> num + increment, numberOfPoints, rounding);
     }
 }

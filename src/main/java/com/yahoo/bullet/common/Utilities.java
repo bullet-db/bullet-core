@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 public class Utilities {
    /**
@@ -139,6 +140,16 @@ public class Utilities {
     public static double round(double value, int places) {
         return Double.isInfinite(value) || Double.isNaN(value) ?
                value : BigDecimal.valueOf(value).setScale(places, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static double[] generatePoints(double start, Function<Double, Double> generator, int numberOfPoints, int rounding) {
+        double[] points = new double[numberOfPoints];
+        double begin = start;
+        for (int i = 0; i < numberOfPoints; ++i) {
+            points[i] = Utilities.round(begin, rounding);
+            begin = generator.apply(begin);
+        }
+        return points;
     }
 
     /**

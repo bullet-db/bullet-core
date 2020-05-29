@@ -19,8 +19,8 @@ import java.util.List;
 public class Computation extends PostAggregation {
     private static final long serialVersionUID = -1401910210528780976L;
 
-    public static final BulletError COMPUTATION_REQUIRES_FIELDS =
-            new BulletError("The COMPUTATION post-aggregation requires at least one field.", "Please add at least one field.");
+    public static final BulletException COMPUTATION_REQUIRES_FIELDS =
+            new BulletException("The COMPUTATION post-aggregation requires at least one field.", "Please add at least one field.");
 
     private List<Field> fields;
 
@@ -33,7 +33,7 @@ public class Computation extends PostAggregation {
         super(PostAggregationType.COMPUTATION);
         Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
-            throw new BulletException(COMPUTATION_REQUIRES_FIELDS);
+            throw COMPUTATION_REQUIRES_FIELDS;
         }
         this.fields = fields;
     }

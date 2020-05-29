@@ -18,8 +18,8 @@ import java.util.Set;
 public class Culling extends PostAggregation {
     private static final long serialVersionUID = -4606818164037391850L;
 
-    public static final BulletError CULLING_REQUIRES_FIELDS =
-            new BulletError("The CULLING post-aggregation requires at least one field.", "Please add at least one field.");
+    public static final BulletException CULLING_REQUIRES_FIELDS =
+            new BulletException("The CULLING post-aggregation requires at least one field.", "Please add at least one field.");
 
     private Set<String> transientFields;
 
@@ -32,7 +32,7 @@ public class Culling extends PostAggregation {
         super(PostAggregationType.CULLING);
         Utilities.requireNonNull(transientFields);
         if (transientFields.isEmpty()) {
-            throw new BulletException(CULLING_REQUIRES_FIELDS);
+            throw CULLING_REQUIRES_FIELDS;
         }
         this.transientFields = transientFields;
     }

@@ -24,6 +24,7 @@ public class ListExpressionTest {
     public void testConstructorThrows() {
         new ListExpression(null);
     }
+
     @Test
     public void testGetEvaluator() {
         Assert.assertTrue(new ListExpression(new ArrayList<>()).getEvaluator() instanceof ListEvaluator);

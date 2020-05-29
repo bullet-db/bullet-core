@@ -21,13 +21,13 @@ public class CountDistinct extends Aggregation {
     private static final BulletException COUNT_DISTINCT_REQUIRES_FIELDS =
             new BulletException("COUNT DISTINCT requires at least one field.", "Please add at least one field.");
 
-    private List<String> fields;
-    private String name;
+    private final List<String> fields;
+    private final String name;
 
     /**
      * Constructor that creates a COUNT_DISTINCT aggregation.
      *
-     * @param fields List of fields to count distinct on.
+     * @param fields The list of fields to count distinct on.
      * @param name The name of the count distinct field.
      */
     public CountDistinct(List<String> fields, String name) {

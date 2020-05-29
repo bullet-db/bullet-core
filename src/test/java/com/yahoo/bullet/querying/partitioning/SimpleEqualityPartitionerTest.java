@@ -41,15 +41,7 @@ public class SimpleEqualityPartitionerTest {
     }
 
     private Query createQuery() {
-        Query query = new Query(new Projection(),
-                                null,
-                                new Raw(null),
-                                null,
-                                new Window(),
-                                null);
-        //if (filters != null) {
-            //query.setFilters(asList(filters));
-        //}
+        Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
         return query;
     }

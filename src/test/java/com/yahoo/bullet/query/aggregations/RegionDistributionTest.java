@@ -40,13 +40,13 @@ public class RegionDistributionTest {
     }
 
     @Test(expectedExceptions = BulletException.class,
-          expectedExceptionsMessageRegExp = "The quantile distribution requires points to be within the interval \\[0, 1\\] inclusive\\.")
+          expectedExceptionsMessageRegExp = "The QUANTILE distribution requires points to be within the interval \\[0, 1\\] inclusive\\.")
     public void testConstructorInvalidPointsLow() {
         new RegionDistribution("foo", DistributionType.QUANTILE, 500, -1.0, 0.0, 1.0);
     }
 
     @Test(expectedExceptions = BulletException.class,
-          expectedExceptionsMessageRegExp = "The quantile distribution requires points to be within the interval \\[0, 1\\] inclusive\\.")
+          expectedExceptionsMessageRegExp = "The QUANTILE distribution requires points to be within the interval \\[0, 1\\] inclusive\\.")
     public void testConstructorInvalidPointsHigh() {
         new RegionDistribution("foo", DistributionType.QUANTILE, 500, 2.0, 3.0, 1.0);
     }

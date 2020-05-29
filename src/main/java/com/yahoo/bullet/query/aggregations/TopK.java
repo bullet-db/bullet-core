@@ -23,9 +23,9 @@ public class TopK extends Aggregation {
     private static final BulletException TOP_K_REQUIRES_FIELDS =
             new BulletException("TOP K requires at least one field.", "Please add at least one field.");
 
-    private Map<String, String> fieldsToNames;
-    private Long threshold;
-    private String name;
+    private final Map<String, String> fieldsToNames;
+    private final Long threshold;
+    private final String name;
 
     /**
      * Constructor that creates a TOP_K aggregation with a specified max size.

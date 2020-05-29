@@ -20,18 +20,18 @@ public class ManualDistribution extends Distribution {
             new BulletException("If specifying the distribution by a list of points, the list must contain at least one point.",
                                 "Please specify at least one point.");
     private static final BulletException QUANTILE_POINTS_INVALID_RANGE =
-            new BulletException("The quantile distribution requires points to be within the interval [0, 1] inclusive.",
+            new BulletException("The QUANTILE distribution requires points to be within the interval [0, 1] inclusive.",
                                 "Please specify a list of valid points.");
 
 
-    private List<Double> points;
+    private final List<Double> points;
 
     /**
      * Constructor that creates a DISTRIBUTION aggregation with a specified max size. The points in this distribution
      * are specified manually.
      *
-     * @param field The non-null field
-     * @param type The non-null distribution type
+     * @param field The non-null field.
+     * @param type The non-null distribution type.
      * @param size The max size of the DISTRIBUTION aggregation. Can be null.
      * @param points The points of the distribution. Must be not be empty.
      */

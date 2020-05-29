@@ -49,8 +49,8 @@ public class OrderBy extends PostAggregation {
         }
     }
 
-    public static final BulletError ORDER_BY_REQUIRES_FIELDS =
-            new BulletError("The ORDER BY post-aggregation requires at least one field.", "Please add at least one field.");
+    public static final BulletException ORDER_BY_REQUIRES_FIELDS =
+            new BulletException("The ORDER BY post-aggregation requires at least one field.", "Please add at least one field.");
 
     private List<SortItem> fields;
 
@@ -63,7 +63,7 @@ public class OrderBy extends PostAggregation {
         super(PostAggregationType.ORDER_BY);
         Utilities.requireNonNull(fields);
         if (fields.isEmpty()) {
-            throw new BulletException(ORDER_BY_REQUIRES_FIELDS);
+            throw ORDER_BY_REQUIRES_FIELDS;
         }
         this.fields = fields;
     }

@@ -20,7 +20,7 @@ public abstract class Aggregation implements Configurable, Serializable {
     private static final long serialVersionUID = -4451469769203362270L;
 
     protected Integer size;
-    protected AggregationType type;
+    protected final AggregationType type;
 
     @Override
     public void configure(BulletConfig config) {
@@ -35,7 +35,6 @@ public abstract class Aggregation implements Configurable, Serializable {
      * Returns a new {@link Strategy} instance that handles this aggregation.
      *
      * @param config The {@link BulletConfig} containing configuration for the strategy.
-     *
      * @return The created instance of a strategy that can implement this aggregation.
      */
     public abstract Strategy getStrategy(BulletConfig config);
