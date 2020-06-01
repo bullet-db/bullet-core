@@ -169,9 +169,9 @@ public class SimpleEqualityPartitionerTest {
     @Test
     public void testPartitioningForQueryWithAllFieldsOperandsFlipped() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B", "C");
-        Query query = createQuery(new BinaryExpression(new ValueExpression("bar"),new FieldExpression("A"), Operation.EQUALS),
+        Query query = createQuery(new BinaryExpression(new ValueExpression("bar"), new FieldExpression("A"), Operation.EQUALS),
                                   new BinaryExpression(new ValueExpression("baz"), new FieldExpression("B"), Operation.EQUALS),
-                                  new BinaryExpression(new ValueExpression("qux"),new FieldExpression("C"), Operation.EQUALS));
+                                  new BinaryExpression(new ValueExpression("qux"), new FieldExpression("C"), Operation.EQUALS));
         Assert.assertEquals(partitioner.getKeys(query), singleton("bar.-baz.-qux."));
     }
 

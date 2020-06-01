@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.query.postaggregations;
 
-import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.postaggregations.HavingStrategy;
 import com.yahoo.bullet.querying.postaggregations.PostStrategy;

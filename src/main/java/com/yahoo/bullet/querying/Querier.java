@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.JsonParseException;
 import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;

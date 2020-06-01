@@ -9,7 +9,6 @@ package com.yahoo.bullet.query;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.query.aggregations.GroupAll;
-import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.query.aggregations.Raw;
 import org.testng.Assert;
 import org.testng.annotations.Test;
