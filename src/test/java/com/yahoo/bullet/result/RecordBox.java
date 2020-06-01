@@ -14,7 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -161,7 +161,7 @@ public class RecordBox {
     private <T> Map<String, T> asMap(Class<T> clazz, Map.Entry<String, Serializable>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
-        Map<String, T> newMap = new LinkedHashMap<>(entries.length);
+        Map<String, T> newMap = new HashMap<>(entries.length);
         for (Map.Entry<String, Serializable> entry : entries) {
             Object object = entry.getValue();
             if (object != null && !clazz.isInstance(object)) {
@@ -175,7 +175,7 @@ public class RecordBox {
     private <T> Map<String, T> asMap(Class<T> clazz, Map<String, Serializable> map) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(map);
-        Map<String, T> newMap = new LinkedHashMap<>(map.size());
+        Map<String, T> newMap = new HashMap<>(map.size());
         for (Map.Entry<String, Serializable> entry : map.entrySet()) {
             Object object = entry.getValue();
             if (!clazz.isInstance(object)) {
@@ -189,7 +189,7 @@ public class RecordBox {
     private <T> Map<String, Map<String, T>> asMapOfMaps(Class<T> clazz, Pair<String, Map<String, Serializable>>... entries) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(entries);
-        Map<String, Map<String, T>> newMap = new LinkedHashMap<>(entries.length);
+        Map<String, Map<String, T>> newMap = new HashMap<>(entries.length);
         for (Pair<String, Map<String, Serializable>> entry : entries) {
             String key = entry.getKey();
             Map<String, T> casted = asMap(clazz, entry.getValue());

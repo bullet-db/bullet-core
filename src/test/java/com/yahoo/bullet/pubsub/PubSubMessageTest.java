@@ -27,18 +27,8 @@ public class PubSubMessageTest {
 
         PubSubMessage message = new PubSubMessage(messageID, messageContent);
         Assert.assertEquals(message.getId(), messageID);
-        Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertNull(message.getMetadata());
-    }
-
-    @Test
-    public void testWithSequenceCreation() {
-        String messageID = getRandomString();
-        String messageContent = getRandomString();
-
-        PubSubMessage message = new PubSubMessage(messageID, messageContent);
-        Assert.assertEquals(message.getId(), messageID);
-        Assert.assertEquals(message.getContent(), messageContent);
+        Assert.assertEquals(message.getContent(), messageContent.getBytes(PubSubMessage.CHARSET));
+        Assert.assertEquals(message.getContentAsString(), messageContent);
         Assert.assertNull(message.getMetadata());
     }
 
@@ -49,6 +39,7 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage(messageID, Signal.KILL);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertNull(message.getContent());
+        Assert.assertNull(message.getContentAsString());
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
         Assert.assertNull(message.getMetadata().getContent());
@@ -62,7 +53,8 @@ public class PubSubMessageTest {
 
         PubSubMessage message = new PubSubMessage(messageID, messageContent, signal);
         Assert.assertEquals(message.getId(), messageID);
-        Assert.assertEquals(message.getContent(), messageContent);
+        Assert.assertEquals(message.getContent(), messageContent.getBytes(PubSubMessage.CHARSET));
+        Assert.assertEquals(message.getContentAsString(), messageContent);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertNull(message.getMetadata().getContent());
@@ -75,25 +67,11 @@ public class PubSubMessageTest {
         String messageContent = getRandomString();
         String metadataContent = getRandomString();
         Signal signal = Signal.ACKNOWLEDGE;
-        //Test creation without a sequence number.
-        PubSubMessage message = new PubSubMessage(messageID, messageContent, new Metadata(signal, metadataContent));
-        Assert.assertEquals(message.getId(), messageID);
-        Assert.assertEquals(message.getContent(), messageContent);
-        Assert.assertNotNull(message.getMetadata());
-        Assert.assertEquals(message.getMetadata().getSignal(), signal);
-        Assert.assertEquals(message.getMetadata().getContent().toString(), metadataContent);
-    }
 
-    @Test
-    public void testWithMetadataAndSequenceCreation() {
-        String messageID = getRandomString();
-        String messageContent = getRandomString();
-        String metadataContent = getRandomString();
-        Signal signal = Signal.ACKNOWLEDGE;
-        //Test creation with a sequence number.
         PubSubMessage message = new PubSubMessage(messageID, messageContent, new Metadata(signal, metadataContent));
         Assert.assertEquals(message.getId(), messageID);
-        Assert.assertEquals(message.getContent(), messageContent);
+        Assert.assertEquals(message.getContent(), messageContent.getBytes(PubSubMessage.CHARSET));
+        Assert.assertEquals(message.getContentAsString(), messageContent);
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), signal);
         Assert.assertEquals(message.getMetadata().getContent().toString(), metadataContent);
@@ -107,7 +85,8 @@ public class PubSubMessageTest {
         PubSubMessage message;
         message = new PubSubMessage(messageID, messageContent);
         Assert.assertTrue(message.hasContent());
-        Assert.assertEquals(message.getContent(), messageContent);
+        Assert.assertEquals(message.getContent(), messageContent.getBytes(PubSubMessage.CHARSET));
+        Assert.assertEquals(message.getContentAsString(), messageContent);
 
         message = new PubSubMessage(messageID, (byte[]) null, Signal.COMPLETE);
         Assert.assertFalse(message.hasContent());
@@ -204,10 +183,10 @@ public class PubSubMessageTest {
     public void testRecreatingFromJSON() {
         String bar = "[98,97,114]";
         PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': " + bar + ", 'metadata': " +
-                                                        "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
+                                                      "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
         PubSubMessage expected = new PubSubMessage("foo", (String) null);
         Assert.assertEquals(actual, expected);
-        Assert.assertEquals(actual.getContent(), "bar");
+        Assert.assertEquals(actual.getContentAsString(), "bar");
 
         Assert.assertTrue(actual.hasMetadata());
         Assert.assertTrue(actual.hasSignal());
@@ -223,6 +202,7 @@ public class PubSubMessageTest {
         Assert.assertEquals(actual.getId(), "");
         Assert.assertNull(actual.getMetadata());
         Assert.assertNull(actual.getContent());
+        Assert.assertNull(actual.getContentAsString());
 
         actual = PubSubMessage.fromJSON("{ 'metadata': { 'signal': 'ACKNOWLEDGE' } }");
 
@@ -239,6 +219,7 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage("foo", Signal.KILL);
         Assert.assertEquals(message.getId(), "foo");
         Assert.assertNull(message.getContent());
+        Assert.assertNull(message.getContentAsString());
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
         Assert.assertNull(message.getMetadata().getContent());

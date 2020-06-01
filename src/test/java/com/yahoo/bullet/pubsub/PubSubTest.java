@@ -21,7 +21,7 @@ public class PubSubTest {
         PubSub testPubSub = PubSub.from(config);
 
         Assert.assertEquals(testPubSub.getClass(), MockPubSub.class);
-        Assert.assertEquals(testPubSub.getSubscriber().receive().getContent(), mockMessage);
+        Assert.assertEquals(testPubSub.getSubscriber().receive().getContentAsString(), mockMessage);
     }
 
     @Test(expectedExceptions = PubSubException.class)
@@ -63,18 +63,18 @@ public class PubSubTest {
 
         Assert.assertEquals(pubSub.getClass(), MockPubSub.class);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
-        Assert.assertTrue(pubSub.getSubscriber().receive().getContent().isEmpty());
+        Assert.assertTrue(pubSub.getSubscriber().receive().getContentAsString().isEmpty());
 
         // No switch
         pubSub.switchContext(PubSub.Context.QUERY_SUBMISSION, new BulletConfig());
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
-        Assert.assertTrue(pubSub.getSubscriber().receive().getContent().isEmpty());
+        Assert.assertTrue(pubSub.getSubscriber().receive().getContentAsString().isEmpty());
 
         // Switch
         BulletConfig newConfig = new BulletConfig("src/test/resources/test_config.yaml");
         newConfig.set(MockPubSub.MOCK_MESSAGE_NAME, "foo");
         pubSub.switchContext(PubSub.Context.QUERY_PROCESSING, newConfig);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
-        Assert.assertEquals(pubSub.getSubscriber().receive().getContent(), "foo");
+        Assert.assertEquals(pubSub.getSubscriber().receive().getContentAsString(), "foo");
     }
 }
