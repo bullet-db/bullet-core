@@ -25,7 +25,7 @@ public class RunningQuery {
 
     /**
      * Returns true if this running query has timed out. In other words, it returns whether this has been running
-     * longer than the query duraton.
+     * longer than the query duration.
      *
      * @return A boolean denoting whether this query has timed out.
      */

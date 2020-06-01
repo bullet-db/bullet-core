@@ -319,9 +319,8 @@ public class Querier implements Monoidal {
      * @param id The query ID.
      * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(String id, Query query, BulletConfig config) throws JsonParseException {
+    public Querier(String id, Query query, BulletConfig config) {
         this(Mode.ALL, new RunningQuery(id, query), config);
     }
 
@@ -332,9 +331,8 @@ public class Querier implements Monoidal {
      * @param id The query ID.
      * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(Mode mode, String id, Query query, BulletConfig config) throws JsonParseException {
+    public Querier(Mode mode, String id, Query query, BulletConfig config) {
         this(mode, new RunningQuery(id, query), config);
     }
     /**

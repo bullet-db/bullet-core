@@ -14,7 +14,6 @@ import com.yahoo.bullet.query.WindowUtils;
 import com.yahoo.bullet.query.aggregations.AggregationType;
 import com.yahoo.bullet.query.aggregations.CountDistinct;
 import com.yahoo.bullet.query.aggregations.GroupAll;
-import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -34,6 +33,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.typesystem.TypedObject;
 import com.yahoo.bullet.windowing.AdditiveTumbling;
 import com.yahoo.bullet.windowing.Basic;
 import com.yahoo.bullet.windowing.Scheme;
@@ -322,8 +322,10 @@ public class QuerierTest {
                                                                                   new ValueExpression("23"))),
                                                  Operation.EQUALS_ANY);
         Query query = new Query(projection, filter, new Raw(null), null, new Window(), null);
+        BulletConfig config = new BulletConfig();
+        query.configure(config);
 
-        Querier querier = make(Querier.Mode.PARTITION, query);
+        Querier querier = new Querier("", query, config);
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
         Assert.assertFalse(querier.isClosed());
@@ -334,6 +336,22 @@ public class QuerierTest {
         querier.consume(boxB.getRecord());
         Assert.assertFalse(querier.isClosed());
         Assert.assertEquals(querier.getData(), getListBytes(expected.getRecord()));
+    }
+
+    @Test
+    public void testCopyProjection() {
+        Projection projection = new Projection(Collections.singletonList(new Field("mid", new FieldExpression("map_field", "id"))), true);
+        Query query = new Query(projection, null, new Raw(null), null, new Window(), null);
+        BulletConfig config = new BulletConfig();
+        query.configure(config);
+
+        Querier querier = new Querier(new RunningQuery("", query), config);
+        RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
+        BulletRecord expected = boxA.getRecord().copy();
+        expected.setString("mid", "23");
+        querier.consume(boxA.getRecord());
+        Assert.assertFalse(querier.isClosed());
+        Assert.assertEquals(querier.getData(), getListBytes(expected));
     }
 
     @Test
