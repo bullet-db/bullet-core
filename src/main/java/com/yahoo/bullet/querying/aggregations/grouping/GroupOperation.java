@@ -99,8 +99,7 @@ public class GroupOperation implements Serializable {
     @Override
     public int hashCode() {
         // Not relying on Enum hashcode
-        String typeString = type == null ? null : type.getName();
-        return Objects.hash(typeString, field);
+        return Objects.hash(type.getName(), field);
     }
 
     @Override

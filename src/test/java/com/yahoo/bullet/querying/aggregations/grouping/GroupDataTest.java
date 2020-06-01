@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,11 @@ import static java.util.Arrays.asList;
 
 public class GroupDataTest {
     private static BulletRecordProvider provider = new BulletConfig().getBulletRecordProvider();
+
+    public static GroupData make(Map<String, String> groupFields, Map<String, String> fieldAliases, GroupOperation... operations) {
+        Map<GroupOperation, Number> metrics = GroupData.makeInitialMetrics(new HashSet<>(Arrays.asList(operations)));
+        return new GroupData(groupFields, fieldAliases, metrics);
+    }
 
     public static GroupData make(Map<String, String> groupFields, GroupOperation... operations) {
         return new GroupData(groupFields, new HashSet<>(asList(operations)));
@@ -525,6 +531,37 @@ public class GroupDataTest {
 
         expected = RecordBox.get().add("fieldB", 42.0).getRecord();
         Assert.assertTrue(data.getMetricsAsBulletRecord(provider).equals(expected));
+
+        expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").getRecord();
+        Assert.assertTrue(data.getAsBulletRecord(provider).equals(expected));
+    }
+
+    @Test
+    public void testGroupFieldsInDataWithAliases() {
+        Map<String, String> fields = new HashMap<>();
+        fields.put("fieldA", "foo");
+        fields.put("fieldB", "bar");
+
+        Map<String, String> aliases = new HashMap<>();
+        aliases.put("fieldA", "newNameA");
+        aliases.put("fieldB", "newNameB");
+
+        GroupData data = make(fields, aliases, new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "fieldB"));
+
+        BulletRecord expected = RecordBox.get().add("newNameA", "foo").add("newNameB", "bar").addNull("fieldB").getRecord();
+        Assert.assertTrue(data.getAsBulletRecord(provider).equals(expected));
+
+        expected = RecordBox.get().add("fieldA", "foo").add("fieldB", "bar").getRecord();
+        Assert.assertTrue(data.getAsBulletRecord(Collections.emptyMap(), provider).equals(expected));
+
+        data.consume(RecordBox.get().add("someField", 21.0).getRecord());
+        data.consume(RecordBox.get().add("someField", 21.0).getRecord());
+
+        expected = RecordBox.get().add("fieldB", 42.0).getRecord();
+        Assert.assertTrue(data.getMetricsAsBulletRecord(provider).equals(expected));
+
+        expected = RecordBox.get().add("newNameA", "foo").add("newNameB", "bar").add("fieldB", 42.0).getRecord();
+        Assert.assertTrue(data.getAsBulletRecord(provider).equals(expected));
     }
 
     @Test
@@ -533,7 +570,7 @@ public class GroupDataTest {
         fields.put("fieldA", "foo");
         fields.put("fieldB", "bar");
         GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"),
-                              new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
+                                      new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
         BulletRecord record;
 
         record = RecordBox.get().add("someField", "48.2").add("otherField", "17").getRecord();
@@ -554,7 +591,7 @@ public class GroupDataTest {
         fields.put("fieldA", "foo");
         fields.put("fieldB", "bar");
         GroupData data = make(fields, new GroupOperation(GroupOperation.GroupOperationType.SUM, "someField", "sum"),
-                              new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
+                                      new GroupOperation(GroupOperation.GroupOperationType.AVG, "otherField", "avg"));
         BulletRecord record;
 
         record = RecordBox.get().add("someField", "48.2").add("otherField", "17").getRecord();
