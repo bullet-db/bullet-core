@@ -21,6 +21,12 @@ import static java.util.Collections.singletonMap;
 
 public class UtilitiesTest {
     @Test
+    public void testConstructor() {
+        // coverage
+        new Utilities();
+    }
+
+    @Test
     public void testCasting() {
         Map<String, Object> map = new HashMap<>();
         map.put("foo", 1L);

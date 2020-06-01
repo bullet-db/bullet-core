@@ -69,12 +69,14 @@ public class BinaryOperationsTest {
     public void testEqualsAny() {
         Assert.assertEquals(BinaryOperations.equalsAny(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.equalsAny(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.equalsAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testEqualsAll() {
         Assert.assertEquals(BinaryOperations.equalsAll(valueEvaluator(2), listEvaluator(2, 2, 2), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.equalsAll(valueEvaluator(2), listEvaluator(2, 2, 6), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.equalsAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -87,12 +89,14 @@ public class BinaryOperationsTest {
     public void testNotEqualsAny() {
         Assert.assertEquals(BinaryOperations.notEqualsAny(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.notEqualsAny(valueEvaluator(2), listEvaluator(2, 2, 2), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.notEqualsAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testNotEqualsAll() {
         Assert.assertEquals(BinaryOperations.notEqualsAll(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.notEqualsAll(valueEvaluator(2), listEvaluator(2, 2, 6), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.notEqualsAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -105,12 +109,14 @@ public class BinaryOperationsTest {
     public void testGreaterThanAny() {
         Assert.assertEquals(BinaryOperations.greaterThanAny(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.greaterThanAny(valueEvaluator(2), listEvaluator(2, 2, 1), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.greaterThanAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testGreaterThanAll() {
         Assert.assertEquals(BinaryOperations.greaterThanAll(valueEvaluator(2), listEvaluator(1, 0, 6), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.greaterThanAll(valueEvaluator(2), listEvaluator(1, 0, -1), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.greaterThanAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -123,12 +129,14 @@ public class BinaryOperationsTest {
     public void testLessThanAny() {
         Assert.assertEquals(BinaryOperations.lessThanAny(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.lessThanAny(valueEvaluator(2), listEvaluator(2, 2, 1), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.lessThanAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testLessThanAll() {
         Assert.assertEquals(BinaryOperations.lessThanAll(valueEvaluator(2), listEvaluator(1, 0, 6), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.lessThanAll(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.lessThanAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -143,12 +151,14 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAny(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAny(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAny(valueEvaluator(2), listEvaluator(3, 3, 1), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testGreaterThanOrEqualsAll() {
         Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAll(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAll(valueEvaluator(2), listEvaluator(2, 1, 0), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.greaterThanOrEqualsAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -163,12 +173,14 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.lessThanOrEqualsAny(valueEvaluator(2), listEvaluator(3, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.lessThanOrEqualsAny(valueEvaluator(2), listEvaluator(2, 1, 0), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.lessThanOrEqualsAny(valueEvaluator(2), listEvaluator(1, 0, 1), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.lessThanOrEqualsAny(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
     public void testLessThanOrEqualsAll() {
         Assert.assertEquals(BinaryOperations.lessThanOrEqualsAll(valueEvaluator(2), listEvaluator(2, 4, 6), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.lessThanOrEqualsAll(valueEvaluator(2), listEvaluator(2, 1, 5), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.lessThanOrEqualsAll(valueEvaluator(2), listEvaluator(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
     @Test
@@ -182,6 +194,7 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.regexLikeAny(valueEvaluator("aabc"), listEvaluator(".*abc"), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.regexLikeAny(valueEvaluator("abbc"), listEvaluator(".*abc"), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.regexLikeAny(valueEvaluator("abbc"), listEvaluator(".*abc", ".*bbc"), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.regexLikeAny(valueEvaluator("abbc"), listEvaluator(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
     @Test
