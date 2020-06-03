@@ -49,9 +49,13 @@ public class QueryUtils {
     }
 
     public static Query makeProjectionFilterQuery(Expression filter, List<Field> fields) {
-        Query query = new Query(new Projection(fields, false), filter, new Raw(null), null, new Window(), null);
+        Query query = new Query(new Projection(fields, false), filter, new Raw(1), null, new Window(), null);
         query.configure(new BulletConfig());
         return query;
+    }
+
+    public static Query makeProjectionQuery(List<Field> fields) {
+        return makeProjectionFilterQuery(null, fields);
     }
 
     public static Query makeSimpleAggregationFilterQuery(Expression filter, Integer size, Window.Unit emit, Integer emitValue,
@@ -74,7 +78,7 @@ public class QueryUtils {
     }
 
     public static Query makeFilterQuery(Expression filter) {
-        Query query = new Query(new Projection(), filter, new Raw(null), null, new Window(), null);
+        Query query = new Query(new Projection(), filter, new Raw(1), null, new Window(), null);
         query.configure(new BulletConfig());
         return query;
     }
@@ -88,12 +92,6 @@ public class QueryUtils {
 
     public static Query makeFieldFilterQuery(Serializable value) {
         return makeFilterQuery(new BinaryExpression(new FieldExpression("field"), new ValueExpression(value), Operation.EQUALS));
-    }
-
-    public static Query makeProjectionQuery(List<Field> fields) {
-        Query query = new Query(new Projection(fields, false), null, new Raw(null), null, new Window(), null);
-        query.configure(new BulletConfig());
-        return query;
     }
 
     public static Query makeRawQuery(Integer size) {

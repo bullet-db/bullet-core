@@ -8,7 +8,7 @@ package com.yahoo.bullet.query.aggregations;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.querying.aggregations.GroupStrategy;
+import com.yahoo.bullet.querying.aggregations.GroupAllStrategy;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import lombok.Getter;
@@ -39,7 +39,7 @@ public class GroupAll extends Aggregation {
 
     @Override
     public Strategy getStrategy(BulletConfig config) {
-        return new GroupStrategy(this, config);
+        return new GroupAllStrategy(this, config);
     }
 
     @Override

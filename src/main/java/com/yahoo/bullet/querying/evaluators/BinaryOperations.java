@@ -139,14 +139,14 @@ public class BinaryOperations {
     static TypedObject equalsAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static TypedObject equalsAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
@@ -159,14 +159,14 @@ public class BinaryOperations {
     static TypedObject notEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> !leftValue.equalTo(new TypedObject(subType, o))));
     };
 
     static TypedObject notEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().noneMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
     };
 
@@ -179,14 +179,14 @@ public class BinaryOperations {
     static TypedObject greaterThanAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
     static TypedObject greaterThanAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
     };
 
@@ -199,14 +199,14 @@ public class BinaryOperations {
     static TypedObject lessThanAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
     static TypedObject lessThanAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
     };
 
@@ -219,14 +219,14 @@ public class BinaryOperations {
     static TypedObject greaterThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
     static TypedObject greaterThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
     };
 
@@ -239,14 +239,14 @@ public class BinaryOperations {
     static TypedObject lessThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 
     static TypedObject lessThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
-        Type subType = leftValue.getType();
+        Type subType = rightValue.getType().getSubType();
         return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
     };
 

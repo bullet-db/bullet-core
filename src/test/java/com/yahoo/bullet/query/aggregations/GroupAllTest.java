@@ -7,7 +7,7 @@ package com.yahoo.bullet.query.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletException;
-import com.yahoo.bullet.querying.aggregations.GroupStrategy;
+import com.yahoo.bullet.querying.aggregations.GroupAllStrategy;
 import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,7 +42,7 @@ public class GroupAllTest {
         GroupAll aggregation = new GroupAll(Collections.emptySet());
         aggregation.configure(config);
 
-        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof GroupStrategy);
+        Assert.assertTrue(aggregation.getStrategy(new BulletConfig()) instanceof GroupAllStrategy);
     }
 
     @Test

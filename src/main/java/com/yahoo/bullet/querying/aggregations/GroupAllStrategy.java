@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class GroupStrategy implements Strategy {
+public class GroupAllStrategy implements Strategy {
     // We only have a single group.
     private GroupData data;
 
@@ -33,7 +33,7 @@ public class GroupStrategy implements Strategy {
      * @param aggregation The {@link Aggregation} that specifies how and what this will compute.
      * @param config The BulletConfig.
      */
-    public GroupStrategy(GroupAll aggregation, BulletConfig config) {
+    public GroupAllStrategy(GroupAll aggregation, BulletConfig config) {
         // GroupOperations is all we care about - size etc. are meaningless for Group All since it's a single result
         operations = aggregation.getOperations();
         data = new GroupData(operations);

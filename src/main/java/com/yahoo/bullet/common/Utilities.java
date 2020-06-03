@@ -153,10 +153,10 @@ public class Utilities {
      */
     public static double[] generatePoints(double start, Function<Double, Double> generator, int numberOfPoints, int rounding) {
         double[] points = new double[numberOfPoints];
-        double begin = start;
+        double value = start;
         for (int i = 0; i < numberOfPoints; ++i) {
-            points[i] = round(begin, rounding);
-            begin = generator.apply(begin);
+            points[i] = round(value, rounding);
+            value = generator.apply(value);
         }
         return points;
     }
