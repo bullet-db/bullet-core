@@ -84,12 +84,7 @@ public class ThetaSketchingStrategyTest {
         Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(17), ResizeFactor.X8);
         Assert.assertEquals(ThetaSketchingStrategy.getResizeFactor(-10), ResizeFactor.X8);
     }
-/*
-    @Test
-    public void testFailValidateOnCountDistinctFieldsMissing() {
-        ThetaSketchingStrategy countDistinct = makeCountDistinct(new BulletConfig(), null, null);
-    }
-*/
+
     @Test
     public void testNoRecordCount() {
         ThetaSketchingStrategy countDistinct = makeCountDistinct(Collections.singletonList("field"), DEFAULT_NAME);

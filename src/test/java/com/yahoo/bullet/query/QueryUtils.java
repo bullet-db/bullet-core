@@ -5,569 +5,121 @@
  */
 package com.yahoo.bullet.query;
 
-import org.apache.commons.lang3.tuple.Pair;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.aggregations.CountDistinct;
+import com.yahoo.bullet.query.aggregations.Distribution;
+import com.yahoo.bullet.query.aggregations.DistributionType;
+import com.yahoo.bullet.query.aggregations.GroupAll;
+import com.yahoo.bullet.query.aggregations.GroupBy;
+import com.yahoo.bullet.query.aggregations.LinearDistribution;
+import com.yahoo.bullet.query.aggregations.Raw;
+import com.yahoo.bullet.query.aggregations.TopK;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.ListExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.ValueExpression;
+import com.yahoo.bullet.querying.aggregations.grouping.GroupOperation;
 
+import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryUtils {
-    /*
-    @SafeVarargs
-    public static Query makeRawWindowQuery(String field, List<String> values, Clause.Operation operation,
-                                            Aggregation aggregation, Integer size,  Window.Unit emit,
-                                            Integer emitValue, Window.Unit include, Integer includeValue,
-                                            Pair<String, String>... projections) {
-        return makeRawWindowQuery(field, values, operation, aggregation, size, null,
-                                  emit, emitValue, include, includeValue, projections);
+    public static Query makeGroupAllFilterQuery(Expression filter, List<GroupOperation> operations) {
+        Query query = new Query(new Projection(), filter, new GroupAll(new HashSet<>(operations)), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeRawWindowQuery(String field, List<String> values, Clause.Operation operation,
-                                           Aggregation aggregation, Integer size,
-                                           List<String> postAggregations, Window.Unit emit,
-                                           Integer emitValue, Window.Unit include, Integer includeValue,
-                                           Pair<String, String>... projections) {
-
-
-
-        new Query(makeProjection(projections), filter, aggregation, postAggregations,
-                  makeWindow(emit, emitValue, include, includeValue),
-                  null);
-
-
-
-        return "{" +
-                "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                "'projection' : " + makeProjection(projections) + ", " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  + ", " +
-                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
-                "}";
+    public static Query makeGroupAllFieldFilterQuery(String field, List<Serializable> values, Operation op, List<GroupOperation> operations) {
+        Expression filter = new BinaryExpression(new FieldExpression(field),
+                                                 new ListExpression(values.stream().map(ValueExpression::new).collect(Collectors.toList())),
+                                                 op);
+        return makeGroupAllFilterQuery(filter, operations);
     }
 
-    @SafeVarargs
-    public static Query makeGroupFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                              Aggregation.DistributionType aggregation, Integer size,
-                                              List<GroupOperation> operations, Pair<String, String>... fields) {
-        return makeGroupFilterQuery(field, values, operation, aggregation, size, null, operations, fields);
+    public static Query makeGroupByFilterQuery(Expression filter, int size, Map<String, String> fields, List<GroupOperation> operations) {
+        Query query = new Query(new Projection(), filter, new GroupBy(size, fields, new HashSet<>(operations)), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeGroupFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                              Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                              List<GroupOperation> operations, Pair<String, String>... fields) {
-        return "{" +
-                 "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                 "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) + ", " +
-                 "'postAggregations' : " + makePostAggregations(postAggregations)  +
-               "}";
+    public static Query makeProjectionFilterQuery(Expression filter, List<Field> fields) {
+        Query query = new Query(new Projection(fields, false), filter, new Raw(null), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeGroupFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                              Aggregation.DistributionType aggregation, Integer size,
-                                              List<GroupOperation> operations, Pair<String, String>... fields) {
-        return makeGroupFilterQuery(clauses, operation, aggregation, size, null, operations, fields);
+    public static Query makeSimpleAggregationFilterQuery(Expression filter, Integer size, Window.Unit emit, Integer emitValue,
+                                                         Window.Unit include, Integer includeValue) {
+        Window window = WindowUtils.makeWindow(emit, emitValue, include, includeValue);
+        Query query = new Query(new Projection(), filter, new Raw(size), null, window, null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeGroupFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                              Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                              List<GroupOperation> operations, Pair<String, String>... fields) {
-        return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'aggregation' : " + makeGroupAggregation(size, aggregation, operations, fields) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
+    public static Query makeSimpleAggregationFieldFilterQuery(Serializable value, Integer size, Window.Unit emit, Integer emitValue,
+                                                              Window.Unit include, Integer includeValue) {
+        Expression filter = new BinaryExpression(new FieldExpression("field"), new ValueExpression(value), Operation.EQUALS);
+        return makeSimpleAggregationFilterQuery(filter, size, emit, emitValue, include, includeValue);
     }
 
-    @SafeVarargs
-    public static Query makeRawFullQuery(String field, List<String> values, Clause.Operation operation,
-                                          Aggregation.DistributionType aggregation, Integer size,
-                                          Pair<String, String>... projections) {
-        return makeRawFullQuery(field, values, operation, aggregation, size, null, projections);
+    public static Query makeSimpleAggregationQuery(Integer size, Window.Unit emit, Integer emitValue, Window.Unit include,
+                                                   Integer includeValue) {
+        return makeSimpleAggregationFilterQuery(null, size, emit, emitValue, include, includeValue);
     }
 
-    @SafeVarargs
-    public static Query makeRawFullQuery(String field, List<String> values, Clause.Operation operation,
-                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                          Pair<String, String>... projections) {
-        return "{" +
-                "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                "'projection' : " + makeProjection(projections) + ", " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
+    public static Query makeFilterQuery(Expression filter) {
+        Query query = new Query(new Projection(), filter, new Raw(null), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeRawFullQuery(List<Clause> clauses, Clause.Operation operation,
-                                          Aggregation.DistributionType aggregation, Integer size,
-                                          Pair<String, String>... projections) {
-        return makeRawFullQuery(clauses, operation, aggregation, size, null, projections);
+    public static Query makeFilterQuery(String field, List<Serializable> values, Operation op) {
+        Expression filter = new BinaryExpression(new FieldExpression(field),
+                                                 new ListExpression(values.stream().map(ValueExpression::new).collect(Collectors.toList())),
+                                                 op);
+        return makeFilterQuery(filter);
     }
 
-    @SafeVarargs
-    public static Query makeRawFullQuery(List<Clause> clauses, Clause.Operation operation,
-                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                          Pair<String, String>... projections) {
-        return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'projection' : " + makeProjection(projections) + ", " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
+    public static Query makeFieldFilterQuery(Serializable value) {
+        return makeFilterQuery(new BinaryExpression(new FieldExpression("field"), new ValueExpression(value), Operation.EQUALS));
     }
 
-    @SafeVarargs
-    public static Query makeProjectionFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                   Pair<String, String>... projections) {
-        return makeProjectionFilterQuery(field, values, operation, null, projections);
+    public static Query makeProjectionQuery(List<Field> fields) {
+        Query query = new Query(new Projection(fields, false), null, new Raw(null), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeProjectionFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                   List<String> postAggregations, Pair<String, String>... projections) {
-        return "{" +
-                "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                "'projection': " + makeProjection(projections) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
+    public static Query makeRawQuery(Integer size) {
+        Query query = new Query(new Projection(), null, new Raw(size), null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeProjectionFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                   Pair<String, String>... projections) {
-        return makeProjectionFilterQuery(clauses, operation, null, projections);
+    public static Query makeCountDistinctQuery(List<String> fields, String name) {
+        CountDistinct countDistinct = new CountDistinct(fields, name);
+        Query query = new Query(new Projection(), null, countDistinct, null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    @SafeVarargs
-    public static Query makeProjectionFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                   List<String> postAggregations, Pair<String, String>... projections) {
-        return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'projection': " + makeProjection(projections) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
+    public static Query makeDistributionQuery(Integer size, DistributionType type, String field, int numberOfPoints) {
+        Distribution distribution = new LinearDistribution(field, type, size, numberOfPoints);
+        Query query = new Query(new Projection(), null, distribution, null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
 
-    public static Query makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, Window.Unit emit,
-                                                          Integer emitValue, Window.Unit include, Integer includeValue) {
-        return makeSimpleAggregationFilterQuery(field, values, operation, aggregation, size, null,
-                                                emit, emitValue, include, includeValue);
+    public static Query makeTopKQuery(Integer size, Long threshold, String name, Map<String, String> fields) {
+        TopK topK = new TopK(fields, size, threshold, name);
+        Query query = new Query(new Projection(), null, topK, null, new Window(), null);
+        query.configure(new BulletConfig());
+        return query;
     }
-
-    public static Query makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                                          Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
-        return "{" +
-                "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  + ", " +
-                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
-                "}";
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, Window.Unit emit,
-                                                          Integer emitValue, Window.Unit include, Integer includeValue) {
-        return makeSimpleAggregationFilterQuery(clauses, operation, aggregation, size, null,
-                                                emit, emitValue, include, includeValue);
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations,
-                                                          Window.Unit emit, Integer emitValue, Window.Unit include, Integer includeValue) {
-        return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  + ", " +
-                "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
-                "}";
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size) {
-        return makeSimpleAggregationFilterQuery(field, values, operation, aggregation, size, null);
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(String field, List<String> values, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations) {
-        return "{" +
-                "'filters' : [" + makeStringFilter(field, values, operation) + "], " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size) {
-        return makeSimpleAggregationFilterQuery(clauses, operation, aggregation, size, null);
-    }
-
-    public static Query makeSimpleAggregationFilterQuery(List<Clause> clauses, Clause.Operation operation,
-                                                          Aggregation.DistributionType aggregation, Integer size, List<String> postAggregations) {
-        return "{" +
-                "'filters' : [" + makeFilter(clauses, operation) + "], " +
-                "'aggregation' : " + makeSimpleAggregation(size, aggregation) + ", " +
-                "'postAggregations' : " + makePostAggregations(postAggregations)  +
-                "}";
-    }
-
-    public static Query makeFilterQuery(String field, List<String> values, Clause.Operation operation) {
-        return "{'filters' : [" + makeStringFilter(field, values, operation) + "]}";
-    }
-
-    public static Query makeFilterQuery(List<Clause> values, Clause.Operation operation) {
-        return "{'filters' : [" + makeFilter(values, operation) + "]}";
-    }
-
-    public static Query makeFilterQuery(Clause.Operation operation, Clause... values) {
-        return "{'filters': [" + makeFilter(operation, values) + "]}";
-    }
-
-    public static Query makeFieldFilterQuery(String value) {
-        return makeFilterQuery("field", Collections.singletonList(value), Clause.Operation.EQUALS);
-    }
-
-    @SafeVarargs
-    public static Query makeProjectionQuery(Pair<String, String>... projections) {
-        return "{'projection' : " + makeProjection(projections) + "}";
-    }
-
-    public static Query makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Window.Unit emit,
-                                              Integer emitValue, Window.Unit include, Integer includeValue) {
-        return "{" +
-                 "'aggregation' : " + makeSimpleAggregation(size, operation) + ", " +
-                 "'window' : " + makeWindow(emit, emitValue, include, includeValue) +
-               "}";
-    }
-
-    public static Query makeAggregationQuery(Aggregation.DistributionType operation, Integer size) {
-        return "{'aggregation' : " + makeSimpleAggregation(size, operation) + "}";
-    }
-
-    @SafeVarargs
-    public static Query makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Map<String, String> attributes,
-                                              Pair<String, String>... fields) {
-        return "{'aggregation' : " + makeStringAttributesAggregation(size, operation, attributes, fields) + "}";
-    }
-
-    public static Query makeAggregationQuery(Aggregation.DistributionType operation, Integer size, QuantileSketchingStrategy.DistributionType type,
-                                              String field, List<Double> points, Double start, Double end,
-                                              Double increment, Integer numberOfPoints) {
-        return "{'aggregation' : " + makeDistributionAggregation(size, operation, type, field, points, start, end,
-                                                                 increment, numberOfPoints) + "}";
-    }
-
-    @SafeVarargs
-    public static Query makeAggregationQuery(Aggregation.DistributionType operation, Integer size, Long threshold,
-                                              String newName, Pair<String, String>... fields) {
-        return "{'aggregation' : " + makeTopKAggregation(size, operation, threshold, newName, fields) + "}";
-    }
-
-    public static Query makePostAggregationsQuery(String... postAggregations) {
-        return "{'postAggregations': " + makePostAggregations(Arrays.asList(postAggregations)) + "}";
-    }
-
-    public static String makeStringFilter(String field, List<String> values, Clause.Operation operation) {
-        return "{" +
-                 "'field' : " + makeString(field) + ", " +
-                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                 "'values' : ['" + values.stream().reduce((a, b) -> a + "' , '" + b).orElse("") + "']" +
-               "}";
-    }
-
-    public static String makeObjectFilter(String field, List<Value> values, Clause.Operation operation) {
-        return "{" +
-                 "'field' : " + makeString(field) + ", " +
-                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                 "'values' : [" + values.stream().map(v -> makeValue(v)).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
-               "}";
-    }
-
-    public static String makeFilter(List<Clause> values, Clause.Operation operation) {
-        return "{" +
-                 "'operation' : " + makeString(getOperationFor(operation)) + ", " +
-                 "'clauses' : [" + values.stream().map(QueryUtils::toString).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
-               "}";
-    }
-
-    public static String makeFilter(Clause.Operation operation, Clause... values) {
-        return makeFilter(values == null ? Collections.emptyList() : Arrays.asList(values), operation);
-    }
-
-    @SafeVarargs
-    public static Projection makeProjection(Pair<String, String>... pairs) {
-        new Projection(, false);
-
-
-        return "{'fields' : " + makeMap(pairs) + "}";
-    }
-
-    public static String makeSimpleAggregation(Integer size, Aggregation.DistributionType operation) {
-        return "{'type' : '" + getTypeFor(operation) + "', 'size' : " + size + "}";
-    }
-
-    @SafeVarargs
-    public static String makeGroupAggregation(Integer size, Aggregation.DistributionType operation, List<GroupOperation> operations,
-                                              Pair<String, String>... fields) {
-        return "{" +
-                 "'type' : '" + getTypeFor(operation) + "', " +
-                 "'fields' : " + makeGroupFields(fields) + ", " +
-                   "'attributes' : {" +
-                      "'operations' : [" +
-                          operations.stream().map(QueryUtils::makeGroupOperation).reduce((a, b) -> a + " , " + b).orElse("") +
-                      "]" +
-                 "}, " +
-                 "'size' : " + size +
-               "}";
-    }
-
-    public static String makeDistributionAggregation(Integer size, Aggregation.DistributionType operation, QuantileSketchingStrategy.DistributionType type,
-                                                     String field, List<Double> points, Double start, Double end,
-                                                     Double increment, Integer numberOfPoints) {
-        return "{" +
-                 "'type' : '" + getTypeFor(operation) + "', " +
-                 "'fields' : " + makeGroupFields(Pair.of(field, field)) + ", " +
-                 "'attributes' : " + makeMap(type, points, start, end, increment, numberOfPoints) + ", " +
-                 "'size' : " + size +
-               "}";
-    }
-
-    @SafeVarargs
-    public static String makeTopKAggregation(Integer size, Aggregation.DistributionType operation, Long threshold,
-                                             String newName, Pair<String, String>... fields) {
-        return "{" +
-                 "'type' : '" + getTypeFor(operation) + "', " +
-                 "'fields' : " + makeGroupFields(fields) + ", " +
-                 "'attributes' : " + makeMap(threshold, newName) + ", " +
-                 "'size' : " + size +
-               "}";
-    }
-
-    @SafeVarargs
-    public static String makeStringAttributesAggregation(Integer size, Aggregation.DistributionType operation,
-                                                         Map<String, String> attributes,
-                                                         Pair<String, String>... fields) {
-        return "{" +
-                 "'type' : '" + getTypeFor(operation) + "', " +
-                 "'fields' : " + makeGroupFields(fields) + ", " +
-                 "'size' : " + size + ", " +
-                 "'attributes' : " + makeMap(attributes) +
-               "}";
-    }
-
-    public static String makePostAggregations(List<String> postAggregations) {
-        return postAggregations == null ? "null" : "[" + postAggregations.stream().reduce((a, b) -> a + ", " + b).orElse("") + "]";
-    }
-
-    @SafeVarargs
-    public static String makeGroupFields(Pair<String, String>... fields) {
-        if (fields == null) {
-            return "null";
-        }
-        return makeMap(fields);
-
-    }
-
-    public static String makeGroupOperation(GroupOperation operation) {
-        return "{" +
-                 "'type' : " + makeString(operation.getType().getName()) + ", " +
-                 "'field' : " + makeString(operation.getField()) + ", " +
-                 "'newName' : " + makeString(operation.getNewName()) +
-               "}";
-    }
-
-    public static String makeOrderBy(OrderBy.SortItem... sortItems) {
-        return "{" +
-                 "'type': 'ORDERBY', " +
-                 "'fields': [" + Arrays.stream(sortItems).map(QueryUtils::makeSortItem).reduce((a, b) -> a + " , " + b).orElse("") + "]" +
-               "}";
-    }
-
-    public static String makeComputation(Expression expression, String newName) {
-        return "{" +
-                 "'type': 'COMPUTATION', " +
-                 "'expression': " + makeExpression(expression) + ", " +
-                 "'newName': '" + newName + "'" +
-               "}";
-    }
-
-    public static String makeString(String field) {
-        return field != null ? "'" + field + "'" : "null";
-
-    }
-
-    public static String makeMap(QuantileSketchingStrategy.DistributionType type, List<Double> points, Double start, Double end, Double increment,
-                                 Integer numberOfPoints) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        builder.append("'" + QuantileSketchingStrategy.TYPE + "' : '").append(type.getName()).append("', ");
-
-        if (points != null) {
-            builder.append("'" + QuantileSketchingStrategy.POINTS + "' : [")
-                   .append(points.stream().map(Object::toString).collect(Collectors.joining(",")))
-                   .append("]");
-        } else if (numberOfPoints != null) {
-            builder.append("'" + QuantileSketchingStrategy.NUMBER_OF_POINTS + "' : ").append(numberOfPoints);
-        } else {
-            builder.append("'" + QuantileSketchingStrategy.RANGE_START + "' : ").append(start).append(", ");
-            builder.append("'" + QuantileSketchingStrategy.RANGE_END + "' : ").append(end).append(", ");
-            builder.append("'" + QuantileSketchingStrategy.RANGE_INCREMENT + "' : ").append(increment);
-        }
-        builder.append("}");
-        return builder.toString();
-    }
-
-    public static String makeMap(Long threshold, String newName) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        if (threshold != null) {
-            builder.append("'" + FrequentItemsSketchingStrategy.THRESHOLD_FIELD + "' : ").append(threshold);
-        }
-        if (threshold != null && newName != null) {
-            builder.append(", ");
-        }
-        if (newName != null) {
-            builder.append("'" + FrequentItemsSketchingStrategy.NEW_NAME_FIELD + "' : ").append(newName);
-        }
-        builder.append("}");
-        return builder.toString();
-    }
-
-    @SafeVarargs
-    public static String makeMap(Pair<String, String>... pairs) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-
-        String delimiter = "";
-        for (Pair<String, String> pair : pairs) {
-            builder.append(delimiter)
-                   .append("'").append(pair.getKey()).append("'")
-                   .append(" : '").append(pair.getValue()).append("'");
-            delimiter = ", ";
-        }
-        builder.append("}");
-        return builder.toString();
-    }
-
-    public static String makeMap(Map<String, String> map) {
-        if (map == null) {
-            return "null";
-        }
-        return makeMap(map.entrySet().toArray(new Pair[0]));
-    }
-
-    // Again, not implementing toString in Clause to not tie the construction of the JSON to the src.
-    public static String toString(Clause clause) {
-        StringBuilder builder = new StringBuilder();
-        if (clause instanceof StringFilterClause) {
-            StringFilterClause filterClause = (StringFilterClause) clause;
-            builder.append(makeStringFilter(filterClause.getField(), filterClause.getValues(), filterClause.getOperation()));
-        } else if (clause instanceof ObjectFilterClause) {
-            ObjectFilterClause filterClause = (ObjectFilterClause) clause;
-            builder.append(makeObjectFilter(filterClause.getField(), filterClause.getValues(), filterClause.getOperation()));
-        } else if (clause instanceof LogicalClause) {
-            LogicalClause logicalClause = (LogicalClause) clause;
-            builder.append(makeFilter(logicalClause.getClauses(), logicalClause.getOperation()));
-        }
-        return builder.toString();
-    }
-
-    private static String makeValue(Value value) {
-        return "{" +
-                 "'kind' : '" + value.getKind().name() + "', " +
-                 "'value' : '" + value.getValue() + "', " +
-                 "'type' : '" + value.getType() + "' " +
-               "}";
-    }
-
-    private static String makeSortItem(OrderBy.SortItem sortItem) {
-        return "{" +
-                 "'field': '" + sortItem.getField() + "', " +
-                 "'direction': '" + sortItem.getDirection() + "'" +
-               "}";
-    }
-
-    private static String makeExpression(Expression expression) {
-        if (expression instanceof LeafExpression) {
-            LeafExpression leafExpression = (LeafExpression) expression;
-            return "{" +
-                     "'value': " + makeValue(leafExpression.getValue()) +
-                   "}";
-        } else {
-            BinaryExpression binaryExpression = (BinaryExpression) expression;
-            return "{" +
-                     "'operation': '" + getExpressionOperationFor(binaryExpression.getOperation())  + "', " +
-                     "'left': " + makeExpression(binaryExpression.getLeft()) + ", " +
-                     "'right': " + makeExpression(binaryExpression.getRight()) + ", " +
-                     "'type': '" + binaryExpression.getType() + "'" +
-                   "}";
-        }
-    }
-
-    private static String getExpressionOperationFor(Expression.Operation operation) {
-        try {
-            return operation.getClass().getField(operation.name()).getAnnotation(SerializedName.class).value();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    public static String getOperationFor(Clause.Operation operation) {
-        switch (operation) {
-            case EQUALS:
-                return "==";
-            case NOT_EQUALS:
-                return "!=";
-            case GREATER_THAN:
-                return ">";
-            case LESS_THAN:
-                return "<";
-            case GREATER_EQUALS:
-                return ">=";
-            case LESS_EQUALS:
-                return "<=";
-            case AND:
-                return "AND";
-            case OR:
-                return "OR";
-            case NOT:
-                return "NOT";
-            default:
-                return "";
-        }
-    }
-
-    public static String getTypeFor(Aggregation.DistributionType type) {
-        switch (type) {
-            case TOP_K:
-                return "TOP K";
-            case RAW:
-                return "RAW";
-            case GROUP:
-                return "GROUP";
-            case COUNT_DISTINCT:
-                return "COUNT DISTINCT";
-            case DISTRIBUTION:
-                return "DISTRIBUTION";
-            default:
-                return "";
-        }
-    }
-
-    public static String getUnitFor(Window.Unit unit) {
-        switch (unit) {
-            case RECORD:
-                return "RECORD";
-            case TIME:
-                return "TIME";
-            case ALL:
-                return "ALL";
-            default:
-                return "";
-        }
-    }
-    */
 }
