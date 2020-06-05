@@ -146,7 +146,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      *
      * @return The content stored as a String using the {@link PubSubMessage#CHARSET}.
      */
-    public String getContent() {
+    public String getContentAsString() {
         return content == null ? null : new String(content, CHARSET);
     }
 

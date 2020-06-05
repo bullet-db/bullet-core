@@ -19,7 +19,7 @@ import java.util.List;
  * as results to present to the work with {@link #getResult()} or {@link #getRecords()} or {@link #getMetadata()}. Note
  * that {@link #getMetadata()} might not be strictly monoidal since they may not reset to the identity upon {@link #reset()}.
  */
-public interface Monoidal extends Initializable, Closable {
+public interface Monoidal extends Closable {
     /**
      * Consumes a single {@link BulletRecord} into this Monoid.
      *

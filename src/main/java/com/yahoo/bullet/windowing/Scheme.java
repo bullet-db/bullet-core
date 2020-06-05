@@ -5,10 +5,11 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.querying.Querier;
+import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Window;
+import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.result.Meta;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,6 +65,11 @@ public abstract class Scheme implements Monoidal {
      * instead of the full data, you should use this method to reset the window to maintain the windowing invariant.
      */
     public abstract void resetForPartition();
+
+    /**
+     * Readies the window for querying. This is called in {@link Querier#restart()}.
+     */
+    public abstract void start();
 
     /**
      * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.

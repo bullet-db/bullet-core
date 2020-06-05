@@ -6,7 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.querying.partitioning.Partitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import lombok.extern.slf4j.Slf4j;
@@ -103,15 +103,13 @@ public class QueryManager {
      * Adds a configured, initialized query instance {@link Querier} to the manager.
      *
      * @param id The query ID.
-     * @param querier A fully initialized (using {@link Querier#initialize()} {@link Querier} instance.
+     * @param querier A fully initialized {@link Querier} instance.
      */
     public void addQuery(String id, Querier querier) {
         Query query = querier.getQuery();
         Set<String> keys = partitioner.getKeys(query);
         for (String key : keys) {
-            Set<String> partition = partitioning.getOrDefault(key, new HashSet<>());
-            partition.add(id);
-            partitioning.put(key, partition);
+            partitioning.computeIfAbsent(key, s -> new HashSet<>()).add(id);
             log.debug("Added query: {} to partition: {}", id, key);
         }
         queries.put(id, querier);

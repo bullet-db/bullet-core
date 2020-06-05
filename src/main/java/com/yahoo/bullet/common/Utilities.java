@@ -12,7 +12,11 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 
 public class Utilities {
    /**
@@ -79,6 +83,52 @@ public class Utilities {
         return string == null || string.isEmpty();
     }
 
+    /**
+     * Throws a {@link NullPointerException} if the {@link List} is null or contains any null elements.
+     *
+     * @param list The list to check.
+     * @param <T> The type of the list.
+     * @return The list.
+     */
+    public static <T> List<T> requireNonNull(List<T> list) {
+        Objects.requireNonNull(list);
+        for (T t : list) {
+            Objects.requireNonNull(t);
+        }
+        return list;
+    }
+
+    /**
+     * Throws a {@link NullPointerException} if the {@link Set} is null or contains any null elements.
+     *
+     * @param set The set to check.
+     * @param <T> The type of the set.
+     * @return The set.
+     */
+    public static <T> Set<T> requireNonNull(Set<T> set) {
+        Objects.requireNonNull(set);
+        for (T t : set) {
+            Objects.requireNonNull(t);
+        }
+        return set;
+    }
+
+    /**
+     * Throws a {@link NullPointerException} if the {@link Map} is null or contains any null keys or null values.
+     *
+     * @param map The map to check.
+     * @param <K> The type of the map key.
+     * @param <V> The type of the map value.
+     * @return The map.
+     */
+    public static <K, V> Map<K, V> requireNonNull(Map<K, V> map) {
+        Objects.requireNonNull(map);
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            Objects.requireNonNull(entry.getKey());
+            Objects.requireNonNull(entry.getValue());
+        }
+        return map;
+    }
 
     /**
      * Rounds a double up to the specified number of places.
@@ -93,34 +143,44 @@ public class Utilities {
     }
 
     /**
-     * Extracts this identifier as a {@link TypedObject}.
+     * Generates an array of points from the given arguments.
      *
-     * @param identifier The identifier name to extract. It can be "." separated to look inside maps and arrays.
-     * @param record The {@link BulletRecord} to extract it from.
-     * @return The created TypedObject from the value for the identifier in the record.
+     * @param start The first point to begin with.
+     * @param generator A function that returns the next point given the previous.
+     * @param numberOfPoints The size of the resulting array.
+     * @param rounding The number of maximum decimal places to round up to.
+     * @return An array of points generated from the given arguments.
      */
-    public static TypedObject extractTypedObject(String identifier, BulletRecord record) {
-        return new TypedObject(record.extractField(identifier));
+    public static double[] generatePoints(double start, Function<Double, Double> generator, int numberOfPoints, int rounding) {
+        double[] points = new double[numberOfPoints];
+        double value = start;
+        for (int i = 0; i < numberOfPoints; ++i) {
+            points[i] = round(value, rounding);
+            value = generator.apply(value);
+        }
+        return points;
     }
 
     /**
-     * Extracts the identifier from the given (@link BulletRecord} as a {@link Number}, if possible.
+     * Extracts the field from the given (@link BulletRecord} as a {@link Number}, if possible.
      *
-     * @param identifier The identifier of a number to get. It can be "." separated to look inside maps and arrays.
-     * @param record The record containing the identifier.
-     * @return The value of the identifier as a {@link Number} or null if it cannot be forced to one.
+     * @param field The field to get as a number.
+     * @param record The record containing the field.
+     * @return The value of the field as a {@link Number} or null if it cannot be forced to one.
      */
-    public static Number extractFieldAsNumber(String identifier, BulletRecord record) {
-        Object value = record.extractField(identifier);
-        // Also checks for null
-        if (value instanceof Number) {
-            return (Number) value;
-        }
-        TypedObject asNumber = TypedObject.makeNumber(value);
-        if (asNumber.getType() == Type.UNKNOWN) {
+    public static Number extractFieldAsNumber(String field, BulletRecord record) {
+        TypedObject value = record.typedGet(field);
+        if (value.isNull()) {
             return null;
         }
-        return (Number) asNumber.getValue();
+        if (Type.isNumeric(value.getType())) {
+            return (Number) value.getValue();
+        }
+        try {
+            return (Number) value.forceCast(Type.DOUBLE).getValue();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

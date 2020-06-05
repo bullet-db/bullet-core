@@ -5,22 +5,15 @@
  */
 package com.yahoo.bullet.querying;
 
-import com.google.gson.JsonParseException;
-import com.yahoo.bullet.aggregations.Strategy;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.Projection;
-import com.yahoo.bullet.parsing.Query;
-import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.postaggregations.PostStrategy;
-import com.yahoo.bullet.querying.operations.AggregationOperations;
-import com.yahoo.bullet.querying.operations.FilterOperations;
-import com.yahoo.bullet.querying.operations.PostAggregationOperations;
-import com.yahoo.bullet.querying.operations.ProjectionOperations;
-import com.yahoo.bullet.querying.operations.WindowingOperations;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.querying.postaggregations.PostStrategy;
+import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -36,9 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.query.Projection.Type.COPY;
+import static com.yahoo.bullet.query.Projection.Type.PASS_THROUGH;
 import static com.yahoo.bullet.result.Meta.addIfNonNull;
 
 /**
@@ -46,8 +40,6 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  * query, and {@link #combine(byte[])} serialized data from another instance of the running query. It can also merge
  * itself with another instance of running query using {@link #merge(Monoidal)}. Use {@link #finish()} to retrieve the
  * final results and terminate the query.
- *
- * <p>After you create this object, you <strong>must call</strong> {@link #initialize()} before using it.</p>
  *
  * <p>Ideally to implement Bullet, you would parallelize into two stages:</p>
  *
@@ -105,8 +97,7 @@ import static com.yahoo.bullet.result.Meta.addIfNonNull;
  *
  * If you do not want to call {@link #getData()}, you can serialize Querier using non-native serialization frameworks
  * and use {@link #merge(Monoidal)} in the Join stage to merge them into an empty Querier for the query. This will be
- * equivalent to calling {@link #combine(byte[])} on {@link #getData()}. Just remember to not call {@link #initialize()}
- * on the reified querier objects on the Join side since that will wipe the existing results stored in them.
+ * equivalent to calling {@link #combine(byte[])} on {@link #getData()}.
  *
  * <h4>Pseudo Code</h4>
  *
@@ -301,6 +292,10 @@ public class Querier implements Monoidal {
     @Getter
     private RunningQuery runningQuery;
 
+    private Filter filter;
+
+    private Projection projection;
+
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
 
@@ -314,36 +309,30 @@ public class Querier implements Monoidal {
     private Mode mode;
 
     private List<PostStrategy> postStrategies;
-    // Fields which are required by post aggregations and will not shown in final result.
-    private Map<String, String> transientFields;
 
     private BulletRecordProvider provider;
 
     /**
-     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
-     * query.
+     * Constructor that takes a query and a configuration to use. This also starts the query.
      *
      * @param id The query ID.
-     * @param queryString The query as a string.
+     * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(String id, String queryString, BulletConfig config) throws JsonParseException {
-        this(Mode.ALL, new RunningQuery(id, queryString, config), config);
+    public Querier(String id, Query query, BulletConfig config) {
+        this(Mode.ALL, new RunningQuery(id, query), config);
     }
 
     /**
-     * Constructor that takes a String representation of the query and a configuration to use. This also starts the
-     * query.
+     * Constructor that takes a query and a configuration to use. This also starts the query.
      *
      * @param mode The mode for this querier.
      * @param id The query ID.
-     * @param queryString The query as a string.
+     * @param query The query object.
      * @param config The validated {@link BulletConfig} configuration to use.
-     * @throws JsonParseException if there was an issue parsing the query.
      */
-    public Querier(Mode mode, String id, String queryString, BulletConfig config) throws JsonParseException {
-        this(mode, new RunningQuery(id, queryString, config), config);
+    public Querier(Mode mode, String id, Query query, BulletConfig config) {
+        this(mode, new RunningQuery(id, query), config);
     }
     /**
      * Constructor that takes a {@link RunningQuery} instance and a configuration to use. This also starts executing
@@ -369,7 +358,7 @@ public class Querier implements Monoidal {
         this.runningQuery = query;
         this.config = config;
         this.provider = config.getBulletRecordProvider();
-        this.transientFields = new HashMap<>();
+        start();
     }
 
     // ********************************* Monoidal Interface Overrides *********************************
@@ -377,9 +366,7 @@ public class Querier implements Monoidal {
     /**
      * Starts the query.
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<List<BulletError>> initialize() {
+    private void start() {
         // Is an empty map if metadata was disabled
         metaKeys = (Map<String, String>) config.getAs(BulletConfig.RESULT_METADATA_METRICS, Map.class);
 
@@ -390,40 +377,33 @@ public class Querier implements Monoidal {
             rateLimit = new RateLimiter(maxEmit, timeInterval);
         }
 
-        Optional<List<BulletError>> errors;
-
-        errors = runningQuery.initialize();
-        if (errors.isPresent()) {
-            return errors;
+        Query query = runningQuery.getQuery();
+        Expression filter = query.getFilter();
+        if (filter != null) {
+            this.filter = new Filter(filter);
         }
 
-        Query query = this.runningQuery.getQuery();
+        com.yahoo.bullet.query.Projection projection = query.getProjection();
+        if (projection.getType() != PASS_THROUGH) {
+            this.projection = new Projection(projection.getFields());
+        }
 
         // Aggregation and Strategy are guaranteed to not be null.
-        Strategy strategy = AggregationOperations.findStrategy(query.getAggregation(), config);
-        errors = strategy.initialize();
-        if (errors.isPresent()) {
-            return errors;
+        Strategy strategy = query.getAggregation().getStrategy(config);
+
+        List<PostAggregation> postAggregations = query.getPostAggregations();
+        if (postAggregations != null && !postAggregations.isEmpty()) {
+            postStrategies = postAggregations.stream().map(PostAggregation::getPostStrategy).collect(Collectors.toList());
         }
 
-        if (query.getPostAggregations() != null) {
-            postStrategies = query.getPostAggregations().stream().map(PostAggregationOperations::findPostStrategy).collect(Collectors.toList());
-            for (PostStrategy postStrategy : postStrategies) {
-                errors = postStrategy.initialize();
-                if (errors.isPresent()) {
-                    return errors;
-                }
-                addTransientFieldsFor(postStrategy);
-            }
-        }
+        // Scheme is guaranteed to not be null. It is constructed in its "start" state.
+        window = query.getWindow().getScheme(strategy, config);
 
-        // Scheme is guaranteed to not be null.
-        window = WindowingOperations.findScheme(query, strategy, config);
-        return window.initialize();
+        runningQuery.start();
     }
 
     /**
-     * Forces a restart of a valid query (must have previously called {@link #initialize()}) to mark the
+     * Forces a restart of a valid query to mark the
      * correct start of this object if it was previously created but delayed in starting it (by using the negation of
      * {@link #shouldBuffer()}. You might be using this if you were delaying the start of the query in the
      * Join phase. This does not revalidate the query or reset any data this might have already consumed.
@@ -432,7 +412,7 @@ public class Querier implements Monoidal {
         // Only timestamps are in RunningQuery and Scheme.
         // For RunningQuery, we just need to fix the start time.
         runningQuery.start();
-        window.initialize();
+        window.start();
     }
 
     /**
@@ -448,7 +428,6 @@ public class Querier implements Monoidal {
         if (isDone() || !filter(record)) {
             return;
         }
-
         try {
             BulletRecord projected = project(record);
             window.consume(projected);
@@ -639,8 +618,8 @@ public class Querier implements Monoidal {
      */
     public boolean shouldBuffer() {
         Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow =  window == null;
-        // Only buffer if there is no window (including Raw) or if it's a record based window.
+        boolean noWindow = window == null;
+        // Only buffer if there is no window (including RawStrategy) or if it's a record based window.
         return noWindow || !window.isTimeBased();
     }
 
@@ -663,18 +642,20 @@ public class Querier implements Monoidal {
     // ********************************* Private helpers *********************************
 
     private boolean filter(BulletRecord record) {
-        List<Clause> filters = runningQuery.getQuery().getFilters();
-        // Add the record if we have no filters
-        if (filters == null) {
+        if (filter == null) {
             return true;
         }
-        // Otherwise short circuit evaluate till the first filter fails. Filters are ANDed.
-        return filters.stream().allMatch(c -> FilterOperations.perform(record, c));
+        return filter.match(record);
     }
 
     private BulletRecord project(BulletRecord record) {
-        Projection projection = runningQuery.getQuery().getProjection();
-        return projection != null ? ProjectionOperations.project(record, projection, transientFields, provider) : record;
+        if (projection == null) {
+            return record;
+        } else if (runningQuery.getQuery().getProjection().getType() == COPY) {
+            return projection.project(record.copy());
+        } else {
+            return projection.project(record, provider);
+        }
     }
 
     private Clip postAggregate(Clip clip) {
@@ -683,9 +664,6 @@ public class Querier implements Monoidal {
         }
         for (PostStrategy postStrategy : postStrategies) {
             clip = postStrategy.execute(clip);
-        }
-        for (String field : transientFields.keySet()) {
-            clip.getRecords().forEach(record -> record.remove(field));
         }
         return clip;
     }
@@ -716,7 +694,7 @@ public class Querier implements Monoidal {
     }
 
     private Meta getErrorMeta(Exception e) {
-        return Meta.of(BulletError.makeError(e.getMessage(), TRY_AGAIN_LATER));
+        return Meta.of(new BulletError(e.getMessage(), TRY_AGAIN_LATER));
     }
 
     private void incrementRate() {
@@ -727,17 +705,5 @@ public class Querier implements Monoidal {
 
     private String getMetaKey() {
         return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
-    }
-
-    private void addTransientFieldsFor(PostStrategy postStrategy) {
-        Projection projection = runningQuery.getQuery().getProjection();
-        Aggregation aggregation = runningQuery.getQuery().getAggregation();
-        if (aggregation.getType() == Aggregation.Type.RAW && projection != null) {
-            Map<String, String> projectionFields = projection.getFields();
-            if (projectionFields != null) {
-                postStrategy.getRequiredFields().stream().filter(field -> !projectionFields.containsValue(field))
-                            .forEach(field -> transientFields.put(field, field));
-            }
-        }
     }
 }

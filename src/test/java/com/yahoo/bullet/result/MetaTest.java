@@ -6,7 +6,6 @@
 package com.yahoo.bullet.result;
 
 import com.yahoo.bullet.common.BulletError;
-import com.yahoo.bullet.parsing.ParsingError;
 import com.yahoo.bullet.result.Meta.Concept;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -35,42 +33,11 @@ public class MetaTest {
     }
 
     @Test
-    public void testErrorsAddition() {
-        ParsingError errorA = new ParsingError("foo", asList("1", "2"));
-        ParsingError errorB = new ParsingError("bar", asList("3", "4"));
-        Meta meta = Meta.of(errorA, errorB);
-
-        Map<String, Object> actual = meta.asMap();
-        Assert.assertEquals(actual.size(), 1);
-
-        List<ParsingError> actualErrors = (List<ParsingError>) actual.get(Meta.ERROR_KEY);
-        Assert.assertEquals(actualErrors.size(), 2);
-        Assert.assertEquals(actualErrors.get(0).getError(), "foo");
-        Assert.assertEquals(actualErrors.get(0).getResolutions(), asList("1", "2"));
-        Assert.assertEquals(actualErrors.get(1).getError(), "bar");
-        Assert.assertEquals(actualErrors.get(1).getResolutions(), asList("3", "4"));
-
-        ParsingError errorC = new ParsingError("baz", asList("5", "6"));
-        ParsingError errorD = new ParsingError("qux", singletonList("7"));
-        meta.addErrors(Arrays.asList(errorC, errorD));
-
-        Assert.assertEquals(actualErrors.size(), 4);
-        Assert.assertEquals(actualErrors.get(0).getError(), "foo");
-        Assert.assertEquals(actualErrors.get(0).getResolutions(), asList("1", "2"));
-        Assert.assertEquals(actualErrors.get(1).getError(), "bar");
-        Assert.assertEquals(actualErrors.get(1).getResolutions(), asList("3", "4"));
-        Assert.assertEquals(actualErrors.get(2).getError(), "baz");
-        Assert.assertEquals(actualErrors.get(2).getResolutions(), asList("5", "6"));
-        Assert.assertEquals(actualErrors.get(3).getError(), "qux");
-        Assert.assertEquals(actualErrors.get(3).getResolutions(), singletonList("7"));
-    }
-
-    @Test
     public void testMetadataWithErrors() {
-        BulletError errorA = BulletError.makeError("foo", "bar");
-        BulletError errorB = BulletError.makeError("baz", "qux");
+        BulletError errorA = new BulletError("foo", "bar");
+        BulletError errorB = new BulletError("baz", "qux");
         Meta meta = Meta.of(Arrays.asList(errorA, errorB));
-        BulletError errorC = BulletError.makeError("norf", "foo");
+        BulletError errorC = new BulletError("norf", "foo");
         meta.addErrors(Collections.singletonList(errorC));
 
         Map<String, Object> actual = meta.asMap();
@@ -83,6 +50,22 @@ public class MetaTest {
         Assert.assertEquals(actualErrors.get(1).getResolutions(), singletonList("qux"));
         Assert.assertEquals(actualErrors.get(2).getError(), "norf");
         Assert.assertEquals(actualErrors.get(2).getResolutions(), singletonList("foo"));
+    }
+
+    @Test
+    public void testMetadataWithErrorsVarargs() {
+        BulletError errorA = new BulletError("foo", "bar");
+        BulletError errorB = new BulletError("baz", "qux");
+        Meta meta = Meta.of(errorA, errorB);
+
+        Map<String, Object> actual = meta.asMap();
+        Assert.assertEquals(actual.size(), 1);
+        List<BulletError> actualErrors = (List<BulletError>) actual.get(Meta.ERROR_KEY);
+        Assert.assertEquals(actualErrors.size(), 2);
+        Assert.assertEquals(actualErrors.get(0).getError(), "foo");
+        Assert.assertEquals(actualErrors.get(0).getResolutions(), singletonList("bar"));
+        Assert.assertEquals(actualErrors.get(1).getError(), "baz");
+        Assert.assertEquals(actualErrors.get(1).getResolutions(), singletonList("qux"));
     }
 
     @Test

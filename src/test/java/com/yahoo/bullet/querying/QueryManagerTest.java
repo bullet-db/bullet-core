@@ -6,29 +6,32 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Aggregation;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.aggregations.Raw;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.ValueExpression;
 import com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.RecordBox;
+import com.yahoo.bullet.typesystem.Type;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static com.yahoo.bullet.parsing.Clause.Operation.EQUALS;
-import static com.yahoo.bullet.parsing.FilterUtils.makeClause;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,17 +45,37 @@ public class QueryManagerTest {
     }
 
     @SafeVarargs
-    private static Query getQuery(Pair<String, String>... equalities) {
-        Query query = new Query();
-        if (equalities != null) {
-            List<Clause> clauses = Arrays.stream(equalities)
-                                         .map(e -> makeClause(e.getKey(), singletonList(e.getValue()), EQUALS))
-                                         .collect(Collectors.toList());
-            query.setFilters(clauses);
+    private static Query getQuery(Pair<String, Serializable>... equalities) {
+        BinaryExpression expression = null;
+        if (equalities != null && equalities.length > 0) {
+            if (equalities.length == 1) {
+                expression = new BinaryExpression(new FieldExpression(equalities[0].getLeft()),
+                                                  new ValueExpression(equalities[0].getRight()),
+                                                  Operation.EQUALS);
+                expression.setType(Type.BOOLEAN);
+                expression.getLeft().setType(expression.getRight().getType());
+            } else {
+                expression = Arrays.stream(equalities).reduce(null, (a, b) -> {
+                    BinaryExpression equals = new BinaryExpression(new FieldExpression(b.getLeft()),
+                                                                   new ValueExpression(b.getRight()),
+                                                                   Operation.EQUALS);
+                    equals.setType(Type.BOOLEAN);
+                    equals.getLeft().setType(equals.getRight().getType());
+                    if (a == null) {
+                        return equals;
+                    }
+                    BinaryExpression and = new BinaryExpression(a, equals, Operation.AND);
+                    and.setType(Type.BOOLEAN);
+                    return and;
+                }, (left, right) -> {
+                        BinaryExpression and = new BinaryExpression(left, right, Operation.AND);
+                        and.setType(Type.BOOLEAN);
+                        return and;
+                    });
+            }
         }
-        query.setAggregation(new Aggregation());
+        Query query = new Query(new Projection(), expression, new Raw(null), null, new Window(), null);
         query.configure(new BulletConfig());
-        query.initialize();
         return query;
     }
 

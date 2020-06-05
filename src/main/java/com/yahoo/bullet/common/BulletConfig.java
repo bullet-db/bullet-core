@@ -9,6 +9,7 @@ import com.yahoo.bullet.pubsub.PubSub.Context;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
+import com.yahoo.bullet.typesystem.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -68,6 +69,7 @@ public class BulletConfig extends Config {
     public static final String METRIC_PUBLISHER_CLASS_NAME = "bullet.metric.publisher.class.name";
 
     public static final String RECORD_PROVIDER_CLASS_NAME = "bullet.record.provider.class.name";
+    public static final String RECORD_SCHEMA_FILE_NAME = "bullet.record.schema.file.name";
 
     public static final String QUERY_PARTITIONER_ENABLE = "bullet.query.partitioner.enable";
     public static final String QUERY_PARTITIONER_CLASS_NAME = "bullet.query.partitioner.class.name";
@@ -280,6 +282,9 @@ public class BulletConfig extends Config {
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)
                  .defaultTo(DEFAULT_RECORD_PROVIDER_CLASS_NAME)
                  .checkIf(Validator::isClassName);
+        VALIDATOR.define(RECORD_SCHEMA_FILE_NAME)
+                 .checkIf(Validator::isString)
+                 .unless(Validator::isNull);
 
         VALIDATOR.define(QUERY_PARTITIONER_ENABLE)
                  .defaultTo(DEFAULT_QUERY_PARTITIONER_ENABLE)
@@ -352,6 +357,14 @@ public class BulletConfig extends Config {
      */
     public BulletRecordProvider getBulletRecordProvider() {
         return provider;
+    }
+
+    public Schema getSchema() {
+        String schemaFile = getAs(RECORD_SCHEMA_FILE_NAME, String.class);
+        if (schemaFile == null) {
+            return null;
+        }
+        return new Schema(schemaFile);
     }
 
     /**

@@ -53,6 +53,11 @@ public class SerializerDeserializerTest {
         }
     }
 
+    @Test
+    public void testConstructor() {
+        // coverage
+        new SerializerDeserializer();
+    }
 
     @Test
     public void testSerializationFailing() {

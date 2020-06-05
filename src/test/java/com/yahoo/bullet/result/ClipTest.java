@@ -84,7 +84,7 @@ public class ClipTest {
 
         assertJSONEquals(Clip.of(record).add(meta).asJSON(),
                          makeJSON("{'foo': 'Infinity', 'baz': '-Infinity', 'bar': 'NaN'}",
-                                 "[{'field': null, 'plus_inf': 'Infinity', 'neg_inf': '-Infinity', 'not_a_number': 'NaN'}]"));
+                                  "[{'field': null, 'plus_inf': 'Infinity', 'neg_inf': '-Infinity', 'not_a_number': 'NaN'}]"));
     }
 
     @Test

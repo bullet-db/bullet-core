@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.querying.partitioning;
 
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.record.BulletRecord;
 
 import java.util.Set;
