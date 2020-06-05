@@ -11,7 +11,5 @@ public interface Configurable {
      *
      * @param configuration The configuration containing the settings.
      */
-    default void configure(BulletConfig configuration) {
-        // Do nothing
-    }
+    void configure(BulletConfig configuration);
 }

@@ -44,6 +44,12 @@ public class BasicTest {
     }
 
     @Test
+    public void testStart() {
+        // coverage
+        new Basic(strategy, null, config).start();
+    }
+
+    @Test
     public void testAllDataMethodsProxyToStrategy() {
         addMetadata(config, ALL_METADATA);
         Basic basic = new Basic(strategy, null, config);

@@ -92,6 +92,7 @@ public class GroupOperationTest {
         GroupOperation d = new GroupOperation(COUNT, "foo", "count");
         String e = "foo";
 
+        Assert.assertEquals(a, a);
         Assert.assertEquals(a, b);
         Assert.assertNotEquals(a, c);
         Assert.assertNotEquals(a, d);

@@ -6,7 +6,6 @@
 package com.yahoo.bullet.query.expressions;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +15,7 @@ import static java.util.Arrays.asList;
 /**
  * The operations in binary, unary, and n-ary expressions.
  */
-@Getter @AllArgsConstructor
+@AllArgsConstructor
 public enum Operation {
     ADD("+"),
     SUB("-"),

@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying.aggregations;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.aggregations.Distribution;
 import com.yahoo.bullet.query.aggregations.DistributionType;
 import com.yahoo.bullet.query.aggregations.LinearDistribution;
 import com.yahoo.bullet.query.aggregations.ManualDistribution;
@@ -44,6 +45,12 @@ import static com.yahoo.bullet.TestHelpers.addMetadata;
 import static java.util.Arrays.asList;
 
 public class QuantileSketchingStrategyTest {
+    private static class MockDistribution extends Distribution {
+        MockDistribution(String field, DistributionType type, Integer size) {
+            super(field, type, size);
+        }
+    }
+
     private static final List<Map.Entry<Concept, String>> ALL_METADATA =
         asList(Pair.of(Concept.SKETCH_ESTIMATED_RESULT, "isEst"),
                Pair.of(Concept.SKETCH_FAMILY, "family"),
@@ -382,5 +389,11 @@ public class QuantileSketchingStrategyTest {
         Assert.assertEquals(records.get(2), expectedC);
         Assert.assertEquals(distribution.getRecords(), records);
         Assert.assertEquals(distribution.getMetadata().asMap(), result.getMeta().asMap());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Unknown distribution input mode\\.")
+    public void testGetSketchUnknownDistribution() {
+        // coverage
+        new QuantileSketchingStrategy(new MockDistribution("field", DistributionType.QUANTILE, 100), new BulletConfig());
     }
 }
