@@ -161,9 +161,6 @@
             <property name="severity" value="error"/>
             <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
-            <property name="allowUndeclaredRTE" value="true"/>
         </module>
 
         <!-- Checks that variables have Javadoc comments. -->
