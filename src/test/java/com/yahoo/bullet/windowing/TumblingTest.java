@@ -5,10 +5,10 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.MockStrategy;
+import com.yahoo.bullet.querying.aggregations.MockStrategy;
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Window;
-import com.yahoo.bullet.parsing.WindowUtils;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.WindowUtils;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.RecordBox;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,7 +36,6 @@ public class TumblingTest {
     private Window makeTumblingWindow(int length) {
         Window window = WindowUtils.makeTumblingWindow(length);
         window.configure(config);
-        window.initialize();
         return window;
     }
 
@@ -57,13 +56,12 @@ public class TumblingTest {
     @Test
     public void testCreation() {
         Tumbling tumbling = make(1000, 1000);
-        Assert.assertFalse(tumbling.initialize().isPresent());
+        Assert.assertEquals(tumbling.windowLength, 1000L);
     }
 
     @Test
     public void testClampingToMinimumEmit() {
         Tumbling tumbling = make(1000, 5000);
-        Assert.assertFalse(tumbling.initialize().isPresent());
         // The window is what controls this so Tumbling has 5000 for the window size
         Assert.assertEquals(tumbling.windowLength, 5000L);
     }
@@ -73,7 +71,6 @@ public class TumblingTest {
         Window window = makeTumblingWindow(Integer.MAX_VALUE);
         ClosableStrategy strategy = new ClosableStrategy();
         Tumbling tumbling = new Tumbling(strategy, window, config);
-        Assert.assertFalse(tumbling.initialize().isPresent());
 
         Assert.assertFalse(tumbling.isClosed());
         Assert.assertFalse(tumbling.isClosedForPartition());
@@ -85,7 +82,6 @@ public class TumblingTest {
     @Test
     public void testWindowIsOpenIfWithinWindowLength() {
         Tumbling tumbling = make(Integer.MAX_VALUE, 1000);
-        Assert.assertFalse(tumbling.initialize().isPresent());
         Assert.assertFalse(tumbling.isClosed());
         Assert.assertFalse(tumbling.isClosedForPartition());
     }
@@ -94,7 +90,6 @@ public class TumblingTest {
     public void testClosedWindowAfterTime() throws Exception {
         // Change minimum length to 1 ms
         Tumbling tumbling = make(1, 1);
-        Assert.assertFalse(tumbling.initialize().isPresent());
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
@@ -109,7 +104,6 @@ public class TumblingTest {
         // Change minimum length to 1 ms
         Tumbling tumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
-        Assert.assertFalse(tumbling.initialize().isPresent());
         long originalCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(originalCloseTime >= started + 1);
 
@@ -133,7 +127,6 @@ public class TumblingTest {
         // Change minimum length to 1 ms
         Tumbling tumbling = make(1, 1);
         Assert.assertEquals(strategy.getResetCalls(), 0);
-        Assert.assertFalse(tumbling.initialize().isPresent());
         long originalCloseTime = tumbling.nextCloseTime;
         Assert.assertTrue(originalCloseTime >= started + 1);
 
@@ -156,7 +149,6 @@ public class TumblingTest {
         long started = System.currentTimeMillis();
 
         Tumbling tumbling = make(1, 1);
-        Assert.assertFalse(tumbling.initialize().isPresent());
 
         Thread.sleep(1);
 

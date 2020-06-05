@@ -82,7 +82,7 @@ public class BufferingSubscriberTest {
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getId(), "foo");
-        Assert.assertEquals(actual.getContent(), "bar");
+        Assert.assertEquals(actual.getContentAsString(), "bar");
 
         Assert.assertEquals(subscriber.getCallCount(), 8);
     }

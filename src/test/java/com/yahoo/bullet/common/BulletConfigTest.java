@@ -10,6 +10,8 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
+import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -447,7 +449,7 @@ public class BulletConfigTest {
 
     @Test
     public void testValidatorIsACopy() {
-        Assert.assertTrue(BulletConfig.getValidator() != BulletConfig.getValidator());
+        Assert.assertNotSame(BulletConfig.getValidator(), BulletConfig.getValidator());
     }
 
     @Test
@@ -461,12 +463,12 @@ public class BulletConfigTest {
         BulletRecord recordA = providerA.getInstance();
         BulletRecord recordB = providerB.getInstance();
 
-        Assert.assertTrue(recordA instanceof BulletRecord);
-        Assert.assertTrue(recordB instanceof BulletRecord);
+        Assert.assertNotNull(recordA);
+        Assert.assertNotNull(recordB);
 
         recordB.setString("someField", "someValue");
-        Assert.assertEquals(recordB.get("someField"), "someValue");
-        Assert.assertNull(recordA.get("someField"));
+        Assert.assertEquals(recordB.typedGet("someField"), new TypedObject(Type.STRING, "someValue"));
+        Assert.assertTrue(recordA.typedGet("someField").isNull());
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
@@ -502,5 +504,17 @@ public class BulletConfigTest {
         config.validate();
 
         Assert.assertEquals(config.get(BulletConfig.QUERY_PARTITIONER_CLASS_NAME), MockPartitioner.class.getName());
+    }
+
+    @Test
+    public void testGetSchema() {
+        BulletConfig config = new BulletConfig();
+
+        Assert.assertNull(config.getSchema());
+
+        config.set(BulletConfig.RECORD_SCHEMA_FILE_NAME, "empty_schema.json");
+        config.validate();
+
+        Assert.assertEquals(config.getSchema().size(), 0);
     }
 }

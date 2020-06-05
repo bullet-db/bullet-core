@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.windowing;
 
-import com.yahoo.bullet.aggregations.MockStrategy;
+import com.yahoo.bullet.querying.aggregations.MockStrategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
@@ -41,7 +41,12 @@ public class BasicTest {
     public void testCreation() {
         Basic basic = new Basic(strategy, null, config);
         Assert.assertNotNull(basic.getMetadata());
-        Assert.assertFalse(basic.initialize().isPresent());
+    }
+
+    @Test
+    public void testStart() {
+        // coverage
+        new Basic(strategy, null, config).start();
     }
 
     @Test

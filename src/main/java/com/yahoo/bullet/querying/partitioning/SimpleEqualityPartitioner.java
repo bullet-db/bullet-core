@@ -6,14 +6,16 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.parsing.Clause;
-import com.yahoo.bullet.parsing.FilterClause;
-import com.yahoo.bullet.parsing.LogicalClause;
-import com.yahoo.bullet.parsing.Query;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.expressions.BinaryExpression;
+import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.expressions.FieldExpression;
+import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.ValueExpression;
 import com.yahoo.bullet.record.BulletRecord;
-import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.typesystem.TypedObject;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +65,12 @@ import java.util.stream.IntStream;
  * seen by exactly only the queries that need to see it.
  */
 public class SimpleEqualityPartitioner implements Partitioner {
-    private static final String NO_FIELD = Type.NULL_EXPRESSION;
+    /*
+    NULL represents the null value (as opposed to the string "null"). ANY represents all values and is a wildcard used
+    when a field doesn't have a filter, i.e. the field's value does not matter.
+    */
+    private static final String ANY = "*";
+    private static final String NULL = "null";
     private static final int LOWEST_BIT_MASK = 1;
     private static final int ZERO = 0;
     // This appends this char to all non-null values to disambiguate them if they actually had NO_FIELD as their values
@@ -85,7 +92,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         delimiter = config.getAs(BulletConfig.EQUALITY_PARTITIONER_DELIMITER, String.class);
         fields = (List<String>) config.getAs(BulletConfig.EQUALITY_PARTITIONER_FIELDS, List.class);
         fieldSet = new HashSet<>(fields);
-        String defaultKey = Collections.nCopies(fields.size(), NO_FIELD).stream().collect(Collectors.joining(delimiter));
+        String defaultKey = Collections.nCopies(fields.size(), ANY).stream().collect(Collectors.joining(delimiter));
         defaultKeys = Collections.singleton(defaultKey);
     }
 
@@ -101,23 +108,26 @@ public class SimpleEqualityPartitioner implements Partitioner {
     @Override
     public Set<String> getKeys(Query query) {
         Objects.requireNonNull(query);
-        List<Clause> filters = query.getFilters();
-        // If no filters or has non ANDs, default partition
-        if (filters == null || filters.isEmpty() || hasNonANDLogicals(filters)) {
+
+        Expression filter = query.getFilter();
+
+        // If no filter, default partition
+        if (filter == null) {
             return defaultKeys;
         }
 
-        // For each unique field, get all the FilterClauses that define an operation on it.
-        Map<String, List<FilterClause>> fieldFilters = new HashMap<>();
-        filters.forEach(c -> this.mapFieldToFilters(c, fieldFilters));
+        // Map each field to the values that it is checked for equality against
+        Map<String, Set<Serializable>> equalityClauses = new HashMap<>();
+        mapFieldsToValues(filter, equalityClauses);
 
-        // If not one equality filter per field and not one value per filter, default partition
-        if (fieldFilters.values().stream().anyMatch(this::hasInvalidFilterClauses)) {
+        // If not exactly one equality per field, default partition
+        if (equalityClauses.values().stream().anyMatch(set -> set.size() != 1)) {
             return defaultKeys;
         }
 
         // Generate key in fields order and pad with NO_FIELD if no mapping present
-        String key = fields.stream().map(fieldFilters::get).map(this::getFilterValue).collect(Collectors.joining(delimiter));
+        String key = fields.stream().map(equalityClauses::get).map(this::getFilterValue).collect(Collectors.joining(delimiter));
+
         // For the SimpleEqualityPartitioner, the query is mapped to exactly one key only.
         return Collections.singleton(key);
     }
@@ -127,84 +137,66 @@ public class SimpleEqualityPartitioner implements Partitioner {
         Map<String, String> values = getFieldValues(record);
         /*
          * Generate a truth table for all possible combinations of the fields when using the field value or not using
-         * an integer to represent a binary of fields.size() chars where each one represents to include or not the field
-         * For fields not present (NO_FIELD mapped), the final set de-dupes them with the binary combination that
-         * ignores them
+         * an integer to represent a binary of fields.size() chars where each one represents to include or not include
+         * the field. Note, fields that are not present are NULL-mapped. When not included, they are ANY-mapped.
          */
         return IntStream.range(0, 1 << fields.size()).mapToObj(i -> binaryToKey(i, values)).collect(Collectors.toSet());
     }
 
-    private static boolean hasNonANDLogicals(List<Clause> filters) {
-        return filters != null && filters.stream().anyMatch(SimpleEqualityPartitioner::hasNonANDLogicals);
-    }
-
-    private static boolean hasNonANDLogicals(Clause clause) {
-        if (clause instanceof FilterClause) {
-            return false;
-        }
-        return clause.getOperation() != Clause.Operation.AND || hasNonANDLogicals(((LogicalClause) clause).getClauses());
-    }
-
-    private void mapFieldToFilters(Clause clause, Map<String, List<FilterClause>> mapping) {
-        if (clause instanceof FilterClause) {
-            mapFieldToFilter((FilterClause) clause, mapping);
+    private void mapFieldsToValues(Expression expression, Map<String, Set<Serializable>> mapping) {
+        if (!(expression instanceof BinaryExpression)) {
             return;
         }
-        List<Clause> clauses = ((LogicalClause) clause).getClauses();
-        // Cannot have null non-AND logicals as it is checked for.
-        clauses.forEach(c -> this.mapFieldToFilters(c, mapping));
+        BinaryExpression binary = (BinaryExpression) expression;
+        if (binary.getOp() == Operation.AND) {
+            mapFieldsToValues(binary.getLeft(), mapping);
+            mapFieldsToValues(binary.getRight(), mapping);
+        } else if (binary.getOp() == Operation.EQUALS) {
+            if (binary.getLeft() instanceof FieldExpression && binary.getRight() instanceof ValueExpression) {
+                addFieldToMapping((FieldExpression) binary.getLeft(), (ValueExpression) binary.getRight(), mapping);
+            } else if (binary.getRight() instanceof FieldExpression && binary.getLeft() instanceof ValueExpression) {
+                addFieldToMapping((FieldExpression) binary.getRight(), (ValueExpression) binary.getLeft(), mapping);
+            }
+        }
     }
 
-    private void mapFieldToFilter(FilterClause clause, Map<String, List<FilterClause>> mapping) {
-        String field = clause.getField();
-        if (clause.getOperation() != Clause.Operation.EQUALS || !fieldSet.contains(field)) {
-            return;
+    private void addFieldToMapping(FieldExpression fieldExpression, ValueExpression valueExpression, Map<String, Set<Serializable>> mapping) {
+        String field = fieldExpression.getName();
+        if (fieldSet.contains(field)) {
+            Serializable value = valueExpression.getValue();
+            mapping.computeIfAbsent(field, s -> new HashSet<>()).add(value);
         }
-        List<FilterClause> list = mapping.getOrDefault(field, new ArrayList<>());
-        list.add(clause);
-        mapping.put(field, list);
     }
 
-    private boolean hasInvalidFilterClauses(List<FilterClause> filters) {
-        if (filters == null || filters.size() != 1)  {
-            return true;
+    private String getFilterValue(Set<Serializable> values) {
+        if (values == null) {
+            return ANY;
         }
-        FilterClause filter = filters.get(0);
-        List values = filter.getValues();
-        return values == null || values.size() != 1;
-    }
-
-    private String getFilterValue(List<FilterClause> singletonFilters) {
-        if (singletonFilters == null) {
-            return NO_FIELD;
+        Serializable value = values.iterator().next();
+        if (value == null) {
+            return NULL;
         }
-        // Otherwise, it's a list of size 1 with a singular value, which has been already validated
-        FilterClause filter = singletonFilters.get(0);
-        Object value = filter.getValues().get(0);
-        if (filter.hasNull(value)) {
-            return NO_FIELD;
-        }
-        return makeKeyEntry(filter.getValue(value));
+        return makeKeyEntry(value.toString());
     }
 
     private Map<String, String> getFieldValues(BulletRecord record) {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
-            Object value = record.extractField(field);
-            fieldValues.put(field, value == null ? NO_FIELD : makeKeyEntry(value.toString()));
+            TypedObject value = record.typedExtract(field);
+            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.getValue().toString()));
         }
         return fieldValues;
     }
 
     private String binaryToKey(int number, Map<String, String> values) {
-        // If binary is 011 and fields is [A, B.c, D], the key is [values[A], values[B.c], null].join(delimiter)
+        // If binary is 011 and fields is [A, B.c, D], the key is [values[A], values[B.c], ANY].join(delimiter)
         return IntStream.range(0, fields.size()).mapToObj(i -> getValueForIndex(number, i, values))
-                        .collect(Collectors.joining(delimiter));
+                                                .collect(Collectors.joining(delimiter));
     }
 
     private String getValueForIndex(int number, int index, Map<String, String> values) {
         boolean shouldPick = ((number >> index) & LOWEST_BIT_MASK) != ZERO;
-        return shouldPick ? values.get(fields.get(index)) : NO_FIELD;
+        return shouldPick ? values.get(fields.get(index)) : ANY;
     }
 
     private String makeKeyEntry(String value) {

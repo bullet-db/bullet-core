@@ -33,9 +33,9 @@ public class PublisherTest {
         MockPublisher mockPublisher = new MockPublisher();
         PubSubMessage message = mockPublisher.send(randomId, randomMessage);
 
-        Assert.assertTrue(message.getContent().equals(randomMessage));
-        Assert.assertTrue(message.getId().equals(randomId));
-        Assert.assertTrue(mockPublisher.sentMessage.getContent().equals(randomMessage));
-        Assert.assertTrue(mockPublisher.sentMessage.getId().equals(randomId));
+        Assert.assertEquals(message.getContentAsString(), randomMessage);
+        Assert.assertEquals(message.getId(), randomId);
+        Assert.assertEquals(mockPublisher.sentMessage.getContentAsString(), randomMessage);
+        Assert.assertEquals(mockPublisher.sentMessage.getId(), randomId);
     }
 }
