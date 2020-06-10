@@ -25,8 +25,10 @@ public class Metadata implements Serializable {
     private static final long serialVersionUID = 4234800234857923112L;
     @Getter @Setter
     private Signal signal;
-    // Serializable enforced through the constructor, getter and setter. Is Object so GSON can reify an instance.
+    // Serializable enforced through the constructor, getter, and setter. Is Object so GSON can reify an instance.
     private Object content;
+    @Getter @Setter
+    private long created;
 
     /**
      * Allows you to create an instance with a {@link com.yahoo.bullet.pubsub.Metadata.Signal} and a
@@ -38,6 +40,7 @@ public class Metadata implements Serializable {
     public Metadata(Signal signal, Serializable object) {
         this.signal = signal;
         this.content = object;
+        this.created = System.currentTimeMillis();
     }
 
     /**

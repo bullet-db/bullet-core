@@ -34,17 +34,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * Constructor for a message having no information. Used internally. Not recommended for use.
      */
     public PubSubMessage() {
-        this("", (String) null);
-    }
-
-    /**
-     * Constructor for a message having only content.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     */
-    public PubSubMessage(String id, String content) {
-        this(id, content, (Metadata) null);
+        this("", null);
     }
 
     /**
@@ -54,18 +44,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param signal The signal only for the Metadata.
      */
     public PubSubMessage(String id, Signal signal) {
-        this(id, (byte[]) null, signal);
-    }
-
-    /**
-     * Constructor for a message having content and a {@link Metadata.Signal}.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     * @param signal The Signal to be sent with the message.
-     */
-    public PubSubMessage(String id, String content, Signal signal) {
-        this(id, content, new Metadata(signal, null));
+        this(id, null, signal);
     }
 
     /**
@@ -77,17 +56,6 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      */
     public PubSubMessage(String id, byte[] content, Signal signal) {
         this(id, content, new Metadata(signal, null));
-    }
-
-    /**
-     * Constructor for a message having content, {@link Metadata} and a sequence number.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     * @param metadata The Metadata associated with the message.
-     */
-    public PubSubMessage(String id, String content, Metadata metadata) {
-        this(id, content == null ? null : content.getBytes(CHARSET), metadata);
     }
 
     /**
@@ -138,16 +106,6 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      */
     public boolean hasSignal() {
         return hasMetadata() && metadata.hasSignal();
-    }
-
-    /**
-     * Returns the content stored in the message as a String. You should use this to read the String back from the
-     * message if you provided it originally to the message as a String.
-     *
-     * @return The content stored as a String using the {@link PubSubMessage#CHARSET}.
-     */
-    public String getContentAsString() {
-        return content == null ? null : new String(content, CHARSET);
     }
 
     @Override
