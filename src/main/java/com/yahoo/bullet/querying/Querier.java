@@ -317,10 +317,12 @@ public class Querier implements Monoidal {
      *
      * @param id The query ID.
      * @param query The query object.
+     * @param queryString The query string.
+     * @param startTime The query start time.
      * @param config The validated {@link BulletConfig} configuration to use.
      */
-    public Querier(String id, Query query, BulletConfig config) {
-        this(Mode.ALL, new RunningQuery(id, query), config);
+    public Querier(String id, Query query, String queryString, Long startTime, BulletConfig config) {
+        this(Mode.ALL, new RunningQuery(id, query, queryString, startTime), config);
     }
 
     /**
@@ -329,11 +331,14 @@ public class Querier implements Monoidal {
      * @param mode The mode for this querier.
      * @param id The query ID.
      * @param query The query object.
+     * @param queryString The query string.
+     * @param startTime The query start time.
      * @param config The validated {@link BulletConfig} configuration to use.
      */
-    public Querier(Mode mode, String id, Query query, BulletConfig config) {
-        this(mode, new RunningQuery(id, query), config);
+    public Querier(Mode mode, String id, Query query, String queryString, Long startTime, BulletConfig config) {
+        this(mode, new RunningQuery(id, query, queryString, startTime), config);
     }
+
     /**
      * Constructor that takes a {@link RunningQuery} instance and a configuration to use. This also starts executing
      * the query.
@@ -399,7 +404,7 @@ public class Querier implements Monoidal {
         // Scheme is guaranteed to not be null. It is constructed in its "start" state.
         window = query.getWindow().getScheme(strategy, config);
 
-        runningQuery.start();
+        restart();
     }
 
     /**
@@ -410,9 +415,8 @@ public class Querier implements Monoidal {
      */
     public void restart() {
         // Only timestamps are in RunningQuery and Scheme.
-        // For RunningQuery, we just need to fix the start time.
-        runningQuery.start();
-        window.start();
+        // For RunningQuery, the start time is fixed.
+        window.start(runningQuery.getStartTime());
     }
 
     /**
@@ -675,7 +679,7 @@ public class Querier implements Monoidal {
         }
         Map<String, Object> meta = new HashMap<>();
         addIfNonNull(meta, metaKeys, Concept.QUERY_ID, runningQuery::getId);
-        addIfNonNull(meta, metaKeys, Concept.QUERY_BODY, runningQuery::toString);
+        addIfNonNull(meta, metaKeys, Concept.QUERY_STRING, runningQuery::getQueryString);
         addIfNonNull(meta, metaKeys, Concept.QUERY_RECEIVE_TIME, runningQuery::getStartTime);
         return new Meta().add(metaKey, meta);
     }

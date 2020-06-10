@@ -7,16 +7,32 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.query.Query;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * A wrapper for a running query.
  */
-@Getter @RequiredArgsConstructor
+@Getter
 public class RunningQuery {
     private final String id;
     private final Query query;
-    private long startTime;
+    private final String queryString;
+    private final long startTime;
+
+    /**
+     * Constructor that takes an id, query, query string, and start time. If the start time is missing, uses the
+     * current system time.
+     *
+     * @param id The query id.
+     * @param query The query object.
+     * @param queryString The query string.
+     * @param startTime The query start time.
+     */
+    public RunningQuery(String id, Query query, String queryString, Long startTime) {
+        this.id = id;
+        this.query = query;
+        this.queryString = queryString;
+        this.startTime = startTime != null ? startTime : System.currentTimeMillis();
+    }
 
     @Override
     public String toString() {
@@ -30,14 +46,7 @@ public class RunningQuery {
      * @return A boolean denoting whether this query has timed out.
      */
     public boolean isTimedOut() {
-        // Never add to query.getDuration since it can be infinite (Long.MAX_VALUE)
+        // Never add to query.getDuration() since it can be infinite (Long.MAX_VALUE)
         return System.currentTimeMillis() - startTime >= query.getDuration();
-    }
-
-    /**
-     * Exposed for package only. Starts the query.
-     */
-    void start() {
-        startTime = System.currentTimeMillis();
     }
 }

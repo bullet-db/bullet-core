@@ -107,7 +107,7 @@ public class Basic extends Scheme {
     }
 
     @Override
-    public void start() {
+    public void start(long startTime) {
     }
 
     /**
