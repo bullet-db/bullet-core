@@ -58,12 +58,10 @@ public class Tumbling extends Basic {
 
     @Override
     public void start(long startTime) {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime < startTime) {
-            nextCloseTime = startTime + windowLength;
-        } else {
-            nextCloseTime = startTime + ((currentTime - startTime) / windowLength + 1) * windowLength;
-        }
+        // This change aligns the tumbling windows with the query start time.
+        // Unsure if this is wanted and don't even know why I thought to make this change frankly speaking.
+        // Can also lead to a very small initial window.
+        nextCloseTime = startTime + ((System.currentTimeMillis() - startTime) / windowLength + 1) * windowLength;
     }
 
     @Override
