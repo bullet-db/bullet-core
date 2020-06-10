@@ -14,7 +14,7 @@ public interface Publisher extends AutoCloseable {
      * @return The sent {@link PubSubMessage}.
      * @throws PubSubException if the messaging system throws an error.
      */
-    default PubSubMessage send(String id, String content) throws PubSubException {
+    default PubSubMessage send(String id, byte[] content) throws PubSubException {
         return send(new PubSubMessage(id, content));
     }
 

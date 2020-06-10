@@ -30,7 +30,17 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * Constructor for a message having no information. Used internally. Not recommended for use.
      */
     public PubSubMessage() {
-        this("", null);
+        this("", (byte[]) null);
+    }
+
+    /**
+     * Constructor for a message having only content.
+     *
+     * @param id The ID associated with the message.
+     * @param content The content of the message.
+     */
+    public PubSubMessage(String id, byte[] content) {
+        this(id, content, (Metadata) null);
     }
 
     /**
