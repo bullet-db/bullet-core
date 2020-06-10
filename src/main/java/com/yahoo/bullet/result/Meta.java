@@ -29,6 +29,7 @@ public class Meta {
         QUERY_RECEIVE_TIME("Query Receive Time"),
         QUERY_FINISH_TIME("Query Finish Time"),
         QUERY_ID("Query ID"),
+        QUERY_OBJECT("Query Object"),
         QUERY_STRING("Query String"),
 
         // Sketching metadata

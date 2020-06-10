@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.query.Query;
 import lombok.Getter;
 
@@ -24,14 +25,13 @@ public class RunningQuery {
      *
      * @param id The query id.
      * @param query The query object.
-     * @param queryString The query string.
-     * @param startTime The query start time.
+     * @param metadata The metadata associated with the given query.
      */
-    public RunningQuery(String id, Query query, String queryString, Long startTime) {
+    public RunningQuery(String id, Query query, Metadata metadata) {
         this.id = id;
         this.query = query;
-        this.queryString = queryString;
-        this.startTime = startTime != null ? startTime : System.currentTimeMillis();
+        this.queryString = (String) metadata.getContent();
+        this.startTime = metadata.getCreated();
     }
 
     @Override

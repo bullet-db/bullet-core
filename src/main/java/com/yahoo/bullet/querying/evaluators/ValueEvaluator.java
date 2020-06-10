@@ -21,7 +21,7 @@ public class ValueEvaluator extends Evaluator {
      * @param valueExpression The value expression to construct the evaluator from.
      */
     public ValueEvaluator(ValueExpression valueExpression) {
-        value = new TypedObject(valueExpression.getValue());
+        value = new TypedObject(valueExpression.getType(), valueExpression.getValue());
     }
 
     @Override

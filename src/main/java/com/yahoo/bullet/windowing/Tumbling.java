@@ -30,6 +30,7 @@ public class Tumbling extends Basic {
     public Tumbling(Strategy aggregation, Window window, BulletConfig config) {
         super(aggregation, window, config);
         windowLength = (long) window.getEmitEvery();
+        nextCloseTime = System.currentTimeMillis() + windowLength;
     }
 
     @Override
@@ -57,11 +58,8 @@ public class Tumbling extends Basic {
     }
 
     @Override
-    public void start(long startTime) {
-        // This change aligns the tumbling windows with the query start time.
-        // Unsure if this is wanted and don't even know why I thought to make this change frankly speaking.
-        // Can also lead to a very small initial window.
-        nextCloseTime = startTime + ((System.currentTimeMillis() - startTime) / windowLength + 1) * windowLength;
+    public void start() {
+        nextCloseTime = System.currentTimeMillis() + windowLength;
     }
 
     @Override

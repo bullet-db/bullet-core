@@ -11,18 +11,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
  * The class of messages that can be understood by the PubSub package. The id should be set to the query ID generated
- * by the web service for Bullet queries. The sequence identifies individual segments if a multi-part response is
- * emitted by Bullet.
+ * by the web service for Bullet queries.
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
-    public static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final long serialVersionUID = -5068189058170874687L;
 
     private String id;

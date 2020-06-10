@@ -123,7 +123,8 @@ bullet.result.metadata.enable: true
 # Each entry in this list indicates which metadata to collect (the name) and what key to add it as (the key) to the meta
 # Query Metadata adds additional nested metadata about the query if set. These are listed below.
 # Query Identifier adds the ID that was generated for the query.
-# Query Body adds the received query definition. This is useful for diagnosing syntax exceptions when errors are received.
+# Query Object adds the query object as a string. This is useful for diagnosing syntax exceptions when errors are received. By default, this is commented out below.
+# Query String adds the query string that generated the query.
 # Query Receive Time adds the timestamp in milliseconds when the query was received.
 # Query Finish Time adds the timestamp in milliseconds when the final result was emitted.
 
@@ -157,8 +158,10 @@ bullet.result.metadata.metrics:
       key: "Query"
     - name: "Query ID"
       key: "ID"
-    - name: "Query Body"
-      key: "Body"
+#   - name: "Query Object"
+#     key: "Query Object"
+    - name: "Query String"
+      key: "Query String"
     - name: "Query Receive Time"
       key: "Receive Time"
     - name: "Query Finish Time"

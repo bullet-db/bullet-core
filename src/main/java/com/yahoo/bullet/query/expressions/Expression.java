@@ -31,7 +31,7 @@ import java.io.Serializable;
 public abstract class Expression implements Serializable {
     private static final long serialVersionUID = -769774785327135375L;
 
-    protected transient Type type;
+    protected Type type;
 
     /**
      * Gets a new instance of an evaluator for this expression.

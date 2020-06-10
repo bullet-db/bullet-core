@@ -68,10 +68,8 @@ public abstract class Scheme implements Monoidal {
 
     /**
      * Readies the window for querying. This is called in {@link Querier#restart()}.
-     *
-     * @param startTime The query start time used to configure time-based windows.
      */
-    public abstract void start(long startTime);
+    public abstract void start();
 
     /**
      * Return any {@link Meta} for this windowing scheme and the {@link Strategy}.
