@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -29,13 +30,13 @@ public class PublisherTest {
     @Test
     public void testDefaultSend() throws PubSubException {
         String randomId = UUID.randomUUID().toString();
-        String randomMessage = UUID.randomUUID().toString();
+        byte[] randomMessage = SerializerDeserializer.toBytes(UUID.randomUUID());
         MockPublisher mockPublisher = new MockPublisher();
         PubSubMessage message = mockPublisher.send(randomId, randomMessage);
 
-        Assert.assertEquals(message.getContentAsString(), randomMessage);
+        Assert.assertEquals(message.getContent(), randomMessage);
         Assert.assertEquals(message.getId(), randomId);
-        Assert.assertEquals(mockPublisher.sentMessage.getContentAsString(), randomMessage);
+        Assert.assertEquals(mockPublisher.sentMessage.getContent(), randomMessage);
         Assert.assertEquals(mockPublisher.sentMessage.getId(), randomId);
     }
 }

@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.testng.Assert;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BufferingSubscriberTest {
+    // UTF-8 encoding of "bar"
+    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+
     @Getter
     private final static class ExampleBufferingSubscriber extends BufferingSubscriber {
         private List<PubSubMessage> testMessages;
@@ -49,7 +53,7 @@ public class BufferingSubscriberTest {
     }
 
     private static List<PubSubMessage> make(int n) {
-        return IntStream.range(0, n).mapToObj(i -> new PubSubMessage(String.valueOf(i), UUID.randomUUID().toString()))
+        return IntStream.range(0, n).mapToObj(i -> new PubSubMessage(String.valueOf(i), SerializerDeserializer.toBytes(UUID.randomUUID())))
                                     .collect(Collectors.toList());
     }
 
@@ -78,11 +82,11 @@ public class BufferingSubscriberTest {
         // Empty test
         Assert.assertNull(subscriber.receive());
 
-        subscriber.add(Collections.singletonList(new PubSubMessage("foo", "bar")));
+        subscriber.add(Collections.singletonList(new PubSubMessage("foo", CONTENT)));
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getId(), "foo");
-        Assert.assertEquals(actual.getContentAsString(), "bar");
+        Assert.assertEquals(actual.getContent(), CONTENT);
 
         Assert.assertEquals(subscriber.getCallCount(), 8);
     }

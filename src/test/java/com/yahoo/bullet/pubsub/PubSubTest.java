@@ -6,6 +6,7 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,15 +14,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 public class PubSubTest {
+    // UTF-8 encoding of "foo"
+    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+
     @Test
     public void testMockPubSubCreation() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        String mockMessage = UUID.randomUUID().toString();
+        byte[] mockMessage = SerializerDeserializer.toBytes(UUID.randomUUID());
         config.set(MockPubSub.MOCK_MESSAGE_NAME, mockMessage);
         PubSub testPubSub = PubSub.from(config);
 
         Assert.assertEquals(testPubSub.getClass(), MockPubSub.class);
-        Assert.assertEquals(testPubSub.getSubscriber().receive().getContentAsString(), mockMessage);
+        Assert.assertEquals(testPubSub.getSubscriber().receive().getContent(), mockMessage);
     }
 
     @Test(expectedExceptions = PubSubException.class)
@@ -58,23 +62,23 @@ public class PubSubTest {
     @Test
     public void testSwitchingContext() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
-        config.set(MockPubSub.MOCK_MESSAGE_NAME, "");
+        config.set(MockPubSub.MOCK_MESSAGE_NAME, new byte[0]);
         PubSub pubSub = PubSub.from(config);
 
         Assert.assertEquals(pubSub.getClass(), MockPubSub.class);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
-        Assert.assertTrue(pubSub.getSubscriber().receive().getContentAsString().isEmpty());
+        Assert.assertEquals(pubSub.getSubscriber().receive().getContent().length, 0);
 
         // No switch
         pubSub.switchContext(PubSub.Context.QUERY_SUBMISSION, new BulletConfig());
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
-        Assert.assertTrue(pubSub.getSubscriber().receive().getContentAsString().isEmpty());
+        Assert.assertEquals(pubSub.getSubscriber().receive().getContent().length, 0);
 
         // Switch
         BulletConfig newConfig = new BulletConfig("src/test/resources/test_config.yaml");
-        newConfig.set(MockPubSub.MOCK_MESSAGE_NAME, "foo");
+        newConfig.set(MockPubSub.MOCK_MESSAGE_NAME, CONTENT);
         pubSub.switchContext(PubSub.Context.QUERY_PROCESSING, newConfig);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
-        Assert.assertEquals(pubSub.getSubscriber().receive().getContentAsString(), "foo");
+        Assert.assertEquals(pubSub.getSubscriber().receive().getContent(), CONTENT);
     }
 }

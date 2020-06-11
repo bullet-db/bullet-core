@@ -39,6 +39,15 @@ public class MetadataTest {
     }
 
     @Test
+    public void testCreatedTimestamp() {
+        long before = System.currentTimeMillis();
+        Metadata metadata = new Metadata();
+        long after = System.currentTimeMillis();
+        Assert.assertTrue(before <= metadata.getCreated());
+        Assert.assertTrue(after >= metadata.getCreated());
+    }
+
+    @Test
     public void testSetContentWhenEmpty() {
         Metadata empty = new Metadata();
         empty.setContent(5);
@@ -50,5 +59,14 @@ public class MetadataTest {
         Metadata empty = new Metadata();
         empty.setSignal(Signal.ACKNOWLEDGE);
         Assert.assertEquals(empty.getSignal(), Signal.ACKNOWLEDGE);
+    }
+
+    @Test
+    public void testSetCreated() {
+        Metadata metadata = new Metadata();
+        Assert.assertNotEquals(metadata.getCreated(), 0L);
+
+        metadata.setCreated(0L);
+        Assert.assertEquals(metadata.getCreated(), 0L);
     }
 }

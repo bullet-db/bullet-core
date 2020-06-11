@@ -6,12 +6,10 @@
 package com.yahoo.bullet.pubsub;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
 
-@NoArgsConstructor
 public class Metadata implements Serializable {
     public enum Signal {
         ACKNOWLEDGE,
@@ -29,6 +27,13 @@ public class Metadata implements Serializable {
     private Object content;
     @Getter @Setter
     private long created;
+
+    /**
+     * Default constructor to create an empty instance of metadata.
+     */
+    public Metadata() {
+        this.created = System.currentTimeMillis();
+    }
 
     /**
      * Allows you to create an instance with a {@link com.yahoo.bullet.pubsub.Metadata.Signal} and a

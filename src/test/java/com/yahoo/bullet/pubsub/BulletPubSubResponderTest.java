@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 public class BulletPubSubResponderTest {
     private static BulletPubSubResponder mockResponder() {
         BulletConfig config = new BulletConfig("test_config.yaml");
-        config.set(MockPubSub.MOCK_MESSAGE_NAME, "test");
+        config.set(MockPubSub.MOCK_MESSAGE_NAME, new byte[] {1, 2, 3});
         return new BulletPubSubResponder(config);
     }
 
@@ -40,7 +40,7 @@ public class BulletPubSubResponderTest {
     @Test
     public void testResponding() throws Exception {
         BulletPubSubResponder responder = mockResponder();
-        PubSubMessage message = new PubSubMessage("id", "");
+        PubSubMessage message = new PubSubMessage("id", new byte[0]);
         responder.respond("id", message);
         verify(responder.publisher).send(eq(message));
     }
@@ -49,7 +49,7 @@ public class BulletPubSubResponderTest {
     public void testRespondingFailure() throws Exception {
         BulletPubSubResponder responder = mockResponder();
         doThrow(new PubSubException("Testing")).when(responder.publisher).send(any());
-        PubSubMessage message = new PubSubMessage("id", "");
+        PubSubMessage message = new PubSubMessage("id", new byte[0]);
         responder.respond("id", message);
         verify(responder.publisher).send(eq(message));
     }

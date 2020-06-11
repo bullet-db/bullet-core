@@ -35,11 +35,11 @@ public class PubSubResponderTest {
     public void testResponding() {
         PubSubResponder responder = new TestResponder();
         responder.respond("id1", null);
-        responder.respond("id2", new PubSubMessage("id2", ""));
+        responder.respond("id2", new PubSubMessage("id2", new byte[0]));
 
         TestResponder testResponder = (TestResponder) responder;
         Assert.assertNull(testResponder.store.get("id1"));
-        Assert.assertEquals(testResponder.store.get("id2"), new PubSubMessage("id2", ""));
+        Assert.assertEquals(testResponder.store.get("id2"), new PubSubMessage("id2", new byte[0]));
         responder.close();
         Assert.assertTrue(testResponder.store.isEmpty());
     }
