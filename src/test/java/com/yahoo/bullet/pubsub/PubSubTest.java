@@ -14,8 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 public class PubSubTest {
-    // UTF-8 encoding of "foo"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     @Test
     public void testMockPubSubCreation() throws PubSubException {
@@ -79,6 +78,9 @@ public class PubSubTest {
         newConfig.set(MockPubSub.MOCK_MESSAGE_NAME, CONTENT);
         pubSub.switchContext(PubSub.Context.QUERY_PROCESSING, newConfig);
         Assert.assertEquals(pubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
-        Assert.assertEquals(pubSub.getSubscriber().receive().getContent(), CONTENT);
+
+        PubSubMessage message = pubSub.getSubscriber().receive();
+        Assert.assertEquals(message.getContent(), CONTENT);
+        Assert.assertEquals(message.getContentAsString(), "bar");
     }
 }

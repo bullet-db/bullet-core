@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BufferingSubscriberTest {
-    // UTF-8 encoding of "bar"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     @Getter
     private final static class ExampleBufferingSubscriber extends BufferingSubscriber {
@@ -82,11 +81,12 @@ public class BufferingSubscriberTest {
         // Empty test
         Assert.assertNull(subscriber.receive());
 
-        subscriber.add(Collections.singletonList(new PubSubMessage("foo", CONTENT)));
+        subscriber.add(Collections.singletonList(new PubSubMessage("foo", "bar", null)));
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getId(), "foo");
         Assert.assertEquals(actual.getContent(), CONTENT);
+        Assert.assertEquals(actual.getContentAsString(), "bar");
 
         Assert.assertEquals(subscriber.getCallCount(), 8);
     }

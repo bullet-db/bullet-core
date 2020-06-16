@@ -29,10 +29,10 @@ public class Metadata implements Serializable {
     private long created;
 
     /**
-     * Default constructor to create an empty instance of metadata.
+     * Default constructor that creates an empty instance of metadata.
      */
     public Metadata() {
-        this.created = System.currentTimeMillis();
+        created = System.currentTimeMillis();
     }
 
     /**
@@ -43,9 +43,9 @@ public class Metadata implements Serializable {
      * @param object The object that is the metadata.
      */
     public Metadata(Signal signal, Serializable object) {
+        this();
         this.signal = signal;
         this.content = object;
-        this.created = System.currentTimeMillis();
     }
 
     /**

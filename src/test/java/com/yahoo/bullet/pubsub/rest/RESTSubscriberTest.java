@@ -27,8 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTSubscriberTest {
-    // UTF-8 encoding of "bar"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     private CloseableHttpClient mockClient(int responseCode, String message) throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);

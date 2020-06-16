@@ -22,8 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTResultPublisherTest {
-    // UTF-8 encoding of "bar"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     @Test
     public void testSendPullsURLFromMessage() throws Exception {

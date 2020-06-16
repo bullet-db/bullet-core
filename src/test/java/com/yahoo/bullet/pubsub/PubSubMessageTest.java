@@ -7,6 +7,7 @@ package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
+import com.yahoo.bullet.result.Meta;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,8 +18,7 @@ import java.util.UUID;
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
 
 public class PubSubMessageTest {
-    // UTF-8 encoding of "bar"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     private String getRandomString() {
         return UUID.randomUUID().toString();
@@ -46,6 +46,7 @@ public class PubSubMessageTest {
         PubSubMessage message = new PubSubMessage(messageID, Signal.KILL);
         Assert.assertEquals(message.getId(), messageID);
         Assert.assertNull(message.getContent());
+        Assert.assertNull(message.getContentAsString());
         Assert.assertNotNull(message.getMetadata());
         Assert.assertEquals(message.getMetadata().getSignal(), Signal.KILL);
         Assert.assertNull(message.getMetadata().getContent());
@@ -93,6 +94,9 @@ public class PubSubMessageTest {
 
         message = new PubSubMessage(messageID, null, Signal.COMPLETE);
         Assert.assertFalse(message.hasContent());
+
+        message = new PubSubMessage(messageID, (String) null, null);
+        Assert.assertFalse(message.hasContent());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -139,7 +143,7 @@ public class PubSubMessageTest {
         Assert.assertTrue(message.hasMetadata());
         Assert.assertTrue(message.hasSignal(Signal.COMPLETE));
 
-        message = new PubSubMessage(messageID, null, new Metadata());
+        message = new PubSubMessage(messageID, (byte[]) null, new Metadata());
         Assert.assertTrue(message.hasMetadata());
         Assert.assertFalse(message.hasSignal());
     }
@@ -195,9 +199,10 @@ public class PubSubMessageTest {
         String bar = "[98,97,114]";
         PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': " + bar + ", 'metadata': " +
                                                       "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
-        PubSubMessage expected = new PubSubMessage("foo", CONTENT);
+        PubSubMessage expected = new PubSubMessage("foo", "bar", null);
         Assert.assertEquals(actual, expected);
         Assert.assertEquals(actual.getContent(), CONTENT);
+        Assert.assertEquals(actual.getContentAsString(), "bar");
 
         Assert.assertTrue(actual.hasMetadata());
         Assert.assertTrue(actual.hasSignal());

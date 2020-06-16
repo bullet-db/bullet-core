@@ -28,8 +28,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 public class RESTQueryPublisherTest {
-    // UTF-8 encoding of "bar"
-    private static final byte[] CONTENT = new byte[] {98, 97, 114};
+    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
 
     @Test
     public void testSendResultUrlPutInMetadataAckPreserved() throws Exception {

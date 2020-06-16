@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -19,6 +21,7 @@ import java.util.Objects;
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final long serialVersionUID = -5068189058170874687L;
 
     private String id;
@@ -65,7 +68,18 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Constructor for a message having content, {@link Metadata} and a sequence number.
+     * Constructor for a message having content as a String and {@link Metadata}.
+     *
+     * @param id The ID associated with the message.
+     * @param content The content of the message as a String.
+     * @param metadata The Metadata associated with the message.
+     */
+    public PubSubMessage(String id, String content, Metadata metadata) {
+        this(id, content == null ? null : content.getBytes(CHARSET), metadata);
+    }
+
+    /**
+     * Constructor for a message having content and {@link Metadata}.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.
@@ -112,6 +126,16 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      */
     public boolean hasSignal() {
         return hasMetadata() && metadata.hasSignal();
+    }
+
+    /**
+     * Returns the content stored in the message as a String. You should use this to read the String back from the
+     * message if you provided it originally to the message as a String.
+     *
+     * @return The content stored as a String using the {@link PubSubMessage#CHARSET}.
+     */
+    public String getContentAsString() {
+        return content == null ? null : new String(content, CHARSET);
     }
 
     @Override

@@ -699,13 +699,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 20L);
 
         // This will reset
         querier.reset();
@@ -714,7 +714,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 5L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 5L);
     }
 
     @Test
@@ -735,13 +735,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 20L);
 
         // This will not reset
         querier.reset();
@@ -750,7 +750,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 25L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 25L);
     }
 
     @Test
