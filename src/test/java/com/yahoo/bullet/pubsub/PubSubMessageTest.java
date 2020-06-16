@@ -7,7 +7,6 @@ package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
-import com.yahoo.bullet.result.Meta;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
