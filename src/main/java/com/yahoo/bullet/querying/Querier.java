@@ -313,28 +313,6 @@ public class Querier implements Monoidal {
     private BulletRecordProvider provider;
 
     /**
-     * Constructor that takes a query and a configuration to use. This also starts the query.
-     *
-     * @param id The query ID.
-     * @param query The query object.
-     * @param config The validated {@link BulletConfig} configuration to use.
-     */
-    public Querier(String id, Query query, BulletConfig config) {
-        this(Mode.ALL, new RunningQuery(id, query), config);
-    }
-
-    /**
-     * Constructor that takes a query and a configuration to use. This also starts the query.
-     *
-     * @param mode The mode for this querier.
-     * @param id The query ID.
-     * @param query The query object.
-     * @param config The validated {@link BulletConfig} configuration to use.
-     */
-    public Querier(Mode mode, String id, Query query, BulletConfig config) {
-        this(mode, new RunningQuery(id, query), config);
-    }
-    /**
      * Constructor that takes a {@link RunningQuery} instance and a configuration to use. This also starts executing
      * the query.
      *
@@ -398,8 +376,6 @@ public class Querier implements Monoidal {
 
         // Scheme is guaranteed to not be null. It is constructed in its "start" state.
         window = query.getWindow().getScheme(strategy, config);
-
-        runningQuery.start();
     }
 
     /**
@@ -409,9 +385,7 @@ public class Querier implements Monoidal {
      * Join phase. This does not revalidate the query or reset any data this might have already consumed.
      */
     public void restart() {
-        // Only timestamps are in RunningQuery and Scheme.
-        // For RunningQuery, we just need to fix the start time.
-        runningQuery.start();
+        // Currently, only necessary to mark the correct start of Tumbling and AdditiveTumbling windows.
         window.start();
     }
 
@@ -675,7 +649,8 @@ public class Querier implements Monoidal {
         }
         Map<String, Object> meta = new HashMap<>();
         addIfNonNull(meta, metaKeys, Concept.QUERY_ID, runningQuery::getId);
-        addIfNonNull(meta, metaKeys, Concept.QUERY_BODY, runningQuery::toString);
+        addIfNonNull(meta, metaKeys, Concept.QUERY_OBJECT, runningQuery::toString);
+        addIfNonNull(meta, metaKeys, Concept.QUERY_STRING, runningQuery::getQueryString);
         addIfNonNull(meta, metaKeys, Concept.QUERY_RECEIVE_TIME, runningQuery::getStartTime);
         return new Meta().add(metaKey, meta);
     }

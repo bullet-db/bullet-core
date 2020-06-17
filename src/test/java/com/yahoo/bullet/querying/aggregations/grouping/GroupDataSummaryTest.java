@@ -42,7 +42,7 @@ public class GroupDataSummaryTest {
         Map<GroupOperation, Number> map = new HashMap<>(types.size());
         for (int i = 0; i < types.size(); ++i) {
             GroupOperation.GroupOperationType type = types.get(i);
-            map.put(new GroupOperation(type, "metric_" + i, type.getName() + "_metric_" + i), null);
+            map.put(new GroupOperation(type, "metric_" + i, type + "_metric_" + i), null);
         }
         return map;
     }

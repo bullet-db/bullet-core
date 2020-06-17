@@ -7,6 +7,7 @@ package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfigTest;
 import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.query.Field;
 import com.yahoo.bullet.query.Projection;
 import com.yahoo.bullet.query.Query;
@@ -133,7 +134,7 @@ public class QuerierTest {
     }
 
     private static Querier make(Querier.Mode mode, String id, Query query, BulletConfig config) {
-        return new Querier(mode, id, query, config);
+        return new Querier(mode, makeRunningQuery(id, query), config);
     }
 
     private static Querier make(Querier.Mode mode, Query query, BulletConfig config) {
@@ -153,6 +154,10 @@ public class QuerierTest {
         return make(mode, id, query, config);
     }
 
+    private static RunningQuery makeRunningQuery(String id, Query query) {
+        return new RunningQuery(id, query, new Metadata());
+    }
+
     private static Query makeRawQuery() {
         return new Query(new Projection(), null, new Raw(null), null, new Window(), null);
     }
@@ -164,7 +169,7 @@ public class QuerierTest {
         Query query = new Query(new Projection(), null, groupAll, null, window, null);
         query.configure(config);
 
-        RunningQuery runningQuery = spy(new RunningQuery("", query));
+        RunningQuery runningQuery = spy(makeRunningQuery("", query));
         Mockito.doReturn(false).when(runningQuery).isTimedOut();
 
         return runningQuery;
@@ -190,7 +195,8 @@ public class QuerierTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullConfig() {
-        new Querier("", new Query(new Projection(), null, new Raw(null), null, new Window(), null), null);
+        RunningQuery query = makeRunningQuery("", new Query(new Projection(), null, new Raw(null), null, new Window(), null));
+        new Querier(query, null);
     }
 
     @Test
@@ -324,7 +330,7 @@ public class QuerierTest {
         BulletConfig config = new BulletConfig();
         query.configure(config);
 
-        Querier querier = new Querier("", query, config);
+        Querier querier = new Querier(makeRunningQuery("", query), config);
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "3"));
         querier.consume(boxA.getRecord());
         Assert.assertFalse(querier.isClosed());
@@ -344,7 +350,7 @@ public class QuerierTest {
         BulletConfig config = new BulletConfig();
         query.configure(config);
 
-        Querier querier = new Querier(new RunningQuery("", query), config);
+        Querier querier = new Querier(makeRunningQuery("", query), config);
         RecordBox boxA = RecordBox.get().addMap("map_field", Pair.of("id", "23"));
         BulletRecord expected = boxA.getRecord().copy();
         expected.setString("mid", "23");
@@ -659,7 +665,7 @@ public class QuerierTest {
         Query query = makeRawQuery();
         query.configure(config);
 
-        RunningQuery runningQuery = spy(new RunningQuery("", query));
+        RunningQuery runningQuery = spy(makeRunningQuery("", query));
         Mockito.doAnswer(AdditionalAnswers.returnsElementsOf(Arrays.asList(false, true))).when(runningQuery).isTimedOut();
 
         Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
@@ -693,13 +699,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 20L);
 
         // This will reset
         querier.reset();
@@ -708,7 +714,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 5L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 5L);
     }
 
     @Test
@@ -729,13 +735,13 @@ public class QuerierTest {
         List<BulletRecord> result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         BulletRecord record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 10L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 10L);
 
         IntStream.range(0, 10).forEach(i -> querier.consume(RecordBox.get().getRecord()));
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 20L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 20L);
 
         // This will not reset
         querier.reset();
@@ -744,7 +750,7 @@ public class QuerierTest {
         result = querier.getResult().getRecords();
         Assert.assertEquals(result.size(), 1);
         record = result.get(0);
-        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.getName()).getValue(), 25L);
+        Assert.assertEquals(record.typedGet(GroupOperation.GroupOperationType.COUNT.toString()).getValue(), 25L);
     }
 
     @Test
@@ -755,9 +761,8 @@ public class QuerierTest {
 
         Query query = new Query(new Projection(), null, new Raw(null), null, WindowUtils.makeTumblingWindow(1), null);
         query.configure(config);
-        RunningQuery runningQuery = new RunningQuery("", query);
 
-        Querier querier = new Querier(Querier.Mode.ALL, runningQuery, config);
+        Querier querier = new Querier(Querier.Mode.ALL, makeRunningQuery("", query), config);
 
         querier.consume(RecordBox.get().getRecord());
         Assert.assertEquals(querier.getRecords().size(), 1);
@@ -781,7 +786,8 @@ public class QuerierTest {
         queryMeta = (Map<String, Object>) meta.asMap().get(mapping.get(Meta.Concept.QUERY_METADATA.getName()));
         Assert.assertEquals(windowMeta.get(mapping.get(Meta.Concept.WINDOW_NUMBER.getName())), 1L);
         long newStartTime = (Long) queryMeta.get(mapping.get(Meta.Concept.QUERY_RECEIVE_TIME.getName()));
-        Assert.assertTrue(newStartTime > startTime);
+        // Querier#restart() no longer updates the query's start time
+        Assert.assertEquals(newStartTime, startTime);
 
         querier.reset();
         meta = querier.getMetadata();

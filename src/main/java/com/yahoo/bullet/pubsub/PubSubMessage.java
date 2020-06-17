@@ -17,8 +17,7 @@ import java.util.Objects;
 
 /**
  * The class of messages that can be understood by the PubSub package. The id should be set to the query ID generated
- * by the web service for Bullet queries. The sequence identifies individual segments if a multi-part response is
- * emitted by Bullet.
+ * by the web service for Bullet queries.
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
@@ -34,16 +33,16 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * Constructor for a message having no information. Used internally. Not recommended for use.
      */
     public PubSubMessage() {
-        this("", (String) null);
+        this("", (byte[]) null);
     }
 
     /**
      * Constructor for a message having only content.
      *
      * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
+     * @param content The content of the message.
      */
-    public PubSubMessage(String id, String content) {
+    public PubSubMessage(String id, byte[] content) {
         this(id, content, (Metadata) null);
     }
 
@@ -54,18 +53,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param signal The signal only for the Metadata.
      */
     public PubSubMessage(String id, Signal signal) {
-        this(id, (byte[]) null, signal);
-    }
-
-    /**
-     * Constructor for a message having content and a {@link Metadata.Signal}.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     * @param signal The Signal to be sent with the message.
-     */
-    public PubSubMessage(String id, String content, Signal signal) {
-        this(id, content, new Metadata(signal, null));
+        this(id, null, signal);
     }
 
     /**
@@ -80,7 +68,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Constructor for a message having content, {@link Metadata} and a sequence number.
+     * Constructor for a message having content as a String and {@link Metadata}.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message as a String.
@@ -91,7 +79,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Constructor for a message having content, {@link Metadata} and a sequence number.
+     * Constructor for a message having content and {@link Metadata}.
      *
      * @param id The ID associated with the message.
      * @param content The content of the message.

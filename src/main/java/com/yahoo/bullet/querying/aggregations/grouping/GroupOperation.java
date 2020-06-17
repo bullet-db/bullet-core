@@ -5,7 +5,6 @@
  */
 package com.yahoo.bullet.querying.aggregations.grouping;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -26,17 +25,14 @@ import static java.util.Arrays.asList;
 public class GroupOperation implements Serializable {
     private static final long serialVersionUID = 40039294765462402L;
 
-    @Getter @AllArgsConstructor
     public enum GroupOperationType {
-        COUNT("COUNT"),
-        SUM("SUM"),
-        MIN("MIN"),
-        MAX("MAX"),
-        AVG("AVG"),
+        COUNT,
+        SUM,
+        MIN,
+        MAX,
+        AVG,
         // COUNT_FIELD operation is only used internally in conjunction with AVG and won't be returned.
-        COUNT_FIELD("COUNT_FIELD");
-
-        private String name;
+        COUNT_FIELD;
     }
 
     public interface GroupOperator extends BiFunction<Number, Number, Number> {
@@ -99,7 +95,7 @@ public class GroupOperation implements Serializable {
     @Override
     public int hashCode() {
         // Not relying on Enum hashcode
-        return Objects.hash(type.getName(), field);
+        return Objects.hash(type.ordinal(), field);
     }
 
     @Override

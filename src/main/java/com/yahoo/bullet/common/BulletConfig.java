@@ -110,7 +110,7 @@ public class BulletConfig extends Config {
     public static final List<Map<String, String>> DEFAULT_RESULT_METADATA_METRICS =
         makeMetadata(ImmutablePair.of(Concept.QUERY_METADATA, "Query"),
                      ImmutablePair.of(Concept.QUERY_ID, "ID"),
-                     ImmutablePair.of(Concept.QUERY_BODY, "Body"),
+                     ImmutablePair.of(Concept.QUERY_STRING, "Query String"),
                      ImmutablePair.of(Concept.QUERY_RECEIVE_TIME, "Receive Time"),
                      ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Finish Time"),
                      ImmutablePair.of(Concept.SKETCH_METADATA, "Sketch"),

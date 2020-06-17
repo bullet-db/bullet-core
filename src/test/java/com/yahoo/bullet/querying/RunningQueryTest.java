@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.query.Projection;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.Window;
@@ -20,9 +21,10 @@ public class RunningQueryTest {
         Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
 
-        RunningQuery runningQuery = new RunningQuery("foo", query);
+        RunningQuery runningQuery = new RunningQuery("foo", query, new Metadata(null, "bar"));
         Assert.assertEquals(runningQuery.getId(), "foo");
         Assert.assertNotNull(runningQuery.getQuery());
+        Assert.assertEquals(runningQuery.getQueryString(), "bar");
         Assert.assertEquals(runningQuery.toString(), query.toString());
     }
 
@@ -33,8 +35,7 @@ public class RunningQueryTest {
         Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config);
 
-        RunningQuery runningQuery = new RunningQuery("foo", query);
-        runningQuery.start();
+        RunningQuery runningQuery = new RunningQuery("foo", query, new Metadata(null, null));
 
         long end = System.currentTimeMillis();
         Assert.assertTrue(runningQuery.getStartTime() >= start);
@@ -48,8 +49,7 @@ public class RunningQueryTest {
         Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), 1L);
         query.configure(config);
 
-        RunningQuery runningQuery = new RunningQuery("foo", query);
-        runningQuery.start();
+        RunningQuery runningQuery = new RunningQuery("foo", query, new Metadata(null, null));
 
         // Sleep to make sure it's 1 ms
         Thread.sleep(1);
