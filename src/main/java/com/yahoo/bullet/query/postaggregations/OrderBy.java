@@ -7,6 +7,7 @@ package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.common.Utilities;
+import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.querying.postaggregations.OrderByStrategy;
 import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import lombok.Getter;
@@ -28,23 +29,23 @@ public class OrderBy extends PostAggregation {
     public static class SortItem implements Serializable {
         private static final long serialVersionUID = 4024279669854156179L;
 
-        private String field;
+        private Expression expression;
         private Direction direction;
 
         /**
          * Constructor that creates an {@link OrderBy} item.
          *
-         * @param field The non-null field to sort by.
+         * @param expression The non-null expression to sort by.
          * @param direction The non-null direction to sort by.
          */
-        public SortItem(String field, Direction direction) {
-            this.field = Objects.requireNonNull(field);
+        public SortItem(Expression expression, Direction direction) {
+            this.expression = Objects.requireNonNull(expression);
             this.direction = Objects.requireNonNull(direction);
         }
 
         @Override
         public String toString() {
-            return "{field: " + field + ", direction: " + direction + "}";
+            return "{expression: " + expression + ", direction: " + direction + "}";
         }
     }
 
