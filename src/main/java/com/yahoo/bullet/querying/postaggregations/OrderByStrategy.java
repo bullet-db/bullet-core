@@ -13,7 +13,6 @@ import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -27,27 +26,27 @@ public class OrderByStrategy implements PostStrategy {
     private final Comparator<BulletRecord> comparator;
     private final List<Evaluator> evaluators;
     private final List<OrderBy.Direction> directions;
-    private final Map<BulletRecord, LazyList> mapping;
+    private final Map<BulletRecord, LazyArray> mapping;
     private final int numFields;
 
-    class LazyList {
+    class LazyArray {
         private final BulletRecord record;
-        private final List<TypedObject> values;
+        private final TypedObject[] values;
 
-        LazyList(BulletRecord record, int capacity) {
+        LazyArray(BulletRecord record, int capacity) {
             this.record = record;
-            this.values = new ArrayList<>(capacity);
+            this.values = new TypedObject[capacity];
         }
 
         TypedObject get(int index) {
-            TypedObject value = values.get(index);
+            TypedObject value = values[index];
             if (value == null) {
                 try {
                     value = evaluators.get(index).evaluate(record);
                 } catch (Exception e) {
                     value = TypedObject.NULL;
                 }
-                values.set(index, value);
+                values[index] = value;
             }
             return value;
         }
@@ -69,7 +68,7 @@ public class OrderByStrategy implements PostStrategy {
     @Override
     public Clip execute(Clip clip) {
         List<BulletRecord> records = clip.getRecords();
-        records.forEach(record -> mapping.put(record, new LazyList(record, numFields)));
+        records.forEach(record -> mapping.put(record, new LazyArray(record, numFields)));
         records.sort(comparator);
         mapping.clear();
         return clip;
@@ -77,12 +76,12 @@ public class OrderByStrategy implements PostStrategy {
 
     private Comparator<BulletRecord> getComparator() {
         return (a, b) -> {
-            LazyList lazyListA = mapping.get(a);
-            LazyList lazyListB = mapping.get(b);
+            LazyArray lazyArrayA = mapping.get(a);
+            LazyArray lazyArrayB = mapping.get(b);
             int c;
             for (int i = 0; i < numFields; i++) {
-                c = directions.get(i) == OrderBy.Direction.ASC ? NULLS_FIRST.compare(lazyListA.get(i), lazyListB.get(i))
-                                                               : NULLS_FIRST.compare(lazyListB.get(i), lazyListA.get(i));
+                c = directions.get(i) == OrderBy.Direction.ASC ? NULLS_FIRST.compare(lazyArrayA.get(i), lazyArrayB.get(i))
+                                                               : NULLS_FIRST.compare(lazyArrayB.get(i), lazyArrayA.get(i));
                 if (c != 0) {
                     return c;
                 }

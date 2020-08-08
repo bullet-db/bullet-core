@@ -6,6 +6,7 @@
 package com.yahoo.bullet.query.postaggregations;
 
 import com.yahoo.bullet.common.BulletException;
+import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.querying.postaggregations.OrderByStrategy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,12 +17,13 @@ import java.util.Collections;
 public class OrderByTest {
     @Test
     public void testOrderBy() {
-        OrderBy orderBy = new OrderBy(Arrays.asList(new OrderBy.SortItem("1", OrderBy.Direction.ASC), new OrderBy.SortItem("2", OrderBy.Direction.DESC)));
+        OrderBy orderBy = new OrderBy(Arrays.asList(new OrderBy.SortItem(new FieldExpression("1"), OrderBy.Direction.ASC),
+                                                    new OrderBy.SortItem(new FieldExpression("2"), OrderBy.Direction.DESC)));
 
         Assert.assertEquals(orderBy.getFields().size(), 2);
         Assert.assertEquals(orderBy.getType(), PostAggregationType.ORDER_BY);
         Assert.assertTrue(orderBy.getPostStrategy() instanceof OrderByStrategy);
-        Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{field: 1, direction: ASC}, {field: 2, direction: DESC}]}");
+        Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{expression: {field: 1, index: null, key: null, subKey: null, type: null}, direction: ASC}, {expression: {field: 2, index: null, key: null, subKey: null, type: null}, direction: DESC}]}");
     }
 
     @Test(expectedExceptions = NullPointerException.class)

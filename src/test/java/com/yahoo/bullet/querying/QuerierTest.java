@@ -800,7 +800,7 @@ public class QuerierTest {
     @Test
     public void testOrderBy() {
         Expression filter = new UnaryExpression(new FieldExpression("a"), Operation.IS_NOT_NULL);
-        OrderBy orderBy = new OrderBy(Collections.singletonList(new OrderBy.SortItem("a", OrderBy.Direction.DESC)));
+        OrderBy orderBy = new OrderBy(Collections.singletonList(new OrderBy.SortItem(new FieldExpression("a"), OrderBy.Direction.DESC)));
         Query query = new Query(new Projection(), filter, new Raw(500), Collections.singletonList(orderBy), new Window(), null);
 
         Querier querier = make(Querier.Mode.ALL, query);
