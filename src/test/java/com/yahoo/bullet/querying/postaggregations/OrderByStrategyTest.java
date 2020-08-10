@@ -143,7 +143,7 @@ public class OrderByStrategyTest {
     }
 
     @Test
-    public void testOrderByWithComputations1() {
+    public void testOrderByComputationWithSingleField() {
         OrderByStrategy orderByStrategy = makeOrderBy(Arrays.asList(new OrderBy.SortItem(new BinaryExpression(new FieldExpression("a"), new ValueExpression(-1), Operation.MUL), OrderBy.Direction.ASC),
                                                                     new OrderBy.SortItem(new BinaryExpression(new FieldExpression("b"), new ValueExpression(-1), Operation.MUL), OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
@@ -166,7 +166,7 @@ public class OrderByStrategyTest {
     }
 
     @Test
-    public void testOrderByWithComputations2() {
+    public void testOrderByComputationWithMultipleFields() {
         OrderByStrategy orderByStrategy = makeOrderBy(Collections.singletonList(new OrderBy.SortItem(new BinaryExpression(new FieldExpression("a"), new FieldExpression("b"), Operation.ADD), OrderBy.Direction.DESC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", 5).add("b", 2).getRecord());
@@ -188,7 +188,7 @@ public class OrderByStrategyTest {
     }
 
     @Test
-    public void testOrderByWithComputationsAndSomeMissingField() {
+    public void testOrderByComputationWithMissingField() {
         OrderByStrategy orderByStrategy = makeOrderBy(Collections.singletonList(new OrderBy.SortItem(new UnaryExpression(new FieldExpression("a"), Operation.SIZE_OF), OrderBy.Direction.ASC)));
         List<BulletRecord> records = new ArrayList<>();
         records.add(RecordBox.get().add("a", "hello").getRecord());

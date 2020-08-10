@@ -27,18 +27,18 @@ public class OrderByStrategy implements PostStrategy {
     private final List<Evaluator> evaluators;
     private final List<OrderBy.Direction> directions;
     private final Map<BulletRecord, LazyArray> mapping;
-    private final int numFields;
+    private final int numberOfFields;
 
-    class LazyArray {
+    private class LazyArray {
         private final BulletRecord record;
         private final TypedObject[] values;
 
-        LazyArray(BulletRecord record, int capacity) {
+        private LazyArray(BulletRecord record, int capacity) {
             this.record = record;
             this.values = new TypedObject[capacity];
         }
 
-        TypedObject get(int index) {
+        private TypedObject get(int index) {
             TypedObject value = values[index];
             if (value == null) {
                 try {
@@ -61,14 +61,14 @@ public class OrderByStrategy implements PostStrategy {
         evaluators = orderBy.getFields().stream().map(OrderBy.SortItem::getExpression).map(Expression::getEvaluator).collect(Collectors.toList());
         directions = orderBy.getFields().stream().map(OrderBy.SortItem::getDirection).collect(Collectors.toList());
         mapping = new HashMap<>();
-        numFields = orderBy.getFields().size();
+        numberOfFields = orderBy.getFields().size();
         comparator = getComparator();
     }
 
     @Override
     public Clip execute(Clip clip) {
         List<BulletRecord> records = clip.getRecords();
-        records.forEach(record -> mapping.put(record, new LazyArray(record, numFields)));
+        records.forEach(record -> mapping.put(record, new LazyArray(record, numberOfFields)));
         records.sort(comparator);
         mapping.clear();
         return clip;
@@ -79,7 +79,7 @@ public class OrderByStrategy implements PostStrategy {
             LazyArray lazyArrayA = mapping.get(a);
             LazyArray lazyArrayB = mapping.get(b);
             int c;
-            for (int i = 0; i < numFields; i++) {
+            for (int i = 0; i < numberOfFields; i++) {
                 c = directions.get(i) == OrderBy.Direction.ASC ? NULLS_FIRST.compare(lazyArrayA.get(i), lazyArrayB.get(i))
                                                                : NULLS_FIRST.compare(lazyArrayB.get(i), lazyArrayA.get(i));
                 if (c != 0) {
