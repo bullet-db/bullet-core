@@ -22,11 +22,9 @@ public class MetadataTest {
     public void testSignalTypes() {
         Metadata empty = new Metadata();
         Assert.assertFalse(empty.hasSignal());
-
         Assert.assertTrue(new Metadata(Signal.ACKNOWLEDGE, null).hasSignal(Signal.ACKNOWLEDGE));
         Assert.assertTrue(new Metadata(Signal.FAIL, null).hasSignal(Signal.FAIL));
         Assert.assertTrue(new Metadata(Signal.COMPLETE, null).hasSignal(Signal.COMPLETE));
-
         Assert.assertFalse(new Metadata(Signal.ACKNOWLEDGE, null).hasSignal(Signal.FAIL));
     }
 

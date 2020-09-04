@@ -5,7 +5,11 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,6 +28,9 @@ import java.util.List;
 
 @Slf4j
 public class RESTSubscriber extends BufferingSubscriber {
+    private static final JsonDeserializer<Metadata> METADATA_DESERIALIZER = (item, type, context) -> context.deserialize(item, RESTMetadata.class);
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(Metadata.class, METADATA_DESERIALIZER).create();
+
     @Getter(AccessLevel.PACKAGE)
     private List<String> urls;
     private CloseableHttpClient client;
@@ -65,7 +72,7 @@ public class RESTSubscriber extends BufferingSubscriber {
                     HttpEntity httpEntity = response.getEntity();
                     String message = EntityUtils.toString(httpEntity, RESTPubSub.UTF_8);
                     log.debug("Received message from url: {}. Message was {}", url, message);
-                    messages.add(PubSubMessage.fromJSON(message));
+                    messages.add(GSON.fromJson(message, PubSubMessage.class));
                     EntityUtils.consume(httpEntity);
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem
