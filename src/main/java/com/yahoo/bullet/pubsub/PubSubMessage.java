@@ -63,7 +63,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param content The content of the message as a String.
      */
     public PubSubMessage(String id, String content) {
-        this(id, content == null ? null : content.getBytes(CHARSET));
+        this(id, content, null);
     }
 
     /**

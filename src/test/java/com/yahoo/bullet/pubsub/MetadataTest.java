@@ -67,4 +67,13 @@ public class MetadataTest {
         metadata.setCreated(0L);
         Assert.assertEquals(metadata.getCreated(), 0L);
     }
+
+    @Test
+    public void testCopy() {
+        Metadata metadata = new Metadata(Signal.CUSTOM, "foo");
+        Metadata copy = metadata.copy();
+        Assert.assertNotEquals(metadata, copy);
+        Assert.assertEquals(metadata.getSignal(), copy.getSignal());
+        Assert.assertEquals(metadata.getContent(), copy.getContent());
+    }
 }
