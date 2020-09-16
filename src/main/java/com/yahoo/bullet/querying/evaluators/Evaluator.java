@@ -8,11 +8,15 @@ package com.yahoo.bullet.querying.evaluators;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
+
 /**
  * Evaluators are built from expressions. They are evaluated given a {@link BulletRecord} and will throw exceptions on
  * any errors which are most likely to be the result of missing fields or incorrect types.
  */
-public abstract class Evaluator {
+public abstract class Evaluator implements Serializable {
+    private static final long serialVersionUID = 8998958368200061680L;
+
     /**
      * Evaluates this evaluator on the given {@link BulletRecord}.
      *

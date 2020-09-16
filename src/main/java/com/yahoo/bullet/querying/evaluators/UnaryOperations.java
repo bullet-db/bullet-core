@@ -10,6 +10,7 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public class UnaryOperations {
     @FunctionalInterface
-    public interface UnaryOperator {
+    public interface UnaryOperator extends Serializable {
         TypedObject apply(Evaluator evaluator, BulletRecord record);
     }
 

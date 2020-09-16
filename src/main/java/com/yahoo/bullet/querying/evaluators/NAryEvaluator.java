@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
  * An evaluator that applies an n-ary operator to the results of a list of evaluators.
  */
 public class NAryEvaluator extends Evaluator {
+    private static final long serialVersionUID = 54879052369401372L;
+
     final List<Evaluator> operands;
     final NAryOperations.NAryOperator op;
 

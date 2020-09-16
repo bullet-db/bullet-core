@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
  */
 public class BinaryOperations {
     @FunctionalInterface
-    public interface BinaryOperator {
+    public interface BinaryOperator extends Serializable {
         TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
     }
 

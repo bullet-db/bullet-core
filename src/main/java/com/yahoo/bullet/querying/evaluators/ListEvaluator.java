@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
  * An evaluator that returns a list of the results of a list of evaluators.
  */
 public class ListEvaluator extends Evaluator {
+    private static final long serialVersionUID = -2945310695360542354L;
+
     final List<Evaluator> evaluators;
 
     /**

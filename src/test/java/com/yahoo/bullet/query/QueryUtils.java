@@ -77,10 +77,14 @@ public class QueryUtils {
         return makeSimpleAggregationFilterQuery(null, size, emit, emitValue, include, includeValue);
     }
 
-    public static Query makeFilterQuery(Expression filter) {
-        Query query = new Query(new Projection(), filter, new Raw(1), null, new Window(), null);
+    public static Query makeFilterQuery(Expression filter, Integer size) {
+        Query query = new Query(new Projection(), filter, new Raw(size), null, new Window(), null);
         query.configure(new BulletConfig());
         return query;
+    }
+
+    public static Query makeFilterQuery(Expression filter) {
+        return makeFilterQuery(filter, 1);
     }
 
     public static Query makeFilterQuery(String field, List<Serializable> values, Operation op) {
@@ -90,8 +94,12 @@ public class QueryUtils {
         return makeFilterQuery(filter);
     }
 
+    public static Query makeFieldFilterQuery(Serializable value, Integer size) {
+        return makeFilterQuery(new BinaryExpression(new FieldExpression("field"), new ValueExpression(value), Operation.EQUALS), size);
+    }
+
     public static Query makeFieldFilterQuery(Serializable value) {
-        return makeFilterQuery(new BinaryExpression(new FieldExpression("field"), new ValueExpression(value), Operation.EQUALS));
+        return makeFieldFilterQuery(value, 1);
     }
 
     public static Query makeRawQuery(Integer size) {

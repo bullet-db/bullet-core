@@ -14,6 +14,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
  * An evaluator that force casts the result of an evaluator to a given type.
  */
 public class CastEvaluator extends Evaluator {
+    private static final long serialVersionUID = -7527404049388459123L;
+
     final Evaluator value;
     final Type castType;
 

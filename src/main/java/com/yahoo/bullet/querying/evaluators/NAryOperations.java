@@ -10,13 +10,14 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 public class NAryOperations {
     @FunctionalInterface
-    public interface NAryOperator {
+    public interface NAryOperator extends Serializable {
         TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
     }
 
