@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
  */
 public class BinaryOperations {
     @FunctionalInterface
-    public interface BinaryOperator {
+    public interface BinaryOperator extends Serializable {
         TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
     }
 
@@ -60,6 +60,7 @@ public class BinaryOperations {
         BINARY_OPERATORS.put(Operation.CONTAINS_KEY, BinaryOperations::containsKey);
         BINARY_OPERATORS.put(Operation.CONTAINS_VALUE, BinaryOperations::containsValue);
         BINARY_OPERATORS.put(Operation.IN, BinaryOperations::in);
+        BINARY_OPERATORS.put(Operation.NOT_IN, BinaryOperations::notIn);
         BINARY_OPERATORS.put(Operation.AND, BinaryOperations::and);
         BINARY_OPERATORS.put(Operation.OR, BinaryOperations::or);
         BINARY_OPERATORS.put(Operation.XOR, BinaryOperations::xor);
@@ -285,6 +286,12 @@ public class BinaryOperations {
         TypedObject leftValue = left.evaluate(record);
         TypedObject rightValue = right.evaluate(record);
         return new TypedObject(Type.BOOLEAN, rightValue.containsValue(leftValue));
+    };
+
+    static TypedObject notIn(Evaluator left, Evaluator right, BulletRecord record) {
+        TypedObject leftValue = left.evaluate(record);
+        TypedObject rightValue = right.evaluate(record);
+        return new TypedObject(Type.BOOLEAN, !rightValue.containsValue(leftValue));
     };
 
     static TypedObject and(Evaluator left, Evaluator right, BulletRecord record) {

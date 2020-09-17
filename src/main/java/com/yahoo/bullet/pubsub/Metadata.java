@@ -49,6 +49,15 @@ public class Metadata implements Serializable {
     }
 
     /**
+     * Returns a copy of the current metadata. Subclasses should override this method.
+     *
+     * @return A copy of this {@link Metadata}.
+     */
+    public Metadata copy() {
+        return new Metadata(signal, (Serializable) content);
+    }
+
+    /**
      * Set a serializable content for this metadata.
      *
      * @param content The content for this metadata.

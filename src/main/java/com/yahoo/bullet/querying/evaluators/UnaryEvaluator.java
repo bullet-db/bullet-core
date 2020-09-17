@@ -13,6 +13,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
  * An evaluator that applies a unary operator to the result of an evaluator.
  */
 public class UnaryEvaluator extends Evaluator {
+    private static final long serialVersionUID = -4008832651046022947L;
+
     final Evaluator operand;
     final UnaryOperations.UnaryOperator op;
 

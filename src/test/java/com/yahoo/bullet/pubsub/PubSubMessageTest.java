@@ -94,7 +94,7 @@ public class PubSubMessageTest {
         message = new PubSubMessage(messageID, null, Signal.COMPLETE);
         Assert.assertFalse(message.hasContent());
 
-        message = new PubSubMessage(messageID, (String) null, null);
+        message = new PubSubMessage(messageID, (String) null);
         Assert.assertFalse(message.hasContent());
     }
 
@@ -198,7 +198,7 @@ public class PubSubMessageTest {
         String bar = "[98,97,114]";
         PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': " + bar + ", 'metadata': " +
                                                       "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
-        PubSubMessage expected = new PubSubMessage("foo", "bar", null);
+        PubSubMessage expected = new PubSubMessage("foo", "bar");
         Assert.assertEquals(actual, expected);
         Assert.assertEquals(actual.getContent(), CONTENT);
         Assert.assertEquals(actual.getContentAsString(), "bar");

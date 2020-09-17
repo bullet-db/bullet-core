@@ -13,6 +13,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
  * An evaluator that returns a constant value.
  */
 public class ValueEvaluator extends Evaluator {
+    private static final long serialVersionUID = -1689526286716310223L;
+
     final TypedObject value;
 
     /**

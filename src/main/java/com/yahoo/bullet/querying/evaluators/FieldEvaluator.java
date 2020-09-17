@@ -9,13 +9,17 @@ import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
+import java.io.Serializable;
+
 /**
  * An evaluator that extracts a given field from a {@link BulletRecord}. This is the only evaluator that directly takes a
  * {@link BulletRecord}.
  */
 public class FieldEvaluator extends Evaluator {
+    private static final long serialVersionUID = -1186787768122072138L;
+
     @FunctionalInterface
-    public interface FieldExtractor {
+    public interface FieldExtractor extends Serializable {
         TypedObject extract(BulletRecord record);
     }
 

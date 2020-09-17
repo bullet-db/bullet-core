@@ -21,8 +21,8 @@ import java.util.Objects;
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
-    public static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final long serialVersionUID = -5068189058170874687L;
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private String id;
     private byte[] content;
@@ -37,6 +37,16 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
+     * Constructor for a message having only a {@link Metadata.Signal}.
+     *
+     * @param id The ID associated with the message.
+     * @param signal The signal only for the Metadata.
+     */
+    public PubSubMessage(String id, Signal signal) {
+        this(id, null, signal);
+    }
+
+    /**
      * Constructor for a message having only content.
      *
      * @param id The ID associated with the message.
@@ -47,13 +57,13 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Constructor for a message having only a {@link Metadata.Signal}.
+     * Constructor for a message having only content as a String.
      *
      * @param id The ID associated with the message.
-     * @param signal The signal only for the Metadata.
+     * @param content The content of the message as a String.
      */
-    public PubSubMessage(String id, Signal signal) {
-        this(id, null, signal);
+    public PubSubMessage(String id, String content) {
+        this(id, content, null);
     }
 
     /**

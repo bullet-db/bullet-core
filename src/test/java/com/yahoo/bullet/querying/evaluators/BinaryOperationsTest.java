@@ -234,6 +234,16 @@ public class BinaryOperationsTest {
     }
 
     @Test
+    public void testNotIn() {
+        BulletRecord record = RecordBox.get().addMap("map", Pair.of("abc", 123)).getRecord();
+
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), fieldEvaluator("map"), record), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456), fieldEvaluator("map"), record), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, false));
+    }
+
+    @Test
     public void testAnd() {
         Assert.assertEquals(BinaryOperations.and(valueEvaluator(1), valueEvaluator(1), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.and(valueEvaluator(1), valueEvaluator(0), null), new TypedObject(Type.BOOLEAN, false));

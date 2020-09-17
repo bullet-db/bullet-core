@@ -22,11 +22,9 @@ public class MetadataTest {
     public void testSignalTypes() {
         Metadata empty = new Metadata();
         Assert.assertFalse(empty.hasSignal());
-
         Assert.assertTrue(new Metadata(Signal.ACKNOWLEDGE, null).hasSignal(Signal.ACKNOWLEDGE));
         Assert.assertTrue(new Metadata(Signal.FAIL, null).hasSignal(Signal.FAIL));
         Assert.assertTrue(new Metadata(Signal.COMPLETE, null).hasSignal(Signal.COMPLETE));
-
         Assert.assertFalse(new Metadata(Signal.ACKNOWLEDGE, null).hasSignal(Signal.FAIL));
     }
 
@@ -68,5 +66,14 @@ public class MetadataTest {
 
         metadata.setCreated(0L);
         Assert.assertEquals(metadata.getCreated(), 0L);
+    }
+
+    @Test
+    public void testCopy() {
+        Metadata metadata = new Metadata(Signal.CUSTOM, "foo");
+        Metadata copy = metadata.copy();
+        Assert.assertNotEquals(metadata, copy);
+        Assert.assertEquals(metadata.getSignal(), copy.getSignal());
+        Assert.assertEquals(metadata.getContent(), copy.getContent());
     }
 }

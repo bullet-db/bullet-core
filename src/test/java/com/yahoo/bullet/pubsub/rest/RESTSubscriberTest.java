@@ -55,6 +55,18 @@ public class RESTSubscriberTest {
     }
 
     @Test
+    public void testGetMessagesWithRESTMetadata() throws Exception {
+        String message = new PubSubMessage("foo", CONTENT, new RESTMetadata("bar")).asJSON();
+        CloseableHttpClient mockClient = mockClient(RESTPubSub.OK_200, message);
+        RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 10, 3000);
+        List<PubSubMessage> messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 2);
+        Assert.assertEquals(messages.get(0).getId(), "foo");
+        Assert.assertEquals(messages.get(0).getContent(), CONTENT);
+        Assert.assertEquals(((RESTMetadata) messages.get(0).getMetadata()).getUrl(), "bar");
+    }
+
+    @Test
     public void testGetMessages204() throws Exception {
         String message = new PubSubMessage("foo", new byte[0]).asJSON();
         CloseableHttpClient mockClient = mockClient(RESTPubSub.NO_CONTENT_204, message);

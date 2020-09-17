@@ -81,7 +81,7 @@ public class BufferingSubscriberTest {
         // Empty test
         Assert.assertNull(subscriber.receive());
 
-        subscriber.add(Collections.singletonList(new PubSubMessage("foo", "bar", null)));
+        subscriber.add(Collections.singletonList(new PubSubMessage("foo", "bar")));
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getId(), "foo");

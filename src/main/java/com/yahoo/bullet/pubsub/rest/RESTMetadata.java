@@ -25,4 +25,9 @@ class RESTMetadata extends Metadata {
         super(metadata.getSignal(), metadata.getContent());
         this.url = url;
     }
+
+    @Override
+    public Metadata copy() {
+        return new RESTMetadata(url, this);
+    }
 }
