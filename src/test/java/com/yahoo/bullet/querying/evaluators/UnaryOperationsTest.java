@@ -28,12 +28,14 @@ public class UnaryOperationsTest {
         Assert.assertEquals(UnaryOperations.not(valueEvaluator(1), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(UnaryOperations.not(valueEvaluator("abc"), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(UnaryOperations.not(valueEvaluator("true"), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator(null), null), TypedObject.NULL);
     }
 
     @Test
     public void testSizeOf() {
         Assert.assertEquals(UnaryOperations.sizeOf(listEvaluator(1, 2, 3), null), new TypedObject(Type.INTEGER, 3));
         Assert.assertEquals(UnaryOperations.sizeOf(valueEvaluator("hello"), null), new TypedObject(Type.INTEGER, 5));
+        Assert.assertEquals(UnaryOperations.sizeOf(valueEvaluator(null), null), TypedObject.NULL);
     }
 
     @Test

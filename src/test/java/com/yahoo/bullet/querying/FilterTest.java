@@ -21,9 +21,11 @@ public class FilterTest {
 
         BulletRecord recordA = RecordBox.get().add("abc", 1).getRecord();
         BulletRecord recordB = RecordBox.get().add("abc", 0).getRecord();
+        BulletRecord recordC = RecordBox.get().getRecord();
 
         Assert.assertTrue(filter.match(recordA));
         Assert.assertFalse(filter.match(recordB));
+        Assert.assertFalse(filter.match(recordC));
     }
 
     @Test

@@ -9,6 +9,7 @@ import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
+import com.yahoo.bullet.typesystem.TypedObject;
 
 /**
  * Filter consists of an evaluator built from the filter expression in the bullet query.
@@ -31,7 +32,8 @@ public class Filter {
      */
     public boolean match(BulletRecord record) {
         try {
-            return (Boolean) evaluator.evaluate(record).forceCast(Type.BOOLEAN).getValue();
+            TypedObject value = evaluator.evaluate(record);
+            return !value.isNull() && (Boolean) value.forceCast(Type.BOOLEAN).getValue();
         } catch (Exception e) {
             return false;
         }

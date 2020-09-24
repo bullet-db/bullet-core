@@ -27,6 +27,8 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(true)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.allMatch(new ArrayList<>(), null), new TypedObject(Type.BOOLEAN, true));
     }
 
@@ -35,6 +37,8 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(false)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.anyMatch(new ArrayList<>(), null), new TypedObject(Type.BOOLEAN, false));
     }
 
@@ -42,5 +46,6 @@ public class NAryOperationsTest {
     public void testIf() {
         Assert.assertEquals(NAryOperations.ternary(Arrays.asList(valueEvaluator(true), valueEvaluator(1), valueEvaluator(2)), null), new TypedObject(Type.INTEGER, 1));
         Assert.assertEquals(NAryOperations.ternary(Arrays.asList(valueEvaluator(false), valueEvaluator(1), valueEvaluator(2)), null), new TypedObject(Type.INTEGER, 2));
+        Assert.assertEquals(NAryOperations.ternary(Arrays.asList(valueEvaluator(null), valueEvaluator(1), valueEvaluator(2)), null), new TypedObject(Type.INTEGER, 2));
     }
 }
