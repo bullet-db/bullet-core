@@ -40,7 +40,7 @@ public class NAryOperations {
             }
         }
         return !hasNull ? new TypedObject(Type.BOOLEAN, true) : TypedObject.NULL;
-    };
+    }
 
     static TypedObject anyMatch(List<Evaluator> evaluators, BulletRecord record) {
         boolean hasNull = false;
@@ -53,11 +53,11 @@ public class NAryOperations {
             }
         }
         return !hasNull ? new TypedObject(Type.BOOLEAN, false) : TypedObject.NULL;
-    };
+    }
 
     static TypedObject ternary(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject condition = evaluators.get(0).evaluate(record);
         return !condition.isNull() && (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) :
                                                                        evaluators.get(2).evaluate(record);
-    };
+    }
 }

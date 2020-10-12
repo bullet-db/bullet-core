@@ -98,7 +98,7 @@ public class BinaryOperations {
                     return new TypedObject(Type.INTEGER, getInteger(leftValue) - getInteger(rightValue));
             }
         });
-    };
+    }
 
     static TypedObject mul(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
@@ -114,7 +114,7 @@ public class BinaryOperations {
                     return new TypedObject(Type.INTEGER, getInteger(leftValue) * getInteger(rightValue));
             }
         });
-    };
+    }
 
     static TypedObject div(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
@@ -130,86 +130,86 @@ public class BinaryOperations {
                     return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
             }
         });
-    };
+    }
 
     static TypedObject equals(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.equalTo(rightValue)));
-    };
+    }
 
     static TypedObject equalsAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i == 0));
-    };
+    }
 
     static TypedObject equalsAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i == 0));
-    };
+    }
 
     static TypedObject notEquals(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, !leftValue.equalTo(rightValue)));
-    };
+    }
 
     static TypedObject notEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i != 0));
-    };
+    }
 
     static TypedObject notEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i != 0));
-    };
+    }
 
     static TypedObject greaterThan(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) > 0));
-    };
+    }
 
     static TypedObject greaterThanAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i > 0));
-    };
+    }
 
     static TypedObject greaterThanAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i > 0));
-    };
+    }
 
     static TypedObject lessThan(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) < 0));
-    };
+    }
 
     static TypedObject lessThanAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i < 0));
-    };
+    }
 
     static TypedObject lessThanAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i < 0));
-    };
+    }
 
     static TypedObject greaterThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) >= 0));
-    };
+    }
 
     static TypedObject greaterThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i >= 0));
-    };
+    }
 
     static TypedObject greaterThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i >= 0));
-    };
+    }
 
     static TypedObject lessThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) <= 0));
-    };
+    }
 
     static TypedObject lessThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i <= 0));
-    };
+    }
 
     static TypedObject lessThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i <= 0));
-    };
+    }
 
     static TypedObject regexLike(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) ->
                 new TypedObject(Type.BOOLEAN, Pattern.compile((String) rightValue.getValue())
                                                      .matcher((String) leftValue.getValue())
                                                      .matches()));
-    };
+    }
 
     @SuppressWarnings("unchecked")
     static TypedObject regexLikeAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -225,27 +225,39 @@ public class BinaryOperations {
             }
             return !hasNull ? new TypedObject(Type.BOOLEAN, false) : TypedObject.NULL;
         });
-    };
+    }
 
     static TypedObject sizeIs(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.size() == (int) rightValue.getValue()));
-    };
+    }
 
     static TypedObject containsKey(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.containsKey((String) rightValue.getValue())));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = leftValue.ternaryContainsKey((String) rightValue.getValue());
+            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+        });
+    }
 
     static TypedObject containsValue(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.containsValue(rightValue)));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = leftValue.ternaryContainsValue(rightValue);
+            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+        });
+    }
 
     static TypedObject in(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, rightValue.containsValue(leftValue)));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = rightValue.ternaryContainsValue(leftValue);
+            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+        });
+    }
 
     static TypedObject notIn(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, !rightValue.containsValue(leftValue)));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = rightValue.ternaryContainsValue(leftValue);
+            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, !result);
+        });
+    }
 
     static TypedObject and(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
@@ -297,7 +309,7 @@ public class BinaryOperations {
                                                                  .mapToObj(list::get)
                                                                  .collect(Collectors.toCollection(ArrayList::new)));
         });
-    };
+    }
 
     private static TypedObject checkNull(Evaluator left, Evaluator right, BulletRecord record, BiFunction<TypedObject, TypedObject, TypedObject> operator) {
         TypedObject leftValue = left.evaluate(record);

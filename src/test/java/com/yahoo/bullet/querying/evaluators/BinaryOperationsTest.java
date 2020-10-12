@@ -313,9 +313,9 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.containsKey(fieldEvaluator("map"), valueEvaluator("abc"), record), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.containsKey(fieldEvaluator("map"), valueEvaluator("def"), record), new TypedObject(Type.BOOLEAN, false));
         //
-        Assert.assertEquals(BinaryOperations.containsKey(valueEvaluator(null), valueEvaluator("abc"), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.containsKey(fieldEvaluator("map"), valueEvaluator(null), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.containsKey(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.containsKey(valueEvaluator(null), valueEvaluator("abc"), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.containsKey(fieldEvaluator("map"), valueEvaluator(null), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.containsKey(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
     }
 
     @Test
@@ -327,9 +327,9 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.containsValue(listEvaluator(456, 789), valueEvaluator(123), record), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.containsValue(listEvaluator(456, 789), valueEvaluator(456), record), new TypedObject(Type.BOOLEAN, true));
         //
-        Assert.assertEquals(BinaryOperations.containsValue(valueEvaluator(null), valueEvaluator(123), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.containsValue(fieldEvaluator("map"), valueEvaluator(null), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(BinaryOperations.containsValue(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.containsValue(valueEvaluator(null), valueEvaluator(123), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.containsValue(fieldEvaluator("map"), valueEvaluator(null), record), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.containsValue(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
     }
 
     @Test
@@ -341,9 +341,9 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.in(valueEvaluator(123), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, false));
         Assert.assertEquals(BinaryOperations.in(valueEvaluator(456), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, true));
         //
-        Assert.assertEquals(BinaryOperations.in(valueEvaluator(null), fieldEvaluator("map"), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(BinaryOperations.in(valueEvaluator(123), valueEvaluator(null), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.in(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(null), fieldEvaluator("map"), record), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(123), valueEvaluator(null), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
     }
 
     @Test
@@ -355,9 +355,9 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, true));
         Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456), listEvaluator(456, 789), record), new TypedObject(Type.BOOLEAN, false));
         //
-        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(null), fieldEvaluator("map"), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), valueEvaluator(null), null), TypedObject.NULL);
-        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(null), fieldEvaluator("map"), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), valueEvaluator(null), record), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
     }
 
     @Test
