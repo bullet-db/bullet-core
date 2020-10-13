@@ -24,22 +24,22 @@ public class NAryOperationsTest {
 
     @Test
     public void testAllMatch() {
-        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(false)), null), TypedObject.FALSE);
         Assert.assertEquals(NAryOperations.allMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(true)), null), TypedObject.NULL);
-        Assert.assertEquals(NAryOperations.allMatch(new ArrayList<>(), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(NAryOperations.allMatch(new ArrayList<>(), null), TypedObject.TRUE);
     }
 
     @Test
     public void testAnyMatch() {
-        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(true)), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(true)), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(true), valueEvaluator(false)), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(false), valueEvaluator(false)), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(true)), null), TypedObject.TRUE);
         Assert.assertEquals(NAryOperations.anyMatch(Arrays.asList(valueEvaluator(null), valueEvaluator(false)), null), TypedObject.NULL);
-        Assert.assertEquals(NAryOperations.anyMatch(new ArrayList<>(), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(NAryOperations.anyMatch(new ArrayList<>(), null), TypedObject.FALSE);
     }
 
     @Test

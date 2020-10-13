@@ -133,7 +133,7 @@ public class BinaryOperations {
     }
 
     static TypedObject equals(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.equalTo(rightValue)));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.equalTo(rightValue)));
     }
 
     static TypedObject equalsAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -145,7 +145,7 @@ public class BinaryOperations {
     }
 
     static TypedObject notEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, !leftValue.equalTo(rightValue)));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(!leftValue.equalTo(rightValue)));
     }
 
     static TypedObject notEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -157,7 +157,7 @@ public class BinaryOperations {
     }
 
     static TypedObject greaterThan(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) > 0));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) > 0));
     }
 
     static TypedObject greaterThanAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -169,7 +169,7 @@ public class BinaryOperations {
     }
 
     static TypedObject lessThan(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) < 0));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) < 0));
     }
 
     static TypedObject lessThanAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -181,7 +181,7 @@ public class BinaryOperations {
     }
 
     static TypedObject greaterThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) >= 0));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) >= 0));
     }
 
     static TypedObject greaterThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -193,7 +193,7 @@ public class BinaryOperations {
     }
 
     static TypedObject lessThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) <= 0));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) <= 0));
     }
 
     static TypedObject lessThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
@@ -206,97 +206,97 @@ public class BinaryOperations {
 
     static TypedObject regexLike(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) ->
-                new TypedObject(Type.BOOLEAN, Pattern.compile((String) rightValue.getValue())
-                                                     .matcher((String) leftValue.getValue())
-                                                     .matches()));
+                TypedObject.valueOf(Pattern.compile((String) rightValue.getValue())
+                                           .matcher((String) leftValue.getValue())
+                                           .matches()));
     }
 
     @SuppressWarnings("unchecked")
     static TypedObject regexLikeAny(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
             String value = (String) leftValue.getValue();
-            boolean hasNull = false;
+            boolean containsNull = false;
             for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
                 if (object == null) {
-                    hasNull = true;
+                    containsNull = true;
                 } else if (Pattern.compile((String) object).matcher(value).matches()) {
-                    return new TypedObject(Type.BOOLEAN, true);
+                    return TypedObject.TRUE;
                 }
             }
-            return !hasNull ? new TypedObject(Type.BOOLEAN, false) : TypedObject.NULL;
+            return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
         });
     }
 
     static TypedObject sizeIs(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> new TypedObject(Type.BOOLEAN, leftValue.size() == (int) rightValue.getValue()));
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.size() == (int) rightValue.getValue()));
     }
 
     static TypedObject containsKey(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
             Boolean result = leftValue.ternaryContainsKey((String) rightValue.getValue());
-            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject containsValue(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
             Boolean result = leftValue.ternaryContainsValue(rightValue);
-            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject in(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
             Boolean result = rightValue.ternaryContainsValue(leftValue);
-            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, result);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject notIn(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
             Boolean result = rightValue.ternaryContainsValue(leftValue);
-            return result == null ? TypedObject.NULL : new TypedObject(Type.BOOLEAN, !result);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(!result);
         });
     }
 
     static TypedObject and(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         if (!leftValue.isNull() && !((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue())) {
-            return new TypedObject(Type.BOOLEAN, false);
+            return TypedObject.FALSE;
         }
         TypedObject rightValue = right.evaluate(record);
         if (rightValue.isNull()) {
             return TypedObject.NULL;
         } else if (!((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue())) {
-            return new TypedObject(Type.BOOLEAN, false);
+            return TypedObject.FALSE;
         } else if (leftValue.isNull()) {
             return TypedObject.NULL;
         } else {
-            return new TypedObject(Type.BOOLEAN, true);
+            return TypedObject.TRUE;
         }
     }
 
     static TypedObject or(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
         if (!leftValue.isNull() && (Boolean) leftValue.forceCast(Type.BOOLEAN).getValue()) {
-            return new TypedObject(Type.BOOLEAN, true);
+            return TypedObject.TRUE;
         }
         TypedObject rightValue = right.evaluate(record);
         if (rightValue.isNull()) {
             return TypedObject.NULL;
         } else if ((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()) {
-            return new TypedObject(Type.BOOLEAN, true);
+            return TypedObject.TRUE;
         } else if (leftValue.isNull()) {
             return TypedObject.NULL;
         } else {
-            return new TypedObject(Type.BOOLEAN, false);
+            return TypedObject.FALSE;
         }
     }
 
     static TypedObject xor(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) ->
-                new TypedObject(Type.BOOLEAN, (Boolean) leftValue.forceCast(Type.BOOLEAN).getValue() ^
-                                              (Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()));
+                TypedObject.valueOf((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue() ^
+                                    (Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()));
     }
 
     @SuppressWarnings("unchecked")
@@ -326,15 +326,15 @@ public class BinaryOperations {
     @SuppressWarnings("unchecked")
     private static TypedObject ternaryAnyMatch(TypedObject leftValue, TypedObject rightValue, Predicate<Integer> predicate) {
         Type subType = rightValue.getType().getSubType();
-        boolean hasNull = false;
+        boolean containsNull = false;
         for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
             if (object == null) {
-                hasNull = true;
+                containsNull = true;
             } else if (predicate.test(leftValue.compareTo(new TypedObject(subType, object)))) {
-                return new TypedObject(Type.BOOLEAN, true);
+                return TypedObject.TRUE;
             }
         }
-        return !hasNull ? new TypedObject(Type.BOOLEAN, false) : TypedObject.NULL;
+        return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
     }
 
     @SuppressWarnings("unchecked")
@@ -345,10 +345,10 @@ public class BinaryOperations {
             if (object == null) {
                 hasNull = true;
             } else if (!predicate.test(leftValue.compareTo(new TypedObject(subType, object)))) {
-                return new TypedObject(Type.BOOLEAN, false);
+                return TypedObject.FALSE;
             }
         }
-        return !hasNull ? new TypedObject(Type.BOOLEAN, true) : TypedObject.NULL;
+        return !hasNull ? TypedObject.TRUE : TypedObject.NULL;
     }
 
     private static Type getArithmeticResultType(Type left, Type right) {

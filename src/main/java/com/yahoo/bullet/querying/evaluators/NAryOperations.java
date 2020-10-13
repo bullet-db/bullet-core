@@ -30,29 +30,29 @@ public class NAryOperations {
     }
 
     static TypedObject allMatch(List<Evaluator> evaluators, BulletRecord record) {
-        boolean hasNull = false;
+        boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
             if (value.isNull()) {
-                hasNull = true;
+                containsNull = true;
             } else if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
-                return new TypedObject(Type.BOOLEAN, false);
+                return TypedObject.FALSE;
             }
         }
-        return !hasNull ? new TypedObject(Type.BOOLEAN, true) : TypedObject.NULL;
+        return !containsNull ? TypedObject.TRUE : TypedObject.NULL;
     }
 
     static TypedObject anyMatch(List<Evaluator> evaluators, BulletRecord record) {
-        boolean hasNull = false;
+        boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
             if (value.isNull()) {
-                hasNull = true;
+                containsNull = true;
             } else if ((Boolean) value.forceCast(Type.BOOLEAN).getValue()) {
-                return new TypedObject(Type.BOOLEAN, true);
+                return TypedObject.TRUE;
             }
         }
-        return !hasNull ? new TypedObject(Type.BOOLEAN, false) : TypedObject.NULL;
+        return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
     }
 
     static TypedObject ternary(List<Evaluator> evaluators, BulletRecord record) {

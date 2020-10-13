@@ -34,19 +34,19 @@ public class UnaryOperations {
     }
 
     static TypedObject not(Evaluator evaluator, BulletRecord record) {
-        return checkNull(evaluator, record, value -> new TypedObject(Type.BOOLEAN, !((Boolean) value.forceCast(Type.BOOLEAN).getValue())));
+        return checkNull(evaluator, record, value -> TypedObject.valueOf(!((Boolean) value.forceCast(Type.BOOLEAN).getValue())));
     }
 
     static TypedObject sizeOf(Evaluator evaluator, BulletRecord record) {
-        return checkNull(evaluator, record, value -> new TypedObject(Type.INTEGER, value.size()));
+        return checkNull(evaluator, record, value -> TypedObject.valueOf(value.size()));
     }
 
     static TypedObject isNull(Evaluator evaluator, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(evaluator.evaluate(record).isNull());
     }
 
     static TypedObject isNotNull(Evaluator evaluator, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, !evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(!evaluator.evaluate(record).isNull());
     }
 
     private static TypedObject checkNull(Evaluator evaluator, BulletRecord record, Function<TypedObject, TypedObject> operator) {

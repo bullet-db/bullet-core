@@ -22,12 +22,12 @@ public class UnaryOperationsTest {
 
     @Test
     public void testNot() {
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator(false), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator(true), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator(0), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator(1), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator("abc"), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(UnaryOperations.not(valueEvaluator("true"), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator(false), null), TypedObject.TRUE);
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator(true), null), TypedObject.FALSE);
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator(0), null), TypedObject.TRUE);
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator(1), null), TypedObject.FALSE);
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator("abc"), null), TypedObject.TRUE);
+        Assert.assertEquals(UnaryOperations.not(valueEvaluator("true"), null), TypedObject.FALSE);
         Assert.assertEquals(UnaryOperations.not(valueEvaluator(null), null), TypedObject.NULL);
     }
 
@@ -40,13 +40,13 @@ public class UnaryOperationsTest {
 
     @Test
     public void testIsNull() {
-        Assert.assertEquals(UnaryOperations.isNull(valueEvaluator(1), null), new TypedObject(Type.BOOLEAN, false));
-        Assert.assertEquals(UnaryOperations.isNull(valueEvaluator(null), null), new TypedObject(Type.BOOLEAN, true));
+        Assert.assertEquals(UnaryOperations.isNull(valueEvaluator(1), null), TypedObject.FALSE);
+        Assert.assertEquals(UnaryOperations.isNull(valueEvaluator(null), null), TypedObject.TRUE);
     }
 
     @Test
     public void testIsNotNull() {
-        Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(1), null), new TypedObject(Type.BOOLEAN, true));
-        Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(null), null), new TypedObject(Type.BOOLEAN, false));
+        Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(1), null), TypedObject.TRUE);
+        Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(null), null), TypedObject.FALSE);
     }
 }
