@@ -233,28 +233,28 @@ public class BinaryOperations {
 
     static TypedObject containsKey(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
-            Boolean result = leftValue.ternaryContainsKey((String) rightValue.getValue());
+            Boolean result = leftValue.containsKey((String) rightValue.getValue());
             return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject containsValue(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
-            Boolean result = leftValue.ternaryContainsValue(rightValue);
+            Boolean result = leftValue.containsValue(rightValue);
             return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject in(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
-            Boolean result = rightValue.ternaryContainsValue(leftValue);
+            Boolean result = rightValue.containsValue(leftValue);
             return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
         });
     }
 
     static TypedObject notIn(Evaluator left, Evaluator right, BulletRecord record) {
         return checkNull(left, right, record, (leftValue, rightValue) -> {
-            Boolean result = rightValue.ternaryContainsValue(leftValue);
+            Boolean result = rightValue.containsValue(leftValue);
             return result == null ? TypedObject.NULL : TypedObject.valueOf(!result);
         });
     }
