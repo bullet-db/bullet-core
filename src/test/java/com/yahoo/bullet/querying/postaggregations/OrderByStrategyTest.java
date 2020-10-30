@@ -206,4 +206,21 @@ public class OrderByStrategyTest {
         Assert.assertEquals(result.getRecords().get(3).typedGet("a").getValue(), "world");
         Assert.assertEquals(result.getRecords().get(4).typedGet("a").getValue(), "foobar");
     }
+
+    @Test
+    public void testOrderByComputationWithBadComputation() {
+        OrderByStrategy orderByStrategy = makeOrderBy(Collections.singletonList(new OrderBy.SortItem(new UnaryExpression(new FieldExpression("a"), Operation.SIZE_OF), OrderBy.Direction.ASC)));
+        List<BulletRecord> records = new ArrayList<>();
+        records.add(RecordBox.get().add("a", 1).getRecord());
+        records.add(RecordBox.get().add("a", 3).getRecord());
+        records.add(RecordBox.get().add("a", 2).getRecord());
+        Clip clip = new Clip();
+        clip.add(records);
+        Clip result = orderByStrategy.execute(clip);
+
+        // Order should not change
+        Assert.assertEquals(result.getRecords().get(0).typedGet("a").getValue(), 1);
+        Assert.assertEquals(result.getRecords().get(1).typedGet("a").getValue(), 3);
+        Assert.assertEquals(result.getRecords().get(2).typedGet("a").getValue(), 2);
+    }
 }

@@ -9,6 +9,7 @@ import com.yahoo.bullet.query.Field;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.query.expressions.Operation;
+import com.yahoo.bullet.query.expressions.UnaryExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider;
 import com.yahoo.bullet.result.RecordBox;
@@ -34,7 +35,8 @@ public class ProjectionTest {
                                            new Field("f", new BinaryExpression(new FieldExpression("d"),
                                                                                new FieldExpression("e"),
                                                                                Operation.ADD)),
-                                           new Field("g", new FieldExpression("g")));
+                                           new Field("g", new FieldExpression("g")),
+                                           new Field("h", new UnaryExpression(new FieldExpression("a"), Operation.SIZE_OF)));
 
         Projection projection = new Projection(fields);
         BulletRecord newRecord = projection.project(record, new TypedAvroBulletRecordProvider());
@@ -62,7 +64,8 @@ public class ProjectionTest {
                                            new Field("e", new BinaryExpression(new FieldExpression("e"),
                                                                                new FieldExpression("f"),
                                                                                Operation.SUB)),
-                                           new Field("f", new FieldExpression("f")));
+                                           new Field("f", new FieldExpression("f")),
+                                           new Field("h", new UnaryExpression(new FieldExpression("a"), Operation.SIZE_OF)));
 
         Projection projection = new Projection(fields);
         BulletRecord oldRecord = projection.project(record);
