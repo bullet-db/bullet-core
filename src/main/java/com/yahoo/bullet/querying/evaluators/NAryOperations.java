@@ -21,7 +21,7 @@ public class NAryOperations {
         TypedObject apply(List<Evaluator> evaluator, BulletRecord record);
     }
 
-    public static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, NAryOperator> N_ARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
         N_ARY_OPERATORS.put(Operation.AND, NAryOperations::allMatch);
@@ -30,27 +30,34 @@ public class NAryOperations {
     }
 
     static TypedObject allMatch(List<Evaluator> evaluators, BulletRecord record) {
+        boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
-                return new TypedObject(Type.BOOLEAN, false);
+            if (value.isNull()) {
+                containsNull = true;
+            } else if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
+                return TypedObject.FALSE;
             }
         }
-        return new TypedObject(Type.BOOLEAN, true);
-    };
+        return !containsNull ? TypedObject.TRUE : TypedObject.NULL;
+    }
 
     static TypedObject anyMatch(List<Evaluator> evaluators, BulletRecord record) {
+        boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if ((Boolean) value.getValue()) {
-                return new TypedObject(Type.BOOLEAN, true);
+            if (value.isNull()) {
+                containsNull = true;
+            } else if ((Boolean) value.forceCast(Type.BOOLEAN).getValue()) {
+                return TypedObject.TRUE;
             }
         }
-        return new TypedObject(Type.BOOLEAN, false);
-    };
+        return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
+    }
 
     static TypedObject ternary(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject condition = evaluators.get(0).evaluate(record);
-        return (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) : evaluators.get(2).evaluate(record);
-    };
+        return !condition.isNull() && (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) :
+                                                                       evaluators.get(2).evaluate(record);
+    }
 }

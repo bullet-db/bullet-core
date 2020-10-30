@@ -13,6 +13,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Unary operations used by UnaryEvaluator.
@@ -23,7 +24,7 @@ public class UnaryOperations {
         TypedObject apply(Evaluator evaluator, BulletRecord record);
     }
 
-    public static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, UnaryOperator> UNARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
         UNARY_OPERATORS.put(Operation.NOT, UnaryOperations::not);
@@ -33,20 +34,26 @@ public class UnaryOperations {
     }
 
     static TypedObject not(Evaluator evaluator, BulletRecord record) {
-        TypedObject value = evaluator.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, !((Boolean) value.forceCast(Type.BOOLEAN).getValue()));
-    };
+        return checkNull(evaluator, record, value -> TypedObject.valueOf(!((Boolean) value.forceCast(Type.BOOLEAN).getValue())));
+    }
 
     static TypedObject sizeOf(Evaluator evaluator, BulletRecord record) {
-        TypedObject value = evaluator.evaluate(record);
-        return new TypedObject(Type.INTEGER, value.size());
-    };
+        return checkNull(evaluator, record, value -> TypedObject.valueOf(value.size()));
+    }
 
     static TypedObject isNull(Evaluator evaluator, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(evaluator.evaluate(record).isNull());
     }
 
     static TypedObject isNotNull(Evaluator evaluator, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, !evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(!evaluator.evaluate(record).isNull());
+    }
+
+    private static TypedObject checkNull(Evaluator evaluator, BulletRecord record, Function<TypedObject, TypedObject> operator) {
+        TypedObject value = evaluator.evaluate(record);
+        if (value.isNull()) {
+            return TypedObject.NULL;
+        }
+        return operator.apply(value);
     }
 }

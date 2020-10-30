@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,7 +30,7 @@ public class BinaryOperations {
         TypedObject apply(Evaluator left, Evaluator right, BulletRecord record);
     }
 
-    public static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
+    static final Map<Operation, BinaryOperator> BINARY_OPERATORS = new EnumMap<>(Operation.class);
 
     static {
         BINARY_OPERATORS.put(Operation.ADD, BinaryOperations::add);
@@ -68,254 +69,287 @@ public class BinaryOperations {
     }
 
     static TypedObject add(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
-        switch (type) {
-            case DOUBLE:
-                return new TypedObject(Type.DOUBLE, getDouble(leftValue) + getDouble(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) + getFloat(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) + getLong(rightValue));
-            default:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) + getInteger(rightValue));
-        }
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
+            switch (type) {
+                case DOUBLE:
+                    return new TypedObject(Type.DOUBLE, getDouble(leftValue) + getDouble(rightValue));
+                case FLOAT:
+                    return new TypedObject(Type.FLOAT, getFloat(leftValue) + getFloat(rightValue));
+                case LONG:
+                    return new TypedObject(Type.LONG, getLong(leftValue) + getLong(rightValue));
+                default:
+                    return new TypedObject(Type.INTEGER, getInteger(leftValue) + getInteger(rightValue));
+            }
+        });
     }
 
     static TypedObject sub(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
-        switch (type) {
-            case DOUBLE:
-                return new TypedObject(Type.DOUBLE, getDouble(leftValue) - getDouble(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) - getFloat(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) - getLong(rightValue));
-            default:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) - getInteger(rightValue));
-        }
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
+            switch (type) {
+                case DOUBLE:
+                    return new TypedObject(Type.DOUBLE, getDouble(leftValue) - getDouble(rightValue));
+                case FLOAT:
+                    return new TypedObject(Type.FLOAT, getFloat(leftValue) - getFloat(rightValue));
+                case LONG:
+                    return new TypedObject(Type.LONG, getLong(leftValue) - getLong(rightValue));
+                default:
+                    return new TypedObject(Type.INTEGER, getInteger(leftValue) - getInteger(rightValue));
+            }
+        });
+    }
 
     static TypedObject mul(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
-        switch (type) {
-            case DOUBLE:
-                return new TypedObject(Type.DOUBLE, getDouble(leftValue) * getDouble(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) * getFloat(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) * getLong(rightValue));
-            default:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) * getInteger(rightValue));
-        }
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
+            switch (type) {
+                case DOUBLE:
+                    return new TypedObject(Type.DOUBLE, getDouble(leftValue) * getDouble(rightValue));
+                case FLOAT:
+                    return new TypedObject(Type.FLOAT, getFloat(leftValue) * getFloat(rightValue));
+                case LONG:
+                    return new TypedObject(Type.LONG, getLong(leftValue) * getLong(rightValue));
+                default:
+                    return new TypedObject(Type.INTEGER, getInteger(leftValue) * getInteger(rightValue));
+            }
+        });
+    }
 
     static TypedObject div(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
-        switch (type) {
-            case DOUBLE:
-                return new TypedObject(Type.DOUBLE, getDouble(leftValue) / getDouble(rightValue));
-            case FLOAT:
-                return new TypedObject(Type.FLOAT, getFloat(leftValue) / getFloat(rightValue));
-            case LONG:
-                return new TypedObject(Type.LONG, getLong(leftValue) / getLong(rightValue));
-            default:
-                return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
-        }
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
+            switch (type) {
+                case DOUBLE:
+                    return new TypedObject(Type.DOUBLE, getDouble(leftValue) / getDouble(rightValue));
+                case FLOAT:
+                    return new TypedObject(Type.FLOAT, getFloat(leftValue) / getFloat(rightValue));
+                case LONG:
+                    return new TypedObject(Type.LONG, getLong(leftValue) / getLong(rightValue));
+                default:
+                    return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
+            }
+        });
+    }
 
     static TypedObject equals(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.equalTo(rightValue));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.equalTo(rightValue)));
+    }
 
     static TypedObject equalsAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i == 0));
+    }
 
     static TypedObject equalsAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i == 0));
+    }
 
     static TypedObject notEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, !leftValue.equalTo(rightValue));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(!leftValue.equalTo(rightValue)));
+    }
 
     static TypedObject notEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> !leftValue.equalTo(new TypedObject(subType, o))));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i != 0));
+    }
 
     static TypedObject notEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().noneMatch(o -> leftValue.equalTo(new TypedObject(subType, o))));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i != 0));
+    }
 
     static TypedObject greaterThan(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) > 0);
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) > 0));
+    }
 
     static TypedObject greaterThanAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i > 0));
+    }
 
     static TypedObject greaterThanAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) > 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i > 0));
+    }
 
     static TypedObject lessThan(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) < 0);
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) < 0));
+    }
 
     static TypedObject lessThanAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i < 0));
+    }
 
     static TypedObject lessThanAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) < 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i < 0));
+    }
 
     static TypedObject greaterThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) >= 0);
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) >= 0));
+    }
 
     static TypedObject greaterThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i >= 0));
+    }
 
     static TypedObject greaterThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) >= 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i >= 0));
+    }
 
     static TypedObject lessThanOrEquals(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.compareTo(rightValue) <= 0);
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.compareTo(rightValue) <= 0));
+    }
 
     static TypedObject lessThanOrEqualsAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().anyMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAnyMatch(leftValue, rightValue, i -> i <= 0));
+    }
 
     static TypedObject lessThanOrEqualsAll(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        Type subType = rightValue.getType().getSubType();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().allMatch(o -> leftValue.compareTo(new TypedObject(subType, o)) <= 0));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> ternaryAllMatch(leftValue, rightValue, i -> i <= 0));
+    }
 
     static TypedObject regexLike(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, Pattern.compile((String) rightValue.getValue()).matcher((String) leftValue.getValue()).matches());
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) ->
+                TypedObject.valueOf(Pattern.compile((String) rightValue.getValue())
+                                           .matcher((String) leftValue.getValue())
+                                           .matches()));
+    }
 
+    @SuppressWarnings("unchecked")
     static TypedObject regexLikeAny(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        String value = (String) leftValue.getValue();
-        return new TypedObject(Type.BOOLEAN, ((List<? extends Serializable>) rightValue.getValue()).stream().map(o -> Pattern.compile((String) o).matcher(value)).anyMatch(Matcher::matches));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            String value = (String) leftValue.getValue();
+            boolean containsNull = false;
+            for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
+                if (object == null) {
+                    containsNull = true;
+                } else if (Pattern.compile((String) object).matcher(value).matches()) {
+                    return TypedObject.TRUE;
+                }
+            }
+            return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
+        });
+    }
 
     static TypedObject sizeIs(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.size() == (int) rightValue.getValue());
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> TypedObject.valueOf(leftValue.size() == (int) rightValue.getValue()));
+    }
 
     static TypedObject containsKey(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.containsKey((String) rightValue.getValue()));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = leftValue.containsKey((String) rightValue.getValue());
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
+        });
+    }
 
     static TypedObject containsValue(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, leftValue.containsValue(rightValue));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = leftValue.containsValue(rightValue);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
+        });
+    }
 
     static TypedObject in(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, rightValue.containsValue(leftValue));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = rightValue.containsValue(leftValue);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(result);
+        });
+    }
 
     static TypedObject notIn(Evaluator left, Evaluator right, BulletRecord record) {
-        TypedObject leftValue = left.evaluate(record);
-        TypedObject rightValue = right.evaluate(record);
-        return new TypedObject(Type.BOOLEAN, !rightValue.containsValue(leftValue));
-    };
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Boolean result = rightValue.containsValue(leftValue);
+            return result == null ? TypedObject.NULL : TypedObject.valueOf(!result);
+        });
+    }
 
     static TypedObject and(Evaluator left, Evaluator right, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, (Boolean) left.evaluate(record).forceCast(Type.BOOLEAN).getValue() &&
-                                             (Boolean) right.evaluate(record).forceCast(Type.BOOLEAN).getValue());
+        TypedObject leftValue = left.evaluate(record);
+        if (!leftValue.isNull() && !((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue())) {
+            return TypedObject.FALSE;
+        }
+        TypedObject rightValue = right.evaluate(record);
+        if (rightValue.isNull()) {
+            return TypedObject.NULL;
+        } else if (!((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue())) {
+            return TypedObject.FALSE;
+        } else if (leftValue.isNull()) {
+            return TypedObject.NULL;
+        } else {
+            return TypedObject.TRUE;
+        }
     }
 
     static TypedObject or(Evaluator left, Evaluator right, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, (Boolean) left.evaluate(record).forceCast(Type.BOOLEAN).getValue() ||
-                                             (Boolean) right.evaluate(record).forceCast(Type.BOOLEAN).getValue());
+        TypedObject leftValue = left.evaluate(record);
+        if (!leftValue.isNull() && (Boolean) leftValue.forceCast(Type.BOOLEAN).getValue()) {
+            return TypedObject.TRUE;
+        }
+        TypedObject rightValue = right.evaluate(record);
+        if (rightValue.isNull()) {
+            return TypedObject.NULL;
+        } else if ((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()) {
+            return TypedObject.TRUE;
+        } else if (leftValue.isNull()) {
+            return TypedObject.NULL;
+        } else {
+            return TypedObject.FALSE;
+        }
     }
 
     static TypedObject xor(Evaluator left, Evaluator right, BulletRecord record) {
-        return new TypedObject(Type.BOOLEAN, (Boolean) left.evaluate(record).forceCast(Type.BOOLEAN).getValue() ^
-                                             (Boolean) right.evaluate(record).forceCast(Type.BOOLEAN).getValue());
+        return checkNull(left, right, record, (leftValue, rightValue) ->
+                TypedObject.valueOf((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue() ^
+                                    (Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()));
     }
 
+    @SuppressWarnings("unchecked")
     static TypedObject filter(Evaluator left, Evaluator right, BulletRecord record) {
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            List<? extends Serializable> list = (List<? extends Serializable>) leftValue.getValue();
+            List<Boolean> booleans = (List<Boolean>) rightValue.getValue();
+            return new TypedObject(leftValue.getType(), IntStream.range(0, list.size())
+                                                                 .filter(i -> Boolean.TRUE.equals(booleans.get(i)))
+                                                                 .mapToObj(list::get)
+                                                                 .collect(Collectors.toCollection(ArrayList::new)));
+        });
+    }
+
+    private static TypedObject checkNull(Evaluator left, Evaluator right, BulletRecord record, BiFunction<TypedObject, TypedObject, TypedObject> operator) {
         TypedObject leftValue = left.evaluate(record);
+        if (leftValue.isNull()) {
+            return TypedObject.NULL;
+        }
         TypedObject rightValue = right.evaluate(record);
-        List<? extends Serializable> list = (List<? extends Serializable>) leftValue.getValue();
-        List<Boolean> booleans = (List<Boolean>) rightValue.getValue();
-        return new TypedObject(leftValue.getType(), IntStream.range(0, list.size()).filter(booleans::get).mapToObj(list::get).collect(Collectors.toCollection(ArrayList::new)));
-    };
+        if (rightValue.isNull()) {
+            return TypedObject.NULL;
+        }
+        return operator.apply(leftValue, rightValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static TypedObject ternaryAnyMatch(TypedObject leftValue, TypedObject rightValue, Predicate<Integer> predicate) {
+        Type subType = rightValue.getType().getSubType();
+        boolean containsNull = false;
+        for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
+            if (object == null) {
+                containsNull = true;
+            } else if (predicate.test(leftValue.compareTo(new TypedObject(subType, object)))) {
+                return TypedObject.TRUE;
+            }
+        }
+        return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static TypedObject ternaryAllMatch(TypedObject leftValue, TypedObject rightValue, Predicate<Integer> predicate) {
+        Type subType = rightValue.getType().getSubType();
+        boolean hasNull = false;
+        for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
+            if (object == null) {
+                hasNull = true;
+            } else if (!predicate.test(leftValue.compareTo(new TypedObject(subType, object)))) {
+                return TypedObject.FALSE;
+            }
+        }
+        return !hasNull ? TypedObject.TRUE : TypedObject.NULL;
+    }
 
     private static Type getArithmeticResultType(Type left, Type right) {
         if (left == Type.DOUBLE || right == Type.DOUBLE) {
