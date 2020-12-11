@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A Storage manager that stores everything in-memory.
  */
-public class MemoryStorageManager extends StorageManager implements Serializable {
+public class MemoryStorageManager extends StorageManager<Serializable> implements Serializable {
     private static final long serialVersionUID = 3815534537510449363L;
     private static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
@@ -59,6 +59,11 @@ public class MemoryStorageManager extends StorageManager implements Serializable
     @Override
     public CompletableFuture<Map<String, byte[]>> getAll() {
         return CompletableFuture.completedFuture(storage.isEmpty() ? null : new HashMap<>(storage));
+    }
+
+    @Override
+    public CompletableFuture<Map<String, byte[]>> getAll(Criteria criteria) {
+        return null;
     }
 
     @Override

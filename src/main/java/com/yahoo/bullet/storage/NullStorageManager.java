@@ -15,10 +15,8 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A default implementation that does nothing if you do not want to use a StorageManager.
  */
-public class NullStorageManager extends StorageManager {
+public class NullStorageManager extends StorageManager<Serializable> implements Serializable {
     private static final long serialVersionUID = -1718811448543607136L;
-
-    private static final CompletableFuture<Boolean> FAIL = CompletableFuture.completedFuture(false);
     private static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
     /**
@@ -46,22 +44,22 @@ public class NullStorageManager extends StorageManager {
     }
 
     @Override
-    public CompletableFuture<Map<String, String>> getAllString() {
+    public CompletableFuture<Map<String, String>> getAllStrings(Criteria criteria) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<U> removeObject(String id) {
+    public CompletableFuture<Serializable> removeObject(String id) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
+    public CompletableFuture<Boolean> putObject(String id, Serializable data) {
         return SUCCESS;
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<U> getObject(String id) {
+    public CompletableFuture<Serializable> getObject(String id) {
         return CompletableFuture.completedFuture(null);
     }
 
@@ -92,6 +90,11 @@ public class NullStorageManager extends StorageManager {
 
     @Override
     public CompletableFuture<Map<String, byte[]>> getAll() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Map<String, byte[]>> getAll(Criteria criteria) {
         return CompletableFuture.completedFuture(null);
     }
 
