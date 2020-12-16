@@ -29,7 +29,9 @@ import java.util.function.Function;
  *
  * Note that {@link #getAll()} method is only provided for the raw byte[] access. Use {@link #getAllObjects(Criteria)}
  * or {@link #getAllStrings(Criteria)} for object and String access using {@link Criteria} if needed. There is also a
- * {@link #getAll(Criteria)} for the raw byte[] access using {@link Criteria}.
+ * {@link #getAll(Criteria)} for the raw byte[] access using {@link Criteria}. The access methods that use
+ * {@link Criteria} are not restricted to the current namespace. A specific {@link StorageManager} can provide specific
+ * {@link Criteria} for storage-specific querying needs.
  *
  * It exposes these optional concepts:
  * 1. The concept of a namespace (by default, assumes there is only one default namespace). This can be used to abstract
@@ -80,7 +82,8 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     // Object methods
 
     /**
-     * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object.
+     * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object in the current
+     * namespace.
      *
      * @param id The ID of the data.
      * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
@@ -90,7 +93,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     }
 
     /**
-     * Stores any {@link Serializable} object for a given String identifier.
+     * Stores any {@link Serializable} object for a given String identifier in the current namespace.
      *
      * @param id The ID to store this data under.
      * @param data The object to store as the data.
@@ -101,7 +104,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     }
 
     /**
-     * Retrieves data stored for a given String identifier as a {@link Serializable} object.
+     * Retrieves data stored for a given String identifier in the current namespace as a {@link Serializable} object.
      *
      * @param id The ID of the data.
      * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
@@ -124,7 +127,18 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     }
 
     /**
-     * Retrieves a given ID from the storage stored using {@link #put(String, byte[])}.
+     * Retrieves all the data matching the specified {@link Criteria}.
+     *
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <E> The type returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the types returned by the {@link Criteria}.
+     */
+    public <E> CompletableFuture<E> matchAll(Criteria<E> criteria) {
+        return criteria.match(this);
+    }
+
+    /**
+     * Retrieves a given ID from the current namespace in the storage stored using {@link #put(String, byte[])}.
      *
      * @param id The unique ID to retrieve from the storage.
      * @return A {@link CompletableFuture} that resolves to the stored value for this ID or null if it does not exist
@@ -133,7 +147,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     public abstract CompletableFuture<byte[]> get(String id);
 
     /**
-     * Removes a given ID from the storage stored using {@link #put(String, byte[])}.
+     * Removes a given ID from the current namespace in the storage stored using {@link #put(String, byte[])}.
      *
      * @param id The unique ID to remove from the storage.
      * @return A {@link CompletableFuture} that resolves to the stored value for this ID or null if it does not exist
@@ -142,7 +156,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     public abstract CompletableFuture<byte[]> remove(String id);
 
     /**
-     * Store a given ID and value for that ID into the storage.
+     * Store a given ID and value for that ID into the current namespace in the storage.
      *
      * @param id The unique ID to represent this entry.
      * @param value The value to store for this entry.
@@ -151,7 +165,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     public abstract CompletableFuture<Boolean> put(String id, byte[] value);
 
     /**
-     * Stores a map of IDs and values into the storage.
+     * Stores a map of IDs and values into the storage in the current namespace.
      *
      * @param data The map of IDs and values to store.
      * @return A {@link CompletableFuture} that resolves to true if the storage was completely successful.
@@ -160,7 +174,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
 
     /**
      * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
-     * {@link #putObject(String, Serializable)} from the storage as byte[].
+     * {@link #putObject(String, Serializable)} from the current namespace in the storage as byte[].
      *
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
      *         null if no data is present. It completes exceptionally if there were issues.
@@ -169,7 +183,8 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
 
     /**
      * Retrieves the values for the provided IDs stored with {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as byte[].
+     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the current namespace in the
+     * storage as byte[].
      *
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
      *         null if no data is present. It completes exceptionally if there were issues.
@@ -178,7 +193,8 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
 
     /**
      * Retrieves all the IDs matching the specified {@link Criteria} stored with {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as byte[].
+     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as byte[]. If the
+     * criteria supports it, the data can be across multiple namespaces.
      *
      * @param criteria The {@link Criteria} understood by this storage.
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
@@ -191,7 +207,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
 
     /**
      * Removes all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
-     * {@link #putObject(String, Serializable)} from the storage as byte[].
+     * {@link #putObject(String, Serializable)} from the storage as byte[] in the current namespace.
      *
      * @return A {@link CompletableFuture} that resolves to true or false if the wipe was successful.
      */
@@ -208,7 +224,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     // Namespace methods
 
     /**
-     * The interface to switch namespaces. By default, does nothing.
+     * Swaps to the given namespace, if it is valid.
      *
      * @param namespace The new namespace to use.
      */
@@ -225,8 +241,7 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     }
 
     /**
-     * Clears the specified namespace. By default, since the StorageManager has one namespace, this works the same as
-     * {@link #clear()}.
+     * Clears the specified namespace. If the StorageManager has one namespace, this works the same as {@link #clear()}.
      *
      * @param namespace The namespace to clear.
      * @return A {@link CompletableFuture} that resolves to true if the wipe was successful and throws otherwise.

@@ -74,11 +74,6 @@ public class NullStorageManager extends StorageManager<Serializable> implements 
     }
 
     @Override
-    public CompletableFuture<Boolean> clear(Set<String> ids) {
-        return SUCCESS;
-    }
-
-    @Override
     public CompletableFuture<Boolean> put(String id, byte[] value) {
         return SUCCESS;
     }
@@ -94,12 +89,22 @@ public class NullStorageManager extends StorageManager<Serializable> implements 
     }
 
     @Override
+    public CompletableFuture<Map<String, byte[]>> getAll(Set<String> ids) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public CompletableFuture<Map<String, byte[]>> getAll(Criteria criteria) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public CompletableFuture<Boolean> clear() {
+        return SUCCESS;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clear(Set<String> ids) {
         return SUCCESS;
     }
 }

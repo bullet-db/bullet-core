@@ -428,7 +428,7 @@ public class BulletConfig extends Config {
 
     @SuppressWarnings("unchecked")
     private static boolean alreadySetMetadata(Object metadata) {
-        if (metadata == null || !(metadata instanceof Map)) {
+        if (!(metadata instanceof Map)) {
             return false;
         }
         try {

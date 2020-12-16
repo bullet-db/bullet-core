@@ -62,8 +62,15 @@ public class MemoryStorageManager extends StorageManager<Serializable> implement
     }
 
     @Override
-    public CompletableFuture<Map<String, byte[]>> getAll(Criteria criteria) {
-        return null;
+    public CompletableFuture<Map<String, byte[]>> getAll(Set<String> ids) {
+        if (storage.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
+        Map<String, byte[]> copy = new HashMap<>();
+        if (ids != null) {
+            ids.forEach(id -> copy.put(id, storage.get(id)));
+        }
+        return CompletableFuture.completedFuture(copy);
     }
 
     @Override
