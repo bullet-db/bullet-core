@@ -40,6 +40,8 @@ public class MultiMemoryStorageManager extends StorageManager<Serializable> impl
         this.config = new StorageConfig(config);
         namespaces = (Set<String>) this.config.getAs(StorageConfig.MEMORY_NAMESPACES, Set.class);
         partitions = this.config.getAs(StorageConfig.MEMORY_PARTITION_COUNT, Integer.class);
+        storage = new HashMap<>();
+        namespacePartitions = new HashMap<>();
         // Use the first one by default
         use(namespaces.iterator().next());
         log.info("Using initial namespace {}", currentNamespace);
@@ -113,7 +115,6 @@ public class MultiMemoryStorageManager extends StorageManager<Serializable> impl
         return partitions;
     }
 
-
     @Override
     public CompletableFuture<Boolean> clear(int partition) {
         Set<String> mappings = currentNamespacePartition.get(partition);
@@ -123,7 +124,7 @@ public class MultiMemoryStorageManager extends StorageManager<Serializable> impl
 
     @Override
     public void use(String namespace) {
-        if (!namespaces.isEmpty() && !namespaces.contains(namespace)) {
+        if (!namespaces.contains(namespace)) {
             log.error("{} not found in {}", namespace, namespaces);
             throw new RuntimeException("Unknown namespace " + namespace);
         }

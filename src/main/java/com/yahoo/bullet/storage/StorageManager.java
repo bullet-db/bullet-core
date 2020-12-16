@@ -27,11 +27,10 @@ import java.util.function.Function;
  * and implement the methods that operate on byte[]. The String methods are provided so that storing String instead of
  * byte[] is supported by all Storages.
  *
- * Note that {@link #getAll()} method is only provided for the raw byte[] access. Use {@link #getAllObjects(Criteria)}
- * or {@link #getAllStrings(Criteria)} for object and String access using {@link Criteria} if needed. There is also a
- * {@link #getAll(Criteria)} for the raw byte[] access using {@link Criteria}. The access methods that use
- * {@link Criteria} are not restricted to the current namespace. A specific {@link StorageManager} can provide specific
- * {@link Criteria} for storage-specific querying needs.
+ * Note that {@link #getAll()} method is only provided for the raw byte[] access. Use {@link #getAll(Criteria)}
+ * or {@link #retrieveAll(Criteria)}using {@link Criteria} if needed for specific storage criteria. The access methods
+ * that use {@link Criteria} are not restricted to the current namespace. A specific {@link StorageManager} can provide
+ * specific {@link Criteria} for storage-specific querying needs.
  *
  * It exposes these optional concepts:
  * 1. The concept of a namespace (by default, assumes there is only one default namespace). This can be used to abstract
@@ -115,29 +114,6 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
     }
 
     /**
-     * Retrieves all the IDs matching the specified {@link Criteria} stored with {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as Strings.
-     *
-     * @param criteria The {@link Criteria} understood by this storage.
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values or
-     *         null if no data is present. It completes exceptionally if there were issues.
-     */
-    public CompletableFuture<Map<String, V>> getAllObjects(Criteria criteria) {
-        return getAll(criteria).thenApplyAsync(m -> toObjectMap(m, this::convert));
-    }
-
-    /**
-     * Retrieves all the data matching the specified {@link Criteria}.
-     *
-     * @param criteria The {@link Criteria} understood by this storage.
-     * @param <E> The type returned by the {@link Criteria}.
-     * @return A {@link CompletableFuture} that resolves to the types returned by the {@link Criteria}.
-     */
-    public <E> CompletableFuture<E> matchAll(Criteria<E> criteria) {
-        return criteria.match(this);
-    }
-
-    /**
      * Retrieves a given ID from the current namespace in the storage stored using {@link #put(String, byte[])}.
      *
      * @param id The unique ID to retrieve from the storage.
@@ -193,15 +169,26 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
 
     /**
      * Retrieves all the IDs matching the specified {@link Criteria} stored with {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as byte[]. If the
-     * criteria supports it, the data can be across multiple namespaces.
+     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as the type of the
+     * storage.
      *
      * @param criteria The {@link Criteria} understood by this storage.
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
+     * @param <E> The type of the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values or
      *         null if no data is present. It completes exceptionally if there were issues.
      */
-    public CompletableFuture<Map<String, byte[]>> getAll(Criteria criteria) {
-        Objects.requireNonNull(criteria);
+    public <E> CompletableFuture<Map<String, V>> getAll(Criteria<E> criteria) {
+        return criteria.get(this);
+    }
+
+    /**
+     * Retrieves all the data matching the specified {@link Criteria} as the types of the {@link Criteria}.
+     *
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <E> The type returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the types returned by the {@link Criteria}.
+     */
+    public <E> CompletableFuture<E> retrieveAll(Criteria<E> criteria) {
         return criteria.retrieve(this);
     }
 
@@ -321,18 +308,6 @@ public abstract class StorageManager<V extends Serializable> implements AutoClos
      */
     public CompletableFuture<Boolean> putString(String id, String value) {
         return put(id, toBytes(value));
-    }
-
-    /**
-     * Retrieves all the IDs matching the specified {@link Criteria} stored with {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} or {@link #putObject(String, Serializable)} from the storage as Strings.
-     *
-     * @param criteria The {@link Criteria} understood by this storage.
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as String or
-     *         null if no data is present. It completes exceptionally if there were issues.
-     */
-    public CompletableFuture<Map<String, String>> getAllStrings(Criteria criteria) {
-        return getAll(criteria).thenApplyAsync(StorageManager::toStringMap);
     }
 
     // Conversion methods
