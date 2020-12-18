@@ -20,26 +20,23 @@ public class StorageConfig extends BulletConfig {
 
     // Field names
     public static final String PREFIX = "bullet.storage.";
-    public static final String MEMORY_PREFIX = PREFIX + "memory.";
-
-    // Memory and MultiMemory
-    public static final String MEMORY_NAMESPACES = MEMORY_PREFIX + "namespaces";
-    public static final String MEMORY_PARTITION_COUNT = MEMORY_PREFIX + "partition.count";
+    public static final String NAMESPACES = PREFIX + "namespaces";
+    public static final String PARTITION_COUNT = PREFIX + "partition.count";
 
     // Defaults
-    public static final int DEFAULT_MEMORY_PARTITION_COUNT = 3;
-    public static final String DEFAULT_NAMESPACE = "default";
-    public static final List<String> DEFAULT_MEMORY_NAMESPACES = Collections.singletonList(DEFAULT_NAMESPACE);
+    public static final int DEFAULT_PARTITION_COUNT = 3;
+    public static final String DEFAULT_NAMESPACE = "";
+    public static final List<String> DEFAULT_NAMESPACES = Collections.singletonList(DEFAULT_NAMESPACE);
 
     private static final Validator VALIDATOR = new Validator();
     static {
-        VALIDATOR.define(MEMORY_NAMESPACES)
-                 .defaultTo(DEFAULT_MEMORY_NAMESPACES)
+        VALIDATOR.define(NAMESPACES)
+                 .defaultTo(DEFAULT_NAMESPACES)
                  .checkIf(Validator.isListOfType(String.class))
                  .checkIf(Validator::isNonEmptyList)
                  .castTo(StorageConfig::asSet);
-        VALIDATOR.define(MEMORY_PARTITION_COUNT)
-                 .defaultTo(DEFAULT_MEMORY_PARTITION_COUNT)
+        VALIDATOR.define(PARTITION_COUNT)
+                 .defaultTo(DEFAULT_PARTITION_COUNT)
                  .checkIf(Validator::isPositiveInt)
                  .castTo(Validator::asInt);
     }

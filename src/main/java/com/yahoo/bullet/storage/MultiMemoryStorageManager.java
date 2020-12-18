@@ -9,6 +9,7 @@ import com.yahoo.bullet.common.BulletConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,18 +17,18 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
+/**
+ * A Storage that stores everything in-memory and supports namespaces and partitions.
+ */
 @Slf4j
-public class MultiMemoryStorageManager extends StorageManager<Serializable> implements Serializable {
+public class MultiMemoryStorageManager<V extends Serializable> extends StorageManager<V> implements Serializable {
     private static final long serialVersionUID = 9019357859078979031L;
-    private static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
     private int partitions;
     private Set<String> namespaces;
-    private String currentNamespace;
-    private Map<String, Map<String, byte[]>> storage;
-    private Map<String, byte[]> currentStorage;
-    private Map<String, Map<Integer, Set<String>>> namespacePartitions;
-    private Map<Integer, Set<String>> currentNamespacePartition;
+    private String defaultNamespace;
+
+    private Map<String, Map<Integer, Map<String, byte[]>>> storage;
 
     /**
      * Constructor.
@@ -38,74 +39,58 @@ public class MultiMemoryStorageManager extends StorageManager<Serializable> impl
     public MultiMemoryStorageManager(BulletConfig config) {
         super(config);
         this.config = new StorageConfig(config);
-        namespaces = (Set<String>) this.config.getAs(StorageConfig.MEMORY_NAMESPACES, Set.class);
-        partitions = this.config.getAs(StorageConfig.MEMORY_PARTITION_COUNT, Integer.class);
-        storage = new HashMap<>();
-        namespacePartitions = new HashMap<>();
-        // Use the first one by default
-        use(namespaces.iterator().next());
-        log.info("Using initial namespace {}", currentNamespace);
+        partitions = this.config.getAs(StorageConfig.PARTITION_COUNT, Integer.class);
+        namespaces = (Set<String>) this.config.getAs(StorageConfig.NAMESPACES, Set.class);
+        defaultNamespace = namespaces.iterator().next();
+        initializeStorage();
     }
 
     @Override
-    public CompletableFuture<byte[]> get(String id) {
-        return CompletableFuture.completedFuture(currentStorage.get(id));
+    protected CompletableFuture<Boolean> putRaw(String namespace, String id, byte[] value) {
+        validateNamespace(namespace);
+        return null;
     }
 
     @Override
-    public CompletableFuture<Map<String, byte[]>> getPartition(int partition) {
-        Set<String> mappings = currentNamespacePartition.get(partition);
-        Map<String, byte[]> data = new HashMap<>();
-        mappings.forEach(key -> data.put(key, currentStorage.get(key)));
-        return CompletableFuture.completedFuture(data);
+    protected CompletableFuture<byte[]> getRaw(String namespace, String id) {
+        validateNamespace(namespace);
+        return null;
     }
 
     @Override
-    public CompletableFuture<Map<String, byte[]>> getAll() {
-        return CompletableFuture.completedFuture(new HashMap<>(currentStorage));
+    protected CompletableFuture<Map<String, byte[]>> getAllRaw(String namespace) {
+        validateNamespace(namespace);
+        return null;
     }
 
     @Override
-    public CompletableFuture<Map<String, byte[]>> getAll(Set<String> ids) {
-        if (ids == null) {
-            return CompletableFuture.completedFuture(null);
-        }
-        Map<String, byte[]> data = new HashMap<>();
-        ids.forEach(id -> data.put(id, currentStorage.get(id)));
-        return CompletableFuture.completedFuture(data);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> put(String id, byte[] value) {
-        addToPartition(id, value);
-        return SUCCESS;
-    }
-
-    @Override
-    public CompletableFuture<Boolean> putAll(Map<String, byte[]> data) {
-        if (data != null) {
-            data.forEach(this::addToPartition);
-        }
-        return SUCCESS;
-    }
-
-    @Override
-    public CompletableFuture<byte[]> remove(String id) {
-        return CompletableFuture.completedFuture(removeFromPartition(id));
+    protected CompletableFuture<byte[]> removeRaw(String namespace, String id) {
+        validateNamespace(namespace);
+        return null;
     }
 
     @Override
     public CompletableFuture<Boolean> clear() {
-        currentStorage.clear();
-        currentNamespacePartition.clear();
-        use(currentNamespace);
+        initializeStorage();
         return SUCCESS;
     }
 
     @Override
-    public CompletableFuture<Boolean> clear(Set<String> ids) {
-        if (ids != null) {
-            ids.forEach(this::removeFromPartition);
+    public CompletableFuture<Boolean> clear(String namespace) {
+        validateNamespace(namespace);
+        storage.put(namespace, emptyPartitions());
+        return SUCCESS;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clear(String namespace, Set<String> ids) {
+        validateNamespace(namespace);
+        if (ids == null) {
+            return SUCCESS;
+        }
+        Map<Integer, Map<String, byte[]>> data = storage.get(namespace);
+        for (String id: ids) {
+            data.get(hash(id, partitions)).remove(id);
         }
         return SUCCESS;
     }
@@ -116,56 +101,72 @@ public class MultiMemoryStorageManager extends StorageManager<Serializable> impl
     }
 
     @Override
-    public CompletableFuture<Boolean> clear(int partition) {
-        Set<String> mappings = currentNamespacePartition.get(partition);
-        mappings.forEach(currentStorage::remove);
-        return SUCCESS;
+    public CompletableFuture<Map<String, V>> getPartition(String namespace, int partition) {
+        validateNamespace(namespace);
+        validatePartition(partition);
+        Map<String, byte[]> data = storage.get(namespace).get(partition);
+        return CompletableFuture.completedFuture(new HashMap<>(toObjectMap(data, this::convert)));
     }
 
     @Override
-    public void use(String namespace) {
-        if (!namespaces.contains(namespace)) {
-            log.error("{} not found in {}", namespace, namespaces);
-            throw new RuntimeException("Unknown namespace " + namespace);
+    public CompletableFuture<Boolean> clear(String namespace, int partition) {
+        return super.clear(namespace, partition);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> repartition(int newPartitionCount) {
+        if (newPartitionCount < 0) {
+            throw new IllegalArgumentException("New partition count must be positive!");
         }
-        currentNamespacePartition = namespacePartitions.computeIfAbsent(namespace, k -> emptyPartitions());
-        currentStorage = storage.computeIfAbsent(namespace, k -> new HashMap<>());
-        currentNamespace = namespace;
-    }
-
-    @Override
-    public String getNamespace() {
-        return currentNamespace;
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clear(String namespace) {
-        storage.remove(namespace);
-        namespacePartitions.remove(namespace);
-        // In case namespace was the currentNamespace
-        use(currentNamespace);
+        partitions = newPartitionCount;
+        Map<String, Map<Integer, Map<String, byte[]>>> newStorage = new HashMap<>();
+        for (Map.Entry<String, Map<Integer, Map<String, byte[]>>> data : storage.entrySet()) {
+            String namespace = data.getKey();
+            newStorage.put(namespace, repartition(data.getValue().values()));
+        }
+        storage = newStorage;
         return SUCCESS;
     }
 
-    private void addToPartition(String key, byte[] value) {
-        int partition = partition(key);
-        currentNamespacePartition.get(partition).add(key);
-        currentStorage.put(key, value);
+    @Override
+    protected String getDefaultNamespace() {
+        return defaultNamespace;
     }
 
-    private byte[] removeFromPartition(String key) {
-        int partition = partition(key);
-        currentNamespacePartition.get(partition).remove(key);
-        return currentStorage.remove(key);
+    private Map<Integer, Map<String, byte[]>> repartition(Collection<Map<String, byte[]>> oldPartitions) {
+        Map<Integer, Map<String, byte[]>> data = emptyPartitions();
+        for (Map<String, byte[]> partition: oldPartitions) {
+            for (Map.Entry<String, byte[]> entry: partition.entrySet()) {
+                String key = entry.getKey();
+                Integer hash = hash(key, partitions);
+                data.get(hash).put(key, entry.getValue());
+            }
+        }
+        return data;
     }
 
-    private Map<Integer, Set<String>> emptyPartitions() {
-        Map<Integer, Set<String>> partitions = new HashMap<>();
-        IntStream.range(0, this.partitions).forEach(i -> partitions.put(i, new HashSet<>()));
+    private void validateNamespace(String namespace) {
+        if (namespaces.contains(namespace)) {
+            log.error("Namespace {} is not one of {}", namespace, namespaces);
+            throw new IllegalArgumentException("The provided namespace is not a valid namespace: " + namespace);
+        }
+    }
+
+    private void validatePartition(int partition) {
+        if (partition >= partitions) {
+            log.error("Partition {} is not between 0 and {} exclusive", partition, partitions);
+            throw new IllegalArgumentException("The provided partition is not valid: " + partition);
+        }
+    }
+
+    private void initializeStorage() {
+        storage = new HashMap<>();
+        namespaces.forEach(namespace -> storage.put(namespace, emptyPartitions()));
+    }
+
+    private Map<Integer, Map<String, byte[]>> emptyPartitions() {
+        Map<Integer, Map<String, byte[]>> partitions = new HashMap<>();
+        IntStream.range(0, this.partitions).forEach(i -> partitions.put(i, new HashMap<>()));
         return partitions;
-    }
-
-    private int partition(String key) {
-        return Math.floorMod(key == null ? 42 : key.hashCode(), partitions);
     }
 }
