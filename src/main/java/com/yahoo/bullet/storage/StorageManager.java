@@ -25,16 +25,18 @@ import java.util.concurrent.CompletableFuture;
  * 2. The concept of a partition. It is upto the concrete implementation to choose to shard its data if needed and
  *    understand how to access its shards given the keys. A partition is defined at each namespace level. If you need
  *    partitions for your storage, override the partition specific methods - {@link #getPartition(String, int)},
- *    {@link #clear(String, int)} and {@link #numberOfPartitions()}, as well actually partitioning the data when
- *    implementing the byte[] methods. For convenience, a {@link #hash(String, int)} is provided.
+ *    {@link #clear(String, int)}, {@link #numberOfPartitions(String)} and {@link #repartition(String, int)}, as well
+ *    actually partitioning the data when implementing the byte[] methods. For convenience, a {@link #hash(String, int)}
+ *    is provided.
  * 3. The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide storage
  *    specific {@link Criteria} for storage specific querying needs. Note that the {@link Criteria} methods,
  *    {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
- *    the {@link Criteria} implementations.
+ *    the {@link Criteria} implementations. The {@link #apply(Criteria)} can be used to apply changes to the storage as
+ *    well.
  *
  * Implementors of this class should implement the various raw byte[] methods - the accessors as well as the clear
- * methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can override the
- * {@link #convert(Serializable)} and {@link #convert(byte[])}.
+ * methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can
+ * override the {@link #convert(Serializable)} and {@link #convert(byte[])}.
  *
  *  For convenience,
  *  1. All the accessors are provided with their String variants to store and retrieve values as Strings
@@ -43,7 +45,9 @@ import java.util.concurrent.CompletableFuture;
  *     {@link #toByteArrayMap(Map)} and {@link #toStringMap(Map)} methods.
  *  2. All the accessors (including the ones in 1. above) are provided without requiring a namespace. These methods use
  *     the {@link #DEFAULT_NAMESPACE} when invoking the corresponding methods that do require a namespace. If you wish
- *     to control the default namespace used, override the {@link #getDefaultNamespace()} method.
+ *     to control the default namespace used, override the {@link #getDefaultNamespace()} method. One exception is that
+ *     {@link #clear(String)} is not provided because {@link #clear()} can just be used instead and the later has the
+ *     same signature if the namespace argument is omitted.
  */
 public abstract class StorageManager<V extends Serializable> extends BaseStringStorageManager<V> implements Serializable {
     private static final long serialVersionUID = -2521566298026119635L;
@@ -60,6 +64,39 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
     }
 
     /**
+     * Retrieves all the IDs matching the specified {@link Criteria} from the storage as the type of the storage.
+     *
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <E> The type of the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
+     */
+    public <E> CompletableFuture<Map<String, V>> getAll(Criteria<E> criteria) {
+        return criteria.get(this);
+    }
+
+    /**
+     * Retrieves all the data matching the specified {@link Criteria} as the types of the {@link Criteria}.
+     *
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <E> The type returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
+     */
+    public <E> CompletableFuture<E> retrieveAll(Criteria<E> criteria) {
+        return criteria.retrieve(this);
+    }
+
+    /**
+     * Applies the given {@link Criteria} to this storage. It is upto the {@link Criteria} what it does.
+     *
+     * @param criteria The {@link Criteria} to apply.
+     * @param <E> The type returned the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
+     */
+    public <E> CompletableFuture<E> apply(Criteria<E> criteria) {
+        return criteria.apply(this);
+    }
+
+    /**
      * Gets the default namespace to store data under.
      * 
      * @return The default namespace.
@@ -69,10 +106,20 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
     }
 
     /**
+     * Clears the specified partition under the default namespace.
+     *
+     * @param partition The partition to clear.
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
+     */
+    public CompletableFuture<Boolean> clear(int partition) {
+        return clear(getDefaultNamespace(), partition);
+    }
+
+    /**
      * Removes a given set of IDs from the storage under the default namespace.
      *
      * @param ids The set of IDs to remove from the storage for the default namespace.
-     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful and throws otherwise.
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
     public CompletableFuture<Boolean> clear(Set<String> ids) {
         return clear(getDefaultNamespace(), ids);
@@ -136,6 +183,39 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      */
     public CompletableFuture<V> remove(String id) {
         return remove(getDefaultNamespace(), id);
+    }
+
+    /**
+     * Returns the number of partitions stored in this storage manager for the default namespace. Partitions can be
+     * sharded in storage and can also be used as a smaller unit of processing to reduce memory requirements. Partitions
+     * are numbered with integers from 0 inclusive to numberOfPartitions() exclusive for the namespace. By
+     * default, the storage manager is unpartitioned.
+     *
+     * @return The number of partitions in this storage manager.
+     */
+    public int numberOfPartitions() {
+        return numberOfPartitions(getDefaultNamespace());
+    }
+
+    /**
+     * Retrieves the IDs stored in the provided partition for the default namespace.
+     *
+     * @param partition The partition number to return.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte
+     *         arrays or null if no data is present.
+     */
+    public CompletableFuture<Map<String, V>> getPartition(int partition) {
+        return getPartition(getDefaultNamespace(), partition);
+    }
+
+    /**
+     * Repartitions the data into the given new number of partitions in the default namespace.
+     *
+     * @param newPartitionCount The new number of partitions to use.
+     * @return A {@link CompletableFuture} that resolves to true if the repartitioning was successful.
+     */
+    public CompletableFuture<Boolean> repartition(int newPartitionCount) {
+        return repartition(getDefaultNamespace(), newPartitionCount);
     }
 
     /**

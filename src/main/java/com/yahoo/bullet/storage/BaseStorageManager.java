@@ -19,9 +19,9 @@ import java.util.function.Function;
 
 @Slf4j
 abstract class BaseStorageManager<V extends Serializable> implements AutoCloseable, Serializable {
-    private static final long serialVersionUID = 6384361951608923687L;
+    private static final long serialVersionUID = 951633252390860251L;
+    static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
-    public static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
     protected BulletConfig config;
 
     /**
@@ -41,8 +41,10 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     public void close() {
     }
 
+    // Accessors
+
     /**
-     * Store a given ID and value for that ID into the current namespace in the storage.
+     * Store a given ID and value for that ID into the given namespace in the storage.
      *
      * @param namespace The namespace to store the entry in.
      * @param id The unique ID to represent this entry.
@@ -74,7 +76,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
         }
         int i = 0;
         CompletableFuture[] futures = new CompletableFuture[data.size()];
-        for (Map.Entry<String, byte[]> entry : data.entrySet()) {
+        for (Map.Entry<String, byte[]> entry: data.entrySet()) {
             futures[i] = putRaw(namespace, entry.getKey(), entry.getValue());
             i++;
         }
@@ -105,7 +107,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
 
         int i = 0;
         CompletableFuture[] futures = new CompletableFuture[ids.size()];
-        for (String id : ids) {
+        for (String id: ids) {
             futures[i] = getRaw(namespace, id).thenAccept(v -> data.put(id, v));
             i++;
         }
@@ -203,28 +205,6 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     }
 
     /**
-     * Retrieves all the IDs matching the specified {@link Criteria} from the storage as the type of the storage.
-     *
-     * @param criteria The {@link Criteria} understood by this storage.
-     * @param <E> The type of the {@link Criteria}.
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
-     */
-    public <E> CompletableFuture<Map<String, V>> getAll(Criteria<E> criteria) {
-        return criteria.get(this);
-    }
-
-    /**
-     * Retrieves all the data matching the specified {@link Criteria} as the types of the {@link Criteria}.
-     *
-     * @param criteria The {@link Criteria} understood by this storage.
-     * @param <E> The type returned by the {@link Criteria}.
-     * @return A {@link CompletableFuture} that resolves to the types returned by the {@link Criteria}.
-     */
-    public <E> CompletableFuture<E> retrieveAll(Criteria<E> criteria) {
-        return criteria.retrieve(this);
-    }
-
-    /**
      * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object in the given
      * namespace.
      *
@@ -239,18 +219,20 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     // Partition methods
 
     /**
-     * Returns the number of partitions stored in this storage manager. Partitions can be sharded in storage and can
-     * also be used as a smaller unit of processing to reduce memory requirements. Partitions are numbered with
-     * integers from 0 inclusive to numberOfPartitions() exclusive. By default, the storage manager is unpartitioned.
+     * Returns the number of partitions stored in this storage manager for the given namespace. Partitions can be
+     * sharded in storage and can also be used as a smaller unit of processing to reduce memory requirements. Partitions
+     * are numbered with integers from 0 inclusive to numberOfPartitions(String) exclusive for the namespace. By
+     * default, if storage manager is unpartitioned, this returns 0.
      *
-     * @return The number of partitions in this PartitionedStorageManager.
+     * @param namespace The namespace whose partitions are being asked for.
+     * @return The number of partitions in this storage manager.
      */
-    public int numberOfPartitions() {
+    public int numberOfPartitions(String namespace) {
         return 0;
     }
 
     /**
-     * Retrieves the IDs stored in the provided partition for the given namespace. By default, since the storage manager
+     * Retrieves the IDs stored in the provided partition for the given namespace. By default, if the storage manager
      * is unpartitioned, this works the same as {@link #getAll(String)}
      *
      * @param namespace The namespace to retrieve the IDs from.
@@ -263,9 +245,9 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     }
 
     /**
-     * Clears the specified partition. By default, since the storage manager is unpartitioned, this works the same as
-     * {@link #clear(String)}.
+     * Clears the specified partition under the given namespace.
      *
+     * @param namespace The namespace for the partition.
      * @param partition The partition to clear.
      * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
@@ -274,13 +256,14 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     }
 
     /**
-     * Repartitions the data into the given new number of partitions all the namespaces. By default, since the
-     * storage manager is unpartitioned, this does nothing.
+     * Repartitions the data into the given new number of partitions for the given namespace. If the storage manager
+     * is unpartitioned, this does nothing.
      *
+     * @param namespace The namespace to repartition.
      * @param newPartitionCount The new number of partitions to use.
      * @return A {@link CompletableFuture} that resolves to true if the repartitioning was successful.
      */
-    public CompletableFuture<Boolean> repartition(int newPartitionCount) {
+    public CompletableFuture<Boolean> repartition(String namespace, int newPartitionCount) {
         return SUCCESS;
     }
 

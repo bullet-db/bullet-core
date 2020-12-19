@@ -11,20 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 /**
- * A Storage that stores everything in-memory and supports namespaces and partitions.
+ * A Storage that stores everything in-memory and supports namespaces and partitions. It starts off with initial
+ * partitions for all namespaces. You may use {@link #repartition(String, int)} to change it at runtime.
  */
 @Slf4j
 public class MultiMemoryStorageManager<V extends Serializable> extends StorageManager<V> implements Serializable {
     private static final long serialVersionUID = 9019357859078979031L;
 
-    private int partitions;
+    private Map<String, Integer> partitions;
     private Set<String> namespaces;
     private String defaultNamespace;
 
@@ -39,8 +39,8 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     public MultiMemoryStorageManager(BulletConfig config) {
         super(config);
         this.config = new StorageConfig(config);
-        partitions = this.config.getAs(StorageConfig.PARTITION_COUNT, Integer.class);
         namespaces = (Set<String>) this.config.getAs(StorageConfig.NAMESPACES, Set.class);
+        // Pick the first one as the default
         defaultNamespace = namespaces.iterator().next();
         initializeStorage();
     }
@@ -48,25 +48,28 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     @Override
     protected CompletableFuture<Boolean> putRaw(String namespace, String id, byte[] value) {
         validateNamespace(namespace);
-        return null;
+        storage.get(namespace).get(hash(namespace, id)).put(id, value);
+        return SUCCESS;
     }
 
     @Override
     protected CompletableFuture<byte[]> getRaw(String namespace, String id) {
         validateNamespace(namespace);
-        return null;
+        return CompletableFuture.completedFuture(storage.get(namespace).get(hash(namespace, id)).get(id));
     }
 
     @Override
     protected CompletableFuture<Map<String, byte[]>> getAllRaw(String namespace) {
         validateNamespace(namespace);
-        return null;
+        Map<String, byte[]> result = new HashMap<>();
+        storage.get(namespace).values().forEach(result::putAll);
+        return CompletableFuture.completedFuture(result);
     }
 
     @Override
     protected CompletableFuture<byte[]> removeRaw(String namespace, String id) {
         validateNamespace(namespace);
-        return null;
+        return CompletableFuture.completedFuture(storage.get(namespace).get(hash(namespace, id)).remove(id));
     }
 
     @Override
@@ -78,7 +81,7 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     @Override
     public CompletableFuture<Boolean> clear(String namespace) {
         validateNamespace(namespace);
-        storage.put(namespace, emptyPartitions());
+        storage.put(namespace, emptyPartitions(namespace));
         return SUCCESS;
     }
 
@@ -89,21 +92,23 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
             return SUCCESS;
         }
         Map<Integer, Map<String, byte[]>> data = storage.get(namespace);
+        int count = partitions.get(namespace);
         for (String id: ids) {
-            data.get(hash(id, partitions)).remove(id);
+            data.get(hash(id, count)).remove(id);
         }
         return SUCCESS;
     }
 
     @Override
-    public int numberOfPartitions() {
-        return partitions;
+    public int numberOfPartitions(String namespace) {
+        validateNamespace(namespace);
+        return partitions.get(namespace);
     }
 
     @Override
     public CompletableFuture<Map<String, V>> getPartition(String namespace, int partition) {
         validateNamespace(namespace);
-        validatePartition(partition);
+        validatePartition(namespace, partition);
         Map<String, byte[]> data = storage.get(namespace).get(partition);
         return CompletableFuture.completedFuture(new HashMap<>(toObjectMap(data, this::convert)));
     }
@@ -114,17 +119,12 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     }
 
     @Override
-    public CompletableFuture<Boolean> repartition(int newPartitionCount) {
+    public CompletableFuture<Boolean> repartition(String namespace, int newPartitionCount) {
         if (newPartitionCount < 0) {
             throw new IllegalArgumentException("New partition count must be positive!");
         }
-        partitions = newPartitionCount;
-        Map<String, Map<Integer, Map<String, byte[]>>> newStorage = new HashMap<>();
-        for (Map.Entry<String, Map<Integer, Map<String, byte[]>>> data : storage.entrySet()) {
-            String namespace = data.getKey();
-            newStorage.put(namespace, repartition(data.getValue().values()));
-        }
-        storage = newStorage;
+        partitions.put(namespace, newPartitionCount);
+        storage.put(namespace, repartition(namespace, storage.get(namespace).values()));
         return SUCCESS;
     }
 
@@ -133,16 +133,21 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
         return defaultNamespace;
     }
 
-    private Map<Integer, Map<String, byte[]>> repartition(Collection<Map<String, byte[]>> oldPartitions) {
-        Map<Integer, Map<String, byte[]>> data = emptyPartitions();
+    private Map<Integer, Map<String, byte[]>> repartition(String namespace, Collection<Map<String, byte[]>> oldPartitions) {
+        Map<Integer, Map<String, byte[]>> data = emptyPartitions(namespace);
+        int count = partitions.get(namespace);
         for (Map<String, byte[]> partition: oldPartitions) {
             for (Map.Entry<String, byte[]> entry: partition.entrySet()) {
                 String key = entry.getKey();
-                Integer hash = hash(key, partitions);
-                data.get(hash).put(key, entry.getValue());
+                data.get(hash(key, count)).put(key, entry.getValue());
             }
         }
         return data;
+    }
+
+    private int hash(String namespace, String key) {
+        int numberOfPartitions = partitions.get(namespace);
+        return hash(key, numberOfPartitions);
     }
 
     private void validateNamespace(String namespace) {
@@ -152,21 +157,23 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
         }
     }
 
-    private void validatePartition(int partition) {
-        if (partition >= partitions) {
-            log.error("Partition {} is not between 0 and {} exclusive", partition, partitions);
+    private void validatePartition(String namespace, int partition) {
+        Integer count = partitions.get(namespace);
+        if (partition >= count) {
+            log.error("Partition {} is not between 0 and {} exclusive for {}", partition, count, namespace);
             throw new IllegalArgumentException("The provided partition is not valid: " + partition);
         }
     }
 
     private void initializeStorage() {
         storage = new HashMap<>();
-        namespaces.forEach(namespace -> storage.put(namespace, emptyPartitions()));
+        namespaces.forEach(namespace -> storage.put(namespace, emptyPartitions(namespace)));
     }
 
-    private Map<Integer, Map<String, byte[]>> emptyPartitions() {
-        Map<Integer, Map<String, byte[]>> partitions = new HashMap<>();
-        IntStream.range(0, this.partitions).forEach(i -> partitions.put(i, new HashMap<>()));
-        return partitions;
+    private Map<Integer, Map<String, byte[]>> emptyPartitions(String namespace) {
+        int count = partitions.get(namespace);
+        Map<Integer, Map<String, byte[]>> emptyPartitions = new HashMap<>();
+        IntStream.range(0, count).forEach(i -> emptyPartitions.put(i, new HashMap<>()));
+        return emptyPartitions;
     }
 }
