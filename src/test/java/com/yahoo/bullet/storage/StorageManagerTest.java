@@ -58,6 +58,30 @@ public class StorageManagerTest {
         }
     }
 
+    public static class MockCriteria implements Criteria<Void, Void> {
+        private int gets = 0;
+        private int retrieves = 0;
+        private int applies = 0;
+
+        @Override
+        public <V extends Serializable> CompletableFuture<Map<String, V>> get(StorageManager<V> storage) {
+            gets++;
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public <V extends Serializable> CompletableFuture<Void> retrieve(StorageManager<V> storage) {
+            retrieves++;
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public <V extends Serializable> CompletableFuture<Void> apply(StorageManager<V> storage, Void query) {
+            applies++;
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
     @Test
     public void testFrom() {
         StorageConfig config = new StorageConfig((String) null);
@@ -71,5 +95,17 @@ public class StorageManagerTest {
         StorageConfig config = new StorageConfig((String) null);
         config.set(BulletConfig.STORAGE_CLASS_NAME, "does.not.exist");
         StorageManager.from(config);
+    }
+
+    @Test
+    public void testCriteria() {
+        MockStorageManager<Serializable> storage = new MockStorageManager<>(null);
+        MockCriteria criteria = new MockCriteria();
+        storage.getAll(criteria);
+        storage.retrieveAll(criteria);
+        storage.apply(criteria, null);
+        Assert.assertEquals(criteria.gets, 1);
+        Assert.assertEquals(criteria.retrieves, 1);
+        Assert.assertEquals(criteria.applies, 1);
     }
 }

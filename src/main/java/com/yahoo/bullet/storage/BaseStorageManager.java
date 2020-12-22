@@ -155,7 +155,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @param namespace The namespace to store this value under.
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
+     * @return {@link CompletableFuture} that resolves to true the store succeeded.
      */
     public CompletableFuture<Boolean> put(String namespace, String id, V value) {
         return putRaw(namespace, id, this.convert(value));

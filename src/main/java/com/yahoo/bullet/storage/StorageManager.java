@@ -153,7 +153,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      *
      * @param id The ID to store this data under.
      * @param data The object to store as the data.
-     * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
+     * @return {@link CompletableFuture} that resolves to true the store succeeded.
      */
     public CompletableFuture<Boolean> put(String id, V data) {
         return put(getDefaultNamespace(), id, data);
@@ -247,7 +247,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      *
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
+     * @return {@link CompletableFuture} that resolves to true the store succeeded.
      */
     public CompletableFuture<Boolean> putString(String id, String value) {
         return putString(getDefaultNamespace(), id, value);

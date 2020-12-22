@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
  * <p>
  * In order to be able to do arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
  * also provided. This method is intended to be used for anything dealing with the storage, including retrieval. The
- * specific arguments for the query are left to the specific criteria needs.
+ * specific arguments for the query are left to the specific criteria.
  */
 public interface Criteria<T, R> {
     /**
