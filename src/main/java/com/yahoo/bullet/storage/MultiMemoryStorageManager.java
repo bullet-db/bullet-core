@@ -6,6 +6,8 @@
 package com.yahoo.bullet.storage;
 
 import com.yahoo.bullet.common.BulletConfig;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -19,15 +21,21 @@ import java.util.stream.IntStream;
 /**
  * A Storage that stores everything in-memory and supports namespaces and partitions. It starts off with initial
  * partitions for all namespaces. You may use {@link #repartition(String, int)} to change it at runtime.
+ *
+ * Supported criteria:
+ * <ol>
+ *     <li>{@link MultiMemoryCountingCriteria} that counts keys across namespaces</li>
+ * </ol>
  */
 @Slf4j
 public class MultiMemoryStorageManager<V extends Serializable> extends StorageManager<V> implements Serializable {
     private static final long serialVersionUID = 9019357859078979031L;
 
-    private Map<String, Integer> partitions;
     private Set<String> namespaces;
     private String defaultNamespace;
+    private Map<String, Integer> partitions;
 
+    @Getter(AccessLevel.PACKAGE)
     private Map<String, Map<Integer, Map<String, byte[]>>> storage;
 
     /**
@@ -40,9 +48,13 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
         super(config);
         this.config = new StorageConfig(config);
         namespaces = (Set<String>) this.config.getAs(StorageConfig.NAMESPACES, Set.class);
+        int defaultPartitions = this.config.getAs(StorageConfig.PARTITION_COUNT, Integer.class);
+        partitions = new HashMap<>();
+        namespaces.forEach(namespace -> partitions.put(namespace, defaultPartitions));
         // Pick the first one as the default
         defaultNamespace = namespaces.iterator().next();
         initializeStorage();
+        log.info("Initialized storage with {} namepaces and {} partitions each", namespaces.size(), defaultPartitions);
     }
 
     @Override
@@ -151,7 +163,7 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     }
 
     private void validateNamespace(String namespace) {
-        if (namespaces.contains(namespace)) {
+        if (!namespaces.contains(namespace)) {
             log.error("Namespace {} is not one of {}", namespace, namespaces);
             throw new IllegalArgumentException("The provided namespace is not a valid namespace: " + namespace);
         }

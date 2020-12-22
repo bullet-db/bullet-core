@@ -20,34 +20,47 @@ import java.util.concurrent.CompletableFuture;
  * It lets you store and retrieve raw byte[] or strings, or objects of the type parameter.
  *
  * It exposes these concepts:
- * 1. The concept of a namespace. This can be used to abstract different concepts like tables if the storage is
- *    relational or multiple conceptual storages.
- * 2. The concept of a partition. It is upto the concrete implementation to choose to shard its data if needed and
- *    understand how to access its shards given the keys. A partition is defined at each namespace level. If you need
- *    partitions for your storage, override the partition specific methods - {@link #getPartition(String, int)},
- *    {@link #clear(String, int)}, {@link #numberOfPartitions(String)} and {@link #repartition(String, int)}, as well
- *    actually partitioning the data when implementing the byte[] methods. For convenience, a {@link #hash(String, int)}
- *    is provided.
- * 3. The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide storage
- *    specific {@link Criteria} for storage specific querying needs. Note that the {@link Criteria} methods,
- *    {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
- *    the {@link Criteria} implementations. The {@link #apply(Criteria)} can be used to apply changes to the storage as
- *    well.
+ * <ol>
+ *   <li>
+ *   The concept of a namespace. This can be used to abstract different concepts like tables if the storage is
+ *   relational or multiple conceptual storages.
+ *   </li>
+ *   <li>
+ *   The concept of a partition. It is upto the concrete implementation to choose to shard its data if needed and
+ *   understand how to access its shards given the keys. A partition is defined at each namespace level. If you need
+ *   partitions for your storage, override the partition specific methods - {@link #getPartition(String, int)},
+ *   {@link #clear(String, int)}, {@link #numberOfPartitions(String)} and {@link #repartition(String, int)}, as well
+ *   actually partitioning the data when implementing the byte[] methods. For convenience, a {@link #hash(String, int)}
+ *   is provided.
+ *   </li>
+ *   <li>
+ *   The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide storage
+ *   specific {@link Criteria} for storage specific querying needs. Note that the {@link Criteria} methods,
+ *   {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
+ *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used to apply changes to the
+ *   storage as well.
+ *   </li>
+ * </ol>
  *
  * Implementors of this class should implement the various raw byte[] methods - the accessors as well as the clear
  * methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can
  * override the {@link #convert(Serializable)} and {@link #convert(byte[])}.
  *
  *  For convenience,
- *  1. All the accessors are provided with their String variants to store and retrieve values as Strings
- *     in addition to the the type of data stored in the storage. If you wish to control how the encoding happens, you
- *     may override the {@link #toString(byte[])}, {@link #toBytes(String)}. The map flavors are available as
- *     {@link #toByteArrayMap(Map)} and {@link #toStringMap(Map)} methods.
- *  2. All the accessors (including the ones in 1. above) are provided without requiring a namespace. These methods use
- *     the {@link #DEFAULT_NAMESPACE} when invoking the corresponding methods that do require a namespace. If you wish
- *     to control the default namespace used, override the {@link #getDefaultNamespace()} method. One exception is that
- *     {@link #clear(String)} is not provided because {@link #clear()} can just be used instead and the later has the
- *     same signature if the namespace argument is omitted.
+ * <ol>
+ *   <li>
+ *   All the accessors are provided with their String variants to store and retrieve values as Strings
+ *   in addition to the the type of data stored in the storage. If you wish to control how the encoding happens, you
+ *   may override the {@link #toString(byte[])}, {@link #toBytes(String)}. The map flavors are available as
+ *   {@link #toByteArrayMap(Map)} and {@link #toStringMap(Map)} methods.
+ *   <li>
+ *   All the accessors (including the ones in 1. above) are provided without requiring a namespace. These methods use
+ *   the {@link #DEFAULT_NAMESPACE} when invoking the corresponding methods that do require a namespace. If you wish
+ *   to control the default namespace used, override the {@link #getDefaultNamespace()} method. One exception is that
+ *   {@link #clear(String)} is not provided because {@link #clear()} can just be used instead and the later has the
+ *   same signature if the namespace argument is omitted.
+ *   </li>
+ * </ol>
  */
 public abstract class StorageManager<V extends Serializable> extends BaseStringStorageManager<V> implements Serializable {
     private static final long serialVersionUID = -2521566298026119635L;
@@ -67,10 +80,11 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Retrieves all the IDs matching the specified {@link Criteria} from the storage as the type of the storage.
      *
      * @param criteria The {@link Criteria} understood by this storage.
-     * @param <E> The type of the {@link Criteria}.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
      */
-    public <E> CompletableFuture<Map<String, V>> getAll(Criteria<E> criteria) {
+    public <T, R> CompletableFuture<Map<String, V>> getAll(Criteria<T, R> criteria) {
         return criteria.get(this);
     }
 
@@ -78,10 +92,11 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Retrieves all the data matching the specified {@link Criteria} as the types of the {@link Criteria}.
      *
      * @param criteria The {@link Criteria} understood by this storage.
-     * @param <E> The type returned by the {@link Criteria}.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
      * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
      */
-    public <E> CompletableFuture<E> retrieveAll(Criteria<E> criteria) {
+    public <T, R> CompletableFuture<R> retrieveAll(Criteria<T, R> criteria) {
         return criteria.retrieve(this);
     }
 
@@ -89,11 +104,12 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Applies the given {@link Criteria} to this storage. It is upto the {@link Criteria} what it does.
      *
      * @param criteria The {@link Criteria} to apply.
-     * @param <E> The type returned the {@link Criteria}.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
      * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
      */
-    public <E> CompletableFuture<E> apply(Criteria<E> criteria) {
-        return criteria.apply(this);
+    public <T, R> CompletableFuture<R> apply(Criteria<T, R> criteria, T query) {
+        return criteria.apply(this, query);
     }
 
     /**

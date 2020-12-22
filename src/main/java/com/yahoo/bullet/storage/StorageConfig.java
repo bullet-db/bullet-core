@@ -40,6 +40,7 @@ public class StorageConfig extends BulletConfig {
                  .checkIf(Validator::isPositiveInt)
                  .castTo(Validator::asInt);
     }
+
     /**
      * Constructor that loads specific file augmented with defaults.
      *

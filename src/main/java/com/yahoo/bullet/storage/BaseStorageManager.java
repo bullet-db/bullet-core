@@ -17,6 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import static com.yahoo.bullet.common.Utilities.putNotNull;
+
 @Slf4j
 abstract class BaseStorageManager<V extends Serializable> implements AutoCloseable, Serializable {
     private static final long serialVersionUID = 951633252390860251L;
@@ -108,7 +110,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
         int i = 0;
         CompletableFuture[] futures = new CompletableFuture[ids.size()];
         for (String id: ids) {
-            futures[i] = getRaw(namespace, id).thenAccept(v -> data.put(id, v));
+            futures[i] = getRaw(namespace, id).thenAccept(v -> putNotNull(data, id, v));
             i++;
         }
         return CompletableFuture.allOf(futures).thenApply(ignored -> data);
@@ -200,7 +202,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @param ids The {@link Set} of IDs to retrieve.
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
      */
-    public <E> CompletableFuture<Map<String, V>> getAll(String namespace, Set<String> ids) {
+    public CompletableFuture<Map<String, V>> getAll(String namespace, Set<String> ids) {
         return getAllRaw(namespace, ids).thenApplyAsync(m -> toObjectMap(m, this::convert));
     }
 

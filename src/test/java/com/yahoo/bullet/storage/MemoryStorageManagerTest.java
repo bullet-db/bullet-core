@@ -14,16 +14,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MemoryStorageManagerTest {
-    private MemoryStorageManager manager;
+    private MemoryStorageManager<Serializable> manager;
 
     @BeforeMethod
     public void setup() {
-        manager = new MemoryStorageManager(null);
+        manager = new MemoryStorageManager<>(null);
     }
 
     @AfterMethod
@@ -33,73 +35,68 @@ public class MemoryStorageManagerTest {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testSingleKeys() throws Exception {
         Assert.assertNull(manager.get("foo").get());
-        Assert.assertNull(manager.getString("foo").get());
+        Assert.assertNull(manager.get("bar", "foo").get());
+        Assert.assertTrue(manager.put("bar", "foo", "test").get());
+        Assert.assertEquals(manager.get("bar", "foo").get(), "test");
+        Assert.assertEquals(manager.remove("bar", "foo").get(), "test");
+        Assert.assertNull(manager.get("foo").get());
+        Assert.assertNull(manager.get("bar", "foo").get());
     }
 
     @Test
-    public void testRemove() throws Exception {
-        Assert.assertNull(manager.remove("foo").get());
-        Assert.assertNull(manager.removeString("foo").get());
+    public void testNoNamespace() throws Exception {
+        Assert.assertTrue(manager.put("bar", "foo", "test").get());
+        Assert.assertEquals(manager.get("foo").get(), "test");
+        Assert.assertTrue(manager.put("foo", "bar").get());
+        Assert.assertTrue(manager.clear("baz").get());
     }
 
     @Test
-    public void testRemoveAll() throws Exception {
-        Assert.assertTrue(manager.clear(null).get());
-        Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
-        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
-        Assert.assertTrue(manager.clear(Collections.singleton("bar")).get());
-        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
+    public void testClearing() throws Exception {
+        Assert.assertTrue(manager.put("a", "foo", "test").get());
+        Assert.assertTrue(manager.put("b", "bar", "baz").get());
         Assert.assertTrue(manager.clear(Collections.singleton("foo")).get());
         Assert.assertNull(manager.get("foo").get());
+        Assert.assertEquals(manager.get("bar").get(), "baz");
     }
 
     @Test
-    public void testPut() throws Exception {
-        Assert.assertTrue(manager.put("foo", "bar".getBytes()).get());
-        Assert.assertTrue(manager.put("foo", null).get());
-        Assert.assertTrue(manager.put(null, null).get());
-        Assert.assertTrue(manager.putString("foo", "bar").get());
-        Assert.assertTrue(manager.putString("foo", null).get());
-        Assert.assertTrue(manager.putString(null, null).get());
+    public void testNoPartitions() throws Exception {
+        Assert.assertTrue(manager.put("foo", "test").get());
+        Assert.assertEquals(manager.numberOfPartitions(), 0);
+        Assert.assertEquals(manager.get("foo").get(), "test");
+        Assert.assertTrue(manager.clear(42).get());
     }
 
     @Test
-    public void testPutAll() throws Exception {
-        Assert.assertTrue(manager.putAll(null).get());
-        Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
-        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
-    }
-
-    @Test
-    public void testClear() throws Exception {
-        Assert.assertTrue(manager.putAll(Collections.singletonMap("foo", new byte[0])).get());
-        Assert.assertEquals(manager.get("foo").get(), new byte[0]);
-    }
-
-    @Test
-    public void testGetAll() throws Exception {
-        Assert.assertNull(manager.getAll().get());
-        Assert.assertNull(manager.getAllString().get());
-        manager.put("foo", new byte[0]);
-        Assert.assertEquals(manager.getAll().get(), Collections.singletonMap("foo", new byte[0]));
-    }
-
-    @Test
+    @SuppressWarnings("unchecked")
     public void testStoringObjects() throws Exception {
         Serializable set = new HashSet<>(Arrays.asList("foo", "bar"));
         Serializable list = new ArrayList<>(Arrays.asList("foo", "bar", "baz"));
-
-        Assert.assertTrue(manager.putObject("set", set).get());
-        Assert.assertTrue(manager.putObject("list", list).get());
-
-        Set<String> asSet = (Set<String>) manager.getObject("set").get();
-        List<String> asList = (List<String>) manager.removeObject("list").get();
-
-        Assert.assertNotNull(manager.getObject("set").get());
-        Assert.assertNull(manager.getObject("list").get());
+        Assert.assertTrue(manager.put("set", set).get());
+        Assert.assertTrue(manager.put("list", list).get());
+        Set<String> asSet = (Set<String>) manager.get("set").get();
+        List<String> asList = (List<String>) manager.get("list").get();
         Assert.assertEquals(asSet, set);
         Assert.assertEquals(asList, list);
+    }
+
+    @Test
+    public void testMultipleKeys() throws Exception {
+        Map<String, String> data = new HashMap<>();
+        data.put("foo", "1");
+        data.put("bar", "2");
+        data.put("baz", "3");
+        data.put("qux", "4");
+
+        Assert.assertTrue(manager.putAllString(data).get());
+        Map<String, String> actual = manager.getAllString(new HashSet<>(Arrays.asList("foo", "baz"))).get();
+        Assert.assertEquals(actual.size(), 2);
+        Assert.assertEquals(actual.get("foo"), "1");
+        Assert.assertEquals(actual.get("baz"), "3");
+        Assert.assertEquals(manager.getAll().get().size(), 4);
+        Assert.assertEquals(manager.getAll(new HashSet<>(Arrays.asList("foo", "bar", "baz", "qux"))).get().size(), 4);
     }
 }

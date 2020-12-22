@@ -1,0 +1,7 @@
+bullet.storage.partition.count: 15
+bullet.storage.fake.setting: foo
+bullet.storage.namespaces:
+  - one
+  - two
+  - three
+  - eight

@@ -22,11 +22,15 @@ public abstract class PubSub {
     /**
      * The context determines how the {@link Publisher} and {@link Subscriber} returned by PubSub behave. For example,
      * If the Context is {@link Context#QUERY_SUBMISSION}:
-     *      1. Publishers write to request queue.
-     *      2. Subscribers read from the response queue.
+     * <ol>
+     *   <li>Publishers write to request queue</li>
+     *   <li>Subscribers read from the response queue</li>
+     * </ol>
      * If the Context is {@link Context#QUERY_PROCESSING}:
-     *      1. Publishers write to response queue.
-     *      2. Subscribers read from the request queue.
+     * <ol>
+     *   <li>Publishers write to response queue</li>
+     *   <li>Subscribers read from the request queue</li>
+     * </ol>
      */
     public enum Context {
         QUERY_SUBMISSION,
