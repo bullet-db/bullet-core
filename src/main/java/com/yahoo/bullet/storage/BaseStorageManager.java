@@ -130,7 +130,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      *
      * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
-    public abstract CompletableFuture<Boolean> clear();
+    public abstract CompletableFuture<Boolean> wipe();
 
     /**
      * Clears the specified namespace.
@@ -215,7 +215,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @return {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<V> remove(String namespace, String id) {
-        return removeRaw(namespace, id).thenApplyAsync(this::convert);
+        return removeRaw(namespace, id).thenApply(this::convert);
     }
 
     // Partition methods
@@ -235,15 +235,28 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
 
     /**
      * Retrieves the IDs stored in the provided partition for the given namespace. By default, if the storage manager
-     * is unpartitioned, this works the same as {@link #getAll(String)}
+     * is unpartitioned, this works the same as {@link #getAllRaw(String)}
      *
      * @param namespace The namespace to retrieve the IDs from.
      * @param partition The partition number to return.
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte
      *         arrays or null if no data is present.
      */
+    protected CompletableFuture<Map<String, byte[]>> getPartitionRaw(String namespace, int partition) {
+        return getAllRaw(namespace);
+    }
+
+    /**
+     * Retrieves the IDs stored in the provided partition for the given namespace. By default, if the storage manager
+     * is unpartitioned, this works the same as {@link #getAll(String)}
+     *
+     * @param namespace The namespace to retrieve the IDs from.
+     * @param partition The partition number to return.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as Serializable
+     *         objects or null if no data is present.
+     */
     public CompletableFuture<Map<String, V>> getPartition(String namespace, int partition) {
-        return getAll(namespace);
+        return getPartitionRaw(namespace, partition).thenApply(d -> BaseStorageManager.toObjectMap(d, this::convert));
     }
 
     /**

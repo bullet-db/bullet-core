@@ -85,7 +85,14 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     }
 
     @Override
-    public CompletableFuture<Boolean> clear() {
+    protected CompletableFuture<Map<String, byte[]>> getPartitionRaw(String namespace, int partition) {
+        validateNamespace(namespace);
+        validatePartition(namespace, partition);
+        return CompletableFuture.completedFuture(storage.get(namespace).get(partition));
+    }
+
+    @Override
+    public CompletableFuture<Boolean> wipe() {
         initializeStorage();
         return SUCCESS;
     }
@@ -115,14 +122,6 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     public int numberOfPartitions(String namespace) {
         validateNamespace(namespace);
         return partitions.get(namespace);
-    }
-
-    @Override
-    public CompletableFuture<Map<String, V>> getPartition(String namespace, int partition) {
-        validateNamespace(namespace);
-        validatePartition(namespace, partition);
-        Map<String, byte[]> data = storage.get(namespace).get(partition);
-        return CompletableFuture.completedFuture(new HashMap<>(toObjectMap(data, this::convert)));
     }
 
     @Override
@@ -162,7 +161,13 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
         return hash(key, numberOfPartitions);
     }
 
-    private void validateNamespace(String namespace) {
+    /**
+     * Exposed for use by {@link Criteria}. Validates and throws if the given namespace is not a valid namespace.
+     *
+     * @param namespace The namespace to validate.
+     * @throws IllegalArgumentException if the namespace is not a valid namespace.
+     */
+    void validateNamespace(String namespace) {
         if (!namespaces.contains(namespace)) {
             log.error("Namespace {} is not one of {}", namespace, namespaces);
             throw new IllegalArgumentException("The provided namespace is not a valid namespace: " + namespace);

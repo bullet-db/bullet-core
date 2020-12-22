@@ -45,12 +45,13 @@ public class NullStorageManagerTest {
 
     @Test
     public void testRemoveMultiple() throws Exception {
-        Assert.assertTrue(manager.clear().get());
         Assert.assertTrue(manager.clear("foo").get());
         Assert.assertTrue(manager.clear("foo", null).get());
         Assert.assertTrue(manager.clear("foo", Collections.emptySet()).get());
         Assert.assertTrue(manager.clear("foo", Collections.singleton("bar")).get());
         Assert.assertTrue(manager.clear("foo", 0).get());
+        Assert.assertTrue(manager.clear().get());
+        Assert.assertTrue(manager.wipe().get());
     }
 
     @Test

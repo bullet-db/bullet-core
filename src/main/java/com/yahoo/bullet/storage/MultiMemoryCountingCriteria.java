@@ -8,7 +8,6 @@ package com.yahoo.bullet.storage;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static com.yahoo.bullet.storage.Criteria.checkType;
@@ -50,6 +49,7 @@ public class MultiMemoryCountingCriteria implements Criteria<List, Long> {
     }
 
     private <V extends Serializable> Long sum(String namespace, MultiMemoryStorageManager<V> storage) {
+        storage.validateNamespace(namespace);
         return storage.getStorage().get(namespace).values().stream().mapToLong(Map::size).sum();
     }
 

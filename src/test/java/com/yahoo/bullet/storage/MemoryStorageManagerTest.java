@@ -92,11 +92,19 @@ public class MemoryStorageManagerTest {
         data.put("qux", "4");
 
         Assert.assertTrue(manager.putAllString(data).get());
-        Map<String, String> actual = manager.getAllString(new HashSet<>(Arrays.asList("foo", "baz"))).get();
+        Map<String, String> actual;
+        actual = manager.getAllString(new HashSet<>(Arrays.asList("foo", "baz"))).get();
         Assert.assertEquals(actual.size(), 2);
         Assert.assertEquals(actual.get("foo"), "1");
         Assert.assertEquals(actual.get("baz"), "3");
         Assert.assertEquals(manager.getAll().get().size(), 4);
         Assert.assertEquals(manager.getAll(new HashSet<>(Arrays.asList("foo", "bar", "baz", "qux"))).get().size(), 4);
+
+        actual = manager.getPartitionString("", 42).get();
+        Assert.assertEquals(actual.size(), 4);
+        Assert.assertEquals(actual.get("foo"), "1");
+        Assert.assertEquals(actual.get("bar"), "2");
+        Assert.assertEquals(actual.get("baz"), "3");
+        Assert.assertEquals(actual.get("qux"), "4");
     }
 }

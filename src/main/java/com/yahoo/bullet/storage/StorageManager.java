@@ -56,9 +56,7 @@ import java.util.concurrent.CompletableFuture;
  *   <li>
  *   All the accessors (including the ones in 1. above) are provided without requiring a namespace. These methods use
  *   the {@link #DEFAULT_NAMESPACE} when invoking the corresponding methods that do require a namespace. If you wish
- *   to control the default namespace used, override the {@link #getDefaultNamespace()} method. One exception is that
- *   {@link #clear(String)} is not provided because {@link #clear()} can just be used instead and the later has the
- *   same signature if the namespace argument is omitted.
+ *   to control the default namespace used, override the {@link #getDefaultNamespace()} method.
  *   </li>
  * </ol>
  */
@@ -104,6 +102,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Applies the given {@link Criteria} to this storage. It is upto the {@link Criteria} what it does.
      *
      * @param criteria The {@link Criteria} to apply.
+     * @param query The query that the {@link Criteria} uses to apply.
      * @param <T> The type of query taken by the {@link Criteria}.
      * @param <R> The type of result returned by the {@link Criteria}.
      * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
@@ -119,6 +118,15 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      */
     protected String getDefaultNamespace() {
         return DEFAULT_NAMESPACE;
+    }
+
+    /**
+     * Clears the default namespace.
+     *
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
+     */
+    public CompletableFuture<Boolean> clear() {
+        return clear(getDefaultNamespace());
     }
 
     /**
@@ -178,7 +186,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
     public CompletableFuture<Map<String, V>> getAll() {
         return getAll(getDefaultNamespace());
     }
-    
+
     /**
      * Retrieves the values for the provided IDs from the default namespace in the storage as a {@link Map} of IDs to
      * their {@link Serializable} values.

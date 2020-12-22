@@ -53,14 +53,14 @@ public class MemoryStorageManager<V extends Serializable> extends StorageManager
     }
 
     @Override
-    public CompletableFuture<Boolean> clear() {
+    public CompletableFuture<Boolean> wipe() {
         storage.clear();
         return SUCCESS;
     }
 
     @Override
     public CompletableFuture<Boolean> clear(String namespace) {
-        return clear();
+        return wipe();
     }
 
     @Override

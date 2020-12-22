@@ -98,6 +98,19 @@ abstract class BaseStringStorageManager<V extends Serializable> extends BaseStor
     }
 
     /**
+     * Retrieves the IDs stored in the provided partition for the given namespace. By default, if the storage manager
+     * is unpartitioned, this works the same as {@link #getAll(String)}
+     *
+     * @param namespace The namespace to retrieve the IDs from.
+     * @param partition The partition number to return.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as Strings
+     *         or null if no data is present.
+     */
+    public CompletableFuture<Map<String, String>> getPartitionString(String namespace, int partition) {
+        return getPartitionRaw(namespace, partition).thenApply(BaseStringStorageManager::toStringMap);
+    }
+
+    /**
      * Converts a {@link String} to a byte[].
      *
      * @param input The String input.

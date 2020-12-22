@@ -48,7 +48,7 @@ public class NullStorageManager<V extends Serializable> extends StorageManager<V
     }
 
     @Override
-    public CompletableFuture<Boolean> clear() {
+    public CompletableFuture<Boolean> wipe() {
         return SUCCESS;
     }
 
