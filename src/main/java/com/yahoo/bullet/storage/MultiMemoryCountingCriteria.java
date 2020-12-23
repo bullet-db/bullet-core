@@ -19,7 +19,7 @@ import static com.yahoo.bullet.storage.Criteria.checkType;
  * {@link List} of String of namespaces to retrieve the total count for. If the {@link List} is empty or null, the total
  * count is returned.
  */
-public class MultiMemoryCountingCriteria implements Criteria<List, Long> {
+public class MultiMemoryCountingCriteria implements Criteria<List<String>, Long> {
     @Override
     public <V extends Serializable> CompletableFuture<Map<String, V>> get(StorageManager<V> storage) {
         throw new UnsupportedOperationException("The counting criteria does not allow fetching data");
@@ -31,13 +31,13 @@ public class MultiMemoryCountingCriteria implements Criteria<List, Long> {
     }
 
     @Override
-    public <V extends Serializable> CompletableFuture<Long> apply(StorageManager<V> storage, List query) {
+    public <V extends Serializable> CompletableFuture<Long> apply(StorageManager<V> storage, List<String> query) {
         if (query == null || query.isEmpty()) {
             return CompletableFuture.completedFuture(sum(storage));
         }
         long sum = 0;
-        for (Object namespace : query) {
-            sum += sum(namespace.toString(), storage);
+        for (String namespace : query) {
+            sum += sum(namespace, storage);
         }
         return CompletableFuture.completedFuture(sum);
     }
