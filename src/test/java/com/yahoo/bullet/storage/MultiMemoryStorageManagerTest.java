@@ -116,7 +116,7 @@ public class MultiMemoryStorageManagerTest {
 
         int partition = allPartitions.keySet().iterator().next();
         manager.clear("bar", partition);
-        for (String key: allPartitions.get(partition).keySet()) {
+        for (String key : allPartitions.get(partition).keySet()) {
             Assert.assertNull(manager.get("bar", key).get());
         }
 

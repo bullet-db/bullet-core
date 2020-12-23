@@ -36,12 +36,11 @@ public class MultiMemoryCountingCriteria implements Criteria<List, Long> {
             return CompletableFuture.completedFuture(sum(storage));
         }
         long sum = 0;
-        for (Object namespace: query) {
+        for (Object namespace : query) {
             sum += sum(namespace.toString(), storage);
         }
         return CompletableFuture.completedFuture(sum);
     }
-
 
     private <V extends Serializable> Long sum(String namespace, StorageManager<V> storage) {
         checkType(storage, MultiMemoryStorageManager.class);

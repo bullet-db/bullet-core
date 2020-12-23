@@ -88,7 +88,7 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     protected CompletableFuture<Map<String, byte[]>> getPartitionRaw(String namespace, int partition) {
         validateNamespace(namespace);
         validatePartition(namespace, partition);
-        return CompletableFuture.completedFuture(storage.get(namespace).get(partition));
+        return CompletableFuture.completedFuture(new HashMap<>(storage.get(namespace).get(partition)));
     }
 
     @Override
@@ -112,7 +112,7 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
         }
         Map<Integer, Map<String, byte[]>> data = storage.get(namespace);
         int count = partitions.get(namespace);
-        for (String id: ids) {
+        for (String id : ids) {
             data.get(hash(id, count)).remove(id);
         }
         return SUCCESS;
@@ -147,8 +147,8 @@ public class MultiMemoryStorageManager<V extends Serializable> extends StorageMa
     private Map<Integer, Map<String, byte[]>> repartition(String namespace, Collection<Map<String, byte[]>> oldPartitions) {
         Map<Integer, Map<String, byte[]>> data = emptyPartitions(namespace);
         int count = partitions.get(namespace);
-        for (Map<String, byte[]> partition: oldPartitions) {
-            for (Map.Entry<String, byte[]> entry: partition.entrySet()) {
+        for (Map<String, byte[]> partition : oldPartitions) {
+            for (Map.Entry<String, byte[]> entry : partition.entrySet()) {
                 String key = entry.getKey();
                 data.get(hash(key, count)).put(key, entry.getValue());
             }

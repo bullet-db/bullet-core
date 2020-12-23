@@ -78,7 +78,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
         }
         int i = 0;
         CompletableFuture[] futures = new CompletableFuture[data.size()];
-        for (Map.Entry<String, byte[]> entry: data.entrySet()) {
+        for (Map.Entry<String, byte[]> entry : data.entrySet()) {
             futures[i] = putRaw(namespace, entry.getKey(), entry.getValue());
             i++;
         }
@@ -109,7 +109,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
 
         int i = 0;
         CompletableFuture[] futures = new CompletableFuture[ids.size()];
-        for (String id: ids) {
+        for (String id : ids) {
             futures[i] = getRaw(namespace, id).thenAccept(v -> putNotNull(data, id, v));
             i++;
         }

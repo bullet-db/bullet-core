@@ -20,10 +20,10 @@ import java.util.concurrent.CompletableFuture;
  * stored. The {@link Criteria} can also wrap its results in its own format when using the
  * {@link #retrieve(StorageManager)} interface to return objects of an expected type.
  * <p>
- * A specific {@link Criteria} is intended to implemented along with the particular {@link StorageManager} so that
+ * A specific {@link Criteria} is intended to be implemented along with the particular {@link StorageManager} so that
  * non-public interfaces can be shared between them.
  * <p>
- * In order to be able to do arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
+ * In order to be allow arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
  * also provided. This method is intended to be used for anything dealing with the storage, including retrieval. The
  * specific arguments for the query are left to the specific criteria.
  */
