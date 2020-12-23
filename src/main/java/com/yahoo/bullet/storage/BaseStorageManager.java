@@ -143,7 +143,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
     /**
      * Removes a given set of IDs from the storage under the given namespace.
      *
-     * @param namespace The name that has these IDs.
+     * @param namespace The namespace that has these IDs.
      * @param ids The set of IDs to remove from the storage for the given namespace.
      * @return A {@link CompletableFuture} that resolves to true if the wipe was successful and throws otherwise.
      */
@@ -155,7 +155,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @param namespace The namespace to store this value under.
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true if the store succeeded.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
      */
     public CompletableFuture<Boolean> put(String namespace, String id, V value) {
         return putRaw(namespace, id, this.convert(value));
@@ -166,10 +166,10 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      *
      * @param namespace The namespace of the data.
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<V> get(String namespace, String id) {
-        return getRaw(namespace, id).thenApplyAsync(this::convert);
+        return getRaw(namespace, id).thenApply(this::convert);
     }
 
     /**
@@ -191,7 +191,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
      */
     public CompletableFuture<Map<String, V>> getAll(String namespace) {
-        return getAllRaw(namespace).thenApplyAsync(m -> toObjectMap(m, this::convert));
+        return getAllRaw(namespace).thenApply(m -> toObjectMap(m, this::convert));
     }
 
     /**
@@ -203,7 +203,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
      */
     public CompletableFuture<Map<String, V>> getAll(String namespace, Set<String> ids) {
-        return getAllRaw(namespace, ids).thenApplyAsync(m -> toObjectMap(m, this::convert));
+        return getAllRaw(namespace, ids).thenApply(m -> toObjectMap(m, this::convert));
     }
 
     /**
@@ -212,7 +212,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      *
      * @param namespace The namespace of the data.
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<V> remove(String namespace, String id) {
         return removeRaw(namespace, id).thenApply(this::convert);
@@ -224,7 +224,7 @@ abstract class BaseStorageManager<V extends Serializable> implements AutoCloseab
      * Returns the number of partitions stored in this storage manager for the given namespace. Partitions can be
      * sharded in storage and can also be used as a smaller unit of processing to reduce memory requirements. Partitions
      * are numbered with integers from 0 inclusive to numberOfPartitions(String) exclusive for the namespace. By
-     * default, if storage manager is unpartitioned, this returns 0.
+     * default, if the storage manager is unpartitioned, this returns 0.
      *
      * @param namespace The namespace whose partitions are being asked for.
      * @return The number of partitions in this storage manager.

@@ -19,8 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 /**
- * A Storage that stores everything in-memory and supports namespaces and partitions. It starts off with initial
- * partitions for all namespaces. You may use {@link #repartition(String, int)} to change it at runtime.
+ * A storage that stores everything in-memory and supports namespaces and partitions. It starts off with a fixed initial
+ * number of partitions for all namespaces. You may use {@link #repartition(String, int)} to change it at runtime per
+ * namespace.
  *
  * Supported criteria:
  * <ol>

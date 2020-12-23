@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @param <V> The type of the {@link Serializable} data stored in the underlying storage.
  *
- * Encapsulates the concept of a Storage. It can abstract away a key-value storage as well as other kinds of storing
+ * Encapsulates the concept of a Storage. It can abstract away a key-value storage as well as other ways of storing
  * data. It uses three main concepts (see below) - namespaces, partitions and criteria to abstract away most storages.
  * It lets you store and retrieve raw byte[] or strings, or objects of the type parameter.
  *
@@ -31,20 +31,20 @@ import java.util.concurrent.CompletableFuture;
  *   partitions for your storage, override the partition specific methods - {@link #getPartition(String, int)},
  *   {@link #clear(String, int)}, {@link #numberOfPartitions(String)} and {@link #repartition(String, int)}, as well as
  *   actually partitioning the data when implementing the byte[] methods. For convenience, a {@link #hash(String, int)}
- *   is provided.
+ *   is provided. By default, unless the specific storage manager says so, the storage is assumed to be unpartitioned.
  *   </li>
  *   <li>
  *   The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide
  *   storage-specific {@link Criteria} for storage-specific querying needs. Note that the {@link Criteria} methods,
  *   {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
- *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used to apply changes to the
- *   storage as well.
+ *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used a general method to apply
+ *   arbitrary changes to the storage.
  *   </li>
  * </ol>
  *
- * Implementors of this class should implement the various raw byte[] methods - the accessors as well as the clear
- * methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can
- * override the {@link #convert(Serializable)} and {@link #convert(byte[])}.
+ * Implementors of this class should implement the various raw byte[] methods - the accessors - as well as the clear
+ * and wipe methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can
+ * override the {@link #convert(Serializable)} and {@link #convert(byte[])} methods.
  *
  * For convenience,
  * <ol>
@@ -154,7 +154,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      *
      * @param id The ID to store this data under.
      * @param data The object to store as the data.
-     * @return {@link CompletableFuture} that resolves to true if the store succeeded.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
      */
     public CompletableFuture<Boolean> put(String id, V data) {
         return put(getDefaultNamespace(), id, data);
@@ -164,7 +164,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Retrieves data stored for a given String identifier in the default namespace as a {@link Serializable} object.
      *
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<V> get(String id) {
         return get(getDefaultNamespace(), id);
@@ -206,7 +206,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * namespace.
      *
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<V> remove(String id) {
         return remove(getDefaultNamespace(), id);
@@ -250,7 +250,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      *
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true if the store succeeded.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
      */
     public CompletableFuture<Boolean> putString(String id, String value) {
         return putString(getDefaultNamespace(), id, value);
@@ -260,7 +260,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Retrieves data stored for a given String identifier in the default namespace as a String.
      *
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<String> getString(String id) {
         return getString(getDefaultNamespace(), id);
@@ -300,7 +300,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
      * Retrieves and removes data stored for a given String identifier as a String in the default namespace.
      *
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<String> removeString(String id) {
         return removeString(getDefaultNamespace(), id);

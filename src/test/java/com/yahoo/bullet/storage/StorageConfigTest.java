@@ -19,8 +19,7 @@ public class StorageConfigTest {
         StorageConfig config = new StorageConfig((Config) null);
         Assert.assertEquals(config.get(StorageConfig.NAMESPACES),
                             Collections.singleton(StorageConfig.DEFAULT_NAMESPACE));
-        Assert.assertEquals(config.getAs(StorageConfig.PARTITION_COUNT, Integer.class),
-                            (Integer) StorageConfig.DEFAULT_PARTITION_COUNT);
+        Assert.assertNull(config.getAs(StorageConfig.PARTITION_COUNT, Integer.class));
     }
 
     @Test

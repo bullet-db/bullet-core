@@ -14,16 +14,16 @@ import java.util.concurrent.CompletableFuture;
  * @param <T> The specific type used by this {@link Criteria} as arguments.
  * @param <R> The specific type returned by this {@link Criteria} when applied to a storage.
  *
- * Encapsulates the idea of criteria that can apply themselves to a {@link StorageManager} search query. This can be
- * anything like the WHERE clause of a SQL query for relational storages or whatever else. It provides the
- * {@link #get(StorageManager)} to retrieve the data from the storage as a key-value mapping to the raw data
- * stored. The {@link Criteria} can also wrap its results in its own format when using the
- * {@link #retrieve(StorageManager)} interface to return objects of an expected type.
+ * Encapsulates the idea of criteria that can apply themselves to a {@link StorageManager} query. This can be
+ * anything like the WHERE clause of a SQL query for relational storages or something that modifies the storage or
+ * whatever else. It provides the {@link #get(StorageManager)} method to retrieve the data from the storage as a
+ * key-value mapping to the raw data stored. The {@link Criteria} can also wrap its results in its own format when
+ * using the {@link #retrieve(StorageManager)} interface to return objects of an expected type.
  * <p>
  * A specific {@link Criteria} is intended to be implemented along with the particular {@link StorageManager} so that
  * non-public interfaces can be shared between them.
  * <p>
- * In order to allow arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
+ * In order to allow arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} method is
  * also provided. This method is intended to be used for anything dealing with the storage, including retrieval. The
  * specific arguments for the query are left to the specific criteria.
  */
@@ -39,12 +39,12 @@ public interface Criteria<T, R> {
     <V extends Serializable> CompletableFuture<Map<String, V>> get(StorageManager<V> storage);
 
     /**
-     * Retrieves data from the given {@link StorageManager} as a {@link CompletableFuture} resolving to the type of this
-     * {@link Criteria}.
+     * Retrieves data from the given {@link StorageManager} as a {@link CompletableFuture} resolving to the specific
+     * return type of this {@link Criteria}.
      *
      * @param storage The {@link StorageManager} to retrieve data from.
      * @param <V> The type of the data stored in the storage.
-     * @return A {@link CompletableFuture} that resolves to this {@link Criteria} type.
+     * @return A {@link CompletableFuture} that resolves to the return type of this {@link Criteria}.
      */
     <V extends Serializable> CompletableFuture<R> retrieve(StorageManager<V> storage);
 
@@ -54,7 +54,7 @@ public interface Criteria<T, R> {
      * @param storage The {@link StorageManager} to apply this to.
      * @param query The specific query to apply to this {@link Criteria}.
      * @param <V> The type of the data stored in the storage.
-     * @return A {@link CompletableFuture} that resolves to this {@link Criteria} type.
+     * @return A {@link CompletableFuture} that resolves to the return type of this {@link Criteria}.
      */
     <V extends Serializable> CompletableFuture<R> apply(StorageManager<V> storage, T query);
 

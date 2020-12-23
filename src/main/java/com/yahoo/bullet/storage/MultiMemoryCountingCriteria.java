@@ -35,11 +35,7 @@ public class MultiMemoryCountingCriteria implements Criteria<List<String>, Long>
         if (query == null || query.isEmpty()) {
             return CompletableFuture.completedFuture(sum(storage));
         }
-        long sum = 0;
-        for (String namespace : query) {
-            sum += sum(namespace, storage);
-        }
-        return CompletableFuture.completedFuture(sum);
+        return CompletableFuture.completedFuture(query.stream().mapToLong(namespace -> sum(namespace, storage)).sum());
     }
 
     private <V extends Serializable> Long sum(String namespace, StorageManager<V> storage) {

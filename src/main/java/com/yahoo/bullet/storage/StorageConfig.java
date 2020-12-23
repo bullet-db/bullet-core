@@ -24,7 +24,7 @@ public class StorageConfig extends BulletConfig {
     public static final String PARTITION_COUNT = PREFIX + "partition.count";
 
     // Defaults
-    public static final int DEFAULT_PARTITION_COUNT = 3;
+    public static final int DEFAULT_PARTITION_COUNT = 1;
     public static final String DEFAULT_NAMESPACE = "";
     public static final List<String> DEFAULT_NAMESPACES = Collections.singletonList(DEFAULT_NAMESPACE);
 

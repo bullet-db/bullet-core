@@ -36,7 +36,7 @@ abstract class BaseStringStorageManager<V extends Serializable> extends BaseStor
      * @param namespace The namespace to store this value under.
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true if the store succeeded.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
      */
     public CompletableFuture<Boolean> putString(String namespace, String id, String value) {
         return putRaw(namespace, id, toBytes(value));
@@ -47,7 +47,7 @@ abstract class BaseStringStorageManager<V extends Serializable> extends BaseStor
      *
      * @param namespace The namespace of the data.
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<String> getString(String namespace, String id) {
         return getRaw(namespace, id).thenApply(BaseStringStorageManager::toString);
@@ -91,7 +91,7 @@ abstract class BaseStringStorageManager<V extends Serializable> extends BaseStor
      *
      * @param namespace The namespace of the data.
      * @param id The ID of the data.
-     * @return {@link CompletableFuture} that resolves to the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
     public CompletableFuture<String> removeString(String namespace, String id) {
         return removeRaw(namespace, id).thenApply(BaseStringStorageManager::toString);
