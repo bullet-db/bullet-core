@@ -14,11 +14,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A Storage manager that stores everything in-memory.
+ * A Storage manager that stores everything in-memory and does not support namespaces or partitions.
  */
-public class MemoryStorageManager extends StorageManager implements Serializable {
+public class MemoryStorageManager<V extends Serializable> extends StorageManager<V> implements Serializable {
     private static final long serialVersionUID = 3815534537510449363L;
-    private static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
     private Map<String, byte[]> storage;
 
@@ -33,42 +32,39 @@ public class MemoryStorageManager extends StorageManager implements Serializable
     }
 
     @Override
-    public CompletableFuture<byte[]> get(String id) {
-        return CompletableFuture.completedFuture(storage.get(id));
-    }
-
-    @Override
-    public CompletableFuture<byte[]> remove(String id) {
-        return CompletableFuture.completedFuture(storage.remove(id));
-    }
-
-    @Override
-    public CompletableFuture<Boolean> put(String id, byte[] value) {
+    protected CompletableFuture<Boolean> putRaw(String namespace, String id, byte[] value) {
         storage.put(id, value);
         return SUCCESS;
     }
 
     @Override
-    public CompletableFuture<Boolean> putAll(Map<String, byte[]> data) {
-        if (data != null) {
-            storage.putAll(data);
-        }
-        return SUCCESS;
+    protected CompletableFuture<byte[]> getRaw(String namespace, String id) {
+        return CompletableFuture.completedFuture(storage.get(id));
     }
 
     @Override
-    public CompletableFuture<Map<String, byte[]>> getAll() {
-        return CompletableFuture.completedFuture(storage.isEmpty() ? null : new HashMap<>(storage));
+    protected CompletableFuture<Map<String, byte[]>> getAllRaw(String namespace) {
+        return CompletableFuture.completedFuture(new HashMap<>(storage));
     }
 
     @Override
-    public CompletableFuture<Boolean> clear() {
+    protected CompletableFuture<byte[]> removeRaw(String namespace, String id) {
+        return CompletableFuture.completedFuture(storage.remove(id));
+    }
+
+    @Override
+    public CompletableFuture<Boolean> wipe() {
         storage.clear();
         return SUCCESS;
     }
 
     @Override
-    public CompletableFuture<Boolean> clear(Set<String> ids) {
+    public CompletableFuture<Boolean> clear(String namespace) {
+        return wipe();
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clear(String namespace, Set<String> ids) {
         if (ids != null) {
             ids.forEach(storage::remove);
         }

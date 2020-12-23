@@ -131,6 +131,23 @@ public class Utilities {
     }
 
     /**
+     * Adds the given mapping to the given {@link Map} if the value is not null.
+     *
+     * @param map The map to check.
+     * @param key The key to add.
+     * @param value The value to add if not null.
+     * @param <K> The type of the map key.
+     * @param <V> The type of the map value.
+     * @return The map.
+     */
+    public static <K, V> Map<K, V> putNotNull(Map<K, V> map, K key, V value) {
+        if (value != null) {
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    /**
      * Rounds a double up to the specified number of places.
      *
      * @param value The number to round.

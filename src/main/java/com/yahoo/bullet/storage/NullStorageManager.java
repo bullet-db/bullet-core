@@ -15,11 +15,8 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A default implementation that does nothing if you do not want to use a StorageManager.
  */
-public class NullStorageManager extends StorageManager {
+public class NullStorageManager<V extends Serializable> extends StorageManager<V> implements Serializable {
     private static final long serialVersionUID = -1718811448543607136L;
-
-    private static final CompletableFuture<Boolean> FAIL = CompletableFuture.completedFuture(false);
-    private static final CompletableFuture<Boolean> SUCCESS = CompletableFuture.completedFuture(true);
 
     /**
      * Constructor.
@@ -31,72 +28,37 @@ public class NullStorageManager extends StorageManager {
     }
 
     @Override
-    public CompletableFuture<String> getString(String id) {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<String> removeString(String id) {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> putString(String id, String value) {
+    protected CompletableFuture<Boolean> putRaw(String namespace, String id, byte[] value) {
         return SUCCESS;
     }
 
     @Override
-    public CompletableFuture<Map<String, String>> getAllString() {
+    protected CompletableFuture<byte[]> getRaw(String namespace, String id) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<U> removeObject(String id) {
+    protected CompletableFuture<Map<String, byte[]>> getAllRaw(String namespace) {
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
+    protected CompletableFuture<byte[]> removeRaw(String namespace, String id) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> wipe() {
         return SUCCESS;
     }
 
     @Override
-    public <U extends Serializable> CompletableFuture<U> getObject(String id) {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<byte[]> get(String id) {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<byte[]> remove(String id) {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clear(Set<String> ids) {
+    public CompletableFuture<Boolean> clear(String namespace) {
         return SUCCESS;
     }
 
     @Override
-    public CompletableFuture<Boolean> put(String id, byte[] value) {
-        return SUCCESS;
-    }
-
-    @Override
-    public CompletableFuture<Boolean> putAll(Map<String, byte[]> data) {
-        return SUCCESS;
-    }
-
-    @Override
-    public CompletableFuture<Map<String, byte[]>> getAll() {
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clear() {
+    public CompletableFuture<Boolean> clear(String namespace, Set<String> ids) {
         return SUCCESS;
     }
 }

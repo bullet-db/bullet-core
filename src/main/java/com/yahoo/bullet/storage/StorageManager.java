@@ -1,25 +1,69 @@
 /*
- *  Copyright 2019, Yahoo Inc.
+ *  Copyright 2020, Yahoo Inc.
  *  Licensed under the terms of the Apache License, Version 2.0.
  *  See the LICENSE file associated with the project for terms.
  */
 package com.yahoo.bullet.storage;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.SerializerDeserializer;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
-public abstract class StorageManager implements AutoCloseable, Serializable {
-    private static final long serialVersionUID = 6384361951608923687L;
-    protected BulletConfig config;
+/**
+ * @param <V> The type of the {@link Serializable} data stored in the underlying storage.
+ *
+ * Encapsulates the concept of a Storage. It can abstract away a key-value storage as well as other ways of storing
+ * data. It uses three main concepts (see below) - namespaces, partitions and criteria to abstract away most storages.
+ * It lets you store and retrieve raw byte[] or strings, or objects of the type parameter.
+ *
+ * It exposes these concepts:
+ * <ol>
+ *   <li>
+ *   The concept of a namespace. This can be used to abstract different concepts like tables if the storage is
+ *   relational or multiple conceptual storages.
+ *   </li>
+ *   <li>
+ *   The concept of a partition. It is up to the concrete implementation to choose to shard its data if needed and
+ *   understand how to access its shards given the keys. A partition is defined at each namespace level. If you need
+ *   partitions for your storage, override the partition specific methods - {@link #getPartition(String, int)},
+ *   {@link #clear(String, int)}, {@link #numberOfPartitions(String)} and {@link #repartition(String, int)}, as well as
+ *   actually partitioning the data when implementing the byte[] methods. For convenience, a {@link #hash(String, int)}
+ *   is provided. By default, unless the specific storage manager says so, the storage is assumed to be unpartitioned.
+ *   </li>
+ *   <li>
+ *   The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide
+ *   storage-specific {@link Criteria} for storage-specific querying needs. Note that the {@link Criteria} methods,
+ *   {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
+ *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used as a general method to
+ *   apply arbitrary changes to the storage.
+ *   </li>
+ * </ol>
+ *
+ * Implementors of this class should implement the various raw byte[] methods - the accessors - as well as the clear
+ * and wipe methods. To change the default conversion to and from the type of the StorageManager and the byte[], you can
+ * override the {@link #convert(Serializable)} and {@link #convert(byte[])} methods.
+ *
+ * For convenience,
+ * <ol>
+ *   <li>
+ *   All the accessors are provided with their String variants to store and retrieve values as Strings
+ *   in addition to the type of data stored in the storage. If you wish to control how the encoding happens, you
+ *   may override {@link #toString(byte[])} and {@link #toBytes(String)}. The map flavors are available as
+ *   {@link #toByteArrayMap(Map)} and {@link #toStringMap(Map)} methods.
+ *   <li>
+ *   All the accessors (including the ones in 1. above) are provided without requiring a namespace. These methods use
+ *   the {@link #DEFAULT_NAMESPACE} when invoking the corresponding methods that do require a namespace. If you wish
+ *   to control the default namespace used, override the {@link #getDefaultNamespace()} method.
+ *   </li>
+ * </ol>
+ */
+public abstract class StorageManager<V extends Serializable> extends BaseStringStorageManager<V> implements Serializable {
+    private static final long serialVersionUID = -2521566298026119635L;
+
+    public static final String DEFAULT_NAMESPACE = "";
 
     /**
      * Constructor that takes a {@link BulletConfig}.
@@ -27,217 +71,255 @@ public abstract class StorageManager implements AutoCloseable, Serializable {
      * @param config The config to use.
      */
     public StorageManager(BulletConfig config) {
-        this.config = config;
+        super(config);
     }
 
     /**
-     * Exposed for testing. Helper to convert a {@link String} to a byte[].
+     * Retrieves all the IDs matching the specified {@link Criteria} from the storage as the type of the storage.
      *
-     * @param input The String input.
-     * @return The byte[] encoding of the input.
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
      */
-    static byte[] toBytes(String input) {
-        return input == null ? null : input.getBytes(StandardCharsets.UTF_8);
+    public <T, R> CompletableFuture<Map<String, V>> getAll(Criteria<T, R> criteria) {
+        return criteria.get(this);
     }
 
     /**
-     * Exposed for testing. Converts a byte[] input to a String.
+     * Retrieves all the data matching the specified {@link Criteria} as the types of the {@link Criteria}.
      *
-     * @param input The byte[] input.
-     * @return The String decoded from the byte[].
+     * @param criteria The {@link Criteria} understood by this storage.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
      */
-    static String toString(byte[] input) {
-        return input == null ? null : new String(input, StandardCharsets.UTF_8);
+    public <T, R> CompletableFuture<R> retrieveAll(Criteria<T, R> criteria) {
+        return criteria.retrieve(this);
     }
 
     /**
-     * Exposed for testing. Converts a {@link Map} of String to byte[] to a {@link Map} of String to String.
+     * Applies the given {@link Criteria} to this storage. It is up to the {@link Criteria} what it does.
      *
-     * @param input The String to byte[] map.
-     * @return The String to String converted map.
+     * @param criteria The {@link Criteria} to apply.
+     * @param query The query that the {@link Criteria} uses to apply.
+     * @param <T> The type of query taken by the {@link Criteria}.
+     * @param <R> The type of result returned by the {@link Criteria}.
+     * @return A {@link CompletableFuture} that resolves to the type returned by the {@link Criteria}.
      */
-    static Map<String, String> toStringMap(Map<String, byte[]> input) {
-        if (input == null) {
-            return null;
-        }
-        Map<String, String> map = new HashMap<>();
-        for (Map.Entry<String, byte[]> entry : input.entrySet()) {
-            map.put(entry.getKey(), toString(entry.getValue()));
-        }
-        return map;
+    public <T, R> CompletableFuture<R> apply(Criteria<T, R> criteria, T query) {
+        return criteria.apply(this, query);
     }
 
     /**
-     * Exposed for testing. Converts a @{@link byte[]} to a type of the given object.
+     * Gets the default namespace to store data under.
      *
-     * @param bytes The byte[] to convert.
-     * @param <U> The Serializable type of the object to convert it to.
-     * @return The converted object or null if the input was null or the conversion was unable to be performed.
+     * @return The default namespace.
      */
-    static <U extends Serializable> U convert(byte[] bytes) {
-        // While SerializerDeserializer handles nulls, adding a null check to avoid using exceptions for control flow
-        return bytes == null ? null : SerializerDeserializer.fromBytes(bytes);
+    protected String getDefaultNamespace() {
+        return DEFAULT_NAMESPACE;
     }
 
     /**
-     * Exposed for testing. Converts an object of the given type to a @{@link byte[]}.
+     * Clears the default namespace.
      *
-     * @param object The object to convert.
-     * @param <U> The type of the object to convert.
-     * @return The converted byte[] or null if the input was null or the conversion was unable to be performed.
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
-    static <U extends Serializable> byte[] convert(U object) {
-        // While SerializerDeserializer handles nulls, adding a null check to avoid using exceptions for control flow
-        return object == null ? null : SerializerDeserializer.toBytes(object);
+    public CompletableFuture<Boolean> clear() {
+        return clear(getDefaultNamespace());
     }
 
     /**
-     * Retrieves a given ID from the storage stored using {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} as a String.
+     * Clears the specified partition under the default namespace.
      *
-     * @param id The unique ID to retrieve from the storage.
-     * @return A {@link CompletableFuture} that resolves to the String version of the stored value for this ID or null
-     *         if it does not exist.
+     * @param partition The partition to clear.
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
-    public CompletableFuture<String> getString(String id) {
-        return get(id).thenApplyAsync(StorageManager::toString);
+    public CompletableFuture<Boolean> clear(int partition) {
+        return clear(getDefaultNamespace(), partition);
     }
 
     /**
-     * Removes a given ID from the storage stored using {@link #putString(String, String)} or
-     * {@link #put(String, byte[])} as a String.
+     * Removes a given set of IDs from the storage under the default namespace.
      *
-     * @param id The unique ID to remove from the storage.
-     * @return A {@link CompletableFuture} that resolves to the String version of the stored value for this ID or null
-     *         if it does not exist.
+     * @param ids The set of IDs to remove from the storage for the default namespace.
+     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful.
      */
-    public CompletableFuture<String> removeString(String id) {
-        return remove(id).thenApplyAsync(StorageManager::toString);
+    public CompletableFuture<Boolean> clear(Set<String> ids) {
+        return clear(getDefaultNamespace(), ids);
     }
 
     /**
-     * Store a given ID and String value for that ID into the storage.
+     * Stores any {@link Serializable} object for a given String identifier in the default namespace.
      *
-     * @param id The unique ID to represent this entry.
-     * @param value The String value to store for this entry.
-     * @return A {@link CompletableFuture} that resolves to true or false if the storage was successful.
-     */
-    public CompletableFuture<Boolean> putString(String id, String value) {
-        return put(id, toBytes(value));
-    }
-
-    /**
-     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
-     * {@link #putObject(String, Serializable)} from the storage as Strings.
-     *
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as Strings or
-     *         null if no data is present.
-     */
-    public CompletableFuture<Map<String, String>> getAllString() {
-        return getAll().thenApplyAsync(StorageManager::toStringMap);
-    }
-
-    /**
-     * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object.
-     *
-     * @param id The id of the data.
-     * @param <U> The type of the {@link Serializable} object.
-     * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
-     */
-    public <U extends Serializable> CompletableFuture<U> removeObject(String id) {
-        return remove(id).thenApplyAsync(StorageManager::convert);
-    }
-
-    /**
-     * Stores any {@link Serializable} object for a given String identifier.
-     *
-     * @param id The id to store this data under.
+     * @param id The ID to store this data under.
      * @param data The object to store as the data.
-     * @param <U> The type of the {@link Serializable} object.
-     * @return {@link CompletableFuture} that resolves to true the store succeeded or false if not.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
      */
-    public <U extends Serializable> CompletableFuture<Boolean> putObject(String id, U data) {
-        return put(id, StorageManager.convert(data));
+    public CompletableFuture<Boolean> put(String id, V data) {
+        return put(getDefaultNamespace(), id, data);
     }
 
     /**
-     * Retrieves data stored for a given String identifier as a {@link Serializable} object.
+     * Retrieves data stored for a given String identifier in the default namespace as a {@link Serializable} object.
      *
-     * @param id The id of the data.
-     * @param <U> The type of the {@link Serializable} object.
-     * @return {@link CompletableFuture} that resolves to the data, null if no data, or completes exceptionally.
-     *
+     * @param id The ID of the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
      */
-    public <U extends Serializable> CompletableFuture<U> getObject(String id) {
-        return get(id).thenApplyAsync(StorageManager::convert);
+    public CompletableFuture<V> get(String id) {
+        return get(getDefaultNamespace(), id);
     }
 
     /**
-     * Retrieves a given ID from the storage stored using {@link #put(String, byte[])}.
-     *
-     * @param id The unique ID to retrieve from the storage.
-     * @return A {@link CompletableFuture} that resolves to the stored value for this ID or null if it does not exist
-     *         as a byte[]. It completes exceptionally if there were issues.
-     */
-    public abstract CompletableFuture<byte[]> get(String id);
-
-    /**
-     * Removes a given ID from the storage stored using {@link #put(String, byte[])}.
-     *
-     * @param id The unique ID to remove from the storage.
-     * @return A {@link CompletableFuture} that resolves to the stored value for this ID or null if it does not exist
-     *         as a byte[]. It completes exceptionally if there were issues.
-     */
-    public abstract CompletableFuture<byte[]> remove(String id);
-
-    /**
-     * Store a given ID and value for that ID into the storage.
-     *
-     * @param id The unique ID to represent this entry.
-     * @param value The value to store for this entry.
-     * @return A {@link CompletableFuture} that resolves to true if the storage was successful.
-     */
-    public abstract CompletableFuture<Boolean> put(String id, byte[] value);
-
-    /**
-     * Stores a map of IDs and values into the storage.
+     * Stores a map of IDs and values into the storage in the default namespace.
      *
      * @param data The map of IDs and values to store.
      * @return A {@link CompletableFuture} that resolves to true if the storage was completely successful.
      */
-    public abstract CompletableFuture<Boolean> putAll(Map<String, byte[]> data);
-
-    /**
-     * Retrieves all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
-     * {@link #putObject(String, Serializable)} from the storage as byte[].
-     *
-     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte[] or
-     *         null if no data is present. It completes exceptionally if there were issues.
-     */
-    public abstract CompletableFuture<Map<String, byte[]>> getAll();
-
-    /**
-     * Removes all the IDs stored with {@link #putString(String, String)} or {@link #put(String, byte[])} or
-     * {@link #putObject(String, Serializable)} from the storage as byte[].
-     *
-     * @return A {@link CompletableFuture} that resolves to true or false if the wipe was successful.
-     */
-    public abstract CompletableFuture<Boolean> clear();
-
-    /**
-     * Removes a given set of IDs from the storage.
-     *
-     * @param ids The set of IDs to remove from the storage.
-     * @return A {@link CompletableFuture} that resolves to true if the wipe was successful and throws otherwise.
-     */
-    public abstract CompletableFuture<Boolean> clear(Set<String> ids);
-
-    @Override
-    public void close() {
+    public CompletableFuture<Boolean> putAll(Map<String, V> data) {
+        return putAll(getDefaultNamespace(), data);
     }
 
     /**
-     * Create a StorageManager instance using the class specified in the config file.
+     * Retrieves all the IDs from the default namespace in the storage as a {@link Map} of IDs to their
+     * {@link Serializable} values.
+     *
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
+     */
+    public CompletableFuture<Map<String, V>> getAll() {
+        return getAll(getDefaultNamespace());
+    }
+
+    /**
+     * Retrieves the values for the provided IDs from the default namespace in the storage as a {@link Map} of IDs to
+     * their {@link Serializable} values.
+     *
+     * @param ids The {@link Set} of IDs to retrieve.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values.
+     */
+    public CompletableFuture<Map<String, V>> getAll(Set<String> ids) {
+        return getAll(getDefaultNamespace(), ids);
+    }
+
+    /**
+     * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object in the default
+     * namespace.
+     *
+     * @param id The ID of the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
+     */
+    public CompletableFuture<V> remove(String id) {
+        return remove(getDefaultNamespace(), id);
+    }
+
+    /**
+     * Returns the number of partitions stored in this storage manager for the default namespace. Partitions can be
+     * sharded in storage and can also be used as a smaller unit of processing to reduce memory requirements. Partitions
+     * are numbered with integers from 0 inclusive to numberOfPartitions() exclusive for the namespace. By
+     * default, the storage manager is unpartitioned.
+     *
+     * @return The number of partitions in this storage manager.
+     */
+    public int numberOfPartitions() {
+        return numberOfPartitions(getDefaultNamespace());
+    }
+
+    /**
+     * Retrieves the IDs stored in the provided partition for the default namespace.
+     *
+     * @param partition The partition number to return.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their stored values as byte
+     *         arrays or null if no data is present.
+     */
+    public CompletableFuture<Map<String, V>> getPartition(int partition) {
+        return getPartition(getDefaultNamespace(), partition);
+    }
+
+    /**
+     * Repartitions the data into the given new number of partitions in the default namespace.
+     *
+     * @param newPartitionCount The new number of partitions to use.
+     * @return A {@link CompletableFuture} that resolves to true if the repartitioning was successful.
+     */
+    public CompletableFuture<Boolean> repartition(int newPartitionCount) {
+        return repartition(getDefaultNamespace(), newPartitionCount);
+    }
+
+    /**
+     * Stores a String for a given String identifier in the default namespace.
+     *
+     * @param id The ID to store this value under.
+     * @param value The object to store as the value.
+     * @return A {@link CompletableFuture} that resolves to true if the store succeeded.
+     */
+    public CompletableFuture<Boolean> putString(String id, String value) {
+        return putString(getDefaultNamespace(), id, value);
+    }
+
+    /**
+     * Retrieves data stored for a given String identifier in the default namespace as a String.
+     *
+     * @param id The ID of the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
+     */
+    public CompletableFuture<String> getString(String id) {
+        return getString(getDefaultNamespace(), id);
+    }
+
+    /**
+     * Stores a map of IDs and String values into the storage in the default namespace.
+     *
+     * @param data The map of IDs and values to store.
+     * @return A {@link CompletableFuture} that resolves to true if the storage was completely successful.
+     */
+    public CompletableFuture<Boolean> putAllString(Map<String, String> data) {
+        return putAllString(getDefaultNamespace(), data);
+    }
+
+    /**
+     * Retrieves all the IDs from the default namespace in the storage as a {@link Map} of IDs to their String values.
+     *
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their String values.
+     */
+    public CompletableFuture<Map<String, String>> getAllString() {
+        return getAllString(getDefaultNamespace());
+    }
+
+    /**
+     * Retrieves the values for the provided IDs from the default namespace in the storage as a {@link Map} of IDs to
+     * their String values.
+     *
+     * @param ids The {@link Set} of IDs to retrieve.
+     * @return A {@link CompletableFuture} that resolves to a {@link Map} of IDs to their String values.
+     */
+    public CompletableFuture<Map<String, String>> getAllString(Set<String> ids) {
+        return getAllString(getDefaultNamespace(), ids);
+    }
+
+    /**
+     * Retrieves and removes data stored for a given String identifier as a String in the default namespace.
+     *
+     * @param id The ID of the data.
+     * @return A {@link CompletableFuture} that resolves to the data.
+     */
+    public CompletableFuture<String> removeString(String id) {
+        return removeString(getDefaultNamespace(), id);
+    }
+
+    /**
+     * A default hash function for a given String that places the String into 0 to numberOfPartitions exclusive. Note
+     * that numberOfPartitions must be a whole number.
+     *
+     * @param key The String key to hash.
+     * @param numberOfPartitions The number of partitions. Must be zero or positive.
+     * @return An integer from 0 to numberOfPartitions.
+     */
+    public static int hash(String key, int numberOfPartitions) {
+        return Math.floorMod(key == null ? 42 : key.hashCode(), numberOfPartitions);
+    }
+
+    /**
+     * Create a {@link StorageManager} instance using the class specified in the config file.
      *
      * @param config The non-null {@link BulletConfig} containing the class name and StorageManager settings.
      * @return an instance of specified class initialized with settings from the input file and defaults.

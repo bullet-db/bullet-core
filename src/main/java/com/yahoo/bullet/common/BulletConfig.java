@@ -372,7 +372,7 @@ public class BulletConfig extends Config {
      * should use a {@link Validator} to define the appropriate definitions, casters and defaults to use. You
      * should call this method before you use the config if you set additional settings to ensure that all configurations
      * are valid.
-     *
+     * <p>
      * This class defines a validator for all the fields it knows about. If you subclass it and define your own fields,
      * you should {@link #getValidator()} and add entries and relationships that you need to validate. Make sure
      * to call this method from your override if you wish validate your new definitions.
@@ -428,7 +428,7 @@ public class BulletConfig extends Config {
 
     @SuppressWarnings("unchecked")
     private static boolean alreadySetMetadata(Object metadata) {
-        if (metadata == null || !(metadata instanceof Map)) {
+        if (!(metadata instanceof Map)) {
             return false;
         }
         try {

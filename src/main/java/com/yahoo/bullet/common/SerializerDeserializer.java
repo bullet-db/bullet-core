@@ -52,7 +52,7 @@ public class SerializerDeserializer {
             oos.writeObject(object);
             return bos.toByteArray();
         } catch (IOException | RuntimeException e) {
-            log.error("Could not serialize given object", object);
+            log.error("Could not serialize given object {}", object);
             log.error("Exception was: ", e);
         }
         return null;
