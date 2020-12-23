@@ -37,8 +37,8 @@ import java.util.concurrent.CompletableFuture;
  *   The concept of a criteria. A criteria is a general query. A specific {@link StorageManager} can provide
  *   storage-specific {@link Criteria} for storage-specific querying needs. Note that the {@link Criteria} methods,
  *   {@link #retrieveAll(Criteria)} and {@link #getAll(Criteria)} do not take a namespace since those are handled by
- *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used a general method to apply
- *   arbitrary changes to the storage.
+ *   the {@link Criteria} implementations. The {@link #apply(Criteria, Object)} can be used as a general method to
+ *   apply arbitrary changes to the storage.
  *   </li>
  * </ol>
  *
@@ -62,7 +62,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class StorageManager<V extends Serializable> extends BaseStringStorageManager<V> implements Serializable {
     private static final long serialVersionUID = -2521566298026119635L;
-    
+
     public static final String DEFAULT_NAMESPACE = "";
 
     /**
@@ -113,7 +113,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
 
     /**
      * Gets the default namespace to store data under.
-     * 
+     *
      * @return The default namespace.
      */
     protected String getDefaultNamespace() {
@@ -200,7 +200,7 @@ public abstract class StorageManager<V extends Serializable> extends BaseStringS
     public CompletableFuture<Map<String, V>> getAll(Set<String> ids) {
         return getAll(getDefaultNamespace(), ids);
     }
-    
+
     /**
      * Retrieves and removes data stored for a given String identifier as a {@link Serializable} object in the default
      * namespace.
