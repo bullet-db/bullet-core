@@ -38,6 +38,7 @@ public class StorageConfig extends BulletConfig {
         VALIDATOR.define(PARTITION_COUNT)
                  .defaultTo(DEFAULT_PARTITION_COUNT)
                  .checkIf(Validator::isPositiveInt)
+                 .unless(Validator::isNull)
                  .castTo(Validator::asInt);
     }
 

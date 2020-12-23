@@ -36,7 +36,7 @@ abstract class BaseStringStorageManager<V extends Serializable> extends BaseStor
      * @param namespace The namespace to store this value under.
      * @param id The ID to store this value under.
      * @param value The object to store as the value.
-     * @return {@link CompletableFuture} that resolves to true the store succeeded.
+     * @return {@link CompletableFuture} that resolves to true if the store succeeded.
      */
     public CompletableFuture<Boolean> putString(String namespace, String id, String value) {
         return putRaw(namespace, id, toBytes(value));

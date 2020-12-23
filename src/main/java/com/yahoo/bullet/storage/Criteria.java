@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * A specific {@link Criteria} is intended to be implemented along with the particular {@link StorageManager} so that
  * non-public interfaces can be shared between them.
  * <p>
- * In order to be allow arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
+ * In order to allow arbitrary changes or queries to the storage, the {@link #apply(StorageManager, Object)} is
  * also provided. This method is intended to be used for anything dealing with the storage, including retrieval. The
  * specific arguments for the query are left to the specific criteria.
  */
