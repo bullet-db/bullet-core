@@ -41,6 +41,8 @@ public enum Operation {
     LESS_THAN_OR_EQUALS_ALL("<= ALL"),
     REGEX_LIKE("RLIKE"),
     REGEX_LIKE_ANY("RLIKE ANY"),
+    NOT_REGEX_LIKE("NOT RLIKE"),
+    NOT_REGEX_LIKE_ANY("NOT RLIKE ANY"),
     SIZE_IS("SIZEIS"),
     CONTAINS_KEY("CONTAINSKEY"),
     CONTAINS_VALUE("CONTAINSVALUE"),
@@ -62,7 +64,8 @@ public enum Operation {
                                  GREATER_THAN, GREATER_THAN_ANY, GREATER_THAN_ALL, LESS_THAN, LESS_THAN_ANY, LESS_THAN_ALL,
                                  GREATER_THAN_OR_EQUALS, GREATER_THAN_OR_EQUALS_ANY, GREATER_THAN_OR_EQUALS_ALL,
                                  LESS_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS_ANY, LESS_THAN_OR_EQUALS_ALL, REGEX_LIKE, REGEX_LIKE_ANY,
-                                 SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN, NOT_IN, AND, OR, XOR, FILTER));
+                                 NOT_REGEX_LIKE, NOT_REGEX_LIKE_ANY, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN, NOT_IN,
+                                 AND, OR, XOR, FILTER));
     public static final Set<Operation> UNARY_OPERATIONS = new HashSet<>(asList(NOT, SIZE_OF, IS_NULL, IS_NOT_NULL));
     public static final Set<Operation> N_ARY_OPERATIONS = new HashSet<>(asList(AND, OR, IF));
 
