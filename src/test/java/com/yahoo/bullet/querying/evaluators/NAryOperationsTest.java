@@ -48,4 +48,11 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.ternary(Arrays.asList(valueEvaluator(false), valueEvaluator(1), valueEvaluator(2)), null), new TypedObject(Type.INTEGER, 2));
         Assert.assertEquals(NAryOperations.ternary(Arrays.asList(valueEvaluator(null), valueEvaluator(1), valueEvaluator(2)), null), new TypedObject(Type.INTEGER, 2));
     }
+
+
+
+    @Test
+    public void testUnixTimestamp() {
+
+    }
 }

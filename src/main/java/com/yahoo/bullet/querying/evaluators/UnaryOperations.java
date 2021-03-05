@@ -31,6 +31,8 @@ public class UnaryOperations {
         UNARY_OPERATORS.put(Operation.SIZE_OF, UnaryOperations::sizeOf);
         UNARY_OPERATORS.put(Operation.IS_NULL, UnaryOperations::isNull);
         UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations::isNotNull);
+        UNARY_OPERATORS.put(Operation.TRIM, UnaryOperations::trim);
+        UNARY_OPERATORS.put(Operation.ABS, UnaryOperations::abs);
     }
 
     static TypedObject not(Evaluator evaluator, BulletRecord record) {
@@ -47,6 +49,29 @@ public class UnaryOperations {
 
     static TypedObject isNotNull(Evaluator evaluator, BulletRecord record) {
         return TypedObject.valueOf(!evaluator.evaluate(record).isNull());
+    }
+
+    static TypedObject trim(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            String str = (String) value.getValue();
+            return TypedObject.valueOf(str.trim());
+        });
+    }
+
+    static TypedObject abs(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            Number number = (Number) value.getValue();
+            switch (value.getType()) {
+                case DOUBLE:
+                    return TypedObject.valueOf(Math.abs(number.doubleValue()));
+                case FLOAT:
+                    return TypedObject.valueOf(Math.abs(number.floatValue()));
+                case LONG:
+                    return TypedObject.valueOf(Math.abs(number.longValue()));
+                default:
+                    return TypedObject.valueOf(Math.abs(number.intValue()));
+            }
+        });
     }
 
     private static TypedObject checkNull(Evaluator evaluator, BulletRecord record, Function<TypedObject, TypedObject> operator) {
