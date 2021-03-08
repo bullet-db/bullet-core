@@ -11,11 +11,9 @@ import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.List;
@@ -116,13 +114,20 @@ public class NAryOperations {
         if (stringArg.isNull()) {
             return TypedObject.NULL;
         }
-        String string = (String) stringArg.getValue();
-        if (string.isEmpty()) {
-            return TypedObject.valueOf("");
-        }
         TypedObject startArg = evaluators.get(1).evaluate(record);
         if (startArg.isNull()) {
             return TypedObject.NULL;
+        }
+        TypedObject lengthArg = null;
+        if (evaluators.size() > 2) {
+            lengthArg = evaluators.get(2).evaluate(record);
+            if (lengthArg.isNull()) {
+                return TypedObject.NULL;
+            }
+        }
+        String string = (String) stringArg.getValue();
+        if (string.isEmpty()) {
+            return TypedObject.valueOf("");
         }
         int start = ((Number) startArg.getValue()).intValue();
         if (start == 0 || Math.abs(start) > string.length()) {
@@ -137,11 +142,7 @@ public class NAryOperations {
         if (evaluators.size() == 2) {
             return TypedObject.valueOf(string.substring(start));
         }
-        TypedObject lengthArg = evaluators.get(2).evaluate(record);
-        if (lengthArg.isNull()) {
-            return TypedObject.NULL;
-        }
-        int length = ((Number) startArg.getValue()).intValue();
+        int length = ((Number) lengthArg.getValue()).intValue();
         if (length <= 0) {
             return TypedObject.valueOf("");
         }
@@ -166,10 +167,11 @@ public class NAryOperations {
             if (patternArg.isNull()) {
                 return TypedObject.NULL;
             }
-            String date = (String) dateArg.getValue();
+            // First argument can be a number
+            String date = Type.isNumeric(dateArg.getType()) ? Long.toString(((Number) dateArg.getValue()).longValue()) : (String) dateArg.getValue();
             String pattern = (String) patternArg.getValue();
             LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
-            return TypedObject.valueOf(localDateTime.toEpochSecond(ZoneOffset.UTC));
+            return TypedObject.valueOf(localDateTime.atZone(ZoneId.systemDefault()).toEpochSecond());
         }
         return TypedObject.valueOf(System.currentTimeMillis() / 1000);
     }
