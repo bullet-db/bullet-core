@@ -5,8 +5,10 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.query.expressions.ComplexFieldExpression;
 import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.io.Serializable;
@@ -34,6 +36,15 @@ public class FieldEvaluator extends Evaluator {
         fieldExtractor = getFieldExtractor(fieldExpression);
     }
 
+    /**
+     * Constructor that creates a field evaluator from a {@link ComplexFieldExpression}.
+     *
+     * @param fieldExpression The field expression to construct the evaluator from.
+     */
+    public FieldEvaluator(ComplexFieldExpression fieldExpression) {
+        fieldExtractor = getFieldExtractor(fieldExpression);
+    }
+
     @Override
     public TypedObject evaluate(BulletRecord record) {
         return fieldExtractor.extract(record);
@@ -56,6 +67,43 @@ public class FieldEvaluator extends Evaluator {
             return record -> record.typedGet(field, key);
         } else {
             return record -> record.typedGet(field);
+        }
+    }
+
+    private static FieldExtractor getFieldExtractor(ComplexFieldExpression fieldExpression) {
+        final String field = fieldExpression.getField();
+        final Evaluator keyEvaluator = fieldExpression.getKey().getEvaluator();
+        if (fieldExpression.getSubKey() == null) {
+            return record -> {
+                TypedObject key = keyEvaluator.evaluate(record);
+                if (key.isNull()) {
+                    return TypedObject.NULL;
+                }
+                Type type = key.getType();
+                if (Type.isNumeric(type)) {
+                    return record.typedGet(field, ((Number) key.getValue()).intValue());
+                } else {
+                    return record.typedGet(field, (String) key.getValue());
+                }
+            };
+        } else {
+            final Evaluator subKeyEvaluator = fieldExpression.getSubKey().getEvaluator();
+            return record -> {
+                TypedObject key = keyEvaluator.evaluate(record);
+                if (key.isNull()) {
+                    return TypedObject.NULL;
+                }
+                TypedObject subKey = subKeyEvaluator.evaluate(record);
+                if (subKey.isNull()) {
+                    return TypedObject.NULL;
+                }
+                Type type = key.getType();
+                if (Type.isNumeric(type)) {
+                    return record.typedGet(field, ((Number) key.getValue()).intValue(), (String) subKey.getValue());
+                } else {
+                    return record.typedGet(field, (String) key.getValue(), (String) subKey.getValue());
+                }
+            };
         }
     }
 }

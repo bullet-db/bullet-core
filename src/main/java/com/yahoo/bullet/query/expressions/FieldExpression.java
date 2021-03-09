@@ -83,7 +83,8 @@ public class FieldExpression extends Expression {
     }
 
     /**
-     * Gets the name of this field expression formatted with delimiters for any index and/or keys.
+     * Gets the name of this field expression formatted with delimiters for any index and/or keys. This name is used in
+     * the {@link com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner}.
      *
      * @return The name of this field expression.
      */

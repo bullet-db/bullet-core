@@ -156,8 +156,10 @@ public class NAryOperations {
             if (dateArg.isNull()) {
                 return TypedObject.NULL;
             }
-            Timestamp dateTime = Timestamp.valueOf((String) dateArg.getValue());
-            return TypedObject.valueOf(dateTime.getTime() / 1000);
+            Timestamp timestamp = Timestamp.valueOf((String) dateArg.getValue());
+            //long millisA = timestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
+            //long millisB = timestamp.getTime();
+            return TypedObject.valueOf(timestamp.getTime() / 1000);
         } else if (evaluators.size() == 2) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
             if (dateArg.isNull()) {
@@ -171,6 +173,7 @@ public class NAryOperations {
             String date = Type.isNumeric(dateArg.getType()) ? Long.toString(((Number) dateArg.getValue()).longValue()) : (String) dateArg.getValue();
             String pattern = (String) patternArg.getValue();
             LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
+            //localDateTime.toEpochSecond(ZoneOffset.UTC)
             return TypedObject.valueOf(localDateTime.atZone(ZoneId.systemDefault()).toEpochSecond());
         }
         return TypedObject.valueOf(System.currentTimeMillis() / 1000);
