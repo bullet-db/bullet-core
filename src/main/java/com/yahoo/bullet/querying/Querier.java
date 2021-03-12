@@ -295,6 +295,8 @@ public class Querier implements Monoidal {
     private Filter filter;
 
     private Projection projection;
+    private boolean copyRecord = false;
+    private boolean explodeRecord = false;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
@@ -364,6 +366,8 @@ public class Querier implements Monoidal {
         com.yahoo.bullet.query.Projection projection = query.getProjection();
         if (projection.getType() != PASS_THROUGH) {
             this.projection = new Projection(projection.getFields());
+            copyRecord = projection.getType() == COPY;
+            explodeRecord = projection.getExplode() != null;
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
@@ -403,9 +407,18 @@ public class Querier implements Monoidal {
             return;
         }
         try {
-            BulletRecord projected = project(record);
-            window.consume(projected);
-            hasNewData = true;
+            if (explodeRecord) {
+                List<BulletRecord> exploded = explode(record);
+                if (exploded.isEmpty()) {
+                    return;
+                }
+                exploded.forEach(window::consume);
+                hasNewData = true;
+            } else {
+                BulletRecord projected = project(record);
+                window.consume(projected);
+                hasNewData = true;
+            }
         } catch (RuntimeException e) {
             log.error("Unable to consume {} for query {}", record, this);
             log.error("Skipping due to", e);
@@ -625,10 +638,18 @@ public class Querier implements Monoidal {
     private BulletRecord project(BulletRecord record) {
         if (projection == null) {
             return record;
-        } else if (runningQuery.getQuery().getProjection().getType() == COPY) {
+        } else if (copyRecord) {
             return projection.project(record.copy());
         } else {
             return projection.project(record, provider);
+        }
+    }
+
+    private List<BulletRecord> explode(BulletRecord record) {
+        if (copyRecord) {
+            return projection.explode(record.copy());
+        } else {
+            return projection.explode(record, provider);
         }
     }
 
