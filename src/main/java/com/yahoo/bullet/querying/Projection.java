@@ -6,7 +6,6 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.query.Field;
-import com.yahoo.bullet.querying.evaluators.BulletRecordWrapper;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
