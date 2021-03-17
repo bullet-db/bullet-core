@@ -143,7 +143,7 @@ public class BulletConfig extends Config {
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
 
-    public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.AvroBulletRecordProvider";
+    public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider";
 
     public static final boolean DEFAULT_QUERY_PARTITIONER_ENABLE = false;
     public static final String DEFAULT_QUERY_PARTITIONER_CLASS_NAME = "com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner";
