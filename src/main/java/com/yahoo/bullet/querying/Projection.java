@@ -11,12 +11,9 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.typesystem.TypedObject;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -29,10 +26,6 @@ import java.util.stream.Collectors;
  */
 public class Projection {
     private final Map<String, Evaluator> evaluators;
-    private Evaluator explodeEvaluator;
-    private String keyAlias;
-    private String valueAlias;
-    private boolean outerLateralView = false;
 
     /**
      * Constructor that creates a Projection from the given fields.
@@ -44,22 +37,6 @@ public class Projection {
     }
 
     /**
-     * Constructor that creates a Projection from the given {@link com.yahoo.bullet.query.Projection}.
-     *
-     * @param projection The non-null projection to create a Projection from.
-     */
-    public Projection(com.yahoo.bullet.query.Projection projection) {
-        this(projection.getFields());
-        com.yahoo.bullet.query.Projection.Explode explode = projection.getExplode();
-        if (explode != null) {
-            explodeEvaluator = explode.getField().getEvaluator();
-            keyAlias = explode.getKeyAlias();
-            valueAlias = explode.getValueAlias();
-            outerLateralView = explode.isOuterLateralView();
-        }
-    }
-
-    /**
      * Projects onto a new BulletRecord.
      *
      * @param record The record to compute new fields from.
@@ -67,7 +44,17 @@ public class Projection {
      * @return A new BulletRecord with fields projected onto it.
      */
     public BulletRecord project(BulletRecord record, BulletRecordProvider provider) {
-        return projectRecord(record, provider::getInstance);
+        BulletRecord projected = provider.getInstance();
+        evaluators.forEach((name, evaluator) -> {
+            try {
+                TypedObject value = evaluator.evaluate(record);
+                if (!value.isNull()) {
+                    projected.typedSet(name, value);
+                }
+            } catch (Exception ignored) {
+            }
+        });
+        return projected;
     }
 
     /**
@@ -89,97 +76,6 @@ public class Projection {
         });
         map.forEach(record::typedSet);
         return record;
-    }
-
-    /**
-     *
-     *
-     * @param record
-     * @param provider
-     * @return
-     */
-    public List<BulletRecord> explode(BulletRecord record, BulletRecordProvider provider) {
-        TypedObject explodeField;
-        try {
-            explodeField = explodeEvaluator.evaluate(record);
-        } catch (Exception e) {
-            explodeField = TypedObject.NULL;
-        }
-        if (valueAlias != null) {
-            return explodeMap(explodeField, record, provider::getInstance);
-        } else {
-            return explodeList(explodeField, record, provider::getInstance);
-        }
-    }
-
-    /**
-     *
-     * @param record
-     * @return
-     */
-    public List<BulletRecord> explode(BulletRecord record) {
-        TypedObject explodeField;
-        try {
-            explodeField = explodeEvaluator.evaluate(record);
-        } catch (Exception e) {
-            explodeField = TypedObject.NULL;
-        }
-        if (valueAlias != null) {
-            return explodeMap(explodeField, record, record::copy);
-        } else {
-            return explodeList(explodeField, record, record::copy);
-        }
-    }
-
-    private List<BulletRecord> explodeList(TypedObject explodeField, BulletRecord record, Supplier<BulletRecord> supplier) {
-        List<Serializable> explodedList;
-        if (!explodeField.isList() || explodeField.size() == 0) {
-            if (!outerLateralView) {
-                return Collections.emptyList();
-            }
-            explodedList = Collections.singletonList(null);
-        } else {
-            explodedList = (List<Serializable>) explodeField.getValue();
-        }
-        BulletRecordWrapper wrapper = new BulletRecordWrapper(record);
-        return explodedList.stream().map(s -> {
-            wrapper.put(keyAlias, s);
-            // TODO: Inefficient for evaluators that only depend on the base record
-            return projectRecord(wrapper, supplier);
-        }).collect(Collectors.toList());
-    }
-
-    private List<BulletRecord> explodeMap(TypedObject explodeField, BulletRecord record, Supplier<BulletRecord> supplier) {
-        Map<String, Serializable> explodedMap;
-        if (!explodeField.isList() || explodeField.size() == 0) {
-            if (!outerLateralView) {
-                return Collections.emptyList();
-            }
-            explodedMap = Collections.singletonMap(null, null);
-        } else {
-            explodedMap = (Map<String, Serializable>) explodeField.getValue();
-        }
-        BulletRecordWrapper wrapper = new BulletRecordWrapper(record);
-        return explodedMap.entrySet().stream().map(entry -> {
-            wrapper.put(keyAlias, entry.getKey());
-            wrapper.put(valueAlias, entry.getValue());
-            // TODO: Inefficient for evaluators that only depend on the base record
-            return projectRecord(wrapper, supplier);
-        }).collect(Collectors.toList());
-    }
-
-    private BulletRecord projectRecord(BulletRecord record, Supplier<BulletRecord> supplier) {
-        BulletRecord projected = supplier.get();
-        evaluators.forEach((name, evaluator) -> {
-            try {
-                TypedObject value = evaluator.evaluate(record);
-                if (!value.isNull()) {
-                    projected.typedSet(name, value);
-                }
-            } catch (Exception ignored) {
-            }
-        });
-        return projected;
     }
 
     private static Evaluator getEvaluator(Field field) {

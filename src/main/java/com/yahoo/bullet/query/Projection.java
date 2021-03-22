@@ -6,27 +6,15 @@
 package com.yahoo.bullet.query;
 
 import com.yahoo.bullet.common.Utilities;
-import com.yahoo.bullet.query.expressions.Expression;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j @Getter
 public class Projection implements Serializable {
     private static final long serialVersionUID = -9194169391843941958L;
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class Explode {
-        private final Expression field;
-        private final String keyAlias;
-        private final String valueAlias;
-        private final boolean outerLateralView;
-    }
 
     /**
      * The type of the Projection decides how its fields are projected.
@@ -38,7 +26,6 @@ public class Projection implements Serializable {
     }
 
     private final List<Field> fields;
-    private final Explode explode;
     private final Type type;
 
     /**
@@ -46,7 +33,6 @@ public class Projection implements Serializable {
      */
     public Projection() {
         fields = null;
-        explode = null;
         type = Type.PASS_THROUGH;
     }
 
@@ -58,20 +44,6 @@ public class Projection implements Serializable {
      */
     public Projection(List<Field> fields, boolean copy) {
         this.fields = Utilities.requireNonNull(fields);
-        this.explode = null;
-        this.type = copy ? Type.COPY : Type.NO_COPY;
-    }
-
-    /**
-     * Constructor that creates a COPY or NO_COPY projection with an exploded field.
-     *
-     * @param fields
-     * @param explode
-     * @param copy
-     */
-    public Projection(List<Field> fields, Explode explode, boolean copy) {
-        this.fields = Utilities.requireNonNull(fields);
-        this.explode = Objects.requireNonNull(explode);
         this.type = copy ? Type.COPY : Type.NO_COPY;
     }
 
