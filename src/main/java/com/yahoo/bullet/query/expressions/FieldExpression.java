@@ -9,6 +9,7 @@ import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -21,11 +22,8 @@ public class FieldExpression extends Expression {
     private static final String DELIMITER = ".";
 
     private String field;
-    private Integer index;
-    private String key;
-    private String subKey;
-    private Expression variableKey;
-    private Expression variableSubKey;
+    private Serializable key;
+    private Serializable subKey;
 
     /**
      * Constructor that creates a field expression.
@@ -44,7 +42,7 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Integer index) {
         this.field = Objects.requireNonNull(field);
-        this.index = Objects.requireNonNull(index);
+        this.key = Objects.requireNonNull(index);
     }
 
     /**
@@ -66,7 +64,7 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Expression variableKey) {
         this.field = Objects.requireNonNull(field);
-        this.variableKey = Objects.requireNonNull(variableKey);
+        this.key = Objects.requireNonNull(variableKey);
     }
 
     /**
@@ -78,7 +76,7 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Integer index, String subKey) {
         this.field = Objects.requireNonNull(field);
-        this.index = Objects.requireNonNull(index);
+        this.key = Objects.requireNonNull(index);
         this.subKey = Objects.requireNonNull(subKey);
     }
 
@@ -104,7 +102,7 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Expression variableKey, String subKey) {
         this.field = Objects.requireNonNull(field);
-        this.variableKey = Objects.requireNonNull(variableKey);
+        this.key = Objects.requireNonNull(variableKey);
         this.subKey = Objects.requireNonNull(subKey);
     }
 
@@ -117,8 +115,8 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Integer index, Expression variableSubKey) {
         this.field = Objects.requireNonNull(field);
-        this.index = Objects.requireNonNull(index);
-        this.variableSubKey = Objects.requireNonNull(variableSubKey);
+        this.key = Objects.requireNonNull(index);
+        this.subKey = Objects.requireNonNull(variableSubKey);
     }
 
     /**
@@ -131,7 +129,7 @@ public class FieldExpression extends Expression {
     public FieldExpression(String field, String key, Expression variableSubKey) {
         this.field = Objects.requireNonNull(field);
         this.key = Objects.requireNonNull(key);
-        this.variableSubKey = Objects.requireNonNull(variableSubKey);
+        this.subKey = Objects.requireNonNull(variableSubKey);
     }
 
     /**
@@ -143,8 +141,8 @@ public class FieldExpression extends Expression {
      */
     public FieldExpression(String field, Expression variableKey, Expression variableSubKey) {
         this.field = Objects.requireNonNull(field);
-        this.variableKey = Objects.requireNonNull(variableKey);
-        this.variableSubKey = Objects.requireNonNull(variableSubKey);
+        this.key = Objects.requireNonNull(variableKey);
+        this.subKey = Objects.requireNonNull(variableSubKey);
     }
 
     /**
@@ -157,11 +155,11 @@ public class FieldExpression extends Expression {
     public FieldExpression(FieldExpression other, Integer index) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(index);
-        if (other.index != null || other.key != null || other.variableKey != null || other.subKey != null || other.variableSubKey != null) {
+        if (other.key != null) {
             throw new IllegalArgumentException();
         }
-        this.field = other.field;
-        this.index = index;
+        this.field = Objects.requireNonNull(other.field);
+        this.key = index;
     }
 
     /**
@@ -174,21 +172,15 @@ public class FieldExpression extends Expression {
     public FieldExpression(FieldExpression other, String key) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(key);
-        if (other.subKey != null || other.variableSubKey != null) {
+        if (other.subKey != null) {
             throw new IllegalArgumentException();
-        } else if (other.index != null) {
-            this.index = other.index;
-            this.subKey = key;
         } else if (other.key != null) {
             this.key = other.key;
-            this.subKey = key;
-        } else if (other.variableKey != null) {
-            this.variableKey = other.variableKey;
             this.subKey = key;
         } else {
             this.key = key;
         }
-        this.field = other.field;
+        this.field = Objects.requireNonNull(other.field);
     }
 
     /**
@@ -201,36 +193,25 @@ public class FieldExpression extends Expression {
     public FieldExpression(FieldExpression other, Expression variableKey) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(variableKey);
-        if (other.subKey != null || other.variableSubKey != null) {
+        if (other.subKey != null) {
             throw new IllegalArgumentException();
-        } else if (other.index != null) {
-            this.index = other.index;
-            this.variableSubKey = variableKey;
         } else if (other.key != null) {
             this.key = other.key;
-            this.variableSubKey = variableKey;
-        } else if (other.variableKey != null) {
-            this.variableKey = other.variableKey;
-            this.variableSubKey = variableKey;
+            this.subKey = variableKey;
         } else {
-            this.variableKey = variableKey;
+            this.subKey = variableKey;
         }
-        this.field = other.field;
+        this.field = Objects.requireNonNull(other.field);
     }
 
     /**
      * Gets the name of this field expression formatted with delimiters for any index and/or keys. This name is used in
-     * the {@link com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner}.
+     * the {@link com.yahoo.bullet.querying.partitioning.SimpleEqualityPartitioner} only when the key and subkey are not
+     * expressions.
      *
      * @return The name of this field expression.
      */
     public String getName() {
-        if (index != null) {
-            if (subKey != null) {
-                return field + DELIMITER + index + DELIMITER + subKey;
-            }
-            return field + DELIMITER + index;
-        }
         if (key != null) {
             if (subKey != null) {
                 return field + DELIMITER + key + DELIMITER + subKey;
@@ -255,34 +236,25 @@ public class FieldExpression extends Expression {
         }
         FieldExpression other = (FieldExpression) obj;
         return Objects.equals(field, other.field) &&
-               Objects.equals(index, other.index) &&
                Objects.equals(key, other.key) &&
                Objects.equals(subKey, other.subKey) &&
-               Objects.equals(variableKey, other.variableKey) &&
-               Objects.equals(variableSubKey, other.variableSubKey) &&
                type == other.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(field, index, key, subKey, variableKey, variableSubKey, type);
+        return Objects.hash(field, key, subKey, type);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("{field: ").append(field);
-        if (index != null) {
-            builder.append(", index: ").append(index);
-        } else if (key != null) {
+        if (key != null) {
             builder.append(", key: ").append(key);
-        } else if (variableKey != null) {
-            builder.append(", variableKey: ").append(variableKey);
-        }
-        if (subKey != null) {
-            builder.append(", subKey: ").append(subKey);
-        } else if (variableSubKey != null) {
-            builder.append(", variableSubKey: ").append(variableSubKey);
+            if (subKey != null) {
+                builder.append(", subKey: ").append(subKey);
+            }
         }
         builder.append(", ").append(super.toString()).append("}");
         return builder.toString();

@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.expressions.FieldExpression;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
@@ -42,41 +43,42 @@ public class FieldEvaluator extends Evaluator {
 
     private static FieldExtractor getFieldExtractor(FieldExpression fieldExpression) {
         final String field = fieldExpression.getField();
-        final Integer index = fieldExpression.getIndex();
-        final String key = fieldExpression.getKey();
-        final String subKey = fieldExpression.getSubKey();
-        final Evaluator keyEvaluator = fieldExpression.getVariableKey() != null ? fieldExpression.getVariableKey().getEvaluator() : null;
-        final Evaluator subKeyEvaluator = fieldExpression.getVariableSubKey() != null ? fieldExpression.getVariableSubKey().getEvaluator() : null;
-        if (index != null) {
-            if (subKey != null) {
-                return record -> record.typedGet(field, index, subKey);
-            } else if (subKeyEvaluator != null) {
+        final Serializable key = fieldExpression.getKey();
+        final Serializable subKey = fieldExpression.getSubKey();
+
+        if (key instanceof String) {
+            if (subKey instanceof String) {
+                return record -> record.typedGet(field, (String) key, (String) subKey);
+            } else if (subKey instanceof Expression) {
+                final Evaluator subKeyEvaluator = ((Expression) subKey).getEvaluator();
                 return record -> {
                     TypedObject subKeyArg = subKeyEvaluator.evaluate(record);
                     if (subKeyArg.isNull()) {
                         return TypedObject.NULL;
                     }
-                    return record.typedGet(field, index, (String) subKeyArg.getValue());
+                    return record.typedGet(field, (String) key, (String) subKeyArg.getValue());
                 };
             } else {
-                return record -> record.typedGet(field, index);
+                return record -> record.typedGet(field, (String) key);
             }
-        } else if (key != null) {
-            if (subKey != null) {
-                return record -> record.typedGet(field, key, subKey);
-            } else if (subKeyEvaluator != null) {
+        } else if (key instanceof Integer) {
+            if (subKey instanceof String) {
+                return record -> record.typedGet(field, (Integer) key, (String) subKey);
+            } else if (subKey instanceof Expression) {
+                final Evaluator subKeyEvaluator = ((Expression) subKey).getEvaluator();
                 return record -> {
                     TypedObject subKeyArg = subKeyEvaluator.evaluate(record);
                     if (subKeyArg.isNull()) {
                         return TypedObject.NULL;
                     }
-                    return record.typedGet(field, key, (String) subKeyArg.getValue());
+                    return record.typedGet(field, (Integer) key, (String) subKeyArg.getValue());
                 };
             } else {
-                return record -> record.typedGet(field, key);
+                return record -> record.typedGet(field, (Integer) key);
             }
-        } else if (keyEvaluator != null) {
-            if (subKey != null) {
+        } else if (key instanceof Expression) {
+            final Evaluator keyEvaluator = ((Expression) key).getEvaluator();
+            if (subKey instanceof String) {
                 return record -> {
                     TypedObject keyArg = keyEvaluator.evaluate(record);
                     if (keyArg.isNull()) {
@@ -84,12 +86,13 @@ public class FieldEvaluator extends Evaluator {
                     }
                     Type type = keyArg.getType();
                     if (Type.isNumeric(type)) {
-                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), subKey);
+                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), (String) subKey);
                     } else {
-                        return record.typedGet(field, (String) keyArg.getValue(), subKey);
+                        return record.typedGet(field, (String) keyArg.getValue(), (String) subKey);
                     }
                 };
-            } else if (subKeyEvaluator != null) {
+            } else if (subKey instanceof Expression) {
+                final Evaluator subKeyEvaluator = ((Expression) subKey).getEvaluator();
                 return record -> {
                     TypedObject keyArg = keyEvaluator.evaluate(record);
                     if (keyArg.isNull()) {

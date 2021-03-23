@@ -20,12 +20,12 @@ public class FieldExpressionTest {
 
         expression = new FieldExpression("abc", 0);
         Assert.assertEquals(expression.getName(), "abc.0");
-        Assert.assertEquals(expression.toString(), "{field: abc, index: 0, type: null}");
+        Assert.assertEquals(expression.toString(), "{field: abc, key: 0, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", 0, "def");
         Assert.assertEquals(expression.getName(), "abc.0.def");
-        Assert.assertEquals(expression.toString(), "{field: abc, index: 0, subKey: def, type: null}");
+        Assert.assertEquals(expression.toString(), "{field: abc, key: 0, subKey: def, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
 
         expression = new FieldExpression("abc", "def");
