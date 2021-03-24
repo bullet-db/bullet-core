@@ -8,7 +8,7 @@ package com.yahoo.bullet.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jvyaml.YAML;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,6 +25,7 @@ import java.util.Set;
 
 @Slf4j
 public class Config implements Serializable {
+    private static final long serialVersionUID = 304261170659494090L;
     private Map<String, Object> data;
 
     public static final String DELIMITER = ".";
@@ -201,9 +202,10 @@ public class Config implements Serializable {
         }
         log.info("Loading configuration file: {}", yamlFile);
         try {
+            Yaml yaml = new Yaml();
             InputStream is = this.getClass().getResourceAsStream("/" + yamlFile);
             Reader reader = (is != null ? new InputStreamReader(is) : new FileReader(yamlFile));
-            return (Map<String, Object>) YAML.load(reader);
+            return (Map<String, Object>) yaml.load(reader);
         } catch (IOException ioe) {
             log.error("Error loading configuration", ioe);
             return new HashMap<>();
