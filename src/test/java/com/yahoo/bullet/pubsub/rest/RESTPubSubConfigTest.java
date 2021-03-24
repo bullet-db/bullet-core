@@ -156,8 +156,8 @@ public class RESTPubSubConfigTest {
         Map customMap = config.getAs("my.custom.map", Map.class);
         Assert.assertNotNull(customMap);
         Assert.assertEquals(customMap.size(), 2);
-        Assert.assertEquals(customMap.get("first"), 10L);
-        Assert.assertEquals(customMap.get("second"), 42L);
+        Assert.assertEquals(((Number) customMap.get("first")).longValue(), 10L);
+        Assert.assertEquals(((Number) customMap.get("second")).longValue(), 42L);
 
         List customList = config.getAs("my.custom.list", List.class);
         Assert.assertNotNull(customList);
