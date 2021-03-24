@@ -199,7 +199,7 @@ public class FieldExpression extends Expression {
             this.key = other.key;
             this.subKey = variableKey;
         } else {
-            this.subKey = variableKey;
+            this.key = variableKey;
         }
         this.field = Objects.requireNonNull(other.field);
     }
