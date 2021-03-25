@@ -6,7 +6,7 @@ script:
 - mvn verify
 after_success:
 - mvn coveralls:report
-- test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis/settings.xml
+- test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_BRANCH}" != "master" && mvn deploy --settings travis/settings.xml
 cache:
   directories:
   - "~/.m2"
