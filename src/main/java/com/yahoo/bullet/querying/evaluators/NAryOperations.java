@@ -150,6 +150,7 @@ public class NAryOperations {
         return TypedObject.valueOf(string.substring(start, end));
     }
 
+    // TODO pr: should this use UTC or system timezone?
     static TypedObject unixTimestamp(List<Evaluator> evaluators, BulletRecord record) {
         if (evaluators.size() == 1) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
