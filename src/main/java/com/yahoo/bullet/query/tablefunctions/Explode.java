@@ -20,8 +20,8 @@ public class Explode extends TableFunction {
     private final String keyAlias;
     private final String valueAlias;
 
-    public Explode(Expression field, String keyAlias, String valueAlias, boolean lateralView, boolean outer) {
-        super(TableFunctionType.EXPLODE, lateralView, outer);
+    public Explode(Expression field, String keyAlias, String valueAlias, boolean outer) {
+        super(TableFunctionType.EXPLODE, outer);
         this.field = Objects.requireNonNull(field);
         this.keyAlias = Objects.requireNonNull(keyAlias);
         this.valueAlias = valueAlias;

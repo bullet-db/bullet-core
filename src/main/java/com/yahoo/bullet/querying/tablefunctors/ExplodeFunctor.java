@@ -9,7 +9,6 @@ import com.yahoo.bullet.query.tablefunctions.Explode;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
-import com.yahoo.bullet.record.VirtualBulletRecord;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.io.Serializable;
@@ -24,15 +23,12 @@ public class ExplodeFunctor extends TableFunctor {
     final Evaluator field;
     final String keyAlias;
     final String valueAlias;
-    final boolean lateralView;
-    final boolean outer;
 
     public ExplodeFunctor(Explode explode) {
+        super(explode.isOuter());
         field = explode.getField().getEvaluator();
         keyAlias = explode.getKeyAlias();
         valueAlias = explode.getValueAlias();
-        lateralView = explode.isLateralView();
-        outer = explode.isOuter();
     }
 
     @Override
@@ -55,7 +51,7 @@ public class ExplodeFunctor extends TableFunctor {
     private List<BulletRecord> explodeMap(BulletRecord record, BulletRecordProvider provider) {
         TypedObject typedObject = getField(record);
         if (!typedObject.isMap() || typedObject.size() == 0) {
-            return emptyExplode(record, provider);
+            return emptyExplode(provider);
         }
         Map<String, Serializable> map = (Map<String, Serializable>) typedObject.getValue();
         return map.entrySet().stream().map(entry -> getRecord(entry, record, provider)).collect(Collectors.toList());
@@ -64,21 +60,17 @@ public class ExplodeFunctor extends TableFunctor {
     private List<BulletRecord> explodeList(BulletRecord record, BulletRecordProvider provider) {
         TypedObject typedObject = getField(record);
         if (!typedObject.isList() || typedObject.size() == 0) {
-            return emptyExplode(record, provider);
+            return emptyExplode(provider);
         }
         List<Serializable> list = (List<Serializable>) typedObject.getValue();
         return list.stream().map(object -> getRecord(object, record, provider)).collect(Collectors.toList());
     }
 
-    private List<BulletRecord> emptyExplode(BulletRecord record, BulletRecordProvider provider) {
-        if (!outer) {
-            return Collections.emptyList();
-        }
-        if (lateralView) {
-            return Collections.singletonList(record);
-        } else {
+    private List<BulletRecord> emptyExplode(BulletRecordProvider provider) {
+        if (outer) {
             return Collections.singletonList(provider.getInstance());
         }
+        return Collections.emptyList();
     }
 
     private BulletRecord getRecord(Map.Entry<String, Serializable> entry, BulletRecord record, BulletRecordProvider provider) {
@@ -89,9 +81,6 @@ public class ExplodeFunctor extends TableFunctor {
         if (entry.getValue() != null) {
             generated.typedSet(valueAlias, new TypedObject(entry.getValue()));
         }
-        if (lateralView) {
-            return new VirtualBulletRecord(record, generated);
-        }
         return generated;
     }
 
@@ -99,9 +88,6 @@ public class ExplodeFunctor extends TableFunctor {
         BulletRecord generated = provider.getInstance();
         if (object != null) {
             generated.typedSet(keyAlias, new TypedObject(object));
-        }
-        if (lateralView) {
-            return new VirtualBulletRecord(record, generated);
         }
         return generated;
     }

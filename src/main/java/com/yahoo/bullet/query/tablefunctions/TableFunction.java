@@ -16,7 +16,6 @@ public abstract class TableFunction implements Serializable {
     private static final long serialVersionUID = 4126801547249854808L;
 
     protected final TableFunctionType tableFunctionType;
-    protected final boolean lateralView;
     // If true, the function returns null if the input is empty or null. If false, the function returns nothing.
     protected final boolean outer;
 
