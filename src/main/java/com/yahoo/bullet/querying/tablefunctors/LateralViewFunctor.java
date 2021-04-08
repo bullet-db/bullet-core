@@ -8,7 +8,7 @@ package com.yahoo.bullet.querying.tablefunctors;
 import com.yahoo.bullet.query.tablefunctions.LateralView;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
-import com.yahoo.bullet.record.LateralBulletRecord;
+import com.yahoo.bullet.record.LateralViewBulletRecord;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,8 +28,11 @@ public class LateralViewFunctor extends TableFunctor {
     public List<BulletRecord> apply(BulletRecord record, BulletRecordProvider provider) {
         List<BulletRecord> records = tableFunctor.apply(record, provider);
         if (records.isEmpty()) {
-            return outer ? Collections.singletonList(record) : Collections.emptyList();
+            if (outer) {
+                return Collections.singletonList(new LateralViewBulletRecord(record, provider.getInstance()));
+            }
+            return Collections.emptyList();
         }
-        return records.stream().map(generated -> new LateralBulletRecord(record, generated)).collect(Collectors.toList());
+        return records.stream().map(generated -> new LateralViewBulletRecord(record, generated)).collect(Collectors.toList());
     }
 }

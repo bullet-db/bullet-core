@@ -15,13 +15,18 @@ import java.io.Serializable;
 public abstract class TableFunction implements Serializable {
     private static final long serialVersionUID = 4126801547249854808L;
 
-    protected final TableFunctionType tableFunctionType;
     // If true, the function returns null if the input is empty or null. If false, the function returns nothing.
     protected final boolean outer;
+    protected final TableFunctionType type;
 
     /**
      *
      * @return
      */
     public abstract TableFunctor getTableFunctor();
+
+    @Override
+    public String toString() {
+        return "{outer: " + outer + ", type: " + type + "}";
+    }
 }

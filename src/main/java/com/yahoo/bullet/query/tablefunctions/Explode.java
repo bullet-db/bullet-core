@@ -21,14 +21,23 @@ public class Explode extends TableFunction {
     private final String valueAlias;
 
     public Explode(Expression field, String keyAlias, String valueAlias, boolean outer) {
-        super(TableFunctionType.EXPLODE, outer);
+        super(outer, TableFunctionType.EXPLODE);
         this.field = Objects.requireNonNull(field);
         this.keyAlias = Objects.requireNonNull(keyAlias);
         this.valueAlias = valueAlias;
     }
 
+    public Explode(Expression field, String keyAlias, boolean outer) {
+        this(field, keyAlias, null, outer);
+    }
+
     @Override
     public TableFunctor getTableFunctor() {
         return new ExplodeFunctor(this);
+    }
+
+    @Override
+    public String toString() {
+        return "{outer: " + outer + ", type: " + type + ", field: " + field + ", keyAlias: " + keyAlias + ", valueAlias: " + valueAlias + "}";
     }
 }
