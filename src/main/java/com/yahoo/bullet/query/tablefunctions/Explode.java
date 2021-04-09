@@ -26,10 +26,11 @@ public class Explode extends TableFunction {
      * @param field The non-null field to explode.
      * @param keyAlias The non-null alias of the exploded field's key column.
      * @param valueAlias The alias of the exploded field's value column.
+     * @param lateralView The lateral view.
      * @param outer The outer.
      */
-    public Explode(Expression field, String keyAlias, String valueAlias, boolean outer) {
-        super(outer, TableFunctionType.EXPLODE);
+    public Explode(Expression field, String keyAlias, String valueAlias, boolean lateralView, boolean outer) {
+        super(lateralView, outer, TableFunctionType.EXPLODE);
         this.field = Objects.requireNonNull(field);
         this.keyAlias = Objects.requireNonNull(keyAlias);
         this.valueAlias = valueAlias;
@@ -40,10 +41,11 @@ public class Explode extends TableFunction {
      *
      * @param field The non-null field to explode.
      * @param keyAlias The non-null alias of the exploded field's key column.
+     * @param lateralView The lateral view.
      * @param outer The outer.
      */
-    public Explode(Expression field, String keyAlias, boolean outer) {
-        this(field, keyAlias, null, outer);
+    public Explode(Expression field, String keyAlias, boolean lateralView, boolean outer) {
+        this(field, keyAlias, null, lateralView, outer);
     }
 
     @Override

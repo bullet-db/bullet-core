@@ -9,6 +9,5 @@ package com.yahoo.bullet.query.tablefunctions;
  * Represents the type of the {@link TableFunction}.
  */
 public enum TableFunctionType {
-    LATERAL_VIEW,
     EXPLODE
 }

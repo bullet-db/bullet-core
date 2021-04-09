@@ -15,6 +15,8 @@ import java.io.Serializable;
 public abstract class TableFunction implements Serializable {
     private static final long serialVersionUID = 4126801547249854808L;
 
+    // If true, joins input-output.
+    protected final boolean lateralView;
     // If true, the function returns null if the input is empty or null. If false, the function returns nothing.
     protected final boolean outer;
     protected final TableFunctionType type;
@@ -28,6 +30,6 @@ public abstract class TableFunction implements Serializable {
 
     @Override
     public String toString() {
-        return "{outer: " + outer + ", type: " + type + "}";
+        return "{lateralView: " + lateralView + ", outer: " + outer + ", type: " + type + "}";
     }
 }

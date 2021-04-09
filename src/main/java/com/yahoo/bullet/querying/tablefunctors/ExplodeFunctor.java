@@ -32,7 +32,7 @@ public class ExplodeFunctor extends TableFunctor {
      * @param explode
      */
     public ExplodeFunctor(Explode explode) {
-        super(explode.isOuter());
+        super(explode.isLateralView(), explode.isOuter());
         field = explode.getField().getEvaluator();
         keyAlias = explode.getKeyAlias();
         valueAlias = explode.getValueAlias();
@@ -58,29 +58,22 @@ public class ExplodeFunctor extends TableFunctor {
     private List<BulletRecord> explodeMap(BulletRecord record, BulletRecordProvider provider) {
         TypedObject typedObject = getField(record);
         if (!typedObject.isMap() || typedObject.size() == 0) {
-            return emptyExplode(provider);
+            return Collections.emptyList();
         }
         Map<String, Serializable> map = (Map<String, Serializable>) typedObject.getValue();
-        return map.entrySet().stream().map(entry -> getRecord(entry, record, provider)).collect(Collectors.toList());
+        return map.entrySet().stream().map(entry -> getRecord(entry, provider)).collect(Collectors.toList());
     }
 
     private List<BulletRecord> explodeList(BulletRecord record, BulletRecordProvider provider) {
         TypedObject typedObject = getField(record);
         if (!typedObject.isList() || typedObject.size() == 0) {
-            return emptyExplode(provider);
+            return Collections.emptyList();
         }
         List<Serializable> list = (List<Serializable>) typedObject.getValue();
-        return list.stream().map(object -> getRecord(object, record, provider)).collect(Collectors.toList());
+        return list.stream().map(object -> getRecord(object, provider)).collect(Collectors.toList());
     }
 
-    private List<BulletRecord> emptyExplode(BulletRecordProvider provider) {
-        if (outer) {
-            return Collections.singletonList(provider.getInstance());
-        }
-        return Collections.emptyList();
-    }
-
-    private BulletRecord getRecord(Map.Entry<String, Serializable> entry, BulletRecord record, BulletRecordProvider provider) {
+    private BulletRecord getRecord(Map.Entry<String, Serializable> entry, BulletRecordProvider provider) {
         BulletRecord generated = provider.getInstance();
         if (entry.getKey() != null) {
             generated.typedSet(keyAlias, new TypedObject(entry.getKey()));
@@ -91,7 +84,7 @@ public class ExplodeFunctor extends TableFunctor {
         return generated;
     }
 
-    private BulletRecord getRecord(Serializable object, BulletRecord record, BulletRecordProvider provider) {
+    private BulletRecord getRecord(Serializable object, BulletRecordProvider provider) {
         BulletRecord generated = provider.getInstance();
         if (object != null) {
             generated.typedSet(keyAlias, new TypedObject(object));
