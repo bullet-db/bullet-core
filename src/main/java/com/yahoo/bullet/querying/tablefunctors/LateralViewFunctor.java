@@ -14,11 +14,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 public class LateralViewFunctor extends TableFunctor {
     private static final long serialVersionUID = 1017033253024183470L;
 
     final TableFunctor tableFunctor;
 
+    /**
+     *
+     * @param lateralView
+     */
     public LateralViewFunctor(LateralView lateralView) {
         super(lateralView.isOuter());
         tableFunctor = lateralView.getTableFunction().getTableFunctor();

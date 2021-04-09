@@ -17,6 +17,11 @@ public class LateralView extends TableFunction {
 
     private final TableFunction tableFunction;
 
+    /**
+     *
+     * @param tableFunction
+     * @param outer
+     */
     public LateralView(TableFunction tableFunction, boolean outer) {
         super(outer, TableFunctionType.LATERAL_VIEW);
         this.tableFunction = Objects.requireNonNull(tableFunction);

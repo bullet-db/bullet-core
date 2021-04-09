@@ -20,6 +20,14 @@ public class Explode extends TableFunction {
     private final String keyAlias;
     private final String valueAlias;
 
+    /**
+     * Constructor that creates an EXPLODE table function.
+     *
+     * @param field The non-null field to explode.
+     * @param keyAlias The non-null alias of the exploded field's key column.
+     * @param valueAlias The alias of the exploded field's value column.
+     * @param outer The outer.
+     */
     public Explode(Expression field, String keyAlias, String valueAlias, boolean outer) {
         super(outer, TableFunctionType.EXPLODE);
         this.field = Objects.requireNonNull(field);
@@ -27,6 +35,13 @@ public class Explode extends TableFunction {
         this.valueAlias = valueAlias;
     }
 
+    /**
+     * Constructor that creates an EXPLODE table function.
+     *
+     * @param field The non-null field to explode.
+     * @param keyAlias The non-null alias of the exploded field's key column.
+     * @param outer The outer.
+     */
     public Explode(Expression field, String keyAlias, boolean outer) {
         this(field, keyAlias, null, outer);
     }

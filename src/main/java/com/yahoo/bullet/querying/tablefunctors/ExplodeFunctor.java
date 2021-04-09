@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 public class ExplodeFunctor extends TableFunctor {
     private static final long serialVersionUID = -6412197830718118997L;
 
@@ -24,6 +27,10 @@ public class ExplodeFunctor extends TableFunctor {
     final String keyAlias;
     final String valueAlias;
 
+    /**
+     *
+     * @param explode
+     */
     public ExplodeFunctor(Explode explode) {
         super(explode.isOuter());
         field = explode.getField().getEvaluator();

@@ -20,8 +20,9 @@ public abstract class TableFunction implements Serializable {
     protected final TableFunctionType type;
 
     /**
+     * Gets a new instance of a functor for this table function.
      *
-     * @return
+     * @return A newly-constructed functor for this table function.
      */
     public abstract TableFunctor getTableFunctor();
 
