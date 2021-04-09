@@ -27,9 +27,4 @@ public abstract class TableFunction implements Serializable {
      * @return A newly-constructed functor for this table function.
      */
     public abstract TableFunctor getTableFunctor();
-
-    @Override
-    public String toString() {
-        return "{lateralView: " + lateralView + ", outer: " + outer + ", type: " + type + "}";
-    }
 }

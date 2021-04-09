@@ -55,6 +55,6 @@ public class Explode extends TableFunction {
 
     @Override
     public String toString() {
-        return "{outer: " + outer + ", type: " + type + ", field: " + field + ", keyAlias: " + keyAlias + ", valueAlias: " + valueAlias + "}";
+        return "{lateralView: " + lateralView + ", outer: " + outer + ", type: " + type + ", field: " + field + ", keyAlias: " + keyAlias + ", valueAlias: " + valueAlias + "}";
     }
 }
