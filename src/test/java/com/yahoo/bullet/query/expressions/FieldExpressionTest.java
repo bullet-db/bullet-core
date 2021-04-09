@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 public class FieldExpressionTest {
     @Test
-    public void testConstructor() {
+    public void testConstructors() {
         FieldExpression expression = new FieldExpression("abc");
         Assert.assertEquals(expression.getName(), "abc");
         Assert.assertEquals(expression.toString(), "{field: abc, type: null}");
@@ -37,6 +37,16 @@ public class FieldExpressionTest {
         Assert.assertEquals(expression.getName(), "abc.def.ghi");
         Assert.assertEquals(expression.toString(), "{field: abc, key: def, subKey: ghi, type: null}");
         Assert.assertTrue(expression.getEvaluator() instanceof FieldEvaluator);
+    }
+
+    @Test
+    public void testAdditiveConstructors() {
+
+    }
+
+    @Test
+    public void testConstructorThrows() {
+
     }
 
     @Test

@@ -30,11 +30,14 @@ public class FieldEvaluatorTest {
         map.put("def", 5);
         record = RecordBox.get().addListOfMaps("abc", map)
                                 .addMapOfMaps("aaa", Pair.of("abc", map))
+                                .add("a", 0)
+                                .add("b", "abc")
+                                .add("c", "def")
                                 .getRecord();
     }
 
     @Test
-    public void testConstructor() {
+    public void testEvaluate() {
         FieldEvaluator evaluator = new FieldEvaluator(new FieldExpression("abc"));
         Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER_MAP_LIST, new ArrayList<>(Collections.singletonList(map))));
 
@@ -55,5 +58,53 @@ public class FieldEvaluatorTest {
 
         evaluator = new FieldEvaluator(new FieldExpression("aaa", "abc", "def"));
         Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+    }
+
+    @Test
+    public void testEvaluateWithExpressionsMixedIn() {
+        FieldEvaluator evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("a")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER_MAP, map));
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("a"), new FieldExpression("c")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", 0, new FieldExpression("c")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("a"), "def"));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+
+        evaluator = new FieldEvaluator(new FieldExpression("aaa", new FieldExpression("b")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER_MAP, map));
+
+        evaluator = new FieldEvaluator(new FieldExpression("aaa", new FieldExpression("b"), new FieldExpression("c")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+
+        evaluator = new FieldEvaluator(new FieldExpression("aaa", "abc", new FieldExpression("c")));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+
+        evaluator = new FieldEvaluator(new FieldExpression("aaa", new FieldExpression("b"), "def"));
+        Assert.assertEquals(evaluator.evaluate(record), new TypedObject(Type.INTEGER, 5));
+    }
+
+    @Test
+    public void testEvaluateWithExpressionsAndNulls() {
+        FieldEvaluator evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("dne")));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("dne"), new FieldExpression("c")));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("a"), new FieldExpression("dne")));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", 0, new FieldExpression("dne")));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
+
+        evaluator = new FieldEvaluator(new FieldExpression("abc", new FieldExpression("dne"), "def"));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
+
+        evaluator = new FieldEvaluator(new FieldExpression("aaa", "abc", new FieldExpression("dne")));
+        Assert.assertEquals(evaluator.evaluate(record), TypedObject.NULL);
     }
 }
