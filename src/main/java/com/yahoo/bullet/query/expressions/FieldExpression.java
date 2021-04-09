@@ -5,11 +5,14 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletError;
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.Evaluator;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -19,6 +22,10 @@ import java.util.Objects;
 @Getter
 public class FieldExpression extends Expression {
     private static final long serialVersionUID = -1659250076242321771L;
+    private static final BulletException FIELD_EXPRESSION_WITH_KEY_CANNOT_ACCEPT_AN_INDEX =
+            new BulletException(new BulletError("The field expression already has a key and cannot accept an index.", Collections.emptyList()));
+    private static final BulletException FIELD_EXPRESSION_CANNOT_ACCEPT_ANOTHER_KEY =
+            new BulletException(new BulletError("The field expression already has a key and subkey and cannot accept another key.", Collections.emptyList()));
     private static final String DELIMITER = ".";
 
     private String field;
@@ -150,13 +157,12 @@ public class FieldExpression extends Expression {
      *
      * @param other The non-null field expression to get a subfield from.
      * @param index The non-null index to get from the field expression.
-     * @throws IllegalArgumentException if the field expression has an index or key and therefore cannot have another index.
      */
     public FieldExpression(FieldExpression other, Integer index) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(index);
         if (other.key != null) {
-            throw new IllegalArgumentException();
+            throw FIELD_EXPRESSION_WITH_KEY_CANNOT_ACCEPT_AN_INDEX;
         }
         this.field = Objects.requireNonNull(other.field);
         this.key = index;
@@ -167,13 +173,12 @@ public class FieldExpression extends Expression {
      *
      * @param other The non-null field expression to get a subfield from.
      * @param key The non-null key to get from the field expression.
-     * @throws IllegalArgumentException if the field expression has a subkey and therefore cannot have another key.
      */
     public FieldExpression(FieldExpression other, String key) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(key);
         if (other.subKey != null) {
-            throw new IllegalArgumentException();
+            throw FIELD_EXPRESSION_CANNOT_ACCEPT_ANOTHER_KEY;
         } else if (other.key != null) {
             this.key = other.key;
             this.subKey = key;
@@ -188,13 +193,12 @@ public class FieldExpression extends Expression {
      *
      * @param other The non-null field expression to get a subfield from.
      * @param variableKey The non-null variable key to get from the field expression.
-     * @throws IllegalArgumentException if the field expression has a subkey and therefore cannot have another key.
      */
     public FieldExpression(FieldExpression other, Expression variableKey) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(variableKey);
         if (other.subKey != null) {
-            throw new IllegalArgumentException();
+            throw FIELD_EXPRESSION_CANNOT_ACCEPT_ANOTHER_KEY;
         } else if (other.key != null) {
             this.key = other.key;
             this.subKey = variableKey;

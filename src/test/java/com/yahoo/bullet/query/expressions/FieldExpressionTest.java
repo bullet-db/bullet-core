@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.query.expressions;
 
+import com.yahoo.bullet.common.BulletException;
 import com.yahoo.bullet.querying.evaluators.FieldEvaluator;
 import com.yahoo.bullet.typesystem.Type;
 import org.testng.Assert;
@@ -40,13 +41,35 @@ public class FieldExpressionTest {
     }
 
     @Test
-    public void testAdditiveConstructors() {
-
+    public void testConstructorWithIndex() {
+        Assert.assertEquals(new FieldExpression(new FieldExpression("abc"), 0), new FieldExpression("abc", 0));
     }
 
     @Test
-    public void testConstructorThrows() {
+    public void testConstructorWithKey() {
+        Assert.assertEquals(new FieldExpression(new FieldExpression("abc"), "def"), new FieldExpression("abc", "def"));
+        Assert.assertEquals(new FieldExpression(new FieldExpression("abc", "def"), "ghi"), new FieldExpression("abc", "def", "ghi"));
+    }
 
+    @Test
+    public void testConstructorWithVariableKey() {
+        Assert.assertEquals(new FieldExpression(new FieldExpression("abc"), new ValueExpression("def")), new FieldExpression("abc", new ValueExpression("def")));
+        Assert.assertEquals(new FieldExpression(new FieldExpression("abc", "def"), new ValueExpression("ghi")), new FieldExpression("abc", "def", new ValueExpression("ghi")));
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The field expression already has a key and cannot accept an index\\.")
+    public void testConstructorNotAnotherIndex() {
+        new FieldExpression(new FieldExpression("abc", "def"), 0);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The field expression already has a key and subkey and cannot accept another key\\.")
+    public void testConstructorNotAnotherKey() {
+        new FieldExpression(new FieldExpression("abc", "def", "ghi"), "jkl");
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "The field expression already has a key and subkey and cannot accept another key\\.")
+    public void testConstructorNotAnotherVariableKey() {
+        new FieldExpression(new FieldExpression("abc", "def", "ghi"), new ValueExpression("jkl"));
     }
 
     @Test
