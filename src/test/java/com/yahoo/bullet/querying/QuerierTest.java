@@ -26,6 +26,8 @@ import com.yahoo.bullet.query.expressions.ValueExpression;
 import com.yahoo.bullet.query.postaggregations.Computation;
 import com.yahoo.bullet.query.postaggregations.Culling;
 import com.yahoo.bullet.query.postaggregations.OrderBy;
+import com.yahoo.bullet.query.tablefunctions.Explode;
+import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.query.Window;
@@ -46,6 +48,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -847,5 +850,44 @@ public class QuerierTest {
         Assert.assertEquals(result.get(3).typedGet("newName").getValue(), 5L);
         Assert.assertFalse(result.get(3).hasField("a"));
         Assert.assertEquals(result.get(3).typedGet("b").getValue(), 3);
+    }
+
+    @Test
+    public void testTableFunction() {
+        TableFunction tableFunction = new Explode(new FieldExpression("map"), "key", "value", true, true);
+        Projection projection = new Projection(Arrays.asList(new Field("key", new FieldExpression("key")),
+                                                             new Field("value", new FieldExpression("value")),
+                                                             new Field("abc", new FieldExpression("abc"))),
+                                               false);
+        Expression filter = new UnaryExpression(new FieldExpression("map"), Operation.IS_NOT_NULL);
+        Query query = new Query(tableFunction, projection, filter, new Raw(500), null, new Window(), null);
+
+        Querier querier = make(Querier.Mode.ALL, query);
+
+        querier.consume(RecordBox.get().addMap("map", Pair.of("a", 0), Pair.of("b", 1), Pair.of("c", 2))
+                                       .add("abc", 1)
+                                       .getRecord());
+        querier.consume(RecordBox.get().add("abc", 2)
+                                       .getRecord());
+        querier.consume(RecordBox.get().add("abc", 3)
+                                       .add("map", new HashMap<>())
+                                       .getRecord());
+
+        List<BulletRecord> result = querier.getResult().getRecords();
+        Assert.assertEquals(result.size(), 4);
+        Assert.assertEquals(result.get(0).fieldCount(), 3);
+        Assert.assertEquals(result.get(0).typedGet("key").getValue(), "a");
+        Assert.assertEquals(result.get(0).typedGet("value").getValue(), 0);
+        Assert.assertEquals(result.get(0).typedGet("abc").getValue(), 1);
+        Assert.assertEquals(result.get(1).fieldCount(), 3);
+        Assert.assertEquals(result.get(1).typedGet("key").getValue(), "b");
+        Assert.assertEquals(result.get(1).typedGet("value").getValue(), 1);
+        Assert.assertEquals(result.get(1).typedGet("abc").getValue(), 1);
+        Assert.assertEquals(result.get(2).fieldCount(), 3);
+        Assert.assertEquals(result.get(2).typedGet("key").getValue(), "c");
+        Assert.assertEquals(result.get(2).typedGet("value").getValue(), 2);
+        Assert.assertEquals(result.get(2).typedGet("abc").getValue(), 1);
+        Assert.assertEquals(result.get(3).fieldCount(), 1);
+        Assert.assertEquals(result.get(3).typedGet("abc").getValue(), 3);
     }
 }
