@@ -62,7 +62,7 @@ public enum Operation {
     BETWEEN("BETWEEN"),
     NOT_BETWEEN("NOT BETWEEN"),
     SUBSTRING("SUBSTRING"),
-    UNIX_TIMESTAMP("UNIX_TIMESTAMP");
+    UNIX_TIMESTAMP("UNIXTIMESTAMP");
 
     public static final Set<Operation> BINARY_OPERATIONS =
             new HashSet<>(asList(ADD, SUB, MUL, DIV,
