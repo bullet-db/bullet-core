@@ -41,14 +41,15 @@ public class Query implements Configurable, Serializable {
                                                                           "Change your aggregation type or your window include type");
 
     /**
+     * Constructor that creates the Bullet query.
      *
-     * @param tableFunction
-     * @param projection
-     * @param filter
-     * @param aggregation
-     * @param postAggregations
-     * @param window
-     * @param duration
+     * @param tableFunction The table function that is applied to the input record before the rest of the query. Can be null.
+     * @param projection The non-null projection that decides which fields are selected from a Bullet record before aggregation.
+     * @param filter The filter expression records must pass before projection. Can be null.
+     * @param aggregation The non-null aggregation that takes projected records.
+     * @param postAggregations The list of post-aggregations that are executed on records before getting results. Can be null.
+     * @param window The non-null window that decides when and how results are returned.
+     * @param duration The duration of the query. Can be null.
      */
     public Query(TableFunction tableFunction, Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
         this.tableFunction = tableFunction;

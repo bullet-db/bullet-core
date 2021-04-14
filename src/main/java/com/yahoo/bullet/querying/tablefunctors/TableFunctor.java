@@ -15,15 +15,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Table functors are built from table functions. A table functor is applied to a {@link BulletRecord} and generates a
+ * list of {@link BulletRecord}.
+ *
+ * Classes inheriting from this class must implement {@link TableFunctor#apply(BulletRecord, BulletRecordProvider)} but
+ * not the lateral view and outer options which are already implemented in {@link TableFunctor#getRecords(BulletRecord,
+ * BulletRecordProvider)}.
+ */
 @AllArgsConstructor
 public abstract class TableFunctor implements Serializable {
     private static final long serialVersionUID = 5843896863161739195L;
 
-    // If true, joins input-output.
     protected final boolean lateralView;
-    // If true, the function returns null if the input is empty or null. If false, the function returns nothing.
     protected final boolean outer;
 
+    /**
+     * Applies this table functor to the given {@link BulletRecord} with the lateral view and/or outer options if
+     * specified.
+     *
+     * @param record The Bullet record to apply this table functor to.
+     * @param provider The provider used in generating new Bullet records.
+     * @return The generated list of records from applying this table functor to the given Bullet record.
+     */
     public List<BulletRecord> getRecords(BulletRecord record, BulletRecordProvider provider) {
         List<BulletRecord> records = apply(record, provider);
         if (outer && records.isEmpty()) {
@@ -36,5 +50,12 @@ public abstract class TableFunctor implements Serializable {
         }
     }
 
+    /**
+     * Applies this table functor to the given {@link BulletRecord}.
+     *
+     * @param record The Bullet record to apply this table functor to.
+     * @param provider The provider used in generating new Bullet records.
+     * @return The generated list of records from applying this table functor to the given Bullet record.
+     */
     protected abstract List<BulletRecord> apply(BulletRecord record, BulletRecordProvider provider);
 }

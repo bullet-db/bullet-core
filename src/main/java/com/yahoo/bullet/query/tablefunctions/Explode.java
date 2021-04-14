@@ -12,6 +12,9 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+/**
+ * A table function that requires either a list operand and a key alias or a map operand and both key and value aliases.
+ */
 @Getter
 public class Explode extends TableFunction {
     private static final long serialVersionUID = 6058738006416405818L;

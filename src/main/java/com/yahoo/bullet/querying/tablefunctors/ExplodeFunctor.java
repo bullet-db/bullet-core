@@ -18,7 +18,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- *
+ * A table functor that flattens the result of the given evaluator into a list of Bullet records. If only the key alias
+ * is specified, the result is assumed to be a list, and each element of the list is inserted into its own record as a
+ * field named by the key alias. If the value alias is also specified, the result is instead assumed to be a map,
+ * and each key-value pair of the map is inserted into its own record as two fields named respectively by the key and
+ * value aliases. If the result of the evaluator has the wrong type or is null, the table functor returns an empty list.
  */
 public class ExplodeFunctor extends TableFunctor {
     private static final long serialVersionUID = -6412197830718118997L;
@@ -28,8 +32,9 @@ public class ExplodeFunctor extends TableFunctor {
     final String valueAlias;
 
     /**
+     * Constructor that creates an explode table functor from a {@link Explode}.
      *
-     * @param explode
+     * @param explode The explode table function to construct the table functor from.
      */
     public ExplodeFunctor(Explode explode) {
         super(explode.isLateralView(), explode.isOuter());
@@ -44,14 +49,6 @@ public class ExplodeFunctor extends TableFunctor {
             return explodeMap(record, provider);
         } else {
             return explodeList(record, provider);
-        }
-    }
-
-    private TypedObject getField(BulletRecord record) {
-        try {
-            return field.evaluate(record);
-        } catch (Exception ignored) {
-            return TypedObject.NULL;
         }
     }
 
@@ -71,6 +68,14 @@ public class ExplodeFunctor extends TableFunctor {
         }
         List<Serializable> list = (List<Serializable>) typedObject.getValue();
         return list.stream().map(object -> getRecord(object, provider)).collect(Collectors.toList());
+    }
+
+    private TypedObject getField(BulletRecord record) {
+        try {
+            return field.evaluate(record);
+        } catch (Exception ignored) {
+            return TypedObject.NULL;
+        }
     }
 
     private BulletRecord getRecord(Map.Entry<String, Serializable> entry, BulletRecordProvider provider) {
