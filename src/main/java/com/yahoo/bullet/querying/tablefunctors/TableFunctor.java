@@ -7,12 +7,12 @@ package com.yahoo.bullet.querying.tablefunctors;
 
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
-import com.yahoo.bullet.record.LateralViewBulletRecord;
 import lombok.AllArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +44,13 @@ public abstract class TableFunctor implements Serializable {
             records = Collections.singletonList(provider.getInstance());
         }
         if (lateralView) {
-            return records.stream().map(generated -> new LateralViewBulletRecord(record, generated)).collect(Collectors.toList());
+            return records.stream().map(generated -> {
+                BulletRecord lateralViewRecord = record.copy();
+                for (Map.Entry<String, ? extends Serializable> entry : ((BulletRecord<? extends Serializable>) generated)) {
+                    lateralViewRecord.set(entry.getKey(), generated, entry.getKey());
+                }
+                return lateralViewRecord;
+            }).collect(Collectors.toList());
         } else {
             return records;
         }
