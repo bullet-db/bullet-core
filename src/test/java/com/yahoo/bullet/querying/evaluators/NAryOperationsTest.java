@@ -64,6 +64,7 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator(11), valueEvaluator(null), valueEvaluator(10)), null), TypedObject.FALSE);
         Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator(5), valueEvaluator(5), valueEvaluator(null)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator(4), valueEvaluator(5), valueEvaluator(null)), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator(5), valueEvaluator(null), valueEvaluator(null)), null), TypedObject.NULL);
     }
 
     @Test
@@ -80,6 +81,7 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator(11), valueEvaluator(null), valueEvaluator(10)), null), TypedObject.TRUE);
         Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator(5), valueEvaluator(5), valueEvaluator(null)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator(4), valueEvaluator(5), valueEvaluator(null)), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator(5), valueEvaluator(null), valueEvaluator(null)), null), TypedObject.NULL);
     }
 
     @Test
@@ -105,6 +107,7 @@ public class NAryOperationsTest {
         Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator(null), valueEvaluator(1)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator("hello world"), valueEvaluator(null)), null), TypedObject.NULL);
         Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator("hello world"), valueEvaluator(1), valueEvaluator(null)), null), TypedObject.NULL);
+        Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator(""), valueEvaluator(7)), null), TypedObject.valueOf(""));
     }
 
     @Test
