@@ -27,8 +27,8 @@ public class Explode extends TableFunction {
      * Constructor that creates an EXPLODE table function.
      *
      * @param field The non-null field to explode.
-     * @param keyAlias The non-null alias of the exploded field's key column.
-     * @param valueAlias The alias of the exploded field's value column.
+     * @param keyAlias The non-null alias for the key column of the exploded field.
+     * @param valueAlias The alias for the value column of the exploded field.
      * @param lateralView The lateral view.
      * @param outer The outer.
      */
@@ -43,7 +43,7 @@ public class Explode extends TableFunction {
      * Constructor that creates an EXPLODE table function.
      *
      * @param field The non-null field to explode.
-     * @param keyAlias The non-null alias of the exploded field's key column.
+     * @param keyAlias The non-null alias for the key column of the exploded field.
      * @param lateralView The lateral view.
      * @param outer The outer.
      */

@@ -299,7 +299,6 @@ public class Querier implements Monoidal {
     private TableFunctor tableFunctor;
 
     private Projection projection;
-    private boolean copyRecord = false;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.
     private transient BulletConfig config;
@@ -375,7 +374,6 @@ public class Querier implements Monoidal {
         com.yahoo.bullet.query.Projection projection = query.getProjection();
         if (projection.getType() != PASS_THROUGH) {
             this.projection = new Projection(projection.getFields());
-            copyRecord = projection.getType() == COPY;
         }
 
         // Aggregation and Strategy are guaranteed to not be null.
@@ -514,7 +512,7 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Depending on the {@link Mode#ALL} mode this is operating in, returns true if and only if  the query window is
+     * Depending on the {@link Mode#ALL} mode this is operating in, returns true if and only if `the query window is
      * closed and you should emit the result at this time.
      *
      * @return boolean denoting if query has closed.
@@ -649,7 +647,7 @@ public class Querier implements Monoidal {
     private BulletRecord project(BulletRecord record) {
         if (projection == null) {
             return record;
-        } else if (copyRecord) {
+        } else if (runningQuery.getQuery().getProjection().getType() == COPY) {
             return projection.project(record.copy());
         } else {
             return projection.project(record, provider);
