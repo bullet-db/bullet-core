@@ -4,7 +4,7 @@
 
     <groupId>com.yahoo.bullet</groupId>
     <artifactId>bullet-core</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
     <packaging>jar</packaging>
     <name>bullet-core</name>
     <description>
@@ -34,7 +34,7 @@
         <url>https://github.com/bullet-db/bullet-core</url>
         <connection>scm:git:ssh://git@github.com/bullet-db/bullet-core.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/bullet-db/bullet-core.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>bullet-core-1.2.2</tag>
     </scm>
 
     <developers>
