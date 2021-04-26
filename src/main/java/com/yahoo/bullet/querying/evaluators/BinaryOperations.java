@@ -238,18 +238,11 @@ public class BinaryOperations {
 
     @SuppressWarnings("unchecked")
     static TypedObject notRegexLikeAny(Evaluator left, Evaluator right, BulletRecord record) {
-        return checkNull(left, right, record, (leftValue, rightValue) -> {
-            String value = (String) leftValue.getValue();
-            boolean containsNull = false;
-            for (Serializable object : (List<? extends Serializable>) rightValue.getValue()) {
-                if (object == null) {
-                    containsNull = true;
-                } else if (Pattern.compile((String) object).matcher(value).matches()) {
-                    return TypedObject.FALSE;
-                }
-            }
-            return !containsNull ? TypedObject.TRUE : TypedObject.NULL;
-        });
+        TypedObject result = regexLikeAny(left, right, record);
+        if (result.isNull()) {
+            return TypedObject.NULL;
+        }
+        return (Boolean) result.getValue() ? TypedObject.FALSE : TypedObject.TRUE;
     }
 
     static TypedObject sizeIs(Evaluator left, Evaluator right, BulletRecord record) {

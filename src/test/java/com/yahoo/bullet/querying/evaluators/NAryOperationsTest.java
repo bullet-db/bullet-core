@@ -120,8 +120,7 @@ public class NAryOperationsTest {
 
         TypedObject unixTimestampB = NAryOperations.unixTimestamp(Collections.singletonList(valueEvaluator("2021-01-01 00:00:00")), null);
         long timeB = ((Number) unixTimestampB.getValue()).longValue();
-        // Account for timezone range of system running the test. GMT-12 <= timeB <= GMT+12
-        Assert.assertTrue(1609459200 - 12 * 60 * 60 <= timeB && timeB <= 1609459200 + 12 * 60 * 60);
+        Assert.assertEquals(timeB, 1609459200);
 
         TypedObject unixTimestampC = NAryOperations.unixTimestamp(Arrays.asList(valueEvaluator("2021010100"), valueEvaluator("yyyyMMddHH")), null);
         long timeC = ((Number) unixTimestampC.getValue()).longValue();

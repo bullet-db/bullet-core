@@ -13,7 +13,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.List;
@@ -90,23 +90,11 @@ public class NAryOperations {
     }
 
     static TypedObject notBetween(List<Evaluator> evaluators, BulletRecord record) {
-        TypedObject valueArg = evaluators.get(0).evaluate(record);
-        if (valueArg.isNull()) {
+        TypedObject result = between(evaluators, record);
+        if (result.isNull()) {
             return TypedObject.NULL;
         }
-        double value = ((Number) valueArg.getValue()).doubleValue();
-        TypedObject lowerArg = evaluators.get(1).evaluate(record);
-        TypedObject upperArg = evaluators.get(2).evaluate(record);
-        Number lower = (Number) lowerArg.getValue();
-        Number upper = (Number) upperArg.getValue();
-        if (lowerArg.isNull() && upperArg.isNull()) {
-            return TypedObject.NULL;
-        } else if (lowerArg.isNull()) {
-            return upper.doubleValue() < value ? TypedObject.TRUE : TypedObject.NULL;
-        } else if (upperArg.isNull()) {
-            return value < lower.doubleValue() ? TypedObject.TRUE : TypedObject.NULL;
-        }
-        return TypedObject.valueOf(value < lower.doubleValue() || value > upper.doubleValue());
+        return (Boolean) result.getValue() ? TypedObject.FALSE : TypedObject.TRUE;
     }
 
     static TypedObject substring(List<Evaluator> evaluators, BulletRecord record) {
@@ -150,7 +138,6 @@ public class NAryOperations {
         return TypedObject.valueOf(string.substring(start, end));
     }
 
-    // TODO pr: should this use UTC or system timezone?
     static TypedObject unixTimestamp(List<Evaluator> evaluators, BulletRecord record) {
         if (evaluators.size() == 1) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
@@ -158,9 +145,7 @@ public class NAryOperations {
                 return TypedObject.NULL;
             }
             Timestamp timestamp = Timestamp.valueOf((String) dateArg.getValue());
-            //long millisA = timestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
-            //long millisB = timestamp.getTime();
-            return TypedObject.valueOf(timestamp.getTime() / 1000);
+            return TypedObject.valueOf(timestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC));
         } else if (evaluators.size() == 2) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
             if (dateArg.isNull()) {
@@ -174,8 +159,7 @@ public class NAryOperations {
             String date = Type.isNumeric(dateArg.getType()) ? Long.toString(((Number) dateArg.getValue()).longValue()) : (String) dateArg.getValue();
             String pattern = (String) patternArg.getValue();
             LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
-            //localDateTime.toEpochSecond(ZoneOffset.UTC)
-            return TypedObject.valueOf(localDateTime.atZone(ZoneId.systemDefault()).toEpochSecond());
+            return TypedObject.valueOf(localDateTime.toEpochSecond(ZoneOffset.UTC));
         }
         return TypedObject.valueOf(System.currentTimeMillis() / 1000);
     }
