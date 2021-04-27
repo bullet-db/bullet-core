@@ -22,3 +22,4 @@ jobs:
       - GPG_ENCPHRASE
     steps:
       - publish: screwdriver/release.sh
+
