@@ -13,21 +13,20 @@ import org.testng.annotations.Test;
 public class ExplodeTest {
     @Test
     public void testExplodeTableFunction() {
-        Explode tableFunction = new Explode(new FieldExpression("abc"), "foo", "bar", true, true);
+        Explode tableFunction = new Explode(new FieldExpression("abc"), "foo", "bar", true);
 
         Assert.assertEquals(tableFunction.getType(), TableFunctionType.EXPLODE);
         Assert.assertEquals(tableFunction.getField(), new FieldExpression("abc"));
         Assert.assertEquals(tableFunction.getKeyAlias(), "foo");
         Assert.assertEquals(tableFunction.getValueAlias(), "bar");
-        Assert.assertTrue(tableFunction.isLateralView());
         Assert.assertTrue(tableFunction.isOuter());
         Assert.assertTrue(tableFunction.getTableFunctor() instanceof ExplodeFunctor);
     }
 
     @Test
     public void testToString() {
-        Explode tableFunction = new Explode(new FieldExpression("abc"), "foo", true, true);
+        Explode tableFunction = new Explode(new FieldExpression("abc"), "foo", null, true);
 
-        Assert.assertEquals(tableFunction.toString(), "{lateralView: true, outer: true, type: EXPLODE, field: {field: abc, type: null}, keyAlias: foo, valueAlias: null}");
+        Assert.assertEquals(tableFunction.toString(), "{outer: true, type: EXPLODE, field: {field: abc, type: null}, keyAlias: foo, valueAlias: null}");
     }
 }

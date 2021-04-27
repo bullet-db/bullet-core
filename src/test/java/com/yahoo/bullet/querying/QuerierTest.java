@@ -27,6 +27,7 @@ import com.yahoo.bullet.query.postaggregations.Computation;
 import com.yahoo.bullet.query.postaggregations.Culling;
 import com.yahoo.bullet.query.postaggregations.OrderBy;
 import com.yahoo.bullet.query.tablefunctions.Explode;
+import com.yahoo.bullet.query.tablefunctions.LateralView;
 import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
@@ -854,7 +855,7 @@ public class QuerierTest {
 
     @Test
     public void testTableFunction() {
-        TableFunction tableFunction = new Explode(new FieldExpression("map"), "key", "value", true, true);
+        TableFunction tableFunction = new LateralView(new Explode(new FieldExpression("map"), "key", "value", true));
         Projection projection = new Projection(Arrays.asList(new Field("key", new FieldExpression("key")),
                                                              new Field("value", new FieldExpression("value")),
                                                              new Field("abc", new FieldExpression("abc"))),

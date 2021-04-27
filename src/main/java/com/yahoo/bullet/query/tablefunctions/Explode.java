@@ -16,7 +16,7 @@ import java.util.Objects;
  * A table function that requires either a list operand and a key alias or a map operand and both key and value aliases.
  */
 @Getter
-public class Explode extends TableFunction {
+public class Explode extends OuterableTableFunction {
     private static final long serialVersionUID = 6058738006416405818L;
 
     private final Expression field;
@@ -29,26 +29,13 @@ public class Explode extends TableFunction {
      * @param field The non-null field to explode.
      * @param keyAlias The non-null alias for the key column of the exploded field.
      * @param valueAlias The alias for the value column of the exploded field.
-     * @param lateralView The lateral view.
-     * @param outer The outer.
+     * @param outer The outer option.
      */
-    public Explode(Expression field, String keyAlias, String valueAlias, boolean lateralView, boolean outer) {
-        super(lateralView, outer, TableFunctionType.EXPLODE);
+    public Explode(Expression field, String keyAlias, String valueAlias, boolean outer) {
+        super(outer, TableFunctionType.EXPLODE);
         this.field = Objects.requireNonNull(field);
         this.keyAlias = Objects.requireNonNull(keyAlias);
         this.valueAlias = valueAlias;
-    }
-
-    /**
-     * Constructor that creates an EXPLODE table function.
-     *
-     * @param field The non-null field to explode.
-     * @param keyAlias The non-null alias for the key column of the exploded field.
-     * @param lateralView The lateral view.
-     * @param outer The outer.
-     */
-    public Explode(Expression field, String keyAlias, boolean lateralView, boolean outer) {
-        this(field, keyAlias, null, lateralView, outer);
     }
 
     @Override
@@ -58,6 +45,6 @@ public class Explode extends TableFunction {
 
     @Override
     public String toString() {
-        return "{lateralView: " + lateralView + ", outer: " + outer + ", type: " + type + ", field: " + field + ", keyAlias: " + keyAlias + ", valueAlias: " + valueAlias + "}";
+        return "{outer: " + outer + ", type: " + type + ", field: " + field + ", keyAlias: " + keyAlias + ", valueAlias: " + valueAlias + "}";
     }
 }

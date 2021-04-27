@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * and each key-value pair of the map is inserted into its own record as two fields named respectively by the key and
  * value aliases. If the result of the evaluator has the wrong type or is null, the table functor returns an empty list.
  */
-public class ExplodeFunctor extends TableFunctor {
+public class ExplodeFunctor extends OuterableTableFunctor {
     private static final long serialVersionUID = -6412197830718118997L;
 
     final Evaluator field;
@@ -37,14 +37,14 @@ public class ExplodeFunctor extends TableFunctor {
      * @param explode The explode table function to construct the table functor from.
      */
     public ExplodeFunctor(Explode explode) {
-        super(explode.isLateralView(), explode.isOuter());
+        super(explode.isOuter());
         field = explode.getField().getEvaluator();
         keyAlias = explode.getKeyAlias();
         valueAlias = explode.getValueAlias();
     }
 
     @Override
-    public List<BulletRecord> apply(BulletRecord record, BulletRecordProvider provider) {
+    protected List<BulletRecord> outerableApply(BulletRecord record, BulletRecordProvider provider) {
         if (valueAlias != null) {
             return explodeMap(record, provider);
         } else {

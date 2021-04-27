@@ -415,7 +415,7 @@ public class Querier implements Monoidal {
         if (tableFunctor == null) {
             consumeRecord(record);
         } else {
-            tableFunctor.getRecords(record, provider).forEach(this::consumeRecord);
+            tableFunctor.apply(record, provider).forEach(this::consumeRecord);
         }
     }
 
