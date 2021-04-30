@@ -1,6 +1,8 @@
 # Bullet Core
 
-[![Build Status](https://travis-ci.com/bullet-db/bullet-core.svg?branch=master)](https://travis-ci.com/bullet-db/bullet-core) [![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-core/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-core?branch=master) [![Download](https://api.bintray.com/packages/yahoo/maven/bullet-core/images/download.svg) ](https://bintray.com/yahoo/maven/bullet-core/_latestVersion)
+[![Build Status](https://cd.screwdriver.cd/pipelines/7220/badge)](https://cd.screwdriver.cd/pipelines/7220)
+[![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-core/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-core?branch=master) 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-core/)
 
 Bullet is a streaming query engine that can be plugged into any singular data stream using a Stream Processing framework like Apache [Storm](https://storm.apache.org), [Spark](https://spark.apache.org) or [Flink](https://flink.apache.org). It lets you run queries on this data stream - including hard queries like Count Distincts, Top K etc.
 
