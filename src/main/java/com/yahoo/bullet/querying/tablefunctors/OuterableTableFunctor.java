@@ -34,5 +34,13 @@ public abstract class OuterableTableFunctor extends TableFunctor {
         return records;
     }
 
+    /**
+     * Applies this table functor to the given {@link BulletRecord}. This method is called by the main
+     * {@link #apply(BulletRecord, BulletRecordProvider)} method which will handle the outer option.
+     *
+     * @param record The Bullet record to apply this table functor to.
+     * @param provider The provider used in generating new Bullet records.
+     * @return The generated list of records from applying this table functor to the given Bullet record.
+     */
     protected abstract List<BulletRecord> outerableApply(BulletRecord record, BulletRecordProvider provider);
 }
