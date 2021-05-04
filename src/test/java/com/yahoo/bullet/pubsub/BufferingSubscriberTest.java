@@ -32,6 +32,12 @@ public class BufferingSubscriberTest {
             add(messages);
         }
 
+        public ExampleBufferingSubscriber(int max, int rateLimitMax, long rateLimitInterval, List<PubSubMessage> messages) {
+            super(max, rateLimitMax, rateLimitInterval);
+            testMessages = new LinkedList<>();
+            add(messages);
+        }
+
         public void add(List<PubSubMessage> messages) {
             testMessages.addAll(messages);
         }
@@ -64,6 +70,26 @@ public class BufferingSubscriberTest {
         // Multiple receives without a commit.
         Assert.assertNotNull(subscriber.receive());
         Assert.assertNull(subscriber.receive());
+    }
+
+    @Test
+    public void testRateLimit() throws PubSubException, InterruptedException {
+        List<PubSubMessage> messages = make(20);
+        ExampleBufferingSubscriber subscriber = new ExampleBufferingSubscriber(100, 5, 1000L, messages);
+        for (int i = 0; i < 5; i++) {
+            Assert.assertNotNull(subscriber.receive());
+        }
+        Assert.assertNull(subscriber.receive());
+        Assert.assertEquals(subscriber.getCallCount(), 5);
+
+        // Sleep to reset interval
+        Thread.sleep(1500);
+
+        for (int i = 0; i < 5; i++) {
+            Assert.assertNotNull(subscriber.receive());
+        }
+        Assert.assertNull(subscriber.receive());
+        Assert.assertEquals(subscriber.getCallCount(), 10);
     }
 
     @Test

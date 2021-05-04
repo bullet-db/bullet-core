@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -22,12 +23,27 @@ import java.util.Map;
  * This class is intended to be used if your PubSub implementation does not care about (or cannot be) using commit and
  * fail to reprocess messages from the PubSub and prefers to manage it in code.
  */
-@Slf4j
+@Slf4j @RequiredArgsConstructor
 public abstract class BufferingSubscriber implements Subscriber {
     /**
      * The maximum number of PubSubMessages we can have unacked at any time. Further calls to receive will return nothing.
      */
     protected final int maxUncommittedMessages;
+
+    /**
+     * The maximum number of PubSubMessages we can receive in a rate limit interval. Further calls to receive will return nothing.
+     */
+    protected final int rateLimitMaxMessages;
+
+    /**
+     * The duration of a rate limit interval.
+     */
+    protected final long rateLimitIntervalMs;
+
+    /**
+     * Whether or not rate limiting is enabled.
+     */
+    protected final boolean rateLimitEnable;
 
     /**
      * A List of messages read. {@link #receive()} emits from the head.
@@ -40,12 +56,34 @@ public abstract class BufferingSubscriber implements Subscriber {
     protected Map<String, PubSubMessage> uncommittedMessages = new HashMap<>();
 
     /**
-     * Creates an instance of this class with the given max for committed messages.
+     * The number of messages received during the current rate limit interval. This count is reset when a new interval starts.
+     */
+    protected int messageCount = 0;
+
+    /**
+     * The start time of the current rate limit interval.
+     */
+    protected long startTime = System.currentTimeMillis();
+
+    /**
+     * Creates an instance of this class with the given max for uncommitted messages and rate limiting disabled.
      *
      * @param maxUncommittedMessages The maximum number of messages that this Subscriber will buffer.
      */
     public BufferingSubscriber(int maxUncommittedMessages) {
-        this.maxUncommittedMessages = maxUncommittedMessages;
+        this(maxUncommittedMessages, 0, 0L, false);
+    }
+
+    /**
+     * Creates an instance of this class with the given max for uncommitted messages and the max messages and interval
+     * in milliseconds for rate limiting.
+     *
+     * @param maxUncommittedMessages The maximum number of messages that this Subscriber will buffer.
+     * @param rateLimitMaxMessages The maximum number of messages that this Subscriber will read in a rate limit interval.
+     * @param rateLimitIntervalMs The duration of a rate limit interval in milliseconds.
+     */
+    public BufferingSubscriber(int maxUncommittedMessages, int rateLimitMaxMessages, long rateLimitIntervalMs) {
+        this(maxUncommittedMessages, rateLimitMaxMessages, rateLimitIntervalMs, true);
     }
 
     @Override
@@ -54,12 +92,34 @@ public abstract class BufferingSubscriber implements Subscriber {
             log.warn("Reached limit of max uncommitted messages: {}. Waiting for commits to proceed.", maxUncommittedMessages);
             return null;
         }
+        if (isRateLimited()) {
+            log.warn("Reached rate limit of max {} messages every {} ms.", rateLimitMaxMessages, rateLimitIntervalMs);
+            return null;
+        }
         if (!haveMessages()) {
             return null;
         }
         PubSubMessage message = receivedMessages.remove(0);
         uncommittedMessages.put(message.getId(), message);
+        updateRateLimit();
         return message;
+    }
+
+    private boolean isRateLimited() {
+        return rateLimitEnable && startTime + rateLimitIntervalMs > System.currentTimeMillis() && messageCount >= rateLimitMaxMessages;
+    }
+
+    private void updateRateLimit() {
+        if (!rateLimitEnable) {
+            return;
+        }
+        long timeNow = System.currentTimeMillis();
+        if (startTime + rateLimitIntervalMs > timeNow) {
+            messageCount++;
+        } else {
+            startTime = timeNow;
+            messageCount = 1;
+        }
     }
 
     /**
