@@ -74,19 +74,35 @@ public class NAryOperations {
         if (valueArg.isNull()) {
             return TypedObject.NULL;
         }
-        double value = ((Number) valueArg.getValue()).doubleValue();
-        TypedObject lowerArg = evaluators.get(1).evaluate(record);
-        TypedObject upperArg = evaluators.get(2).evaluate(record);
-        Number lower = (Number) lowerArg.getValue();
-        Number upper = (Number) upperArg.getValue();
-        if (lowerArg.isNull() && upperArg.isNull()) {
-            return TypedObject.NULL;
-        } else if (lowerArg.isNull()) {
-            return upper.doubleValue() < value ? TypedObject.FALSE : TypedObject.NULL;
-        } else if (upperArg.isNull()) {
-            return value < lower.doubleValue() ? TypedObject.FALSE : TypedObject.NULL;
+        if (Type.isNumeric(valueArg.getType())) {
+            double value = ((Number) valueArg.getValue()).doubleValue();
+            TypedObject lowerArg = evaluators.get(1).evaluate(record);
+            TypedObject upperArg = evaluators.get(2).evaluate(record);
+            Number lower = (Number) lowerArg.getValue();
+            Number upper = (Number) upperArg.getValue();
+            if (lowerArg.isNull() && upperArg.isNull()) {
+                return TypedObject.NULL;
+            } else if (lowerArg.isNull()) {
+                return upper.doubleValue() < value ? TypedObject.FALSE : TypedObject.NULL;
+            } else if (upperArg.isNull()) {
+                return value < lower.doubleValue() ? TypedObject.FALSE : TypedObject.NULL;
+            }
+            return TypedObject.valueOf(lower.doubleValue() <= value && value <= upper.doubleValue());
+        } else {
+            String value = (String) valueArg.getValue();
+            TypedObject lowerArg = evaluators.get(1).evaluate(record);
+            TypedObject upperArg = evaluators.get(2).evaluate(record);
+            String lower = (String) lowerArg.getValue();
+            String upper = (String) upperArg.getValue();
+            if (lowerArg.isNull() && upperArg.isNull()) {
+                return TypedObject.NULL;
+            } else if (lowerArg.isNull()) {
+                return upper.compareTo(value) < 0 ? TypedObject.FALSE : TypedObject.NULL;
+            } else if (upperArg.isNull()) {
+                return value.compareTo(lower) < 0 ? TypedObject.FALSE : TypedObject.NULL;
+            }
+            return TypedObject.valueOf(lower.compareTo(value) <= 0 && value.compareTo(upper) <= 0);
         }
-        return TypedObject.valueOf(lower.doubleValue() <= value && value <= upper.doubleValue());
     }
 
     static TypedObject notBetween(List<Evaluator> evaluators, BulletRecord record) {

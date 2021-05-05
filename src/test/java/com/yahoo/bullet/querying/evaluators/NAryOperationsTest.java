@@ -85,6 +85,36 @@ public class NAryOperationsTest {
     }
 
     @Test
+    public void testBetweenWithStrings() {
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("abc"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("def"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("ghi"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("ABC"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("{}"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("def"), valueEvaluator("ghi"), valueEvaluator("abc")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("ghi"), valueEvaluator(null), valueEvaluator("ghi")), null), TypedObject.NULL);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("{}"), valueEvaluator(null), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("abc"), valueEvaluator("abc"), valueEvaluator(null)), null), TypedObject.NULL);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("ABC"), valueEvaluator("abc"), valueEvaluator(null)), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.between(Arrays.asList(valueEvaluator("abc"), valueEvaluator(null), valueEvaluator(null)), null), TypedObject.NULL);
+    }
+
+    @Test
+    public void testNotBetweenWithStrings() {
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("abc"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("def"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("ghi"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.FALSE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("ABC"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("{}"), valueEvaluator("abc"), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("def"), valueEvaluator("ghi"), valueEvaluator("abc")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("ghi"), valueEvaluator(null), valueEvaluator("ghi")), null), TypedObject.NULL);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("{}"), valueEvaluator(null), valueEvaluator("ghi")), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("abc"), valueEvaluator("abc"), valueEvaluator(null)), null), TypedObject.NULL);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("ABC"), valueEvaluator("abc"), valueEvaluator(null)), null), TypedObject.TRUE);
+        Assert.assertEquals(NAryOperations.notBetween(Arrays.asList(valueEvaluator("abc"), valueEvaluator(null), valueEvaluator(null)), null), TypedObject.NULL);
+    }
+
+    @Test
     public void testSubstring() {
         Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator("hello world"), valueEvaluator(1)), null), TypedObject.valueOf("hello world"));
         Assert.assertEquals(NAryOperations.substring(Arrays.asList(valueEvaluator("hello world"), valueEvaluator(7)), null), TypedObject.valueOf("world"));
