@@ -75,7 +75,7 @@ public class BufferingSubscriberTest {
     @Test
     public void testRateLimit() throws PubSubException, InterruptedException {
         List<PubSubMessage> messages = make(20);
-        ExampleBufferingSubscriber subscriber = new ExampleBufferingSubscriber(100, 5, 1000L, messages);
+        ExampleBufferingSubscriber subscriber = new ExampleBufferingSubscriber(100, 5, 10L, messages);
         for (int i = 0; i < 5; i++) {
             Assert.assertNotNull(subscriber.receive());
         }
@@ -83,7 +83,7 @@ public class BufferingSubscriberTest {
         Assert.assertEquals(subscriber.getCallCount(), 5);
 
         // Sleep to reset interval
-        Thread.sleep(1500);
+        Thread.sleep(15);
 
         for (int i = 0; i < 5; i++) {
             Assert.assertNotNull(subscriber.receive());

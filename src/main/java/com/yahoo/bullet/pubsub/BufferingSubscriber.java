@@ -38,7 +38,7 @@ public abstract class BufferingSubscriber implements Subscriber {
     /**
      * The duration of a rate limit interval.
      */
-    protected final long rateLimitIntervalMs;
+    protected final long rateLimitIntervalMS;
 
     /**
      * Whether or not rate limiting is enabled.
@@ -80,10 +80,10 @@ public abstract class BufferingSubscriber implements Subscriber {
      *
      * @param maxUncommittedMessages The maximum number of messages that this Subscriber will buffer.
      * @param rateLimitMaxMessages The maximum number of messages that this Subscriber will read in a rate limit interval.
-     * @param rateLimitIntervalMs The duration of a rate limit interval in milliseconds.
+     * @param rateLimitIntervalMS The duration of a rate limit interval in milliseconds.
      */
-    public BufferingSubscriber(int maxUncommittedMessages, int rateLimitMaxMessages, long rateLimitIntervalMs) {
-        this(maxUncommittedMessages, rateLimitMaxMessages, rateLimitIntervalMs, true);
+    public BufferingSubscriber(int maxUncommittedMessages, int rateLimitMaxMessages, long rateLimitIntervalMS) {
+        this(maxUncommittedMessages, rateLimitMaxMessages, rateLimitIntervalMS, true);
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class BufferingSubscriber implements Subscriber {
             return null;
         }
         if (isRateLimited()) {
-            log.warn("Reached rate limit of max {} messages every {} ms.", rateLimitMaxMessages, rateLimitIntervalMs);
+            log.warn("Reached rate limit of max {} messages every {} ms.", rateLimitMaxMessages, rateLimitIntervalMS);
             return null;
         }
         if (!haveMessages()) {
@@ -106,7 +106,7 @@ public abstract class BufferingSubscriber implements Subscriber {
     }
 
     private boolean isRateLimited() {
-        return rateLimitEnable && startTime + rateLimitIntervalMs > System.currentTimeMillis() && messageCount >= rateLimitMaxMessages;
+        return rateLimitEnable && startTime + rateLimitIntervalMS > System.currentTimeMillis() && messageCount >= rateLimitMaxMessages;
     }
 
     private void updateRateLimit() {
@@ -114,7 +114,7 @@ public abstract class BufferingSubscriber implements Subscriber {
             return;
         }
         long timeNow = System.currentTimeMillis();
-        if (startTime + rateLimitIntervalMs > timeNow) {
+        if (startTime + rateLimitIntervalMS > timeNow) {
             messageCount++;
         } else {
             startTime = timeNow;
