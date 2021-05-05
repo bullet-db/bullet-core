@@ -49,4 +49,24 @@ public class UnaryOperationsTest {
         Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(1), null), TypedObject.TRUE);
         Assert.assertEquals(UnaryOperations.isNotNull(valueEvaluator(null), null), TypedObject.FALSE);
     }
+
+    @Test
+    public void testTrim() {
+        Assert.assertEquals(UnaryOperations.trim(valueEvaluator("hello"), null), TypedObject.valueOf("hello"));
+        Assert.assertEquals(UnaryOperations.trim(valueEvaluator(" hello "), null), TypedObject.valueOf("hello"));
+        Assert.assertEquals(UnaryOperations.trim(valueEvaluator(null), null), TypedObject.NULL);
+    }
+
+    @Test
+    public void testAbs() {
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(2.0), null), TypedObject.valueOf(2.0));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(-2.0), null), TypedObject.valueOf(2.0));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(2.0f), null), TypedObject.valueOf(2.0f));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(-2.0f), null), TypedObject.valueOf(2.0f));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(2L), null), TypedObject.valueOf(2L));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(-2L), null), TypedObject.valueOf(2L));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(2), null), TypedObject.valueOf(2));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(-2), null), TypedObject.valueOf(2));
+        Assert.assertEquals(UnaryOperations.abs(valueEvaluator(null), null), TypedObject.NULL);
+    }
 }

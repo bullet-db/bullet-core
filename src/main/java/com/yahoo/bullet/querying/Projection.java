@@ -30,7 +30,7 @@ public class Projection {
     /**
      * Constructor that creates a Projection from the given fields.
      *
-     * @param fields The fields to create a Projection from. Will be non-null.
+     * @param fields The non-null fields to create a Projection from.
      */
     public Projection(List<Field> fields) {
         evaluators = fields.stream().collect(Collectors.toMap(Field::getName, Projection::getEvaluator));

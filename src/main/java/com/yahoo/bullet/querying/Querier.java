@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying;
 
 import com.yahoo.bullet.query.expressions.Expression;
+import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.querying.aggregations.Strategy;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
@@ -14,6 +15,7 @@ import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.postaggregations.PostAggregation;
+import com.yahoo.bullet.querying.tablefunctors.TableFunctor;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 import com.yahoo.bullet.result.Clip;
@@ -294,6 +296,8 @@ public class Querier implements Monoidal {
 
     private Filter filter;
 
+    private TableFunctor tableFunctor;
+
     private Projection projection;
 
     // Transient field, DO NOT use it beyond constructor and initialize methods.
@@ -356,9 +360,15 @@ public class Querier implements Monoidal {
         }
 
         Query query = runningQuery.getQuery();
+
         Expression filter = query.getFilter();
         if (filter != null) {
             this.filter = new Filter(filter);
+        }
+
+        TableFunction tableFunction = query.getTableFunction();
+        if (tableFunction != null) {
+            tableFunctor = tableFunction.getTableFunctor();
         }
 
         com.yahoo.bullet.query.Projection projection = query.getProjection();
@@ -398,17 +408,14 @@ public class Querier implements Monoidal {
      */
     @Override
     public void consume(BulletRecord record) {
-        // Ignore if query is expired, or doesn't match filters. But consume if the window is closed (partition or otherwise)
-        if (isDone() || !filter(record)) {
+        // Ignore if query is expired. But consume if the window is closed (partition or otherwise)
+        if (isDone()) {
             return;
         }
-        try {
-            BulletRecord projected = project(record);
-            window.consume(projected);
-            hasNewData = true;
-        } catch (RuntimeException e) {
-            log.error("Unable to consume {} for query {}", record, this);
-            log.error("Skipping due to", e);
+        if (tableFunctor == null) {
+            consumeRecord(record);
+        } else {
+            tableFunctor.apply(record, provider).forEach(this::consumeRecord);
         }
     }
 
@@ -505,7 +512,7 @@ public class Querier implements Monoidal {
     }
 
     /**
-     * Depending on the {@link Mode#ALL} mode this is operating in, returns true if and only if  the query window is
+     * Depending on the {@link Mode#ALL} mode this is operating in, returns true if and only if `the query window is
      * closed and you should emit the result at this time.
      *
      * @return boolean denoting if query has closed.
@@ -614,6 +621,21 @@ public class Querier implements Monoidal {
     }
 
     // ********************************* Private helpers *********************************
+
+    private void consumeRecord(BulletRecord record) {
+        // Ignore if record doesn't match filters
+        if (!filter(record)) {
+            return;
+        }
+        try {
+            BulletRecord projected = project(record);
+            window.consume(projected);
+            hasNewData = true;
+        } catch (RuntimeException e) {
+            log.error("Unable to consume {} for query {}", record, this);
+            log.error("Skipping due to", e);
+        }
+    }
 
     private boolean filter(BulletRecord record) {
         if (filter == null) {

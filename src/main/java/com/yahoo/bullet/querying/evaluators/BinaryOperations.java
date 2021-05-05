@@ -57,6 +57,8 @@ public class BinaryOperations {
         BINARY_OPERATORS.put(Operation.LESS_THAN_OR_EQUALS_ALL, BinaryOperations::lessThanOrEqualsAll);
         BINARY_OPERATORS.put(Operation.REGEX_LIKE, BinaryOperations::regexLike);
         BINARY_OPERATORS.put(Operation.REGEX_LIKE_ANY, BinaryOperations::regexLikeAny);
+        BINARY_OPERATORS.put(Operation.NOT_REGEX_LIKE, BinaryOperations::notRegexLike);
+        BINARY_OPERATORS.put(Operation.NOT_REGEX_LIKE_ANY, BinaryOperations::notRegexLikeAny);
         BINARY_OPERATORS.put(Operation.SIZE_IS, BinaryOperations::sizeIs);
         BINARY_OPERATORS.put(Operation.CONTAINS_KEY, BinaryOperations::containsKey);
         BINARY_OPERATORS.put(Operation.CONTAINS_VALUE, BinaryOperations::containsValue);
@@ -225,6 +227,22 @@ public class BinaryOperations {
             }
             return !containsNull ? TypedObject.FALSE : TypedObject.NULL;
         });
+    }
+
+    static TypedObject notRegexLike(Evaluator left, Evaluator right, BulletRecord record) {
+        return checkNull(left, right, record, (leftValue, rightValue) ->
+                TypedObject.valueOf(!Pattern.compile((String) rightValue.getValue())
+                                            .matcher((String) leftValue.getValue())
+                                            .matches()));
+    }
+
+    @SuppressWarnings("unchecked")
+    static TypedObject notRegexLikeAny(Evaluator left, Evaluator right, BulletRecord record) {
+        TypedObject result = regexLikeAny(left, right, record);
+        if (result.isNull()) {
+            return TypedObject.NULL;
+        }
+        return (Boolean) result.getValue() ? TypedObject.FALSE : TypedObject.TRUE;
     }
 
     static TypedObject sizeIs(Evaluator left, Evaluator right, BulletRecord record) {

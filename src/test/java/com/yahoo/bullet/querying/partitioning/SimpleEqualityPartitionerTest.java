@@ -186,6 +186,14 @@ public class SimpleEqualityPartitionerTest {
     }
 
     @Test
+    public void testNoPartitioningForQueryWithExpressionFields() {
+        FieldExpression fieldExpression = new FieldExpression("A", new ValueExpression("b"));
+        SimpleEqualityPartitioner partitioner = createPartitioner(fieldExpression.getName());
+        Query query = createQuery(new BinaryExpression(fieldExpression, new ValueExpression("bar"), Operation.EQUALS));
+        Assert.assertEquals(partitioner.getKeys(query), singleton("*"));
+    }
+
+    @Test
     public void testPartitioningForRecordWithMissingFields() {
         SimpleEqualityPartitioner partitioner = createPartitioner("A", "B");
         BulletRecord record = RecordBox.get().add("A", "foo").getRecord();

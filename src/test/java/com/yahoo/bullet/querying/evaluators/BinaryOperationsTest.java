@@ -296,6 +296,28 @@ public class BinaryOperationsTest {
     }
 
     @Test
+    public void testNotRegexLike() {
+        Assert.assertEquals(BinaryOperations.notRegexLike(valueEvaluator("aabc"), valueEvaluator(".*abc"), null), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.notRegexLike(valueEvaluator("abbc"), valueEvaluator(".*abc"), null), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notRegexLike(valueEvaluator(null), valueEvaluator(".*abc"), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notRegexLike(valueEvaluator("aabc"), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notRegexLike(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+    }
+
+    @Test
+    public void testNotRegexLikeAny() {
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("aabc"), listEvaluator(".*abc"), null), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), listEvaluator(".*abc"), null), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), listEvaluator(".*abc", ".*bbc"), null), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), listEvaluator(), null), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator(null), listEvaluator(".*abc"), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), listEvaluator(null, ".*bbc"), null), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.notRegexLikeAny(valueEvaluator("abbc"), listEvaluator(".*abc", null), null), TypedObject.NULL);
+    }
+
+    @Test
     public void testSizeIs() {
         Assert.assertEquals(BinaryOperations.sizeIs(listEvaluator(1, 2, 3), valueEvaluator(3), null), TypedObject.TRUE);
         Assert.assertEquals(BinaryOperations.sizeIs(listEvaluator(1, 2, 3), valueEvaluator(4), null), TypedObject.FALSE);

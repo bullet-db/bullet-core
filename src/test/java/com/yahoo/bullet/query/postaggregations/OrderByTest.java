@@ -23,7 +23,7 @@ public class OrderByTest {
         Assert.assertEquals(orderBy.getFields().size(), 2);
         Assert.assertEquals(orderBy.getType(), PostAggregationType.ORDER_BY);
         Assert.assertTrue(orderBy.getPostStrategy() instanceof OrderByStrategy);
-        Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{expression: {field: 1, index: null, key: null, subKey: null, type: null}, direction: ASC}, {expression: {field: 2, index: null, key: null, subKey: null, type: null}, direction: DESC}]}");
+        Assert.assertEquals(orderBy.toString(), "{type: ORDER_BY, fields: [{expression: {field: 1, type: null}, direction: ASC}, {expression: {field: 2, type: null}, direction: DESC}]}");
     }
 
     @Test(expectedExceptions = NullPointerException.class)

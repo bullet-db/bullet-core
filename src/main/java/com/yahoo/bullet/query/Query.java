@@ -12,6 +12,7 @@ import com.yahoo.bullet.query.aggregations.Aggregation;
 import com.yahoo.bullet.query.aggregations.AggregationType;
 import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.postaggregations.PostAggregation;
+import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class Query implements Configurable, Serializable {
     private static final long serialVersionUID = 592082288228551406L;
 
+    private final TableFunction tableFunction;
     private final Projection projection;
     private final Expression filter;
     private final Aggregation aggregation;
@@ -41,6 +43,7 @@ public class Query implements Configurable, Serializable {
     /**
      * Constructor that creates the Bullet query.
      *
+     * @param tableFunction The table function that is applied to the input record before the rest of the query. Can be null.
      * @param projection The non-null projection that decides which fields are selected from a Bullet record before aggregation.
      * @param filter The filter expression records must pass before projection. Can be null.
      * @param aggregation The non-null aggregation that takes projected records.
@@ -48,7 +51,8 @@ public class Query implements Configurable, Serializable {
      * @param window The non-null window that decides when and how results are returned.
      * @param duration The duration of the query. Can be null.
      */
-    public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
+    public Query(TableFunction tableFunction, Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
+        this.tableFunction = tableFunction;
         this.projection = Objects.requireNonNull(projection);
         this.filter = filter;
         this.aggregation = Objects.requireNonNull(aggregation);
@@ -57,6 +61,20 @@ public class Query implements Configurable, Serializable {
         this.duration = duration;
         // Required since there are window types that are not yet supported.
         validateWindow();
+    }
+
+    /**
+     * Constructor that creates the Bullet query.
+     *
+     * @param projection The non-null projection that decides which fields are selected from a Bullet record before aggregation.
+     * @param filter The filter expression records must pass before projection. Can be null.
+     * @param aggregation The non-null aggregation that takes projected records.
+     * @param postAggregations The list of post-aggregations that are executed on records before getting results. Can be null.
+     * @param window The non-null window that decides when and how results are returned.
+     * @param duration The duration of the query. Can be null.
+     */
+    public Query(Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Window window, Long duration) {
+        this(null, projection, filter, aggregation, postAggregations, window, duration);
     }
 
     private void validateWindow() {
