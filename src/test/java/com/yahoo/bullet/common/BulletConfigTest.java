@@ -8,6 +8,8 @@ package com.yahoo.bullet.common;
 import com.yahoo.bullet.querying.partitioning.MockPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider;
+import com.yahoo.bullet.record.simple.TypedSimpleBulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.typesystem.Type;
@@ -169,6 +171,17 @@ public class BulletConfigTest {
         Assert.assertEquals(config.get(BulletConfig.QUERY_MAX_DURATION), 15000L);
         Assert.assertEquals(config.get(BulletConfig.AGGREGATION_MAX_SIZE), BulletConfig.DEFAULT_AGGREGATION_MAX_SIZE);
         Assert.assertEquals(config.get("pi"), 3.14);
+    }
+
+    @Test
+    public void testMergingDifferentBulletRecordProvider() {
+        BulletConfig config = new BulletConfig();
+        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
+
+        Config another = new BulletConfig(null);
+        another.set(BulletConfig.RECORD_PROVIDER_CLASS_NAME, "com.yahoo.bullet.record.simple.TypedSimpleBulletRecordProvider");
+        config.merge(another);
+        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedSimpleBulletRecordProvider);
     }
 
     @Test

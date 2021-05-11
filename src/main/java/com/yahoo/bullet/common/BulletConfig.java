@@ -398,6 +398,7 @@ public class BulletConfig extends Config {
     public void merge(Config other) {
         super.merge(other);
         validate();
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
