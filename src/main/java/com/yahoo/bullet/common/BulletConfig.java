@@ -337,7 +337,6 @@ public class BulletConfig extends Config {
     public BulletConfig(String file) {
         super(file, DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
@@ -346,19 +345,36 @@ public class BulletConfig extends Config {
     public BulletConfig() {
         super(DEFAULT_CONFIGURATION_NAME);
         VALIDATOR.validate(this);
-        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
-     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance. This BulletRecordProvider is
-     * created when this BulletConfig is constructed.
+     * Construct a {@link BulletRecordProvider} and store it in this BulletConfig instance.
      *
      * @return The BulletRecordProvider instance.
      */
     public BulletRecordProvider getBulletRecordProvider() {
+        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
         return provider;
     }
 
+    /**
+     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance, or construct and store one first if
+     * there is none.
+     *
+     * @return The BulletRecordProvider instance.
+     */
+    public BulletRecordProvider getCachedBulletRecordProvider() {
+        if (provider == null) {
+            return getBulletRecordProvider();
+        }
+        return provider;
+    }
+
+    /**
+     * Construct a {@link Schema} if configured.
+     *
+     * @return The Schema instance if configured; otherwise, null.
+     */
     public Schema getSchema() {
         String schemaFile = getAs(RECORD_SCHEMA_FILE_NAME, String.class);
         if (schemaFile == null) {
@@ -398,7 +414,6 @@ public class BulletConfig extends Config {
     public void merge(Config other) {
         super.merge(other);
         validate();
-        provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
     }
 
     /**
