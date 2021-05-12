@@ -486,7 +486,7 @@ public class BulletConfigTest {
         BulletRecordProvider providerB = config.getCachedBulletRecordProvider();
 
         // Uses the same provider
-        Assert.assertEquals(providerA, providerB);
+        Assert.assertSame(providerA, providerB);
     }
 
     @Test
@@ -496,7 +496,7 @@ public class BulletConfigTest {
         // Default record provider is TypedAvroBulletRecordProvider
         Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
 
-        config.set(BulletConfig.RECORD_PROVIDER_CLASS_NAME, "com.yahoo.bullet.record.simple.TypedSimpleBulletRecordProvider");
+        config.set(BulletConfig.RECORD_PROVIDER_CLASS_NAME, TypedSimpleBulletRecordProvider.class.getName());
 
         // Cached record provider doesn't change with new setting
         Assert.assertTrue(config.getCachedBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
