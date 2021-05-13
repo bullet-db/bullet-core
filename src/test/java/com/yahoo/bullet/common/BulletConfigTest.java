@@ -459,13 +459,13 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGetBulletRecordProvider() {
+    public void testCreateBulletRecordProvider() {
         BulletConfig config = new BulletConfig();
-        BulletRecordProvider providerA = config.getBulletRecordProvider();
-        BulletRecordProvider providerB = config.getBulletRecordProvider();
+        BulletRecordProvider providerA = config.createBulletRecordProvider();
+        BulletRecordProvider providerB = config.createBulletRecordProvider();
 
         // Creates a new provider each time
-        Assert.assertNotEquals(providerA, providerB);
+        Assert.assertNotSame(providerA, providerB);
 
         // Ensure the provider generates new records each time
         BulletRecord recordA = providerA.getInstance();
@@ -480,10 +480,10 @@ public class BulletConfigTest {
     }
 
     @Test
-    public void testGetCachedBulletRecordProvider() {
+    public void testGetBulletRecordProvider() {
         BulletConfig config = new BulletConfig();
-        BulletRecordProvider providerA = config.getCachedBulletRecordProvider();
-        BulletRecordProvider providerB = config.getCachedBulletRecordProvider();
+        BulletRecordProvider providerA = config.getBulletRecordProvider();
+        BulletRecordProvider providerB = config.getBulletRecordProvider();
 
         // Uses the same provider
         Assert.assertSame(providerA, providerB);
@@ -494,14 +494,14 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig();
 
         // Default record provider is TypedAvroBulletRecordProvider
-        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
+        Assert.assertTrue(config.createBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
 
         config.set(BulletConfig.RECORD_PROVIDER_CLASS_NAME, TypedSimpleBulletRecordProvider.class.getName());
 
         // Cached record provider doesn't change with new setting
-        Assert.assertTrue(config.getCachedBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
+        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
 
-        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedSimpleBulletRecordProvider);
+        Assert.assertTrue(config.createBulletRecordProvider() instanceof TypedSimpleBulletRecordProvider);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
