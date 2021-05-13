@@ -8,6 +8,8 @@ package com.yahoo.bullet.common;
 import com.yahoo.bullet.querying.partitioning.MockPartitioner;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
+import com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider;
+import com.yahoo.bullet.record.simple.TypedSimpleBulletRecordProvider;
 import com.yahoo.bullet.result.Meta;
 import com.yahoo.bullet.result.Meta.Concept;
 import com.yahoo.bullet.typesystem.Type;
@@ -461,11 +463,13 @@ public class BulletConfigTest {
         BulletConfig config = new BulletConfig();
         BulletRecordProvider providerA = config.getBulletRecordProvider();
         BulletRecordProvider providerB = config.getBulletRecordProvider();
-        Assert.assertEquals(providerA, providerB);
+
+        // Creates a new provider each time
+        Assert.assertNotEquals(providerA, providerB);
 
         // Ensure the provider generates new records each time
         BulletRecord recordA = providerA.getInstance();
-        BulletRecord recordB = providerB.getInstance();
+        BulletRecord recordB = providerA.getInstance();
 
         Assert.assertNotNull(recordA);
         Assert.assertNotNull(recordB);
@@ -473,6 +477,31 @@ public class BulletConfigTest {
         recordB.setString("someField", "someValue");
         Assert.assertEquals(recordB.typedGet("someField"), new TypedObject(Type.STRING, "someValue"));
         Assert.assertTrue(recordA.typedGet("someField").isNull());
+    }
+
+    @Test
+    public void testGetCachedBulletRecordProvider() {
+        BulletConfig config = new BulletConfig();
+        BulletRecordProvider providerA = config.getCachedBulletRecordProvider();
+        BulletRecordProvider providerB = config.getCachedBulletRecordProvider();
+
+        // Uses the same provider
+        Assert.assertSame(providerA, providerB);
+    }
+
+    @Test
+    public void testSettingDifferentBulletRecordProvider() {
+        BulletConfig config = new BulletConfig();
+
+        // Default record provider is TypedAvroBulletRecordProvider
+        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
+
+        config.set(BulletConfig.RECORD_PROVIDER_CLASS_NAME, TypedSimpleBulletRecordProvider.class.getName());
+
+        // Cached record provider doesn't change with new setting
+        Assert.assertTrue(config.getCachedBulletRecordProvider() instanceof TypedAvroBulletRecordProvider);
+
+        Assert.assertTrue(config.getBulletRecordProvider() instanceof TypedSimpleBulletRecordProvider);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
