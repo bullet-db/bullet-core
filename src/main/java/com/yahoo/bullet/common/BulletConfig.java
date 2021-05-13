@@ -348,24 +348,25 @@ public class BulletConfig extends Config {
     }
 
     /**
-     * Construct a {@link BulletRecordProvider} and store it in this BulletConfig instance.
+     * Create a {@link BulletRecordProvider} and store it in this BulletConfig instance. If the provider is changed,
+     * this method should be called before {@link BulletConfig#getBulletRecordProvider()} is called again.
      *
      * @return The BulletRecordProvider instance.
      */
-    public BulletRecordProvider getBulletRecordProvider() {
+    public BulletRecordProvider createBulletRecordProvider() {
         provider = BulletRecordProvider.from(getAs(RECORD_PROVIDER_CLASS_NAME, String.class));
         return provider;
     }
 
     /**
-     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance, or construct and store one first if
+     * Get the {@link BulletRecordProvider} stored in this BulletConfig instance, or create and store one first if
      * there is none.
      *
      * @return The BulletRecordProvider instance.
      */
-    public BulletRecordProvider getCachedBulletRecordProvider() {
+    public BulletRecordProvider getBulletRecordProvider() {
         if (provider == null) {
-            return getBulletRecordProvider();
+            return createBulletRecordProvider();
         }
         return provider;
     }
