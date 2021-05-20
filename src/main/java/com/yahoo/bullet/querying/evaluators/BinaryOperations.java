@@ -37,6 +37,7 @@ public class BinaryOperations {
         BINARY_OPERATORS.put(Operation.SUB, BinaryOperations::sub);
         BINARY_OPERATORS.put(Operation.MUL, BinaryOperations::mul);
         BINARY_OPERATORS.put(Operation.DIV, BinaryOperations::div);
+        BINARY_OPERATORS.put(Operation.MOD, BinaryOperations::mod);
         BINARY_OPERATORS.put(Operation.EQUALS, BinaryOperations::equals);
         BINARY_OPERATORS.put(Operation.EQUALS_ANY, BinaryOperations::equalsAny);
         BINARY_OPERATORS.put(Operation.EQUALS_ALL, BinaryOperations::equalsAll);
@@ -130,6 +131,22 @@ public class BinaryOperations {
                     return new TypedObject(Type.LONG, getLong(leftValue) / getLong(rightValue));
                 default:
                     return new TypedObject(Type.INTEGER, getInteger(leftValue) / getInteger(rightValue));
+            }
+        });
+    }
+
+    static TypedObject mod(Evaluator left, Evaluator right, BulletRecord record) {
+        return checkNull(left, right, record, (leftValue, rightValue) -> {
+            Type type = getArithmeticResultType(leftValue.getType(), rightValue.getType());
+            switch (type) {
+                case DOUBLE:
+                    return new TypedObject(Type.DOUBLE, getDouble(leftValue) % getDouble(rightValue));
+                case FLOAT:
+                    return new TypedObject(Type.FLOAT, getFloat(leftValue) % getFloat(rightValue));
+                case LONG:
+                    return new TypedObject(Type.LONG, getLong(leftValue) % getLong(rightValue));
+                default:
+                    return new TypedObject(Type.INTEGER, getInteger(leftValue) % getInteger(rightValue));
             }
         });
     }

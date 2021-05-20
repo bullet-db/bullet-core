@@ -21,6 +21,7 @@ public enum Operation {
     SUB("-"),
     MUL("*"),
     DIV("/"),
+    MOD("%"),
     EQUALS("="),
     EQUALS_ANY("= ANY"),
     EQUALS_ALL("= ALL"),
@@ -62,17 +63,19 @@ public enum Operation {
     BETWEEN("BETWEEN"),
     NOT_BETWEEN("NOT BETWEEN"),
     SUBSTRING("SUBSTRING"),
-    UNIX_TIMESTAMP("UNIXTIMESTAMP");
+    UNIX_TIMESTAMP("UNIXTIMESTAMP"),
+    LOWER("LOWER"),
+    UPPER("UPPER");
 
     public static final Set<Operation> BINARY_OPERATIONS =
-            new HashSet<>(asList(ADD, SUB, MUL, DIV,
+            new HashSet<>(asList(ADD, SUB, MUL, DIV, MOD,
                                  EQUALS, EQUALS_ANY, EQUALS_ALL, NOT_EQUALS, NOT_EQUALS_ANY, NOT_EQUALS_ALL,
                                  GREATER_THAN, GREATER_THAN_ANY, GREATER_THAN_ALL, LESS_THAN, LESS_THAN_ANY, LESS_THAN_ALL,
                                  GREATER_THAN_OR_EQUALS, GREATER_THAN_OR_EQUALS_ANY, GREATER_THAN_OR_EQUALS_ALL,
                                  LESS_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS_ANY, LESS_THAN_OR_EQUALS_ALL, REGEX_LIKE, REGEX_LIKE_ANY,
                                  NOT_REGEX_LIKE, NOT_REGEX_LIKE_ANY, SIZE_IS, CONTAINS_KEY, CONTAINS_VALUE, IN, NOT_IN,
                                  AND, OR, XOR, FILTER));
-    public static final Set<Operation> UNARY_OPERATIONS = new HashSet<>(asList(NOT, SIZE_OF, IS_NULL, IS_NOT_NULL, TRIM, ABS));
+    public static final Set<Operation> UNARY_OPERATIONS = new HashSet<>(asList(NOT, SIZE_OF, IS_NULL, IS_NOT_NULL, TRIM, ABS, LOWER, UPPER));
     public static final Set<Operation> N_ARY_OPERATIONS = new HashSet<>(asList(AND, OR, IF, BETWEEN, NOT_BETWEEN, SUBSTRING, UNIX_TIMESTAMP));
 
     private String name;

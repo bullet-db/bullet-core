@@ -33,6 +33,8 @@ public class UnaryOperations {
         UNARY_OPERATORS.put(Operation.IS_NOT_NULL, UnaryOperations::isNotNull);
         UNARY_OPERATORS.put(Operation.TRIM, UnaryOperations::trim);
         UNARY_OPERATORS.put(Operation.ABS, UnaryOperations::abs);
+        UNARY_OPERATORS.put(Operation.LOWER, UnaryOperations::lower);
+        UNARY_OPERATORS.put(Operation.UPPER, UnaryOperations::upper);
     }
 
     static TypedObject not(Evaluator evaluator, BulletRecord record) {
@@ -55,6 +57,20 @@ public class UnaryOperations {
         return checkNull(evaluator, record, value -> {
             String str = (String) value.getValue();
             return TypedObject.valueOf(str.trim());
+        });
+    }
+
+    static TypedObject lower(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            String str = (String) value.getValue();
+            return TypedObject.valueOf(str.toLowerCase());
+        });
+    }
+
+    static TypedObject upper(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            String str = (String) value.getValue();
+            return TypedObject.valueOf(str.toUpperCase());
         });
     }
 
