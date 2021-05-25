@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.querying.aggregations.Strategy;
@@ -412,11 +413,7 @@ public class Querier implements Monoidal {
         if (isDone()) {
             return;
         }
-        if (tableFunctor == null) {
-            consumeRecord(record);
-        } else {
-            tableFunctor.apply(record, provider).forEach(this::consumeRecord);
-        }
+        consumeRecord(record);
     }
 
     /**
@@ -466,6 +463,7 @@ public class Querier implements Monoidal {
             Clip result = new Clip();
             result.add(window.getRecords());
             result = postAggregate(result);
+            result = postQuery(result);
             return result.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -503,6 +501,7 @@ public class Querier implements Monoidal {
             incrementRate();
             result = window.getResult();
             result = postAggregate(result);
+            result = postQuery(result);
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -623,6 +622,14 @@ public class Querier implements Monoidal {
     // ********************************* Private helpers *********************************
 
     private void consumeRecord(BulletRecord record) {
+        if (tableFunctor == null) {
+            process(record);
+        } else {
+            tableFunctor.apply(record, provider).forEach(this::process);
+        }
+    }
+
+    private void process(BulletRecord record) {
         // Ignore if record doesn't match filters
         if (!filter(record)) {
             return;
@@ -664,6 +671,22 @@ public class Querier implements Monoidal {
         return clip;
     }
 
+    private Clip postQuery(Clip clip) {
+        if (runningQuery.getQuery().getPostQuery() == null) {
+            return clip;
+        }
+        Querier querier = new Querier(Mode.ALL, new RunningQuery(runningQuery.getId(), runningQuery.getQuery().getPostQuery(), new Metadata()), config);
+        for (BulletRecord record : clip.getRecords()) {
+            if (querier.isClosed()) {
+                break;
+            }
+            querier.consumeRecord(record);
+        }
+        Clip result = querier.getResult();
+        result.getMeta().add(getSubMetaKey(), clip.getMeta().asMap());
+        return result;
+    }
+
     private Meta getResultMetadata() {
         String metaKey = getMetaKey();
         if (metaKey == null) {
@@ -701,6 +724,11 @@ public class Querier implements Monoidal {
     }
 
     private String getMetaKey() {
-        return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
+        return metaKeys.getOrDefault(Concept.QUERY_METADATA.getName(), null);
+    }
+
+    private String getSubMetaKey() {
+        return "Subquery";
+        //return metaKeys.getOrDefault(Concept.SUBQUERY_METADATA.getName(), null);
     }
 }
