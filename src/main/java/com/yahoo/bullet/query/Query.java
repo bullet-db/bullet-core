@@ -139,6 +139,10 @@ public class Query implements Configurable, Serializable {
 
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration <= 0) ? durationDefault : Math.min(duration, durationMax);
+
+        if (postQuery != null) {
+            postQuery.configure(config);
+        }
     }
 
     @Override
