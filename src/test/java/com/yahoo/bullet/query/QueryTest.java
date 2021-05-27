@@ -151,9 +151,9 @@ public class QueryTest {
         config.set(BulletConfig.QUERY_DEFAULT_DURATION, 30000L);
         Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config.validate());
-        Assert.assertEquals(query.toString(), "{projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
+        Assert.assertEquals(query.toString(), "{tableFunction: null, projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
                                               "aggregation: {size: 1, type: RAW}, postAggregations: null, " +
                                               "window: {emitEvery: null, emitType: null, includeType: null, includeFirst: null}, " +
-                                              "duration: 30000}");
+                                              "duration: 30000, postQuery: null}");
     }
 }
