@@ -69,4 +69,18 @@ public class UnaryOperationsTest {
         Assert.assertEquals(UnaryOperations.abs(valueEvaluator(-2), null), TypedObject.valueOf(2));
         Assert.assertEquals(UnaryOperations.abs(valueEvaluator(null), null), TypedObject.NULL);
     }
+
+    @Test
+    public void testLower() {
+        Assert.assertEquals(UnaryOperations.lower(valueEvaluator("HELLO"), null), TypedObject.valueOf("hello"));
+        Assert.assertEquals(UnaryOperations.lower(valueEvaluator("hello"), null), TypedObject.valueOf("hello"));
+        Assert.assertEquals(UnaryOperations.lower(valueEvaluator(null), null), TypedObject.NULL);
+    }
+
+    @Test
+    public void testUpper() {
+        Assert.assertEquals(UnaryOperations.upper(valueEvaluator("HELLO"), null), TypedObject.valueOf("HELLO"));
+        Assert.assertEquals(UnaryOperations.upper(valueEvaluator("hello"), null), TypedObject.valueOf("HELLO"));
+        Assert.assertEquals(UnaryOperations.upper(valueEvaluator(null), null), TypedObject.NULL);
+    }
 }

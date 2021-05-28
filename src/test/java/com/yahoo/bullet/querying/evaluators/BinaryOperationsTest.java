@@ -72,6 +72,17 @@ public class BinaryOperationsTest {
     }
 
     @Test
+    public void testMod() {
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(7.0), valueEvaluator(4.0f), null), new TypedObject(Type.DOUBLE, 3.0));
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(5.0f), valueEvaluator(4L), null), new TypedObject(Type.FLOAT, 1.0f));
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(6L), valueEvaluator(4), null), new TypedObject(Type.LONG, 2L));
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(4), valueEvaluator(4), null), new TypedObject(Type.INTEGER, 0));
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(null), valueEvaluator(4), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(2), valueEvaluator(null), null), TypedObject.NULL);
+        Assert.assertEquals(BinaryOperations.mod(valueEvaluator(null), valueEvaluator(null), null), TypedObject.NULL);
+    }
+
+    @Test
     public void testEquals() {
         Assert.assertEquals(BinaryOperations.equals(valueEvaluator(2), valueEvaluator(4), null), TypedObject.FALSE);
         Assert.assertEquals(BinaryOperations.equals(valueEvaluator(2), valueEvaluator(2), null), TypedObject.TRUE);
