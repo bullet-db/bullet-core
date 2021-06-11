@@ -597,10 +597,8 @@ public class Querier implements Monoidal {
      * @return A boolean that is true if the query results should be buffered in the Join phase.
      */
     public boolean shouldBuffer() {
-        Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow = window == null;
-        // Only buffer if there is no window (including RawStrategy) or if it's a record based window.
-        return noWindow || !window.isTimeBased();
+        // Only buffer if the window is not time based (RawStrategy or if it's a record based window).
+        return runningQuery.getQuery().getWindow().isTimeBased();
     }
 
     /**
