@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.apache.http.StatusLine;
@@ -15,6 +16,7 @@ import org.apache.http.util.EntityUtils;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 import java.io.IOException;
+import java.util.Base64;
 
 import org.testng.Assert;
 
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 public class RESTQueryPublisherTest {
-    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
+    private static final String BAR = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes("bar"));
 
     @Test
     public void testSendResultUrlPutInMetadataAckPreserved() throws Exception {
@@ -39,7 +41,7 @@ public class RESTQueryPublisherTest {
         doReturn(mockStatusLine).when(mockResponse).getStatusLine();
         doReturn(mockResponse).when(mockClient).execute(any());
         RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
-        PubSubMessage actual = publisher.send(new PubSubMessage("foo", CONTENT, Metadata.Signal.ACKNOWLEDGE));
+        PubSubMessage actual = publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.ACKNOWLEDGE));
 
         Assert.assertTrue(actual.getMetadata() instanceof RESTMetadata);
         RESTMetadata actualMeta = (RESTMetadata) actual.getMetadata();
@@ -49,7 +51,7 @@ public class RESTQueryPublisherTest {
         verify(mockClient).execute(argumentCaptor.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
-        String expectedMessage = "{'id':'foo','content':[98,97,114],'metadata':{'url':'my/custom/url','signal':ACKNOWLEDGE,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
+        String expectedMessage = "{'id':'foo','content':'" + BAR + "','metadata':{'url':'my/custom/url','signal':ACKNOWLEDGE,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
         assertJSONEquals(actualMessage, expectedMessage);
@@ -61,13 +63,13 @@ public class RESTQueryPublisherTest {
     public void testSendResultUrlPutInMetadataCompletePreserved() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
-        PubSubMessage actual = publisher.send(new PubSubMessage("foo", CONTENT, Metadata.Signal.COMPLETE));
+        PubSubMessage actual = publisher.send(new PubSubMessage("foo", "bar", Metadata.Signal.COMPLETE));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
         verify(mockClient).execute(argumentCaptor.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
-        String expectedMessage = "{'id':'foo','content':[98,97,114],'metadata':{'url':'my/custom/url','signal':COMPLETE,'content':null,'created': " + actual.getMetadata().getCreated() + "}}";
+        String expectedMessage = "{'id':'foo','content':'" + BAR + "','metadata':{'url':'my/custom/url','signal':COMPLETE,'content':null,'created': " + actual.getMetadata().getCreated() + "}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
         assertJSONEquals(actualMessage, expectedMessage);
@@ -79,13 +81,13 @@ public class RESTQueryPublisherTest {
     public void testSendMetadataCreated() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         RESTQueryPublisher publisher = new RESTQueryPublisher(mockClient, "my/custom/query/url", "my/custom/url", 5000);
-        PubSubMessage actual = publisher.send("foo", CONTENT);
+        PubSubMessage actual = publisher.send("foo", "bar");
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
         verify(mockClient).execute(argumentCaptor.capture());
         HttpPost post = argumentCaptor.getValue();
         String actualMessage = EntityUtils.toString(post.getEntity(), RESTPubSub.UTF_8);
-        String expectedMessage = "{'id':'foo','content':[98,97,114],'metadata':{'url':'my/custom/url','signal':null,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
+        String expectedMessage = "{'id':'foo','content':'" + BAR + "','metadata':{'url':'my/custom/url','signal':null,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
         assertJSONEquals(actualMessage, expectedMessage);

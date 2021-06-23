@@ -5,7 +5,10 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import com.google.gson.Gson;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
+import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.result.JSONFormatter;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +16,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -21,11 +25,12 @@ import java.util.Objects;
  */
 @Getter
 public class PubSubMessage implements Serializable, JSONFormatter {
-    private static final long serialVersionUID = -5068189058170874687L;
     public static final Charset CHARSET = StandardCharsets.UTF_8;
+    private static final long serialVersionUID = 5096747716667851530L;
 
     private String id;
-    private byte[] content;
+    // Serializable enforced through the constructors, getter and setter. Is Object so GSON can reify an instance.
+    private Object content;
     @Setter
     private Metadata metadata;
 
@@ -52,18 +57,8 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param id The ID associated with the message.
      * @param content The content of the message.
      */
-    public PubSubMessage(String id, byte[] content) {
+    public PubSubMessage(String id, Serializable content) {
         this(id, content, (Metadata) null);
-    }
-
-    /**
-     * Constructor for a message having only content as a String.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     */
-    public PubSubMessage(String id, String content) {
-        this(id, content, null);
     }
 
     /**
@@ -73,19 +68,8 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param content The content of the message.
      * @param signal The Signal to be sent with the message.
      */
-    public PubSubMessage(String id, byte[] content, Signal signal) {
+    public PubSubMessage(String id, Serializable content, Signal signal) {
         this(id, content, new Metadata(signal, null));
-    }
-
-    /**
-     * Constructor for a message having content as a String and {@link Metadata}.
-     *
-     * @param id The ID associated with the message.
-     * @param content The content of the message as a String.
-     * @param metadata The Metadata associated with the message.
-     */
-    public PubSubMessage(String id, String content, Metadata metadata) {
-        this(id, content == null ? null : content.getBytes(CHARSET), metadata);
     }
 
     /**
@@ -95,7 +79,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @param content The content of the message.
      * @param metadata The Metadata associated with the message.
      */
-    public PubSubMessage(String id, byte[] content, Metadata metadata) {
+    public PubSubMessage(String id, Serializable content, Metadata metadata) {
         this.id = Objects.requireNonNull(id, "ID cannot be null");
         this.content = content;
         this.metadata = metadata;
@@ -139,13 +123,51 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
+     * Returns the {@link Serializable} content stored in the message.
+     *
+     * @return The content stored.
+     */
+    public Serializable getContent() {
+        return (Serializable) content;
+    }
+
+    /**
+     * Returns the content stored in the message as a byte[]. You should use this to read the byte[] back from the
+     * message if you provided it originally to the message as a byte[].
+     *
+     * @return The content stored as a byte[].
+     */
+    public byte[] getContentAsByteArray() {
+        return (byte[]) content;
+    }
+
+    /**
      * Returns the content stored in the message as a String. You should use this to read the String back from the
      * message if you provided it originally to the message as a String.
      *
-     * @return The content stored as a String using the {@link PubSubMessage#CHARSET}.
+     * @return The content stored as a String.
      */
     public String getContentAsString() {
-        return content == null ? null : new String(content, CHARSET);
+        return (String) content;
+    }
+
+    /**
+     * Returns the content stored in the message as a {@link Query}. You should use this to read the {@link Query} back
+     * if you originally provided to the message as a {@link Serializable}.
+     *
+     * @return The content stored as a {@link Query}.
+     */
+    public Query getContentAsQuery() {
+        return (Query) content;
+    }
+
+    /**
+     * Set a {@link Serializable} content for this message.
+     *
+     * @param content The content for this message.
+     */
+    public void setContent(Serializable content) {
+        this.content = content;
     }
 
     @Override
@@ -169,16 +191,38 @@ public class PubSubMessage implements Serializable, JSONFormatter {
 
     @Override
     public String asJSON() {
-        return JSONFormatter.asJSON(this);
+        String data = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes((Serializable) content));
+        PubSubMessage message = new PubSubMessage(id, data, metadata);
+        return JSONFormatter.asJSON(message);
     }
 
     /**
-     * Converts a json representation back to an instance.
+     * Converts a json representation back to an instance. Is the inverse of {@link #asJSON()}.
      *
      * @param json The string representation of the JSON.
      * @return An instance of this class.
      */
     public static PubSubMessage fromJSON(String json) {
-        return JSONFormatter.fromJSON(json, PubSubMessage.class);
+        return fromJSON(json, GSON);
+    }
+
+    /**
+     * Converts a JSON representation back to an instance using a specific {@link Gson} converter.
+     * Is the inverse of {@link #asJSON()}.
+     *
+     * @param json The string representation of the JSON.
+     * @param gson The {@link Gson} converter to use.
+     * @return An instance of this class.
+     */
+    public static PubSubMessage fromJSON(String json, Gson gson) {
+        return fromJSON(gson.fromJson(json, PubSubMessage.class));
+    }
+
+    private static PubSubMessage fromJSON(PubSubMessage message) {
+        if (message == null || message.getContent() == null) {
+            return message;
+        }
+        message.content = SerializerDeserializer.fromBytes(Base64.getDecoder().decode(message.getContentAsString()));
+        return message;
     }
 }

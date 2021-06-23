@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BufferingSubscriberTest {
-    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
-
     @Getter
     private final static class ExampleBufferingSubscriber extends BufferingSubscriber {
         private List<PubSubMessage> testMessages;
@@ -111,7 +109,7 @@ public class BufferingSubscriberTest {
         PubSubMessage actual = subscriber.receive();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getId(), "foo");
-        Assert.assertEquals(actual.getContent(), CONTENT);
+        Assert.assertEquals(actual.getContent(), "bar");
         Assert.assertEquals(actual.getContentAsString(), "bar");
 
         Assert.assertEquals(subscriber.getCallCount(), 8);

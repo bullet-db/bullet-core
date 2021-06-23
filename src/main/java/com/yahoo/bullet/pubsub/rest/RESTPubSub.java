@@ -12,6 +12,9 @@ import com.yahoo.bullet.pubsub.Publisher;
 import com.yahoo.bullet.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClients;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +24,7 @@ import java.util.stream.IntStream;
 public class RESTPubSub extends PubSub {
     public static final int OK_200 = 200;
     public static final int NO_CONTENT_204 = 204;
-    public static final String UTF_8 = "UTF-8";
+    public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
     /**
      * Create a RESTPubSub from a {@link BulletConfig}.

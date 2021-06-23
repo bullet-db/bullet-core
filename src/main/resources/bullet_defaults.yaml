@@ -249,3 +249,5 @@ bullet.query.partitioner.equality.delimiter: "|"
 bullet.pubsub.class.name: "com.yahoo.bullet.pubsub.rest.RESTPubSub"
 # The current context. This can be QUERY_PROCESSING or QUERY_SUBMISSION. The PubSub implementation should use this to generate appropriate Publishers and Subscribers.
 bullet.pubsub.context.name: "QUERY_PROCESSING"
+# The class to use for converting and reading PubSubMessage queries sent to the backend.
+bullet.pubsub.message.serde.class.name: "com.yahoo.bullet.pubsub.IdentityPubSubMessageSerDe"

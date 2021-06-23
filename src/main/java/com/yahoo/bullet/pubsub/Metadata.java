@@ -58,7 +58,7 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * Set a serializable content for this metadata.
+     * Set a {@link Serializable} content for this metadata.
      *
      * @param content The content for this metadata.
      */
