@@ -39,7 +39,7 @@ public abstract class PubSubMessageSerDe implements Serializable {
      * {@link #toMessage(PubSubMessage)}.
      *
      * @param id The ID for the query.
-     * @param query The {@link Query} object to create a {@link PubSubMessage}
+     * @param query The {@link Query} object to create a {@link PubSubMessage}.
      * @param queryString The BQL for the query.
      * @return A converted {@link PubSubMessage}.
      */
