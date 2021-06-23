@@ -11,13 +11,13 @@ import com.yahoo.bullet.query.Query;
 import java.io.Serializable;
 
 /**
- * This allows you to hook into the {@link PubSubMessage} serialization and deserialization. In particular, if you want
+ * This allows you to hook into the {@link PubSubMessage} serialization and deserialization - for instance, if you want
  * to customize what is done to the message before it is sent to or read in the backend. You can implement a custom
- * version of this to change what the {@link PubSubMessage} contains (see {@link #toMessage(PubSubMessage)} and invert
- * it when it is read back (see {@link #fromMessage(PubSubMessage)}.
+ * version of this to change what the {@link PubSubMessage} contains (see {@link #toMessage(PubSubMessage)}) and invert
+ * it when it is read back (see {@link #fromMessage(PubSubMessage)}).
  *
  * Please note that this is not intended to be applied to messages read from the backend or for signals sent to the
- * backend. You can for example, use this if you want to customize what is stored in storage or to lazily create a
+ * backend. You can, for example, use this if you want to customize what is stored in storage or to lazily create a
  * {@link Query} in the backend.
  */
 public abstract class PubSubMessageSerDe implements Serializable {

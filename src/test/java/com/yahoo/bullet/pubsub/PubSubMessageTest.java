@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.UUID;
 
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
@@ -134,14 +135,14 @@ public class PubSubMessageTest {
         String messageID = getRandomString();
         byte[] messageContent = getRandomBytes();
         Metadata randomMetadata = new Metadata(Signal.ACKNOWLEDGE, getRandomString());
-        PubSubMessage message1 = new PubSubMessage(messageID, messageContent, randomMetadata);
-        PubSubMessage message2 = new PubSubMessage(messageID, messageContent, new Metadata(Signal.ACKNOWLEDGE, getRandomString()));
-        PubSubMessage message3 = new PubSubMessage(getRandomString(), messageContent, randomMetadata);
+        PubSubMessage messageA = new PubSubMessage(messageID, messageContent, randomMetadata);
+        PubSubMessage messageB = new PubSubMessage(messageID, messageContent, new Metadata(Signal.ACKNOWLEDGE, getRandomString()));
+        PubSubMessage messageC = new PubSubMessage(getRandomString(), messageContent, randomMetadata);
 
-        Assert.assertEquals(message1, message2);
-        Assert.assertNotEquals(message1, message3);
-        Assert.assertFalse(message1.equals(null));
-        Assert.assertFalse(message1.equals(new PubSubException("Dummy")));
+        Assert.assertEquals(messageA, messageB);
+        Assert.assertNotEquals(messageA, messageC);
+        Assert.assertFalse(messageA.equals(null));
+        Assert.assertFalse(messageA.equals(new PubSubException("Dummy")));
     }
 
     @Test
@@ -149,9 +150,9 @@ public class PubSubMessageTest {
         String messageID = getRandomString();
         byte[] messageContent = getRandomBytes();
         Metadata randomMetadata = new Metadata(Signal.ACKNOWLEDGE, getRandomString());
-        PubSubMessage message1 = new PubSubMessage(messageID, messageContent, randomMetadata);
-        PubSubMessage message2 = new PubSubMessage(messageID, messageContent, new Metadata(Signal.ACKNOWLEDGE, getRandomString()));
-        Assert.assertEquals(message1.hashCode(), message2.hashCode());
+        PubSubMessage messageA = new PubSubMessage(messageID, messageContent, randomMetadata);
+        PubSubMessage messageB = new PubSubMessage(messageID, messageContent, new Metadata(Signal.ACKNOWLEDGE, getRandomString()));
+        Assert.assertEquals(messageA.hashCode(), messageB.hashCode());
     }
 
     @Test
@@ -168,7 +169,7 @@ public class PubSubMessageTest {
         Assert.assertTrue(message.hasMetadata());
         Assert.assertTrue(message.hasSignal(Signal.COMPLETE));
 
-        message = new PubSubMessage(messageID, (byte[]) null, new Metadata());
+        message = new PubSubMessage(messageID, null, new Metadata());
         Assert.assertTrue(message.hasMetadata());
         Assert.assertFalse(message.hasSignal());
     }
@@ -249,6 +250,20 @@ public class PubSubMessageTest {
         Assert.assertTrue(actual.getMetadata().hasSignal(Signal.ACKNOWLEDGE));
         Assert.assertNull(actual.getMetadata().getContent());
         Assert.assertNull(actual.getContent());
+    }
+    @Test
+    public void testSettingConent() {
+        PubSubMessage message = new PubSubMessage("foo", "bar");
+        Assert.assertEquals(message.getId(), "foo");
+        Assert.assertEquals(message.getContent(), "bar");
+        Assert.assertEquals(message.getContentAsString(), "bar");
+
+        message.setContent(new byte[0]);
+        Assert.assertEquals(message.getContent(), new byte[0]);
+        Assert.assertEquals(message.getContentAsByteArray(), new byte[0]);
+
+        message.setContent(new HashMap<>());
+        Assert.assertEquals(message.getContent(), Collections.emptyMap());
     }
 
     @Test

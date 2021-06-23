@@ -29,7 +29,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     private static final long serialVersionUID = 5096747716667851530L;
 
     private String id;
-    // Serializable enforced through the constructors, and getter. Is Object so GSON can reify an instance.
+    // Serializable enforced through the constructors, getter and setter. Is Object so GSON can reify an instance.
     private Object content;
     @Setter
     private Metadata metadata;
@@ -161,6 +161,15 @@ public class PubSubMessage implements Serializable, JSONFormatter {
         return (Query) content;
     }
 
+    /**
+     * Set a {@link Serializable} content for this message.
+     *
+     * @param content The content for this message.
+     */
+    public void setContent(Serializable content) {
+        this.content = content;
+    }
+
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -198,7 +207,7 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     }
 
     /**
-     * Converts a json representation back to an instance using a specific {@link Gson} converter.
+     * Converts a JSON representation back to an instance using a specific {@link Gson} converter.
      * Is the inverse of {@link #asJSON()}.
      *
      * @param json The string representation of the JSON.
