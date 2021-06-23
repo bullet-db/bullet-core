@@ -6,7 +6,6 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
-import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.query.Query;
 
 import java.io.Serializable;
