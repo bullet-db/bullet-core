@@ -7,6 +7,10 @@ package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.aggregations.Raw;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -98,6 +102,26 @@ public class PubSubMessageTest {
 
         message = new PubSubMessage(messageID, (String) null);
         Assert.assertFalse(message.hasContent());
+    }
+
+    @Test
+    public void testReadingDataAsDifferentTypes() {
+        String string = getRandomString();
+        byte[] bytes = getRandomBytes();
+        Query query = new Query(new Projection(), null, new Raw(1), null, new Window(), Long.MAX_VALUE);
+
+        PubSubMessage message;
+        message = new PubSubMessage("foo", string);
+        Assert.assertEquals(message.getContent(), string);
+        Assert.assertEquals(message.getContentAsString(), string);
+
+        message = new PubSubMessage("foo", bytes);
+        Assert.assertEquals(message.getContent(), bytes);
+        Assert.assertEquals(message.getContentAsByteArray(), bytes);
+
+        message = new PubSubMessage("foo", query);
+        Assert.assertSame(message.getContent(), query);
+        Assert.assertSame(message.getContentAsQuery(), query);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

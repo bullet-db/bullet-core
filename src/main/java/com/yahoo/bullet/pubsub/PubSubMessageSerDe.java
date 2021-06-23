@@ -44,8 +44,8 @@ public abstract class PubSubMessageSerDe implements Serializable {
      * @param queryString The BQL for the query.
      * @return A converted {@link PubSubMessage}.
      */
-    public PubSubMessage queryToMessage(String id, Query query, String queryString) {
-        return toMessage(new PubSubMessage(id, SerializerDeserializer.toBytes(query), new Metadata(null, queryString)));
+    public PubSubMessage toMessage(String id, Query query, String queryString) {
+        return toMessage(new PubSubMessage(id, query, new Metadata(null, queryString)));
     }
 
     /**

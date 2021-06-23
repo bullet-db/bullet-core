@@ -6,10 +6,25 @@
 package com.yahoo.bullet.pubsub;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.query.Projection;
+import com.yahoo.bullet.query.Query;
+import com.yahoo.bullet.query.Window;
+import com.yahoo.bullet.query.aggregations.Raw;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class IdentityPubSubMessageSerDeTest {
+    @Test
+    public void testConvertingQuery() {
+        IdentityPubSubMessageSerDe serDe = new IdentityPubSubMessageSerDe(null);
+
+        Query query = new Query(new Projection(), null, new Raw(1), null, new Window(), 1L);
+        PubSubMessage actual = serDe.toMessage("id", query, "foo");
+        Assert.assertEquals(actual.getId(), "id");
+        Assert.assertSame(actual.getContent(), query);
+        Assert.assertEquals(actual.getMetadata().getContent(), "foo");
+    }
+
     @Test
     public void testConverting() {
         IdentityPubSubMessageSerDe serDe = new IdentityPubSubMessageSerDe(null);
