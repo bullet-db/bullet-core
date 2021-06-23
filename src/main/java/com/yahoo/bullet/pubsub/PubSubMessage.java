@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import com.google.gson.Gson;
 import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata.Signal;
 import com.yahoo.bullet.query.Query;
@@ -193,17 +194,22 @@ public class PubSubMessage implements Serializable, JSONFormatter {
      * @return An instance of this class.
      */
     public static PubSubMessage fromJSON(String json) {
-        return fromJSON(JSONFormatter.fromJSON(json, PubSubMessage.class));
+        return fromJSON(json, GSON);
     }
 
-
     /**
-     * Converts a {@link PubSubMessage} read using another JSON reading method back to the standard representation.
+     * Converts a json representation back to an instance using a specific {@link Gson} converter.
+     * Is the inverse of {@link #asJSON()}.
      *
-     * @param message The {@link PubSubMessage} that was deserialized using another JSON reading method.
+     * @param json The string representation of the JSON.
+     * @param gson The {@link Gson} converter to use.
      * @return An instance of this class.
      */
-    public static PubSubMessage fromJSON(PubSubMessage message) {
+    public static PubSubMessage fromJSON(String json, Gson gson) {
+        return fromJSON(gson.fromJson(json, PubSubMessage.class));
+    }
+
+    private static PubSubMessage fromJSON(PubSubMessage message) {
         if (message == null || message.getContent() == null) {
             return message;
         }

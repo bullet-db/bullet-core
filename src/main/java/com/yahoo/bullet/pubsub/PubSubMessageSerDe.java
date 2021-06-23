@@ -69,7 +69,7 @@ public abstract class PubSubMessageSerDe implements Serializable {
      * Create a {@link PubSubMessageSerDe} instance using the class specified in the config file.
      *
      * @param config The non-null {@link BulletConfig} containing the class name and its settings.
-     * @return an instance of specified class initialized with settings from the input file and defaults.
+     * @return An instance of specified class initialized with settings from the input file and defaults.
      */
     public static PubSubMessageSerDe from(BulletConfig config) {
         try {
