@@ -14,11 +14,11 @@ import static org.mockito.Mockito.mock;
 
 public class MockPubSub extends PubSub {
     public static final String MOCK_MESSAGE_NAME = "MOCK_MESSAGE";
-    private byte[] mockMessage;
+    private String mockMessage;
 
     public MockPubSub(BulletConfig config) throws PubSubException {
         super(config);
-        mockMessage = getRequiredConfig(byte[].class, MOCK_MESSAGE_NAME);
+        mockMessage = getRequiredConfig(String.class, MOCK_MESSAGE_NAME);
     }
 
     @Override
@@ -50,6 +50,6 @@ public class MockPubSub extends PubSub {
     @Override
     public void switchContext(Context context, BulletConfig config) throws PubSubException {
         super.switchContext(context, config);
-        mockMessage = getRequiredConfig(byte[].class, MOCK_MESSAGE_NAME);
+        mockMessage = getRequiredConfig(String.class, MOCK_MESSAGE_NAME);
     }
 }

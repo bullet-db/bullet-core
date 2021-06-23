@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 public class BulletPubSubResponderTest {
     private static BulletPubSubResponder mockResponder() {
         BulletConfig config = new BulletConfig("test_config.yaml");
-        config.set(MockPubSub.MOCK_MESSAGE_NAME, new byte[] {1, 2, 3});
+        config.set(MockPubSub.MOCK_MESSAGE_NAME, "foo");
         return new BulletPubSubResponder(config);
     }
 

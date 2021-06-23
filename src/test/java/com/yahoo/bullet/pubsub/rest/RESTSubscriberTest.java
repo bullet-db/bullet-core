@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
@@ -27,7 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTSubscriberTest {
-    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
+    private static final String BAR = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes("bar"));
 
     private CloseableHttpClient mockClient(int responseCode, String message) throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
@@ -46,23 +48,25 @@ public class RESTSubscriberTest {
 
     @Test
     public void testGetMessages() throws Exception {
-        String message = new PubSubMessage("foo", CONTENT).asJSON();
-        CloseableHttpClient mockClient = mockClient(RESTPubSub.OK_200, message);
-        RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 10, 3000);
-        List<PubSubMessage> messages = subscriber.getMessages();
-        Assert.assertEquals(messages.size(), 2);
-        Assert.assertEquals(messages.get(0).asJSON(), "{\"id\":\"foo\",\"content\":[98,97,114],\"metadata\":null}");
-    }
-
-    @Test
-    public void testGetMessagesWithRESTMetadata() throws Exception {
-        String message = new PubSubMessage("foo", CONTENT, new RESTMetadata("bar")).asJSON();
+        String message = new PubSubMessage("foo", "bar").asJSON();
         CloseableHttpClient mockClient = mockClient(RESTPubSub.OK_200, message);
         RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 10, 3000);
         List<PubSubMessage> messages = subscriber.getMessages();
         Assert.assertEquals(messages.size(), 2);
         Assert.assertEquals(messages.get(0).getId(), "foo");
-        Assert.assertEquals(messages.get(0).getContent(), CONTENT);
+        Assert.assertEquals(messages.get(0).getContent(), "bar");
+        Assert.assertNull(messages.get(0).getMetadata());
+    }
+
+    @Test
+    public void testGetMessagesWithRESTMetadata() throws Exception {
+        String message = new PubSubMessage("foo", "bar", new RESTMetadata("bar")).asJSON();
+        CloseableHttpClient mockClient = mockClient(RESTPubSub.OK_200, message);
+        RESTSubscriber subscriber = new RESTSubscriber(88, Arrays.asList("url", "anotherURL"), mockClient, 10, 3000);
+        List<PubSubMessage> messages = subscriber.getMessages();
+        Assert.assertEquals(messages.size(), 2);
+        Assert.assertEquals(messages.get(0).getId(), "foo");
+        Assert.assertEquals(messages.get(0).getContent(), "bar");
         Assert.assertEquals(((RESTMetadata) messages.get(0).getMetadata()).getUrl(), "bar");
     }
 

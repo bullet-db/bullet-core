@@ -72,7 +72,8 @@ public class RESTSubscriber extends BufferingSubscriber {
                     HttpEntity httpEntity = response.getEntity();
                     String message = EntityUtils.toString(httpEntity, RESTPubSub.UTF_8);
                     log.debug("Received message from url: {}. Message was {}", url, message);
-                    messages.add(GSON.fromJson(message, PubSubMessage.class));
+                    PubSubMessage pubSubMessage = GSON.fromJson(message, PubSubMessage.class);
+                    messages.add(PubSubMessage.fromJSON(pubSubMessage));
                     EntityUtils.consume(httpEntity);
                 } else if (statusCode != RESTPubSub.NO_CONTENT_204) {
                     // NO_CONTENT_204 indicates there are no new messages - anything else indicates a problem

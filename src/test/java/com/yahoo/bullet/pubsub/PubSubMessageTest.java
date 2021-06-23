@@ -11,13 +11,15 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.UUID;
 
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
 
 public class PubSubMessageTest {
-    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
+    private static final String NULL = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes(null));
+    private static final String BAR = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes("bar"));
 
     private String getRandomString() {
         return UUID.randomUUID().toString();
@@ -149,59 +151,56 @@ public class PubSubMessageTest {
 
     @Test
     public void testToString() {
-        String bar = "[98,97,114]";
         Metadata metadata = new Metadata(Signal.FAIL, 42.0);
-        assertJSONEquals(new PubSubMessage("foo", CONTENT, metadata).toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'FAIL', 'content': 42.0, 'created': " + metadata.getCreated() + " } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar", metadata).toString(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'FAIL', 'content': 42.0, 'created': " + metadata.getCreated() + " } }");
         metadata = new Metadata(Signal.COMPLETE, new ArrayList<>());
-        assertJSONEquals(new PubSubMessage("foo", CONTENT, metadata).toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': [], 'created': " + metadata.getCreated() + " } }");
-        PubSubMessage pubSubMessage = new PubSubMessage("foo", CONTENT, Signal.COMPLETE);
+        assertJSONEquals(new PubSubMessage("foo", "bar", metadata).toString(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'COMPLETE', 'content': [], 'created': " + metadata.getCreated() + " } }");
+        PubSubMessage pubSubMessage = new PubSubMessage("foo", "bar", Signal.COMPLETE);
         assertJSONEquals(pubSubMessage.toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
-        pubSubMessage = new PubSubMessage("foo", CONTENT, Signal.ACKNOWLEDGE);
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'COMPLETE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
+        pubSubMessage = new PubSubMessage("foo", "bar", Signal.ACKNOWLEDGE);
         assertJSONEquals(pubSubMessage.toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
-        assertJSONEquals(new PubSubMessage("foo", CONTENT).toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
-        assertJSONEquals(new PubSubMessage("foo", CONTENT).toString(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").toString(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': null }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").toString(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': null }");
         assertJSONEquals(new PubSubMessage().toString(),
-                         "{ 'id': '', 'content': null, 'metadata': null }");
+                         "{ 'id': '', 'content': '" + NULL + "', 'metadata': null }");
     }
 
     @Test
     public void testJSONConversion() {
-        String bar = "[98,97,114]";
         Metadata metadata = new Metadata(Signal.FAIL, 42.0);
-        assertJSONEquals(new PubSubMessage("foo", CONTENT, metadata).asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'FAIL', 'content': 42.0, 'created': " + metadata.getCreated() + " } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar", metadata).asJSON(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'FAIL', 'content': 42.0, 'created': " + metadata.getCreated() + " } }");
         metadata = new Metadata(Signal.COMPLETE, new ArrayList<>());
-        assertJSONEquals(new PubSubMessage("foo", CONTENT, metadata).asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': [], 'created': " + metadata.getCreated() + " } }");
-        PubSubMessage pubSubMessage = new PubSubMessage("foo", CONTENT, Signal.COMPLETE);
+        assertJSONEquals(new PubSubMessage("foo", "bar", metadata).asJSON(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'COMPLETE', 'content': [], 'created': " + metadata.getCreated() + " } }");
+        PubSubMessage pubSubMessage = new PubSubMessage("foo", "bar", Signal.COMPLETE);
         assertJSONEquals(pubSubMessage.asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'COMPLETE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
-        pubSubMessage = new PubSubMessage("foo", CONTENT, Signal.ACKNOWLEDGE);
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'COMPLETE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
+        pubSubMessage = new PubSubMessage("foo", "bar", Signal.ACKNOWLEDGE);
         assertJSONEquals(pubSubMessage.asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
-        assertJSONEquals(new PubSubMessage("foo", CONTENT).asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
-        assertJSONEquals(new PubSubMessage("foo", CONTENT).asJSON(),
-                         "{ 'id': 'foo', 'content': " + bar + ", 'metadata': null }");
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': { 'signal': 'ACKNOWLEDGE', 'content': null, 'created': " + pubSubMessage.getMetadata().getCreated() + " } }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").asJSON(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': null }");
+        assertJSONEquals(new PubSubMessage("foo", "bar").asJSON(),
+                         "{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': null }");
         assertJSONEquals(new PubSubMessage().asJSON(),
-                         "{ 'id': '', 'content': null, 'metadata': null }");
+                         "{ 'id': '', 'content': '" + NULL + "', 'metadata': null }");
     }
 
     @Test
     public void testRecreatingFromJSON() {
-        String bar = "[98,97,114]";
-        PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': " + bar + ", 'metadata': " +
+        PubSubMessage actual = PubSubMessage.fromJSON("{ 'id': 'foo', 'content': '" + BAR + "', 'metadata': " +
                                                       "{ 'signal': 'FAIL', 'content': { 'type': null } } }");
         PubSubMessage expected = new PubSubMessage("foo", "bar");
+
         Assert.assertEquals(actual, expected);
-        Assert.assertEquals(actual.getContent(), CONTENT);
-        Assert.assertEquals(actual.getContentAsString(), "bar");
+        Assert.assertEquals(actual.getContent(), "bar");
 
         Assert.assertTrue(actual.hasMetadata());
         Assert.assertTrue(actual.hasSignal());

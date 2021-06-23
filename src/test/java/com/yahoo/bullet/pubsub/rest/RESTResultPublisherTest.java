@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.pubsub.rest;
 
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import java.io.IOException;
+import java.util.Base64;
 
 import static com.yahoo.bullet.TestHelpers.assertJSONEquals;
 import static org.mockito.Mockito.doNothing;
@@ -22,14 +24,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class RESTResultPublisherTest {
-    private static final byte[] CONTENT = "bar".getBytes(PubSubMessage.CHARSET);
+    private static final String BAR = Base64.getEncoder().encodeToString(SerializerDeserializer.toBytes("bar"));
 
     @Test
     public void testSendPullsURLFromMessage() throws Exception {
         CloseableHttpClient mockClient = mock(CloseableHttpClient.class);
         RESTResultPublisher publisher = new RESTResultPublisher(mockClient, 5000);
         Metadata metadata = new RESTMetadata("my/custom/url");
-        PubSubMessage actual = publisher.send(new PubSubMessage("foo", CONTENT, metadata));
+        PubSubMessage actual = publisher.send(new PubSubMessage("foo", "bar", metadata));
 
         ArgumentCaptor<HttpPost> argumentCaptor = ArgumentCaptor.forClass(HttpPost.class);
         verify(mockClient).execute(argumentCaptor.capture());
@@ -40,7 +42,7 @@ public class RESTResultPublisherTest {
         String actualHeader = post.getHeaders(RESTPublisher.CONTENT_TYPE)[0].getValue();
 
         String expectedURI = "my/custom/url";
-        String expectedMessage = "{'id':'foo','content':[98,97,114],'metadata':{'url':'my/custom/url','signal':null,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
+        String expectedMessage = "{'id':'foo','content': '" + BAR + "','metadata':{'url':'my/custom/url','signal':null,'content':null,'created':" + actual.getMetadata().getCreated() + "}}";
         String expectedHeader = RESTPublisher.APPLICATION_JSON;
 
         assertJSONEquals(actualMessage, expectedMessage);

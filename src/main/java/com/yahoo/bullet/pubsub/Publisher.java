@@ -5,6 +5,8 @@
  */
 package com.yahoo.bullet.pubsub;
 
+import java.io.Serializable;
+
 public interface Publisher extends AutoCloseable {
     /**
      * Send a message with an ID and content.
@@ -14,7 +16,7 @@ public interface Publisher extends AutoCloseable {
      * @return The sent {@link PubSubMessage}.
      * @throws PubSubException if the messaging system throws an error.
      */
-    default PubSubMessage send(String id, byte[] content) throws PubSubException {
+    default PubSubMessage send(String id, Serializable content) throws PubSubException {
         return send(new PubSubMessage(id, content));
     }
 
