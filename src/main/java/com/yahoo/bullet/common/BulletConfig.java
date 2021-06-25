@@ -143,7 +143,7 @@ public class BulletConfig extends Config {
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
-    public static final String DEFAULT_PUBSUB_MESSAGE_SERDE_CLASS_NAME = "com.yahoo.bullet.pubsub.IdentityPubSubMessageSerDe";
+    public static final String DEFAULT_PUBSUB_MESSAGE_SERDE_CLASS_NAME = "com.yahoo.bullet.pubsub.ByteArrayPubSubMessageSerDe";
 
     public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider";
 
