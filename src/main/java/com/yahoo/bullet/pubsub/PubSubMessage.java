@@ -28,11 +28,11 @@ public class PubSubMessage implements Serializable, JSONFormatter {
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final long serialVersionUID = 5096747716667851530L;
 
-    private String id;
+    protected String id;
     // Serializable enforced through the constructors, getter and setter. Is Object so GSON can reify an instance.
-    private Object content;
+    protected Object content;
     @Setter
-    private Metadata metadata;
+    protected Metadata metadata;
 
     /**
      * Constructor for a message having no information. Used internally. Not recommended for use.
