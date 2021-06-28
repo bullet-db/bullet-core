@@ -187,7 +187,7 @@ public class Utilities {
      */
     public static Number extractFieldAsNumber(String field, BulletRecord record) {
         TypedObject value = record.typedGet(field);
-        if (value.isNull()) {
+        if (isNull(value)) {
             return null;
         }
         if (Type.isNumeric(value.getType())) {
@@ -198,6 +198,10 @@ public class Utilities {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static boolean isNull(TypedObject typedObject) {
+        return typedObject.isNull();// || typedObject.getValue() == null;
     }
 
     /**

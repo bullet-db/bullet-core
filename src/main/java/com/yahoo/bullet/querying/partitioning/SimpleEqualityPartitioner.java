@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying.partitioning;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.Query;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -186,7 +187,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
             TypedObject value = record.typedExtract(field);
-            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.getValue().toString()));
+            fieldValues.put(field, Utilities.isNull(value) ? NULL : makeKeyEntry(value.getValue().toString()));
         }
         return fieldValues;
     }
