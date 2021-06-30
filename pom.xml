@@ -50,7 +50,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.record.version>1.1.3</bullet.record.version>
+        <bullet.record.version>1.1.4</bullet.record.version>
         <sketches.version>0.9.1</sketches.version>
     </properties>
 
