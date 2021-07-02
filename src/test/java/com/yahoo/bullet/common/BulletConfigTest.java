@@ -177,28 +177,33 @@ public class BulletConfigTest {
     public void testPropertiesWithPrefix() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub";
-        String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
+        String pubSubClassValue = "com.yahoo.bullet.pubsub.MockPubSub";
+        String pubSubMessageSerDeClassValue = "com.yahoo.bullet.pubsub.ByteArrayPubSubMessageSerDe";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, false).size();
-        Assert.assertEquals(configSize, 4);
+        Assert.assertEquals(configSize, 5);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, false);
-        Assert.assertEquals(properties.get(BulletConfig.PUBSUB_CLASS_NAME), fieldValue);
+        Assert.assertEquals(properties.get(BulletConfig.PUBSUB_CLASS_NAME), pubSubClassValue);
+        Assert.assertEquals(properties.get(BulletConfig.PUBSUB_MESSAGE_SERDE_CLASS_NAME), pubSubMessageSerDeClassValue);
     }
 
     @Test
     public void testPropertiesStripPrefix() {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         String prefix = "bullet.pubsub.";
-        String fieldName = "class.name";
-        String fieldValue = "com.yahoo.bullet.pubsub.MockPubSub";
+        String pubsubClassKey = "class.name";
+        String pubSubClassValue = "com.yahoo.bullet.pubsub.MockPubSub";
+        String pubsubMessageSerDeClassKey = "message.serde.class.name";
+        String pubSubMessageSerDeClassValue = "com.yahoo.bullet.pubsub.ByteArrayPubSubMessageSerDe";
 
         int configSize = config.getAllWithPrefix(Optional.empty(), prefix, true).size();
-        Assert.assertEquals(configSize, 4);
+        Assert.assertEquals(configSize, 5);
 
         Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), prefix, true);
         Assert.assertNull(properties.get(BulletConfig.PUBSUB_CLASS_NAME));
-        Assert.assertEquals(properties.get(fieldName), fieldValue);
+        Assert.assertEquals(properties.get(pubsubClassKey), pubSubClassValue);
+        Assert.assertEquals(properties.get(pubsubMessageSerDeClassKey), pubSubMessageSerDeClassValue);
     }
 
     @Test

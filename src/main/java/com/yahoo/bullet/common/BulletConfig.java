@@ -63,6 +63,7 @@ public class BulletConfig extends Config {
 
     public static final String PUBSUB_CONTEXT_NAME = "bullet.pubsub.context.name";
     public static final String PUBSUB_CLASS_NAME = "bullet.pubsub.class.name";
+    public static final String PUBSUB_MESSAGE_SERDE_CLASS_NAME = "bullet.pubsub.message.serde.class.name";
 
     public static final String STORAGE_CLASS_NAME = "bullet.storage.class.name";
 
@@ -142,6 +143,7 @@ public class BulletConfig extends Config {
 
     public static final String DEFAULT_PUBSUB_CONTEXT_NAME = Context.QUERY_PROCESSING.name();
     public static final String DEFAULT_PUBSUB_CLASS_NAME = "com.yahoo.bullet.pubsub.MockPubSub";
+    public static final String DEFAULT_PUBSUB_MESSAGE_SERDE_CLASS_NAME = "com.yahoo.bullet.pubsub.ByteArrayPubSubMessageSerDe";
 
     public static final String DEFAULT_RECORD_PROVIDER_CLASS_NAME = "com.yahoo.bullet.record.avro.TypedAvroBulletRecordProvider";
 
@@ -277,6 +279,9 @@ public class BulletConfig extends Config {
                  .checkIf(Validator.isIn(Context.QUERY_PROCESSING.name(), Context.QUERY_SUBMISSION.name()));
         VALIDATOR.define(PUBSUB_CLASS_NAME)
                  .defaultTo(DEFAULT_PUBSUB_CLASS_NAME)
+                 .checkIf(Validator::isClassName);
+        VALIDATOR.define(PUBSUB_MESSAGE_SERDE_CLASS_NAME)
+                 .defaultTo(DEFAULT_PUBSUB_MESSAGE_SERDE_CLASS_NAME)
                  .checkIf(Validator::isClassName);
 
         VALIDATOR.define(RECORD_PROVIDER_CLASS_NAME)

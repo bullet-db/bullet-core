@@ -22,11 +22,11 @@ public class Metadata implements Serializable {
 
     private static final long serialVersionUID = 7478596915692253699L;
     @Getter @Setter
-    private Signal signal;
+    protected Signal signal;
     // Serializable enforced through the constructor, getter, and setter. Is Object so GSON can reify an instance.
-    private Object content;
+    protected Object content;
     @Getter @Setter
-    private long created;
+    protected long created;
 
     /**
      * Default constructor that creates an empty instance of metadata.
@@ -58,7 +58,7 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * Set a serializable content for this metadata.
+     * Set a {@link Serializable} content for this metadata.
      *
      * @param content The content for this metadata.
      */
