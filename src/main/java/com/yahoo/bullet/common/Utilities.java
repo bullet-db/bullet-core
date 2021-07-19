@@ -193,6 +193,9 @@ public class Utilities {
         if (Type.isNumeric(value.getType())) {
             return (Number) value.getValue();
         }
+        if (value.getType() == Type.BOOLEAN) {
+            return (Boolean) value.getValue() ? 1L : 0L;
+        }
         try {
             return (Number) value.forceCast(Type.DOUBLE).getValue();
         } catch (Exception e) {
@@ -201,7 +204,7 @@ public class Utilities {
     }
 
     public static boolean isNull(TypedObject typedObject) {
-        return typedObject.isNull();// || typedObject.getValue() == null;
+        return typedObject.isNull() || typedObject.getValue() == null;
     }
 
     /**
