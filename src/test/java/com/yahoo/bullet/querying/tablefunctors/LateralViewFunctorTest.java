@@ -50,21 +50,24 @@ public class LateralViewFunctorTest {
         List<BulletRecord> records = functor.apply(record, provider);
 
         Assert.assertEquals(records.size(), 3);
-        Assert.assertEquals(records.get(0).fieldCount(), 6);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getBaseRecord().fieldCount(), 4);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(0).typedGet("foo").getValue(), "a");
         Assert.assertEquals(records.get(0).typedGet("bar").getValue(), 0);
         Assert.assertTrue(records.get(0).hasField("listA"));
         Assert.assertTrue(records.get(0).hasField("listB"));
         Assert.assertTrue(records.get(0).hasField("mapA"));
         Assert.assertTrue(records.get(0).hasField("mapB"));
-        Assert.assertEquals(records.get(1).fieldCount(), 6);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(1)).getBaseRecord().fieldCount(), 4);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(1)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(1).typedGet("foo").getValue(), "b");
         Assert.assertEquals(records.get(1).typedGet("bar").getValue(), 1);
         Assert.assertTrue(records.get(1).hasField("listA"));
         Assert.assertTrue(records.get(1).hasField("listB"));
         Assert.assertTrue(records.get(1).hasField("mapA"));
         Assert.assertTrue(records.get(1).hasField("mapB"));
-        Assert.assertEquals(records.get(2).fieldCount(), 6);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(2)).getBaseRecord().fieldCount(), 4);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(2)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(2).typedGet("foo").getValue(), "c");
         Assert.assertEquals(records.get(2).typedGet("bar").getValue(), 2);
         Assert.assertTrue(records.get(2).hasField("listA"));
@@ -88,7 +91,8 @@ public class LateralViewFunctorTest {
         List<BulletRecord> records = functor.apply(record, provider);
 
         Assert.assertEquals(records.size(), 1);
-        Assert.assertEquals(records.get(0).fieldCount(), 4);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getBaseRecord().fieldCount(), 4);
+        Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getTopRecord().fieldCount(), 0);
         Assert.assertTrue(records.get(0).hasField("listA"));
         Assert.assertTrue(records.get(0).hasField("listB"));
         Assert.assertTrue(records.get(0).hasField("mapA"));
