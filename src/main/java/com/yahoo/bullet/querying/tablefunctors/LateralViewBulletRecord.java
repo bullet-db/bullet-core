@@ -19,8 +19,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This BulletRecord is only used for Lateral View and possible operations in the Querier. It is not meant to be a
- * fully-functional BulletRecord.
+ * This BulletRecord is only used for Lateral View and possible operations in the Querier thereafter. It is not intended
+ * to be a fully-functional BulletRecord and does not implement any methods that are not expected to be called.
+ *
+ * Note: The COPY projection calls copy() so that the incoming record is not clobbered by record changes. In the case of
+ * lateral view, the top record is generated from a table function and is therefore one-time use and can be modified
+ * however. As a result, the copy() method returns this.
+ *
+ * Furthermore, the COPY projection can have a CULLING post-aggregation as a result of renaming a field. If, for example,
+ * there was a field "A" in both the top and base records, renaming field "A" would expose the field "A" in the base record.
+ * To handle this, the record tracks which fields were "culled" and removes these from the raw data map when called.
  */
 @RequiredArgsConstructor
 @Getter(AccessLevel.PACKAGE)
@@ -51,12 +59,12 @@ class LateralViewBulletRecord extends BulletRecord {
 
     @Override
     public Serializable get(String field) {
-        return topRecord.hasField(field) ? topRecord.get(field) : baseRecord.get(field);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean hasField(String field) {
-        return topRecord.hasField(field) || baseRecord.hasField(field);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -89,7 +97,6 @@ class LateralViewBulletRecord extends BulletRecord {
 
     @Override
     public BulletRecord copy() {
-        // LateralViewBulletRecord does not need to be copied in the Querier Projection since the topRecord is one-use anyways.
         return this;
     }
 

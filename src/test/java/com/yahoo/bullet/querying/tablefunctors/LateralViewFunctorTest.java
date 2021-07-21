@@ -54,26 +54,26 @@ public class LateralViewFunctorTest {
         Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(0).typedGet("foo").getValue(), "a");
         Assert.assertEquals(records.get(0).typedGet("bar").getValue(), 0);
-        Assert.assertTrue(records.get(0).hasField("listA"));
-        Assert.assertTrue(records.get(0).hasField("listB"));
-        Assert.assertTrue(records.get(0).hasField("mapA"));
-        Assert.assertTrue(records.get(0).hasField("mapB"));
+        Assert.assertFalse(records.get(0).typedGet("listA").isNull());
+        Assert.assertFalse(records.get(0).typedGet("listB").isNull());
+        Assert.assertFalse(records.get(0).typedGet("mapA").isNull());
+        Assert.assertFalse(records.get(0).typedGet("mapB").isNull());
         Assert.assertEquals(((LateralViewBulletRecord) records.get(1)).getBaseRecord().fieldCount(), 4);
         Assert.assertEquals(((LateralViewBulletRecord) records.get(1)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(1).typedGet("foo").getValue(), "b");
         Assert.assertEquals(records.get(1).typedGet("bar").getValue(), 1);
-        Assert.assertTrue(records.get(1).hasField("listA"));
-        Assert.assertTrue(records.get(1).hasField("listB"));
-        Assert.assertTrue(records.get(1).hasField("mapA"));
-        Assert.assertTrue(records.get(1).hasField("mapB"));
+        Assert.assertFalse(records.get(1).typedGet("listA").isNull());
+        Assert.assertFalse(records.get(1).typedGet("listB").isNull());
+        Assert.assertFalse(records.get(1).typedGet("mapA").isNull());
+        Assert.assertFalse(records.get(1).typedGet("mapB").isNull());
         Assert.assertEquals(((LateralViewBulletRecord) records.get(2)).getBaseRecord().fieldCount(), 4);
         Assert.assertEquals(((LateralViewBulletRecord) records.get(2)).getTopRecord().fieldCount(), 2);
         Assert.assertEquals(records.get(2).typedGet("foo").getValue(), "c");
         Assert.assertEquals(records.get(2).typedGet("bar").getValue(), 2);
-        Assert.assertTrue(records.get(2).hasField("listA"));
-        Assert.assertTrue(records.get(2).hasField("listB"));
-        Assert.assertTrue(records.get(2).hasField("mapA"));
-        Assert.assertTrue(records.get(2).hasField("mapB"));
+        Assert.assertFalse(records.get(2).typedGet("listA").isNull());
+        Assert.assertFalse(records.get(2).typedGet("listB").isNull());
+        Assert.assertFalse(records.get(2).typedGet("mapA").isNull());
+        Assert.assertFalse(records.get(2).typedGet("mapB").isNull());
 
         lateralView = new LateralView(new Explode(new FieldExpression("mapB"), "foo", "bar", false));
         functor = new LateralViewFunctor(lateralView);
@@ -93,9 +93,9 @@ public class LateralViewFunctorTest {
         Assert.assertEquals(records.size(), 1);
         Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getBaseRecord().fieldCount(), 4);
         Assert.assertEquals(((LateralViewBulletRecord) records.get(0)).getTopRecord().fieldCount(), 0);
-        Assert.assertTrue(records.get(0).hasField("listA"));
-        Assert.assertTrue(records.get(0).hasField("listB"));
-        Assert.assertTrue(records.get(0).hasField("mapA"));
-        Assert.assertTrue(records.get(0).hasField("mapB"));
+        Assert.assertFalse(records.get(0).typedGet("listA").isNull());
+        Assert.assertFalse(records.get(0).typedGet("listB").isNull());
+        Assert.assertFalse(records.get(0).typedGet("mapA").isNull());
+        Assert.assertFalse(records.get(0).typedGet("mapB").isNull());
     }
 }
