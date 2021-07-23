@@ -187,7 +187,7 @@ public class Utilities {
      */
     public static Number extractFieldAsNumber(String field, BulletRecord record) {
         TypedObject value = record.typedGet(field);
-        if (value.isNull()) {
+        if (isNull(value)) {
             return null;
         }
         if (Type.isNumeric(value.getType())) {
@@ -198,6 +198,16 @@ public class Utilities {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Returns if the {@link TypedObject} has type {@link TypedObject#NULL} or value null.
+     *
+     * @param typedObject The typed object to check for null.
+     * @return true if the {@link TypedObject} has type {@link TypedObject#NULL} or value null and false otherwise.
+     */
+    public static boolean isNull(TypedObject typedObject) {
+        return typedObject.isNull() || typedObject.getValue() == null;
     }
 
     /**

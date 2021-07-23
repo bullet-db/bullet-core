@@ -19,6 +19,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.yahoo.bullet.common.Utilities.isNull;
+
 public class NAryOperations {
     @FunctionalInterface
     public interface NAryOperator extends Serializable {
@@ -41,7 +43,7 @@ public class NAryOperations {
         boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if (value.isNull()) {
+            if (isNull(value)) {
                 containsNull = true;
             } else if (!((Boolean) value.forceCast(Type.BOOLEAN).getValue())) {
                 return TypedObject.FALSE;
@@ -54,7 +56,7 @@ public class NAryOperations {
         boolean containsNull = false;
         for (Evaluator evaluator : evaluators) {
             TypedObject value = evaluator.evaluate(record);
-            if (value.isNull()) {
+            if (isNull(value)) {
                 containsNull = true;
             } else if ((Boolean) value.forceCast(Type.BOOLEAN).getValue()) {
                 return TypedObject.TRUE;
@@ -65,13 +67,13 @@ public class NAryOperations {
 
     static TypedObject ternary(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject condition = evaluators.get(0).evaluate(record);
-        return !condition.isNull() && (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) :
-                                                                       evaluators.get(2).evaluate(record);
+        return !isNull(condition) && (Boolean) condition.getValue() ? evaluators.get(1).evaluate(record) :
+                                                                      evaluators.get(2).evaluate(record);
     }
 
     static TypedObject between(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject valueArg = evaluators.get(0).evaluate(record);
-        if (valueArg.isNull()) {
+        if (isNull(valueArg)) {
             return TypedObject.NULL;
         }
         if (Type.isNumeric(valueArg.getType())) {
@@ -80,11 +82,11 @@ public class NAryOperations {
             TypedObject upperArg = evaluators.get(2).evaluate(record);
             Number lower = (Number) lowerArg.getValue();
             Number upper = (Number) upperArg.getValue();
-            if (lowerArg.isNull() && upperArg.isNull()) {
+            if (lower == null && upper == null) {
                 return TypedObject.NULL;
-            } else if (lowerArg.isNull()) {
+            } else if (lower == null) {
                 return upper.doubleValue() < value ? TypedObject.FALSE : TypedObject.NULL;
-            } else if (upperArg.isNull()) {
+            } else if (upper == null) {
                 return value < lower.doubleValue() ? TypedObject.FALSE : TypedObject.NULL;
             }
             return TypedObject.valueOf(lower.doubleValue() <= value && value <= upper.doubleValue());
@@ -94,11 +96,11 @@ public class NAryOperations {
             TypedObject upperArg = evaluators.get(2).evaluate(record);
             String lower = (String) lowerArg.getValue();
             String upper = (String) upperArg.getValue();
-            if (lowerArg.isNull() && upperArg.isNull()) {
+            if (lower == null && upper == null) {
                 return TypedObject.NULL;
-            } else if (lowerArg.isNull()) {
+            } else if (lower == null) {
                 return upper.compareTo(value) < 0 ? TypedObject.FALSE : TypedObject.NULL;
-            } else if (upperArg.isNull()) {
+            } else if (upper == null) {
                 return value.compareTo(lower) < 0 ? TypedObject.FALSE : TypedObject.NULL;
             }
             return TypedObject.valueOf(lower.compareTo(value) <= 0 && value.compareTo(upper) <= 0);
@@ -115,17 +117,17 @@ public class NAryOperations {
 
     static TypedObject substring(List<Evaluator> evaluators, BulletRecord record) {
         TypedObject stringArg = evaluators.get(0).evaluate(record);
-        if (stringArg.isNull()) {
+        if (isNull(stringArg)) {
             return TypedObject.NULL;
         }
         TypedObject startArg = evaluators.get(1).evaluate(record);
-        if (startArg.isNull()) {
+        if (isNull(startArg)) {
             return TypedObject.NULL;
         }
         TypedObject lengthArg = null;
         if (evaluators.size() > 2) {
             lengthArg = evaluators.get(2).evaluate(record);
-            if (lengthArg.isNull()) {
+            if (isNull(lengthArg)) {
                 return TypedObject.NULL;
             }
         }
@@ -157,18 +159,18 @@ public class NAryOperations {
     static TypedObject unixTimestamp(List<Evaluator> evaluators, BulletRecord record) {
         if (evaluators.size() == 1) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
-            if (dateArg.isNull()) {
+            if (isNull(dateArg)) {
                 return TypedObject.NULL;
             }
             Timestamp timestamp = Timestamp.valueOf((String) dateArg.getValue());
             return TypedObject.valueOf(timestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC));
         } else if (evaluators.size() == 2) {
             TypedObject dateArg = evaluators.get(0).evaluate(record);
-            if (dateArg.isNull()) {
+            if (isNull(dateArg)) {
                 return TypedObject.NULL;
             }
             TypedObject patternArg = evaluators.get(1).evaluate(record);
-            if (patternArg.isNull()) {
+            if (isNull(patternArg)) {
                 return TypedObject.NULL;
             }
             // First argument can be a number
