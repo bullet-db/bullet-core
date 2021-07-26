@@ -208,6 +208,16 @@ public class Utilities {
     }
 
     /**
+     * Returns if the {@link TypedObject} has type {@link TypedObject#NULL} or value null.
+     *
+     * @param typedObject The typed object to check for null.
+     * @return true if the {@link TypedObject} has type {@link TypedObject#NULL} or value null and false otherwise.
+     */
+    public static boolean isNull(TypedObject typedObject) {
+        return typedObject.isNull() || typedObject.getValue() == null;
+    }
+
+    /**
      * This method loads a given class name with the class name key and creates an instance of it by using a constructor
      * that has a single argument for a {@link BulletConfig}. It then passes in the provided config and returns the
      * constructed instance.

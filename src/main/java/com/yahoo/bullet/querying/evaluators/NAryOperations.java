@@ -82,11 +82,11 @@ public class NAryOperations {
             TypedObject upperArg = evaluators.get(2).evaluate(record);
             Number lower = (Number) lowerArg.getValue();
             Number upper = (Number) upperArg.getValue();
-            if (isNull(lowerArg) && isNull(upperArg)) {
+            if (lower == null && upper == null) {
                 return TypedObject.NULL;
-            } else if (isNull(lowerArg)) {
+            } else if (lower == null) {
                 return upper.doubleValue() < value ? TypedObject.FALSE : TypedObject.NULL;
-            } else if (isNull(upperArg)) {
+            } else if (upper == null) {
                 return value < lower.doubleValue() ? TypedObject.FALSE : TypedObject.NULL;
             }
             return TypedObject.valueOf(lower.doubleValue() <= value && value <= upper.doubleValue());
@@ -96,11 +96,11 @@ public class NAryOperations {
             TypedObject upperArg = evaluators.get(2).evaluate(record);
             String lower = (String) lowerArg.getValue();
             String upper = (String) upperArg.getValue();
-            if (isNull(lowerArg) && isNull(upperArg)) {
+            if (lower == null && upper == null) {
                 return TypedObject.NULL;
-            } else if (lowerArg.isNull()) {
+            } else if (lower == null) {
                 return upper.compareTo(value) < 0 ? TypedObject.FALSE : TypedObject.NULL;
-            } else if (upperArg.isNull()) {
+            } else if (upper == null) {
                 return value.compareTo(lower) < 0 ? TypedObject.FALSE : TypedObject.NULL;
             }
             return TypedObject.valueOf(lower.compareTo(value) <= 0 && value.compareTo(upper) <= 0);
