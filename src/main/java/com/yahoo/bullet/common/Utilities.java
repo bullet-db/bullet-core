@@ -203,10 +203,6 @@ public class Utilities {
         }
     }
 
-    public static boolean isNull(TypedObject typedObject) {
-        return typedObject.isNull() || typedObject.getValue() == null;
-    }
-
     /**
      * Returns if the {@link TypedObject} has type {@link TypedObject#NULL} or value null.
      *
