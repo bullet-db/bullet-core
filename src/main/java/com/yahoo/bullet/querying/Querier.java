@@ -597,7 +597,7 @@ public class Querier implements Monoidal {
      */
     public boolean shouldBuffer() {
         // Only buffer if the window is not time based (RawStrategy or if it's a record based window).
-        return runningQuery.getQuery().getWindow().isTimeBased();
+        return !runningQuery.getQuery().getWindow().isTimeBased();
     }
 
     /**
