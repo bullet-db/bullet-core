@@ -39,7 +39,7 @@ public class LateralViewFunctorTest {
         LateralView lateralView = new LateralView(new Explode(new FieldExpression("abc"), "foo", "bar", true));
         LateralViewFunctor functor = new LateralViewFunctor(lateralView);
 
-        Assert.assertTrue(functor.tableFunctor instanceof ExplodeFunctor);
+        Assert.assertTrue(functor.tableFunctors.get(0) instanceof ExplodeFunctor);
     }
 
     @Test
