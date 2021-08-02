@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.yahoo.bullet.common.Utilities.isNull;
+
 /**
  * Binary operations used by BinaryEvaluator.
  */
@@ -296,15 +298,15 @@ public class BinaryOperations {
 
     static TypedObject and(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
-        if (!leftValue.isNull() && !((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue())) {
+        if (!isNull(leftValue) && !((Boolean) leftValue.forceCast(Type.BOOLEAN).getValue())) {
             return TypedObject.FALSE;
         }
         TypedObject rightValue = right.evaluate(record);
-        if (rightValue.isNull()) {
+        if (isNull(rightValue)) {
             return TypedObject.NULL;
         } else if (!((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue())) {
             return TypedObject.FALSE;
-        } else if (leftValue.isNull()) {
+        } else if (isNull(leftValue)) {
             return TypedObject.NULL;
         } else {
             return TypedObject.TRUE;
@@ -313,15 +315,15 @@ public class BinaryOperations {
 
     static TypedObject or(Evaluator left, Evaluator right, BulletRecord record) {
         TypedObject leftValue = left.evaluate(record);
-        if (!leftValue.isNull() && (Boolean) leftValue.forceCast(Type.BOOLEAN).getValue()) {
+        if (!isNull(leftValue) && (Boolean) leftValue.forceCast(Type.BOOLEAN).getValue()) {
             return TypedObject.TRUE;
         }
         TypedObject rightValue = right.evaluate(record);
-        if (rightValue.isNull()) {
+        if (isNull(rightValue)) {
             return TypedObject.NULL;
         } else if ((Boolean) rightValue.forceCast(Type.BOOLEAN).getValue()) {
             return TypedObject.TRUE;
-        } else if (leftValue.isNull()) {
+        } else if (isNull(leftValue)) {
             return TypedObject.NULL;
         } else {
             return TypedObject.FALSE;
@@ -348,11 +350,11 @@ public class BinaryOperations {
 
     private static TypedObject checkNull(Evaluator left, Evaluator right, BulletRecord record, BiFunction<TypedObject, TypedObject, TypedObject> operator) {
         TypedObject leftValue = left.evaluate(record);
-        if (leftValue.isNull()) {
+        if (isNull(leftValue)) {
             return TypedObject.NULL;
         }
         TypedObject rightValue = right.evaluate(record);
-        if (rightValue.isNull()) {
+        if (isNull(rightValue)) {
             return TypedObject.NULL;
         }
         return operator.apply(leftValue, rightValue);

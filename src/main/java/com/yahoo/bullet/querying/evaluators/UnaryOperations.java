@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying.evaluators;
 
+import com.yahoo.bullet.common.Utilities;
 import com.yahoo.bullet.query.expressions.Operation;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.typesystem.Type;
@@ -46,11 +47,11 @@ public class UnaryOperations {
     }
 
     static TypedObject isNull(Evaluator evaluator, BulletRecord record) {
-        return TypedObject.valueOf(evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(Utilities.isNull(evaluator.evaluate(record)));
     }
 
     static TypedObject isNotNull(Evaluator evaluator, BulletRecord record) {
-        return TypedObject.valueOf(!evaluator.evaluate(record).isNull());
+        return TypedObject.valueOf(!Utilities.isNull(evaluator.evaluate(record)));
     }
 
     static TypedObject trim(Evaluator evaluator, BulletRecord record) {
@@ -92,7 +93,7 @@ public class UnaryOperations {
 
     private static TypedObject checkNull(Evaluator evaluator, BulletRecord record, Function<TypedObject, TypedObject> operator) {
         TypedObject value = evaluator.evaluate(record);
-        if (value.isNull()) {
+        if (Utilities.isNull(value)) {
             return TypedObject.NULL;
         }
         return operator.apply(value);

@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.yahoo.bullet.common.Utilities.isNull;
+
 /**
  * This partitioner uses a list of fields to partition. If fields A and B are used to partition, this partitioner
  * tries to make sure that queries with equality filters on A and/or B are partitioned appropriately and makes sure
@@ -186,7 +188,7 @@ public class SimpleEqualityPartitioner implements Partitioner {
         Map<String, String> fieldValues = new HashMap<>();
         for (String field : fields) {
             TypedObject value = record.typedExtract(field);
-            fieldValues.put(field, value.isNull() ? NULL : makeKeyEntry(value.getValue().toString()));
+            fieldValues.put(field, isNull(value) ? NULL : makeKeyEntry(value.getValue().toString()));
         }
         return fieldValues;
     }

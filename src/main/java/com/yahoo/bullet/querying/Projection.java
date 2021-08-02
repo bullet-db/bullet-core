@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.common.Utilities.isNull;
+
 /**
  * Projection consists of a mapping of names to evaluators built from the projection in the Bullet query.
  *
@@ -48,7 +50,7 @@ public class Projection {
         evaluators.forEach((name, evaluator) -> {
             try {
                 TypedObject value = evaluator.evaluate(record);
-                if (!value.isNull()) {
+                if (!isNull(value)) {
                     projected.typedSet(name, value);
                 }
             } catch (Exception ignored) {
@@ -68,7 +70,7 @@ public class Projection {
         evaluators.forEach((name, evaluator) -> {
             try {
                 TypedObject value = evaluator.evaluate(record);
-                if (!value.isNull()) {
+                if (!isNull(value)) {
                     map.put(name, value);
                 }
             } catch (Exception ignored) {
