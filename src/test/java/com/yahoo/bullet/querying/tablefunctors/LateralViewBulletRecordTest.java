@@ -26,12 +26,12 @@ public class LateralViewBulletRecordTest {
         Assert.assertEquals(map.size(), 1);
         Assert.assertEquals(map.get("abc"), "ghi");
 
-        // "abc" removed from the top record and also added to culled but still exists in base record
+        // "abc" removed from the top record and also added to culled
         record.remove("abc");
 
         Assert.assertEquals(record.getCulledFields().size(), 1);
         Assert.assertTrue(record.getCulledFields().contains("abc"));
-        Assert.assertEquals(record.typedGet("abc").getValue(), "def");
+        Assert.assertEquals(record.typedGet("abc"), TypedObject.NULL);
 
         map = record.getRawDataMap();
 
