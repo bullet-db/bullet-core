@@ -10,7 +10,6 @@ import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.record.BulletRecordProvider;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,20 +36,11 @@ public class LateralViewFunctor extends TableFunctor {
         if (tableFunctors.size() == 1) {
             return apply(record, provider, tableFunctors.get(0));
         }
-        //List<BulletRecord> records = Collections.singletonList(record);
-        //for (TableFunctor tableFunctor : tableFunctors) {
-        //    records = records.stream().flatMap(r -> apply(r, provider, tableFunctor).stream()).collect(Collectors.toList());
-        //}
-        //return records;
         Stream<BulletRecord> recordsStream = Stream.of(record);
         for (TableFunctor tableFunctor : tableFunctors) {
             recordsStream = recordsStream.flatMap(r -> apply(r, provider, tableFunctor).stream());
         }
         return recordsStream.collect(Collectors.toList());
-
-
-        //List<BulletRecord> records = tableFunctor.apply(record, provider);
-        //return records.stream().map(generated -> new LateralViewBulletRecord(record, generated)).collect(Collectors.toList());
     }
 
     private List<BulletRecord> apply(BulletRecord record, BulletRecordProvider provider, TableFunctor tableFunctor) {
