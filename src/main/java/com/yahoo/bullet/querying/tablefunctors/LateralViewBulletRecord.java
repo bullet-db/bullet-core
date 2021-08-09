@@ -19,16 +19,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This BulletRecord is only used for Lateral View and possible operations in the Querier thereafter. It is not intended
- * to be a fully-functional BulletRecord and does not implement any methods that are not expected to be called.
+ * This {@link BulletRecord} is only used for Lateral View and possible operations in the
+ * {@link com.yahoo.bullet.querying.Querier} thereafter. It is not intended to be a fully-functional {@link BulletRecord}
+ * and does not implement any methods that are not expected to be called.
  *
- * Note: The COPY projection calls copy() so that the incoming record is not clobbered by record changes. In the case of
- * lateral view, the top record is generated from a table function and is therefore one-time use and can be modified
- * however. As a result, the copy() method returns this.
+ * Note: The {@link com.yahoo.bullet.query.Projection.Type#COPY} projection calls {@link BulletRecord#copy()} so that
+ * the incoming record is not clobbered by record changes. In the case of lateral view, the top record is generated from
+ * a table function and is therefore one-time use and can be modified however. As a result, the
+ * {@link LateralViewBulletRecord#copy()} method returns this.
  *
- * Furthermore, the COPY projection can have a CULLING post-aggregation as a result of renaming a field. If, for example,
- * there was a field "A" in both the top and base records, renaming field "A" would expose the field "A" in the base record.
- * To handle this, the record tracks which fields were "culled" and removes these from the raw data map when called.
+ * Furthermore, the {@link com.yahoo.bullet.query.Projection.Type#COPY} projection can have a
+ * {@link com.yahoo.bullet.query.postaggregations.PostAggregationType#CULLING} post-aggregation as a result of renaming
+ * a field. If, for example, there was a field "A" in both the top and base records, renaming field "A" would expose the
+ * field "A" in the base record. To handle this, the record tracks which fields were "culled" and removes these from the
+ * raw data map when called.
  */
 @RequiredArgsConstructor
 @Getter(AccessLevel.PACKAGE)
@@ -85,6 +89,9 @@ class LateralViewBulletRecord extends BulletRecord {
 
     @Override
     public TypedObject typedGet(String field) {
+        if (culledFields.contains(field)) {
+            return TypedObject.NULL;
+        }
         return topRecord.hasField(field) ? topRecord.typedGet(field) : baseRecord.typedGet(field);
     }
 
