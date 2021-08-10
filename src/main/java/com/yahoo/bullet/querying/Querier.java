@@ -726,7 +726,6 @@ public class Querier implements Monoidal {
     }
 
     private String getSubMetaKey() {
-        return "Subquery";
-        //return metaKeys.getOrDefault(Concept.SUBQUERY_METADATA.getName(), null);
+        return metaKeys.getOrDefault(Concept.SUBQUERY_METADATA.getName(), null);
     }
 }
