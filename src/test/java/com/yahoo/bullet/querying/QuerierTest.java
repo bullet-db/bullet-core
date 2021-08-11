@@ -58,7 +58,6 @@ import java.util.stream.Stream;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.spy;
 

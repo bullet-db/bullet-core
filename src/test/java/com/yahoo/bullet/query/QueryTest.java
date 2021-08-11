@@ -55,7 +55,6 @@ public class QueryTest {
     public void testValidatePostQueryNoWindow() {
         Query postQuery = new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.RECORD), null);
         new Query(null, new Projection(), null, new Raw(null), null, postQuery, new Window(), null);
-
     }
 
     @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Post query cannot have a post query\\.")
