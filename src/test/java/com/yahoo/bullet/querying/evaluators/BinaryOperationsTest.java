@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.yahoo.bullet.querying.evaluators.EvaluatorUtils.fieldEvaluator;
 import static com.yahoo.bullet.querying.evaluators.EvaluatorUtils.listEvaluator;
@@ -389,6 +390,17 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.in(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
         Assert.assertEquals(BinaryOperations.in(valueEvaluator(123), fieldEvaluator("map"), record), TypedObject.TRUE);
         Assert.assertEquals(BinaryOperations.in(valueEvaluator(456), fieldEvaluator("map"), record), TypedObject.NULL);
+
+        // Mismatched numeric types
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(123), listEvaluator(456.0, 789.0), record), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(456), listEvaluator(456.0, 789.0), record), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(123.0f), listEvaluator(456L, 789L), record), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(456.0f), listEvaluator(456L, 789L), record), TypedObject.TRUE);
+
+        record = RecordBox.get().addListOfMaps("list", Collections.singletonMap("abc", 456), Collections.singletonMap("def", 789)).getRecord();
+
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(123.0), fieldEvaluator("list"), record), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.in(valueEvaluator(456.0), fieldEvaluator("list"), record), TypedObject.TRUE);
     }
 
     @Test
@@ -407,6 +419,17 @@ public class BinaryOperationsTest {
         Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(null), valueEvaluator(null), record), TypedObject.NULL);
         Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), fieldEvaluator("map"), record), TypedObject.FALSE);
         Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456), fieldEvaluator("map"), record), TypedObject.NULL);
+
+        // Mismatched numeric types
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123), listEvaluator(456.0, 789.0), record), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456), listEvaluator(456.0, 789.0), record), TypedObject.FALSE);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123.0f), listEvaluator(456L, 789L), record), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456.0f), listEvaluator(456L, 789L), record), TypedObject.FALSE);
+
+        record = RecordBox.get().addListOfMaps("list", Collections.singletonMap("abc", 456), Collections.singletonMap("def", 789)).getRecord();
+
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(123.0), fieldEvaluator("list"), record), TypedObject.TRUE);
+        Assert.assertEquals(BinaryOperations.notIn(valueEvaluator(456.0), fieldEvaluator("list"), record), TypedObject.FALSE);
     }
 
     @Test

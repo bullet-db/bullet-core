@@ -9,6 +9,8 @@ import com.yahoo.bullet.querying.tablefunctors.LateralViewFunctor;
 import com.yahoo.bullet.querying.tablefunctors.TableFunctor;
 import lombok.Getter;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,16 +20,25 @@ import java.util.Objects;
 public class LateralView extends TableFunction {
     private static final long serialVersionUID = -8238108616312386350L;
 
-    private final TableFunction tableFunction;
+    private final List<TableFunction> tableFunctions;
 
     /**
-     * Constructor that creates a LATERAL VIEW table function.
+     * Constructor that creates a LATERAL VIEW from a {@link List} of {@link TableFunction}.
      *
-     * @param tableFunction The non-null table function to take a lateral view of.
+     * @param tableFunctions The non-null list of table functions to chain lateral views.
+     */
+    public LateralView(List<TableFunction> tableFunctions) {
+        super(TableFunctionType.LATERAL_VIEW);
+        this.tableFunctions = Objects.requireNonNull(tableFunctions);
+    }
+
+    /**
+     * Constructor that creates a LATERAL VIEW from a {@link TableFunction}.
+     *
+     * @param tableFunction The non-null table function to apply a lateral view.
      */
     public LateralView(TableFunction tableFunction) {
-        super(TableFunctionType.LATERAL_VIEW);
-        this.tableFunction = Objects.requireNonNull(tableFunction);
+        this(Collections.singletonList(Objects.requireNonNull(tableFunction)));
     }
 
     @Override
@@ -37,6 +48,6 @@ public class LateralView extends TableFunction {
 
     @Override
     public String toString() {
-        return "{type: " + type + ", tableFunction: " + tableFunction + "}";
+        return "{type: " + type + ", tableFunctions: " + tableFunctions + "}";
     }
 }
