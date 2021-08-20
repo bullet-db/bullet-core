@@ -84,7 +84,8 @@ class LateralViewBulletRecord extends BulletRecord {
     @Override
     public BulletRecord remove(String field) {
         culledFields.add(field);
-        return topRecord.remove(field);
+        topRecord.remove(field);
+        return this;
     }
 
     @Override

@@ -17,7 +17,7 @@ public class LateralViewTest {
         LateralView tableFunction = new LateralView(explode);
 
         Assert.assertEquals(tableFunction.getType(), TableFunctionType.LATERAL_VIEW);
-        Assert.assertEquals(tableFunction.getTableFunction(), explode);
+        Assert.assertEquals(tableFunction.getTableFunctions().get(0), explode);
         Assert.assertTrue(tableFunction.getTableFunctor() instanceof LateralViewFunctor);
     }
 
@@ -25,6 +25,6 @@ public class LateralViewTest {
     public void testToString() {
         LateralView tableFunction = new LateralView(new Explode(new FieldExpression("abc"), "foo", null, true));
 
-        Assert.assertEquals(tableFunction.toString(), "{type: LATERAL_VIEW, tableFunction: {outer: true, type: EXPLODE, field: {field: abc, type: null}, keyAlias: foo, valueAlias: null}}");
+        Assert.assertEquals(tableFunction.toString(), "{type: LATERAL_VIEW, tableFunctions: [{outer: true, type: EXPLODE, field: {field: abc, type: null}, keyAlias: foo, valueAlias: null}]}");
     }
 }
