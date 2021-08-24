@@ -51,17 +51,17 @@ public class QueryTest {
         new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.TIME, Window.Unit.ALL, null), null);
     }
 
-    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Post query cannot have a window\\.")
-    public void testValidatePostQueryNoWindow() {
-        Query postQuery = new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.RECORD), null);
-        new Query(null, new Projection(), null, new Raw(null), null, postQuery, new Window(), null);
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Outer query cannot have a window\\.")
+    public void testValidateOuterQueryNoWindow() {
+        Query outerQuery = new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.RECORD), null);
+        new Query(null, new Projection(), null, new Raw(null), null, outerQuery, new Window(), null);
     }
 
-    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Post query cannot have a post query\\.")
-    public void testValidatePostQueryNoNestedPostQuery() {
-        Query nestedPostQuery = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
-        Query postQuery = new Query(null, new Projection(), null, new Raw(null), null, nestedPostQuery, new Window(), null);
-        new Query(null, new Projection(), null, new Raw(null), null, postQuery, new Window(), null);
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Outer query cannot have an outer query\\.")
+    public void testValidateOuterQueryNoNestedOuterQuery() {
+        Query nestedOuterQuery = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
+        Query outerQuery = new Query(null, new Projection(), null, new Raw(null), null, nestedOuterQuery, new Window(), null);
+        new Query(null, new Projection(), null, new Raw(null), null, outerQuery, new Window(), null);
     }
 
     @Test
@@ -167,6 +167,6 @@ public class QueryTest {
         Assert.assertEquals(query.toString(), "{tableFunction: null, projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
                                               "aggregation: {size: 1, type: RAW}, postAggregations: null, " +
                                               "window: {emitEvery: null, emitType: null, includeType: null, includeFirst: null}, " +
-                                              "duration: 30000, postQuery: null}");
+                                              "duration: 30000, outerQuery: null}");
     }
 }

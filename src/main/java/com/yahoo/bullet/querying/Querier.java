@@ -669,10 +669,10 @@ public class Querier implements Monoidal {
     }
 
     private Clip postQuery(Clip clip) {
-        if (runningQuery.getQuery().getPostQuery() == null) {
+        if (runningQuery.getQuery().getOuterQuery() == null) {
             return clip;
         }
-        Querier querier = new Querier(Mode.ALL, new RunningQuery(runningQuery.getId(), runningQuery.getQuery().getPostQuery(), new Metadata()), config);
+        Querier querier = new Querier(Mode.ALL, new RunningQuery(runningQuery.getId(), runningQuery.getQuery().getOuterQuery(), new Metadata()), config);
         for (BulletRecord record : clip.getRecords()) {
             // A bit inefficient since this is only needed for RAW aggregation queries
             if (querier.isClosed()) {

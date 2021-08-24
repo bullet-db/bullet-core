@@ -32,7 +32,7 @@ public class Query implements Configurable, Serializable {
     private final Expression filter;
     private final Aggregation aggregation;
     private final List<PostAggregation> postAggregations;
-    private final Query postQuery;
+    private final Query outerQuery;
     private Window window;
     private Long duration;
 
@@ -40,10 +40,10 @@ public class Query implements Configurable, Serializable {
                                                                                "Change your aggregation type or your window emit type to TIME.");
     private static final BulletException NO_RAW_ALL = new BulletException("RAW aggregation type cannot have window include type ALL.",
                                                                           "Change your aggregation type or your window include type.");
-    private static final BulletException NO_POST_QUERY_WINDOW = new BulletException("Post query cannot have a window.",
-                                                                                    "Remove the window.");
-    private static final BulletException NO_NESTED_POST_QUERY = new BulletException("Post query cannot have a post query.",
-                                                                                    "Remove the nested post query.");
+    private static final BulletException NO_OUTER_QUERY_WINDOW = new BulletException("Outer query cannot have a window.",
+                                                                                     "Remove the window.");
+    private static final BulletException NO_NESTED_OUTER_QUERY = new BulletException("Outer query cannot have an outer query.",
+                                                                                     "Remove the nested outer query.");
 
     /**
      * Constructor that creates the Bullet query.
@@ -53,22 +53,22 @@ public class Query implements Configurable, Serializable {
      * @param filter The filter expression records must pass before projection. Can be null.
      * @param aggregation The non-null aggregation that takes projected records.
      * @param postAggregations The list of post-aggregations that are executed on records before getting results. Can be null.
-     * @param postQuery The post-query that is executed on records before getting results. Can be null.
+     * @param outerQuery The outer query that is executed on records before getting results. Can be null.
      * @param window The non-null window that decides when and how results are returned.
      * @param duration The duration of the query. Can be null.
      */
-    public Query(TableFunction tableFunction, Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Query postQuery, Window window, Long duration) {
+    public Query(TableFunction tableFunction, Projection projection, Expression filter, Aggregation aggregation, List<PostAggregation> postAggregations, Query outerQuery, Window window, Long duration) {
         this.tableFunction = tableFunction;
         this.projection = Objects.requireNonNull(projection);
         this.filter = filter;
         this.aggregation = Objects.requireNonNull(aggregation);
         this.postAggregations = postAggregations;
-        this.postQuery = postQuery;
+        this.outerQuery = outerQuery;
         this.window = Objects.requireNonNull(window);
         this.duration = duration;
         // Required since there are window types that are not yet supported.
         validateWindow();
-        validatePostQuery();
+        validateOuterQuery();
     }
 
     /**
@@ -111,15 +111,15 @@ public class Query implements Configurable, Serializable {
         }
     }
 
-    private void validatePostQuery() {
-        if (postQuery == null) {
+    private void validateOuterQuery() {
+        if (outerQuery == null) {
             return;
         }
-        if (postQuery.getWindow().getType() != null) {
-            throw NO_POST_QUERY_WINDOW;
+        if (outerQuery.getWindow().getType() != null) {
+            throw NO_OUTER_QUERY_WINDOW;
         }
-        if (postQuery.getPostQuery() != null) {
-            throw NO_NESTED_POST_QUERY;
+        if (outerQuery.getOuterQuery() != null) {
+            throw NO_NESTED_OUTER_QUERY;
         }
     }
 
@@ -140,14 +140,14 @@ public class Query implements Configurable, Serializable {
         // Null or negative, then default, else min of duration and max.
         duration = (duration == null || duration <= 0) ? durationDefault : Math.min(duration, durationMax);
 
-        if (postQuery != null) {
-            postQuery.configure(config);
+        if (outerQuery != null) {
+            outerQuery.configure(config);
         }
     }
 
     @Override
     public String toString() {
         return "{tableFunction: " + tableFunction + ", projection: " + projection + ", filter: " + filter + ", aggregation: " + aggregation +
-                ", postAggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + ", postQuery: " + postQuery + "}";
+               ", postAggregations: " + postAggregations + ", window: " + window + ", duration: " + duration + ", outerQuery: " + outerQuery + "}";
     }
 }
