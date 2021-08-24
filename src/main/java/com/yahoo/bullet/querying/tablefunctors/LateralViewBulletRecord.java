@@ -6,6 +6,7 @@
 package com.yahoo.bullet.querying.tablefunctors;
 
 import com.yahoo.bullet.record.BulletRecord;
+import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -94,6 +95,14 @@ class LateralViewBulletRecord extends BulletRecord {
             return TypedObject.NULL;
         }
         return topRecord.hasField(field) ? topRecord.typedGet(field) : baseRecord.typedGet(field);
+    }
+
+    @Override
+    public TypedObject typedGet(String field, Type hint) {
+        if (culledFields.contains(field)) {
+            return TypedObject.NULL;
+        }
+        return topRecord.hasField(field) ? topRecord.typedGet(field, hint) : baseRecord.typedGet(field, hint);
     }
 
     @Override
