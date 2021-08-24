@@ -896,11 +896,11 @@ public class QuerierTest {
     }
 
     @Test
-    public void testPostQuery() {
-        Expression postFilter = new BinaryExpression(new FieldExpression("count"), new ValueExpression(1), Operation.GREATER_THAN);
-        Query postQuery = new Query(new Projection(), postFilter, new Raw(3), null, new Window(), null);
+    public void testOuterQuery() {
+        Expression outerQueryFilter = new BinaryExpression(new FieldExpression("count"), new ValueExpression(1), Operation.GREATER_THAN);
+        Query outerQuery = new Query(new Projection(), outerQueryFilter, new Raw(3), null, new Window(), null);
         GroupBy groupBy = new GroupBy(null, singletonMap("color", "color"), singleton(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count")));
-        Query query = new Query(null, new Projection(), null, groupBy, null, postQuery, new Window(), null);
+        Query query = new Query(null, new Projection(), null, groupBy, null, outerQuery, new Window(), null);
 
         Querier querier = make(Querier.Mode.ALL, query);
 

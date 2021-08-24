@@ -462,7 +462,7 @@ public class Querier implements Monoidal {
             Clip result = new Clip();
             result.add(window.getRecords());
             result = postAggregate(result);
-            result = postQuery(result);
+            result = outerQuery(result);
             return result.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -500,7 +500,7 @@ public class Querier implements Monoidal {
             incrementRate();
             result = window.getResult();
             result = postAggregate(result);
-            result = postQuery(result);
+            result = outerQuery(result);
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -668,7 +668,7 @@ public class Querier implements Monoidal {
         return clip;
     }
 
-    private Clip postQuery(Clip clip) {
+    private Clip outerQuery(Clip clip) {
         if (runningQuery.getQuery().getOuterQuery() == null) {
             return clip;
         }
