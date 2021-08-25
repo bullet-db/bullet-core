@@ -15,6 +15,7 @@ import com.yahoo.bullet.query.WindowUtils;
 import com.yahoo.bullet.query.aggregations.AggregationType;
 import com.yahoo.bullet.query.aggregations.CountDistinct;
 import com.yahoo.bullet.query.aggregations.GroupAll;
+import com.yahoo.bullet.query.aggregations.GroupBy;
 import com.yahoo.bullet.query.aggregations.Raw;
 import com.yahoo.bullet.query.expressions.BinaryExpression;
 import com.yahoo.bullet.query.expressions.Expression;
@@ -56,6 +57,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.yahoo.bullet.TestHelpers.getListBytes;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.spy;
 
 public class QuerierTest {
@@ -167,7 +170,7 @@ public class QuerierTest {
     }
 
     private static RunningQuery makeCountQueryWithAllWindow(BulletConfig config, int emitInterval) {
-        GroupAll groupAll = new GroupAll(Collections.singleton(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "COUNT")));
+        GroupAll groupAll = new GroupAll(singleton(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "COUNT")));
         Window window = WindowUtils.makeWindow(Window.Unit.TIME, emitInterval, Window.Unit.ALL, null);
 
         Query query = new Query(new Projection(), null, groupAll, null, window, null);
@@ -830,7 +833,7 @@ public class QuerierTest {
         Expression filter = new UnaryExpression(new FieldExpression("a"), Operation.IS_NOT_NULL);
         Expression expression = new BinaryExpression(new FieldExpression("a"), new ValueExpression(2L), Operation.ADD);
         Computation computation = new Computation(Collections.singletonList(new Field("newName", expression)));
-        Culling culling = new Culling(Collections.singleton("a"));
+        Culling culling = new Culling(singleton("a"));
         Query query = new Query(projection, filter, new Raw(500), Arrays.asList(computation, culling), new Window(), null);
 
         Querier querier = make(Querier.Mode.ALL, query);
@@ -890,5 +893,47 @@ public class QuerierTest {
         Assert.assertEquals(result.get(2).typedGet("abc").getValue(), 1);
         Assert.assertEquals(result.get(3).fieldCount(), 1);
         Assert.assertEquals(result.get(3).typedGet("abc").getValue(), 3);
+    }
+
+    @Test
+    public void testOuterQuery() {
+        Expression outerQueryFilter = new BinaryExpression(new FieldExpression("count"), new ValueExpression(1), Operation.GREATER_THAN);
+        Query outerQuery = new Query(new Projection(), outerQueryFilter, new Raw(3), null, new Window(), null);
+        GroupBy groupBy = new GroupBy(null, singletonMap("color", "color"), singleton(new GroupOperation(GroupOperation.GroupOperationType.COUNT, null, "count")));
+        Query query = new Query(null, new Projection(), null, groupBy, null, outerQuery, new Window(), null);
+
+        Querier querier = make(Querier.Mode.ALL, query);
+
+        BulletRecord red = RecordBox.get().add("color", "red").getRecord();
+        BulletRecord orange = RecordBox.get().add("color", "orange").getRecord();
+        BulletRecord yellow = RecordBox.get().add("color", "yellow").getRecord();
+        BulletRecord green = RecordBox.get().add("color", "green").getRecord();
+        BulletRecord blue = RecordBox.get().add("color", "blue").getRecord();
+        BulletRecord indigo = RecordBox.get().add("color", "indigo").getRecord();
+        BulletRecord violet = RecordBox.get().add("color", "violet").getRecord();
+
+        querier.consume(red);
+        querier.consume(orange);
+        querier.consume(yellow);
+        querier.consume(green);
+        querier.consume(blue);
+        querier.consume(indigo);
+        querier.consume(violet);
+        querier.consume(yellow);
+        querier.consume(green);
+        querier.consume(blue);
+        querier.consume(indigo);
+        querier.consume(violet);
+
+        Clip result = querier.getResult();
+        List<BulletRecord> records = result.getRecords();
+        Assert.assertEquals(records.size(), 3);
+        Assert.assertFalse(records.stream().anyMatch(record -> record.typedGet("color").getValue().equals("red") ||
+                                                               record.typedGet("color").getValue().equals("orange")));
+        Assert.assertTrue(records.stream().allMatch(record -> record.typedGet("count").getValue().equals(2L)));
+
+        Map<String, Object> metadata = result.getMeta().asMap();
+
+        Assert.assertTrue(metadata.containsKey("Subquery"));
     }
 }

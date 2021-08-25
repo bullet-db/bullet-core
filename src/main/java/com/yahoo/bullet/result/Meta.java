@@ -31,6 +31,7 @@ public class Meta {
         QUERY_ID("Query ID"),
         QUERY_OBJECT("Query Object"),
         QUERY_STRING("Query String"),
+        SUBQUERY_METADATA("Subquery Metadata"),
 
         // Sketching metadata
         SKETCH_METADATA("Sketch Metadata"),

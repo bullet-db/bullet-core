@@ -51,6 +51,19 @@ public class QueryTest {
         new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.TIME, Window.Unit.ALL, null), null);
     }
 
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Outer query cannot have a window\\.")
+    public void testValidateOuterQueryNoWindow() {
+        Query outerQuery = new Query(new Projection(), null, new Raw(null), null, new Window(1, Window.Unit.RECORD), null);
+        new Query(null, new Projection(), null, new Raw(null), null, outerQuery, new Window(), null);
+    }
+
+    @Test(expectedExceptions = BulletException.class, expectedExceptionsMessageRegExp = "Outer query cannot have an outer query\\.")
+    public void testValidateOuterQueryNoNestedOuterQuery() {
+        Query nestedOuterQuery = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
+        Query outerQuery = new Query(null, new Projection(), null, new Raw(null), null, nestedOuterQuery, new Window(), null);
+        new Query(null, new Projection(), null, new Raw(null), null, outerQuery, new Window(), null);
+    }
+
     @Test
     public void testDuration() {
         BulletConfig config = new BulletConfig();
@@ -151,9 +164,9 @@ public class QueryTest {
         config.set(BulletConfig.QUERY_DEFAULT_DURATION, 30000L);
         Query query = new Query(new Projection(), null, new Raw(null), null, new Window(), null);
         query.configure(config.validate());
-        Assert.assertEquals(query.toString(), "{projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
+        Assert.assertEquals(query.toString(), "{tableFunction: null, projection: {fields: null, type: PASS_THROUGH}, filter: null, " +
                                               "aggregation: {size: 1, type: RAW}, postAggregations: null, " +
                                               "window: {emitEvery: null, emitType: null, includeType: null, includeFirst: null}, " +
-                                              "duration: 30000}");
+                                              "duration: 30000, outerQuery: null}");
     }
 }
