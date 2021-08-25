@@ -166,6 +166,8 @@ bullet.result.metadata.metrics:
       key: "Receive Time"
     - name: "Query Finish Time"
       key: "Finish Time"
+    - name: "Subquery Metadata"
+      key: "Subquery"
     - name: "Sketch Metadata"
       key: "Sketch"
     - name: "Sketch Estimated Result"

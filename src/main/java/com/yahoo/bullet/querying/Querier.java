@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.querying;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.query.expressions.Expression;
 import com.yahoo.bullet.query.tablefunctions.TableFunction;
 import com.yahoo.bullet.querying.aggregations.Strategy;
@@ -12,7 +13,6 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.BulletError;
 import com.yahoo.bullet.common.Monoidal;
 import com.yahoo.bullet.query.Query;
-import com.yahoo.bullet.query.Window;
 import com.yahoo.bullet.querying.postaggregations.PostStrategy;
 import com.yahoo.bullet.query.postaggregations.PostAggregation;
 import com.yahoo.bullet.querying.tablefunctors.TableFunctor;
@@ -412,11 +412,7 @@ public class Querier implements Monoidal {
         if (isDone()) {
             return;
         }
-        if (tableFunctor == null) {
-            consumeRecord(record);
-        } else {
-            tableFunctor.apply(record, provider).forEach(this::consumeRecord);
-        }
+        consumeRecord(record);
     }
 
     /**
@@ -466,6 +462,7 @@ public class Querier implements Monoidal {
             Clip result = new Clip();
             result.add(window.getRecords());
             result = postAggregate(result);
+            result = outerQuery(result);
             return result.getRecords();
         } catch (RuntimeException e) {
             log.error("Unable to get serialized result for query {}", this);
@@ -503,6 +500,7 @@ public class Querier implements Monoidal {
             incrementRate();
             result = window.getResult();
             result = postAggregate(result);
+            result = outerQuery(result);
             result.add(getResultMetadata());
         } catch (RuntimeException e) {
             log.error("Unable to get serialized data for query {}", this);
@@ -598,10 +596,8 @@ public class Querier implements Monoidal {
      * @return A boolean that is true if the query results should be buffered in the Join phase.
      */
     public boolean shouldBuffer() {
-        Window window = runningQuery.getQuery().getWindow();
-        boolean noWindow = window == null;
-        // Only buffer if there is no window (including RawStrategy) or if it's a record based window.
-        return noWindow || !window.isTimeBased();
+        // Only buffer if the window is not time based (RawStrategy or if it's a record based window).
+        return !runningQuery.getQuery().getWindow().isTimeBased();
     }
 
     /**
@@ -623,6 +619,14 @@ public class Querier implements Monoidal {
     // ********************************* Private helpers *********************************
 
     private void consumeRecord(BulletRecord record) {
+        if (tableFunctor == null) {
+            process(record);
+        } else {
+            tableFunctor.apply(record, provider).forEach(this::process);
+        }
+    }
+
+    private void process(BulletRecord record) {
         // Ignore if record doesn't match filters
         if (!filter(record)) {
             return;
@@ -664,6 +668,23 @@ public class Querier implements Monoidal {
         return clip;
     }
 
+    private Clip outerQuery(Clip clip) {
+        if (runningQuery.getQuery().getOuterQuery() == null) {
+            return clip;
+        }
+        Querier querier = new Querier(Mode.ALL, new RunningQuery(runningQuery.getId(), runningQuery.getQuery().getOuterQuery(), new Metadata()), config);
+        for (BulletRecord record : clip.getRecords()) {
+            // A bit inefficient since this is only needed for RAW aggregation queries
+            if (querier.isClosed()) {
+                break;
+            }
+            querier.consumeRecord(record);
+        }
+        Clip result = querier.getResult();
+        result.getMeta().add(getSubMetaKey(), clip.getMeta().asMap());
+        return result;
+    }
+
     private Meta getResultMetadata() {
         String metaKey = getMetaKey();
         if (metaKey == null) {
@@ -701,6 +722,10 @@ public class Querier implements Monoidal {
     }
 
     private String getMetaKey() {
-        return metaKeys.getOrDefault(Meta.Concept.QUERY_METADATA.getName(), null);
+        return metaKeys.getOrDefault(Concept.QUERY_METADATA.getName(), null);
+    }
+
+    private String getSubMetaKey() {
+        return metaKeys.getOrDefault(Concept.SUBQUERY_METADATA.getName(), null);
     }
 }

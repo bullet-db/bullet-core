@@ -20,8 +20,7 @@ public class RunningQuery {
     private final long startTime;
 
     /**
-     * Constructor that takes an id, query, query string, and start time. If the start time is missing, uses the
-     * current system time.
+     * Constructor that takes an id, query, and metadata that contains the query string and start time.
      *
      * @param id The query id.
      * @param query The query object.
