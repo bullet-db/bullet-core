@@ -681,7 +681,7 @@ public class Querier implements Monoidal {
             querier.consumeRecord(record);
         }
         Clip result = querier.getResult();
-        result.getMeta().add(getSubMetaKey(), clip.getMeta().asMap());
+        result.getMeta().add(getInnerQueryMetaKey(), clip.getMeta().asMap());
         return result;
     }
 
@@ -725,7 +725,7 @@ public class Querier implements Monoidal {
         return metaKeys.getOrDefault(Concept.QUERY_METADATA.getName(), null);
     }
 
-    private String getSubMetaKey() {
-        return metaKeys.getOrDefault(Concept.SUBQUERY_METADATA.getName(), null);
+    private String getInnerQueryMetaKey() {
+        return metaKeys.getOrDefault(Concept.INNER_QUERY_METADATA.getName(), null);
     }
 }

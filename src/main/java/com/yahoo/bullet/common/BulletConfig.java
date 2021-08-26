@@ -112,7 +112,7 @@ public class BulletConfig extends Config {
         makeMetadata(ImmutablePair.of(Concept.QUERY_METADATA, "Query"),
                      ImmutablePair.of(Concept.QUERY_ID, "ID"),
                      ImmutablePair.of(Concept.QUERY_STRING, "Query String"),
-                     ImmutablePair.of(Concept.SUBQUERY_METADATA, "Subquery"),
+                     ImmutablePair.of(Concept.INNER_QUERY_METADATA, "Inner Query"),
                      ImmutablePair.of(Concept.QUERY_RECEIVE_TIME, "Receive Time"),
                      ImmutablePair.of(Concept.QUERY_FINISH_TIME, "Finish Time"),
                      ImmutablePair.of(Concept.SKETCH_METADATA, "Sketch"),
