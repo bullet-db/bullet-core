@@ -934,6 +934,6 @@ public class QuerierTest {
 
         Map<String, Object> metadata = result.getMeta().asMap();
 
-        Assert.assertTrue(metadata.containsKey("Subquery"));
+        Assert.assertTrue(metadata.containsKey("Inner Query"));
     }
 }
