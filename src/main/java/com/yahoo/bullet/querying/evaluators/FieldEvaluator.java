@@ -46,7 +46,7 @@ public class FieldEvaluator extends Evaluator {
         final String field = fieldExpression.getField();
         final Serializable key = fieldExpression.getKey();
         final Serializable subKey = fieldExpression.getSubKey();
-        final Type fieldType = fieldExpression.getType();
+        final Type fieldType = fieldExpression.getType() != null ? fieldExpression.getType() : Type.UNKNOWN;
 
         if (key instanceof String) {
             if (subKey instanceof String) {
@@ -131,16 +131,10 @@ public class FieldEvaluator extends Evaluator {
     }
 
     private static Type getSuperType(Set<Type> types, Type type) {
-        if (type == null || type == Type.UNKNOWN) {
-            return Type.UNKNOWN;
-        }
         return types.stream().filter(t -> t.getSubType() == type).findFirst().orElse(Type.UNKNOWN);
     }
 
     private static Type getSuperSuperType(Set<Type> types, Type type) {
-        if (type == null || type == Type.UNKNOWN) {
-            return Type.UNKNOWN;
-        }
         return types.stream().filter(t -> t.getSubType().getSubType() == type).findFirst().orElse(Type.UNKNOWN);
     }
 }
