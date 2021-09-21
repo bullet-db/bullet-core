@@ -14,6 +14,7 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -36,6 +37,7 @@ public class UnaryOperations {
         UNARY_OPERATORS.put(Operation.ABS, UnaryOperations::abs);
         UNARY_OPERATORS.put(Operation.LOWER, UnaryOperations::lower);
         UNARY_OPERATORS.put(Operation.UPPER, UnaryOperations::upper);
+        UNARY_OPERATORS.put(Operation.HASH, UnaryOperations::hash);
     }
 
     static TypedObject not(Evaluator evaluator, BulletRecord record) {
@@ -61,20 +63,6 @@ public class UnaryOperations {
         });
     }
 
-    static TypedObject lower(Evaluator evaluator, BulletRecord record) {
-        return checkNull(evaluator, record, value -> {
-            String str = (String) value.getValue();
-            return TypedObject.valueOf(str.toLowerCase());
-        });
-    }
-
-    static TypedObject upper(Evaluator evaluator, BulletRecord record) {
-        return checkNull(evaluator, record, value -> {
-            String str = (String) value.getValue();
-            return TypedObject.valueOf(str.toUpperCase());
-        });
-    }
-
     static TypedObject abs(Evaluator evaluator, BulletRecord record) {
         return checkNull(evaluator, record, value -> {
             Number number = (Number) value.getValue();
@@ -89,6 +77,24 @@ public class UnaryOperations {
                     return TypedObject.valueOf(Math.abs(number.intValue()));
             }
         });
+    }
+
+    static TypedObject lower(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            String str = (String) value.getValue();
+            return TypedObject.valueOf(str.toLowerCase());
+        });
+    }
+
+    static TypedObject upper(Evaluator evaluator, BulletRecord record) {
+        return checkNull(evaluator, record, value -> {
+            String str = (String) value.getValue();
+            return TypedObject.valueOf(str.toUpperCase());
+        });
+    }
+
+    static TypedObject hash(Evaluator evaluator, BulletRecord record) {
+        return TypedObject.valueOf(Objects.hashCode(evaluator.evaluate(record).getValue()));
     }
 
     private static TypedObject checkNull(Evaluator evaluator, BulletRecord record, Function<TypedObject, TypedObject> operator) {
