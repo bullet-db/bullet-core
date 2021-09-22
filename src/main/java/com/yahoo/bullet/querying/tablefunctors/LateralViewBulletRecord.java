@@ -90,14 +90,6 @@ class LateralViewBulletRecord extends BulletRecord {
     }
 
     @Override
-    public TypedObject typedGet(String field) {
-        if (culledFields.contains(field)) {
-            return TypedObject.NULL;
-        }
-        return topRecord.hasField(field) ? topRecord.typedGet(field) : baseRecord.typedGet(field);
-    }
-
-    @Override
     public TypedObject typedGet(String field, Type hint) {
         if (culledFields.contains(field)) {
             return TypedObject.NULL;
