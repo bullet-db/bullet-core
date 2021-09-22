@@ -367,4 +367,27 @@ public class FrequentItemsSketchingStrategyTest {
         Assert.assertEquals(topK.getRecords(), records);
         Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
     }
+
+    @Test
+    public void testEmptyValues() {
+        FrequentItemsSketchingStrategy topK = makeTopK(asList("A", "B"), 64, 20);
+
+        topK.consume(RecordBox.get().add("A", String.valueOf("")).add("B", String.valueOf("_")).getRecord());
+        topK.consume(RecordBox.get().add("A", String.valueOf("_")).add("B", String.valueOf("")).getRecord());
+        topK.consume(RecordBox.get().add("A", String.valueOf("")).add("B", String.valueOf("")).getRecord());
+
+        Clip result = topK.getResult();
+
+        List<BulletRecord> records = result.getRecords();
+        Assert.assertEquals(records.size(), 3);
+        for (BulletRecord actual : records) {
+            Assert.assertEquals(actual.fieldCount(), 3);
+            Assert.assertNotNull(actual.typedGet("A").getValue());
+            Assert.assertNotNull(actual.typedGet("B").getValue());
+            Assert.assertEquals(actual.typedGet(COUNT_NAME).getValue(), 1L);
+        }
+
+        Assert.assertEquals(topK.getRecords(), records);
+        Assert.assertEquals(topK.getMetadata().asMap(), result.getMeta().asMap());
+    }
 }

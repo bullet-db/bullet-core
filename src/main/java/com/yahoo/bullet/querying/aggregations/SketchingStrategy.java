@@ -12,11 +12,10 @@ import com.yahoo.bullet.record.BulletRecord;
 import com.yahoo.bullet.result.Clip;
 import com.yahoo.bullet.result.Meta;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -111,7 +110,19 @@ public abstract class SketchingStrategy<S extends Sketch> implements Strategy {
      * @return A {@link List} of the fields that this field was made of.
      */
     List<String> decomposeField(String field) {
-        return Arrays.asList(field.split(Pattern.quote(separator)));
+        List<String> fields = new ArrayList<>();
+        int index = 0;
+        while (true) {
+            int nextIndex = field.indexOf(separator, index);
+            if (nextIndex >= 0) {
+                fields.add(field.substring(index, nextIndex));
+                index = nextIndex + separator.length();
+            } else {
+                fields.add(field.substring(index));
+                break;
+            }
+        }
+        return fields;
     }
 
     private String getMetaKey() {
