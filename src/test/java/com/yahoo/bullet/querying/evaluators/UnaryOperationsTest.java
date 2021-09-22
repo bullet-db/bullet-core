@@ -10,6 +10,8 @@ import com.yahoo.bullet.typesystem.TypedObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Objects;
+
 import static com.yahoo.bullet.querying.evaluators.EvaluatorUtils.listEvaluator;
 import static com.yahoo.bullet.querying.evaluators.EvaluatorUtils.valueEvaluator;
 
@@ -82,5 +84,11 @@ public class UnaryOperationsTest {
         Assert.assertEquals(UnaryOperations.upper(valueEvaluator("HELLO"), null), TypedObject.valueOf("HELLO"));
         Assert.assertEquals(UnaryOperations.upper(valueEvaluator("hello"), null), TypedObject.valueOf("HELLO"));
         Assert.assertEquals(UnaryOperations.upper(valueEvaluator(null), null), TypedObject.NULL);
+    }
+
+    @Test
+    public void testHash() {
+        Assert.assertEquals(UnaryOperations.hash(valueEvaluator(null), null), TypedObject.valueOf(Objects.hashCode(null)));
+        Assert.assertEquals(UnaryOperations.hash(valueEvaluator("hello"), null), TypedObject.valueOf(Objects.hashCode("hello")));
     }
 }
