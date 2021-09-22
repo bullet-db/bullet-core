@@ -12,6 +12,7 @@ import com.yahoo.bullet.typesystem.Type;
 import com.yahoo.bullet.typesystem.TypedObject;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * An evaluator that extracts a given field from a {@link BulletRecord}. This is the only evaluator that directly takes a
@@ -45,10 +46,11 @@ public class FieldEvaluator extends Evaluator {
         final String field = fieldExpression.getField();
         final Serializable key = fieldExpression.getKey();
         final Serializable subKey = fieldExpression.getSubKey();
+        final Type fieldType = fieldExpression.getType() != null ? fieldExpression.getType() : Type.UNKNOWN;
 
         if (key instanceof String) {
             if (subKey instanceof String) {
-                return record -> record.typedGet(field, (String) key, (String) subKey);
+                return record -> record.typedGet(field, (String) key, (String) subKey, getSuperSuperType(Type.COMPLEX_MAPS, fieldType));
             } else if (subKey instanceof Expression) {
                 final Evaluator subKeyEvaluator = ((Expression) subKey).getEvaluator();
                 return record -> {
@@ -56,14 +58,14 @@ public class FieldEvaluator extends Evaluator {
                     if (subKeyArg.isNull()) {
                         return TypedObject.NULL;
                     }
-                    return record.typedGet(field, (String) key, (String) subKeyArg.getValue());
+                    return record.typedGet(field, (String) key, (String) subKeyArg.getValue(), getSuperSuperType(Type.COMPLEX_MAPS, fieldType));
                 };
             } else {
-                return record -> record.typedGet(field, (String) key);
+                return record -> record.typedGet(field, (String) key, getSuperType(Type.MAPS, fieldType));
             }
         } else if (key instanceof Integer) {
             if (subKey instanceof String) {
-                return record -> record.typedGet(field, (Integer) key, (String) subKey);
+                return record -> record.typedGet(field, (Integer) key, (String) subKey, getSuperSuperType(Type.COMPLEX_LISTS, fieldType));
             } else if (subKey instanceof Expression) {
                 final Evaluator subKeyEvaluator = ((Expression) subKey).getEvaluator();
                 return record -> {
@@ -71,10 +73,10 @@ public class FieldEvaluator extends Evaluator {
                     if (subKeyArg.isNull()) {
                         return TypedObject.NULL;
                     }
-                    return record.typedGet(field, (Integer) key, (String) subKeyArg.getValue());
+                    return record.typedGet(field, (Integer) key, (String) subKeyArg.getValue(), getSuperSuperType(Type.COMPLEX_LISTS, fieldType));
                 };
             } else {
-                return record -> record.typedGet(field, (Integer) key);
+                return record -> record.typedGet(field, (Integer) key, getSuperType(Type.LISTS, fieldType));
             }
         } else if (key instanceof Expression) {
             final Evaluator keyEvaluator = ((Expression) key).getEvaluator();
@@ -86,9 +88,9 @@ public class FieldEvaluator extends Evaluator {
                     }
                     Type type = keyArg.getType();
                     if (Type.isNumeric(type)) {
-                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), (String) subKey);
+                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), (String) subKey, getSuperSuperType(Type.COMPLEX_LISTS, fieldType));
                     } else {
-                        return record.typedGet(field, (String) keyArg.getValue(), (String) subKey);
+                        return record.typedGet(field, (String) keyArg.getValue(), (String) subKey, getSuperSuperType(Type.COMPLEX_MAPS, fieldType));
                     }
                 };
             } else if (subKey instanceof Expression) {
@@ -104,9 +106,9 @@ public class FieldEvaluator extends Evaluator {
                     }
                     Type type = keyArg.getType();
                     if (Type.isNumeric(type)) {
-                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), (String) subKeyArg.getValue());
+                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), (String) subKeyArg.getValue(), getSuperSuperType(Type.COMPLEX_LISTS, fieldType));
                     } else {
-                        return record.typedGet(field, (String) keyArg.getValue(), (String) subKeyArg.getValue());
+                        return record.typedGet(field, (String) keyArg.getValue(), (String) subKeyArg.getValue(), getSuperSuperType(Type.COMPLEX_MAPS, fieldType));
                     }
                 };
             } else {
@@ -117,14 +119,22 @@ public class FieldEvaluator extends Evaluator {
                     }
                     Type type = keyArg.getType();
                     if (Type.isNumeric(type)) {
-                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue());
+                        return record.typedGet(field, ((Number) keyArg.getValue()).intValue(), getSuperType(Type.LISTS, fieldType));
                     } else {
-                        return record.typedGet(field, (String) keyArg.getValue());
+                        return record.typedGet(field, (String) keyArg.getValue(), getSuperType(Type.MAPS, fieldType));
                     }
                 };
             }
         } else {
-            return record -> record.typedGet(field);
+            return record -> record.typedGet(field, fieldType);
         }
+    }
+
+    private static Type getSuperType(Set<Type> types, Type type) {
+        return types.stream().filter(t -> t.getSubType() == type).findFirst().orElse(Type.UNKNOWN);
+    }
+
+    private static Type getSuperSuperType(Set<Type> types, Type type) {
+        return types.stream().filter(t -> t.getSubType().getSubType() == type).findFirst().orElse(Type.UNKNOWN);
     }
 }
