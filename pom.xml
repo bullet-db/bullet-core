@@ -50,8 +50,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.record.version>1.2.1</bullet.record.version>
+        <bullet.record.version>1.2.2</bullet.record.version>
         <sketches.version>0.9.1</sketches.version>
+        <slf4jj.version>1.7.32</slf4jj.version>
         <log4j.version>2.17.1</log4j.version>
     </properties>
 
@@ -70,14 +71,9 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -89,6 +85,11 @@
             <groupId>com.yahoo.bullet</groupId>
             <artifactId>bullet-record</artifactId>
             <version>${bullet.record.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4jj.version}</version>
         </dependency>
         <dependency>
             <groupId>com.yahoo.datasketches</groupId>
